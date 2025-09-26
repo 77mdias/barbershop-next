@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  # Ambiente de desenvolvimento
+  app:
+    build:
+      context: .
+      target: dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    command: npm run dev
+
+  # Ambiente de produção
+  app-prod:
+    build:
+      context: .
+      target: prod
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "8080:3000"
+    env_file:
+      - .env.production
+    restart: always

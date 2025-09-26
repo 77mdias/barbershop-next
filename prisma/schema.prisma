@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String           @id @default(cuid())
+  name             String
+  email            String           @unique
+  phone            String?
+  password         String?
+  role             UserRole         @default(CLIENT)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  servicesProvided Appointment[]    @relation("BarberAppointments")
+  appointments     Appointment[]
+  serviceHistory   ServiceHistory[]
+  promotions       UserPromotion[]
+  vouchers         Voucher[]
+}
+
+model Service {
+  id                String             @id @default(cuid())
+  name              String
+  description       String?
+  duration          Int
+  price             Decimal            @db.Decimal(10, 2)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  appointments      Appointment[]
+  promotionServices PromotionService[]
+  serviceHistory    ServiceHistory[]
+  vouchers          Voucher[]
+}
+
+model Appointment {
+  id                 String            @id @default(cuid())
+  date               DateTime
+  status             AppointmentStatus @default(SCHEDULED)
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  userId             String
+  barberId           String
+  serviceId          String
+  serviceHistoryId   String?
+  voucherId          String?
+  appliedPromotionId String?
+  appliedPromotion   Promotion?        @relation(fields: [appliedPromotionId], references: [id])
+  barber             User              @relation("BarberAppointments", fields: [barberId], references: [id])
+  serviceHistory     ServiceHistory?   @relation(fields: [serviceHistoryId], references: [id])
+  service            Service           @relation(fields: [serviceId], references: [id])
+  user               User              @relation(fields: [userId], references: [id])
+  voucher            Voucher?          @relation(fields: [voucherId], references: [id])
+}
+
+model ServiceHistory {
+  id           String        @id @default(cuid())
+  completedAt  DateTime      @default(now())
+  notes        String?
+  finalPrice   Decimal       @db.Decimal(10, 2)
+  rating       Int?
+  feedback     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       String
+  serviceId    String
+  appointments Appointment[]
+  service      Service       @relation(fields: [serviceId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+}
+
+model Voucher {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  type         VoucherType
+  value        Decimal       @db.Decimal(10, 2)
+  minServices  Int           @default(1)
+  validFrom    DateTime      @default(now())
+  validUntil   DateTime?
+  status       VoucherStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       String
+  serviceId    String?
+  appointments Appointment[]
+  service      Service?      @relation(fields: [serviceId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+}
+
+model Promotion {
+  id                String             @id @default(cuid())
+  name              String
+  description       String?
+  type              PromotionType
+  value             Decimal            @db.Decimal(10, 2)
+  validFrom         DateTime           @default(now())
+  validUntil        DateTime?
+  isGlobal          Boolean            @default(false)
+  minFrequency      Int?
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  appointments      Appointment[]
+  servicePromotions PromotionService[]
+  userPromotions    UserPromotion[]
+}
+
+model UserPromotion {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  userId      String
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, promotionId])
+}
+
+model PromotionService {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  promotionId String
+  serviceId   String
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  service     Service   @relation(fields: [serviceId], references: [id])
+
+  @@unique([promotionId, serviceId])
+}
+
+enum UserRole {
+  CLIENT
+  BARBER
+  ADMIN
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum VoucherStatus {
+  ACTIVE
+  USED
+  EXPIRED
+}
+
+enum VoucherType {
+  FREE_SERVICE
+  DISCOUNT_PERCENTAGE
+  DISCOUNT_FIXED
+  CASHBACK
+}
+
+enum PromotionType {
+  DISCOUNT_PERCENTAGE
+  DISCOUNT_FIXED
+  FREE_SERVICE
+  CASHBACK
+  LOYALTY_BONUS
+}
