@@ -37,22 +37,20 @@ export function ServiceCard({
         // Base styles
         "flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl transition-all duration-300",
         "min-w-[80px] sm:min-w-[90px] h-[80px] sm:h-[90px] gap-1 sm:gap-2",
-        "border-2 border-transparent",
         "focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2",
         styles.serviceCard,
         
         // Estado inativo
         !isActive && [
-          "bg-white text-gray-700",
+          "bg-[--card]",
           "hover:bg-gray-50 hover:border-gray-200",
           "shadow-sm hover:shadow-md"
         ],
         
         // Estado ativo
         isActive && [
-          "bg-primary-500 text-white",
+          "bg-[--card-foreground]",
           "shadow-lg shadow-primary-500/25",
-          "border-primary-400",
           styles["serviceCard--active"]
         ],
         
@@ -74,7 +72,7 @@ export function ServiceCard({
       <span className={cn(
         "text-xs sm:text-sm font-medium transition-colors duration-300",
         styles.serviceCard__name,
-        isActive ? "text-white" : "text-gray-700"
+        isActive ? "text-[--all-black]" : "text-[--text]"
       )}>
         {name}
       </span>

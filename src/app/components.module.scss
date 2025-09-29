@@ -7,9 +7,8 @@
 
 /* Header Styles */
 .header {
-  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
-  border-radius: 0 0 24px 24px !important;
-  box-shadow: 0 4px 20px rgba(20, 184, 166, 0.3) !important;
+  background: var(--background);
+
   transition: all 0.3s ease !important;
   padding: 1.5rem !important;
   
@@ -24,9 +23,9 @@
 
 /* Service Card Styles */
 .serviceCard {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: var(--card) !important;
+  color: var(--text) ;
   backdrop-filter: blur(10px) !important;
-  border: 2px solid #e2e8f0 !important;
   border-radius: 16px !important;
   transition: all 0.3s ease !important;
   cursor: pointer !important;
@@ -39,9 +38,9 @@
   }
   
   &--active {
-    background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
-    border-color: transparent !important;
-    color: white !important;
+    background: var(--card-foreground) !important;
+    color: black !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     
     .serviceCard__icon {
       transform: scale(1.1);
@@ -112,7 +111,7 @@
 
 /* Salon Card Styles */
 .salonCard {
-  background: #ffffff;
+  background: var(--card);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -155,9 +154,10 @@
 
 /* Search Bar Styles */
 .searchBar {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card) !important;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   
   &:focus-within {
@@ -172,16 +172,20 @@
 
 /* Bottom Navigation Styles */
 .bottomNav {
-  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  background: var(--all-black) !important;
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
   
   &__item {
     transition: all 0.3s ease;
+    border-radius: 100%;
     
     &--active {
-      color: #00d4aa;
+      background: var(--card-foreground);
+      color: var(--all-black) !important;
       
       .bottomNav__icon {
         transform: scale(1.1);
@@ -197,6 +201,11 @@
   
   &__icon {
     transition: all 0.3s ease;
+    color: var(--text);
+
+    &--active {
+      color: var(--all-black) !important;
+    }
   }
   
   &__label {
@@ -292,16 +301,14 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .searchBar {
-    background: rgba(26, 26, 26, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+  
   }
   
   .bottomNav {
     background: rgba(26, 26, 26, 0.95);
     border-top-color: rgba(255, 255, 255, 0.1);
   }
-}
+
 
 /* Animation Classes */
 .fadeIn {

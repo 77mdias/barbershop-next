@@ -130,7 +130,7 @@ export function SalonCard({
       {/* Informações do salão */}
       <div className="p-3 sm:p-4">
         {/* Nome do salão */}
-        <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 truncate text-sm sm:text-base">{name}</h3>
+        <h3 className="font-semibold text-[--text] mb-1 sm:mb-2 truncate text-sm sm:text-base">{name}</h3>
 
         {/* Avaliação */}
         <div className={cn("flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2", styles.salonCard__rating)}>

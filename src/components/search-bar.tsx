@@ -78,8 +78,8 @@ export function SearchBar({
           onChange={handleInputChange}
           placeholder={placeholder}
           className={cn(
-            "w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-2xl border border-gray-200",
-            "bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base",
+            "w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-2xl",
+            "bg-[--card] text-gray-900 placeholder-gray-500 text-sm sm:text-base",
             "focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent",
             "transition-all duration-200"
           )}

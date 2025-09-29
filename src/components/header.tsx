@@ -43,7 +43,7 @@ export function Header({
 
   return (
     <header className={cn(
-      "flex items-center justify-between p-4 sm:p-6 text-white",
+      "flex gap-4 align-center justify-between items-center w-full p-4 sm:p-6 text-white",
       styles.header,
       className
     )}>

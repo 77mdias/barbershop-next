@@ -115,7 +115,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-[--background] flex flex-col items-center">
       {/* Header */}
       <Header
         userName="smith"
@@ -150,7 +150,7 @@ export default function Home() {
         {/* Ofertas especiais */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Eid offers</h2>
+            <h2 className="text-xl font-bold text-[--text]">Eid offers</h2>
             <button className="text-primary-600 text-sm font-medium">
               See all
             </button>
@@ -172,7 +172,7 @@ export default function Home() {
         {/* Salões próximos */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Nearby salons</h2>
+            <h2 className="text-xl font-bold text-[--text]">Nearby salons</h2>
             <button className="text-primary-600 text-sm font-medium">
               See all
             </button>
