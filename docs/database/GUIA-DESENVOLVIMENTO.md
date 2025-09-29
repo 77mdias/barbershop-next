@@ -1,4 +1,4 @@
-# 📚 Guia Completo de Desenvolvimento de Banco de Dados
+j# 📚 Guia Completo de Desenvolvimento de Banco de Dados
 
 Este documento estabelece as melhores práticas para desenvolvimento, migração e deploy de banco de dados em projetos fullstack, seguindo metodologias profissionais e padrões da indústria.
 
