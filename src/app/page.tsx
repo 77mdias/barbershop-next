@@ -1,103 +1,205 @@
-import Image from "next/image";
+"use client"
 
+import * as React from "react"
+import { Header } from "@/components/header"
+import { SearchBar } from "@/components/search-bar"
+import { ServiceCard } from "@/components/service-card"
+import { OfferCard } from "@/components/offer-card"
+import { SalonCard } from "@/components/salon-card"
+import { BottomNavigation } from "@/components/bottom-navigation"
+
+/**
+ * Página principal da aplicação Barbershop
+ * 
+ * Implementa o layout completo baseado na imagem de referência:
+ * - Header com saudação e avatar
+ * - Barra de busca
+ * - Seção de serviços (Haircuts, Nail, Facial)
+ * - Ofertas especiais (Eid offers)
+ * - Salões próximos (Nearby salons)
+ * - Navegação inferior
+ */
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const [selectedService, setSelectedService] = React.useState("haircuts")
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  // Dados dos serviços disponíveis
+  const services = [
+    {
+      id: "haircuts",
+      name: "Haircuts",
+      icon: "✂️"
+    },
+    {
+      id: "nail",
+      name: "Nail",
+      icon: "💅"
+    },
+    {
+      id: "facial",
+      name: "Facial",
+      icon: "🧴"
+    }
+  ]
+
+  // Dados das ofertas especiais
+  const offers = [
+    {
+      id: "haircut-offer",
+      title: "Haircut",
+      discount: "30% Free",
+      period: "Aug 12-Aug 27"
+    }
+  ]
+
+  // Dados dos salões próximos
+  const nearbySalons = [
+    {
+      id: "salon-1",
+      name: "Premium Barbershop",
+      image: "/images/salon1.svg",
+      rating: 4.8,
+      reviewCount: 127,
+      location: "Centro, São Paulo",
+      distance: "1.2 km"
+    },
+    {
+      id: "salon-2", 
+      name: "Classic Cuts",
+      image: "/images/salon2.svg",
+      rating: 4.6,
+      reviewCount: 89,
+      location: "Vila Madalena, São Paulo",
+      distance: "2.1 km"
+    }
+  ]
+
+  // Itens da navegação inferior
+  const navigationItems = [
+    {
+      id: "home",
+      label: "Home",
+      icon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+      )
+    },
+    {
+      id: "search",
+      label: "Search", 
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      )
+    },
+    {
+      id: "bookings",
+      label: "Bookings",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      )
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <Header
+        userName="smith"
+        onFilterClick={() => console.log("Filter clicked")}
+      />
+
+      {/* Conteúdo principal */}
+      <main className="px-6 py-6 space-y-8">
+        {/* Barra de busca */}
+        <SearchBar
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+          onSubmit={(value) => console.log("Search:", value)}
+        />
+
+        {/* Seção de serviços */}
+        <section>
+          <div className="flex justify-center gap-8">
+            {services.map((service) => (
+              <ServiceCard
+                key={service.id}
+                name={service.name}
+                icon={service.icon}
+                isActive={selectedService === service.id}
+                onClick={() => setSelectedService(service.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Ofertas especiais */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Eid offers</h2>
+            <button className="text-primary-600 text-sm font-medium">
+              See all
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            {offers.map((offer) => (
+              <OfferCard
+                key={offer.id}
+                title={offer.title}
+                discount={offer.discount}
+                period={offer.period}
+                onGetOffer={() => console.log("Get offer:", offer.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Salões próximos */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Nearby salons</h2>
+            <button className="text-primary-600 text-sm font-medium">
+              See all
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {nearbySalons.map((salon) => (
+              <SalonCard
+                key={salon.id}
+                name={salon.name}
+                image={salon.image}
+                rating={salon.rating}
+                reviewCount={salon.reviewCount}
+                location={salon.location}
+                distance={salon.distance}
+                onClick={() => console.log("Salon clicked:", salon.id)}
+              />
+            ))}
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Navegação inferior */}
+      <BottomNavigation
+        items={navigationItems}
+        activeItem="home"
+      />
     </div>
-  );
+  )
 }

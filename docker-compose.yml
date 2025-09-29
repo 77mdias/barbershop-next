@@ -10,8 +10,9 @@ services:
     ports:
       - "3001:3000"
     volumes:
-      - .:/app
+      - .:/app:delegated
       - /app/node_modules
+    user: "${UID:-1000}:${GID:-1000}"
     env_file:
       - .env
     command: npm run dev

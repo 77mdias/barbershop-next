@@ -1,0 +1,38 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="salonGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="200" fill="url(#salonGradient1)"/>
+  
+  <!-- Barbershop interior elements -->
+  <!-- Chair -->
+  <rect x="50" y="120" width="40" height="60" fill="#8b5cf6" rx="5"/>
+  <rect x="45" y="115" width="50" height="10" fill="#a855f7" rx="5"/>
+  
+  <!-- Mirror -->
+  <rect x="120" y="40" width="60" height="80" fill="#e5e7eb" rx="5"/>
+  <rect x="125" y="45" width="50" height="70" fill="#f3f4f6" rx="3"/>
+  
+  <!-- Tools -->
+  <circle cx="200" cy="60" r="3" fill="#14b8a6"/>
+  <circle cx="210" cy="65" r="3" fill="#0d9488"/>
+  <circle cx="220" cy="70" r="3" fill="#14b8a6"/>
+  
+  <!-- Scissors icon -->
+  <g transform="translate(240, 50)">
+    <circle cx="5" cy="5" r="4" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+    <circle cx="15" cy="15" r="4" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+    <line x1="5" y1="5" x2="15" y2="15" stroke="#dc2626" stroke-width="2"/>
+  </g>
+  
+  <!-- Floor -->
+  <rect x="0" y="180" width="300" height="20" fill="#6b7280"/>
+  
+  <!-- Text -->
+  <text x="150" y="190" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Premium Barbershop</text>
+</svg>
