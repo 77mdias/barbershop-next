@@ -1,0 +1,93 @@
+@use '../../styles/_tokens' as *;
+
+// Cores estilo Twitch
+$twitch-purple: #9146ff;
+$twitch-dark: #0e0e10;
+$twitch-darker: #18181b;
+$twitch-card: #00003844;
+
+//cores estilo spotify
+$spotify-green: #2bff75;
+$spotify-dark: #121212;
+$spotify-darker: #000000;
+$spotify-card: #181818;
+
+//White
+$white-gradient: linear-gradient(120deg, #f5f6fa 0%, #e9e9f3 40%, #e0e7ff 70%, #f8fafc 100%);
+
+//Black
+$black-gradient: linear-gradient(120deg, #000000 0%, #0f0f23 30%, #1a0033 60%, #0a0a0a 100%);
+
+// Cores adicionais
+$accent-blue: #00a8ff;
+$accent-red: #ff4655;
+$text-light: #efeff1;
+$text-gray: #adadb8;
+$bg-dark: #000000;
+
+// Gradientes
+$purple-gradient: linear-gradient(135deg, $twitch-purple 0%, #5d3aff 100%);
+$red-gradient: linear-gradient(135deg, $accent-red 0%, #ff6b6b 100%);
+
+// Bordas
+$border-radius: 12px;
+$border-radius-sm: 8px;
+
+// Cores
+$redcolor: #ff0080;
+
+// Variáveis CSS para temas
+:root {
+	// Tema escuro (padrão)
+	--redcolor: #{$redcolor};
+	--meu-bg: #{$black-gradient};
+	--bg-theme: #{$black-gradient};
+	--gradient-primary: #{$purple-gradient};
+	--accent-shadow: rgba(145, 70, 255, 0.4);
+	--bg-primary: #{$bg-dark};
+	--bg-secondary: #{$twitch-darker};
+	--bg-input: #{$twitch-card};
+	--text-primary: #{$text-light};
+	--text-secondary: #{$text-gray};
+	--text-muted: #{$text-gray};
+	--accent-primary: #{$twitch-purple};
+	--accent-secondary: #{$spotify-green};
+	--accent-hover: rgba(145, 70, 255, 0.1);
+	--accent-focus: rgba(145, 70, 255, 0.3);
+	--accent-shadow: rgba(145, 70, 255, 0.4);
+	--border-color: rgba(255, 255, 255, 0.1);
+	--shadow-sm: rgba(0, 0, 0, 0.2);
+	--shadow-md: rgba(0, 0, 0, 0.3);
+	--shadow-lg: rgba(0, 0, 0, 0.5);
+	--gradient-primary: #{$purple-gradient};
+	--logo-filter: none;
+
+	// Cards
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-bg-hover: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-radius: #{$card-radius};
+  --card-shadow: #{$card-shadow};
+  --card-shadow-hover: #{$card-shadow-hover};
+
+  // Cores de progresso
+  --progress-accent: #{$progress-accent};
+  --progress-success: #{$progress-success};
+  --progress-warning: #{$progress-warning};
+  --progress-danger: #{$progress-danger};
+  --progress-info: #{$progress-info};
+
+  // Texto
+  --text-value: var(--text-primary);
+  --text-label: var(--text-secondary);
+  --text-subtitle: var(--text-muted);
+
+  // Espaçamentos
+  --spacing-card: #{$card-padding};
+  --spacing-card-sm: #{$card-padding-sm};
+  --grid-gap: #{$grid-gap};
+
+  // Transições
+  --transition-fast: #{$transition-fast};
+  --transition-normal: #{$transition-normal};
+}

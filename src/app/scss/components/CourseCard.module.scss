@@ -1,0 +1,117 @@
+.card {
+  position: relative;
+
+  border-radius: 1rem;
+  background: #111;
+
+  &:before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle,
+      rgba(255, 0, 128, 0.4),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+  }
+
+  &:hover:before {
+    opacity: 1;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.bgAccentCyan {
+  background-color: var(--accent-cyan);
+}
+
+.bgAccentOrange {
+  background-color: var(--accent-orange);
+}
+
+.textPrimaryForeground {
+  color: var(--primary-foreground);
+}
+
+.textSecondaryForeground {
+  color: var(--secondary-foreground);
+}
+
+.textBackground {
+  color: var(--background);
+}
+
+.bgSecondary {
+  background-color: var(--secondary);
+}
+
+.hoverCard {
+  transition: all 0.3s ease;
+  &:hover {
+    box-shadow: var(--shadow-neon);
+    background-color: var(--card-hover);
+  }
+}
+
+.bgGradient {
+  background-image: var(--gradient-primary);
+}
+
+.bgGradientPrimary {
+  background-image: var(--gradient-primary);
+}
+
+.bgGradientSecondary {
+  background-image: var(--gradient-secondary);
+}
+
+.bgGradientAccent {
+  background-image: var(--gradient-accent);
+}
+
+.shadowNeon {
+  box-shadow: var(--shadow-neon);
+}
+
+.hoverShadowNeon {
+  &:hover {
+    box-shadow: var(--shadow-neon);
+  }
+}
+
+.accentOrange {
+  color: hsl(var(--accent-orange));
+  fill: hsl(var(--accent-orange));
+}
+
+.buttonAccent {
+  border: 1px solid (var(--primary));
+  transition: all 0.6s ease;
+  &:hover {
+    background-image: var(--gradient-secondary);
+    box-shadow: var(--shadow-neon-lg);
+  }
+}
+
+.buttonPrimary {
+  transition: all 0.6s ease;
+  &:hover {
+    scale: 1.02;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-neon-lg);
+  }
+}
+
+.textPrimary {
+  &:hover {
+    color: hsl(var(--primary)) !important;
+  }
+}

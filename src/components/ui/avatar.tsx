@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { getInitials } from "@/lib/utils"
-import styles from "@/app/components.module.scss"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+// import { getInitials } from "@/lib/utils"
+import styles from "@/app/components.module.scss";
 
 interface AvatarProps {
   /** URL da imagem do avatar */
-  src?: string
+  src?: string;
   /** Nome completo para gerar iniciais como fallback */
-  name?: string
+  name?: string;
   /** Tamanho do avatar */
-  size?: "sm" | "md" | "lg" | "xl"
+  size?: "sm" | "md" | "lg" | "xl";
   /** Classes CSS adicionais */
-  className?: string
+  className?: string;
   /** Texto alternativo para a imagem */
-  alt?: string
+  alt?: string;
 }
 
 /**
  * Componente Avatar
- * 
+ *
  * Exibe uma imagem de perfil com fallback para iniciais.
  * Usa Radix UI para acessibilidade.
  */
@@ -29,25 +29,25 @@ export function Avatar({
   name = "",
   size = "md",
   className,
-  alt
+  alt,
 }: AvatarProps) {
-  const [imageError, setImageError] = React.useState(false)
-  const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [imageError, setImageError] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
   // Reset error state when src changes
   React.useEffect(() => {
-    setImageError(false)
-    setImageLoaded(false)
-  }, [src])
+    setImageError(false);
+    setImageLoaded(false);
+  }, [src]);
 
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
     md: "w-10 h-10 text-sm",
     lg: "w-12 h-12 text-base",
-    xl: "w-16 h-16 text-lg"
-  }
+    xl: "w-16 h-16 text-lg",
+  };
 
-  const initials = getInitials(name)
+  // const initials = getInitials(name)
 
   return (
     <div
@@ -78,9 +78,9 @@ export function Avatar({
         </>
       ) : (
         <span className="font-medium text-gray-700 select-none">
-          {initials}
+          {name.charAt(0).toUpperCase()}
         </span>
       )}
     </div>
-  )
+  );
 }

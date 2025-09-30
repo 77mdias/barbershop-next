@@ -9,7 +9,7 @@ import { Eye, EyeOff, Github, Mail } from "lucide-react";
 import ButtonLogin from "./ButtonLogin";
 import { useNotification } from "@/components/ui/notification";
 import { Alert } from "@/components/ui/alert";
-import styles from "@/scss/components/CourseCard.module.scss";
+import styles from "@/app/scss/components/CourseCard.module.scss";
 import { Button } from "@/components/ui/button";
 
 export default function SignInForm() {
@@ -55,7 +55,7 @@ export default function SignInForm() {
       if (result?.error) {
         if (result.error === "EmailNotVerified") {
           setError(
-            "Email não verificado. Verifique sua caixa de entrada e clique no link de verificação.",
+            "Email não verificado. Verifique sua caixa de entrada e clique no link de verificação."
           );
         } else {
           setError("Email ou senha inválidos");
@@ -73,8 +73,6 @@ export default function SignInForm() {
   const handleCloseOAuthError = () => {
     setOauthError(null);
   };
-
-  
 
   return (
     <div className="mb-12 mt-16 flex justify-center bg-[var(--all-black)] px-4">
@@ -195,8 +193,6 @@ export default function SignInForm() {
           </div>
 
           <ButtonLogin isLoading={isLoading} />
-
-        
         </form>
       </div>
 

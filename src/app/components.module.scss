@@ -11,7 +11,7 @@
 
   transition: all 0.3s ease !important;
   padding: 1.5rem !important;
-  
+
   &__greeting {
     background: linear-gradient(45deg, #ffffff, #f0fdfa);
     -webkit-background-clip: text;
@@ -24,29 +24,29 @@
 /* Service Card Styles */
 .serviceCard {
   background: var(--card) !important;
-  color: var(--text) ;
+  color: var(--text);
   backdrop-filter: blur(10px) !important;
   border-radius: 16px !important;
   transition: all 0.3s ease !important;
   cursor: pointer !important;
   padding: 1rem !important;
   text-align: center !important;
-  
+
   &:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
   }
-  
+
   &--active {
     background: var(--card-foreground) !important;
     color: black !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    
+
     .serviceCard__icon {
       transform: scale(1.1);
     }
   }
-  
+
   &__icon {
     font-size: 1.5rem !important;
     margin-bottom: 0.5rem !important;
@@ -54,7 +54,7 @@
     transition: transform 0.3s ease;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
-  
+
   &__name {
     font-size: 0.875rem !important;
     font-weight: 500 !important;
@@ -78,7 +78,7 @@
   }
 
   &::before {
-    content: '' !important;
+    content: "" !important;
     position: absolute !important;
     top: 0 !important;
     right: 0 !important;
@@ -88,12 +88,12 @@
     border-radius: 50% !important;
     transform: translate(30px, -30px) !important;
   }
-  
+
   &__content {
     position: relative !important;
     z-index: 1 !important;
   }
-  
+
   &__button {
     background: rgba(255, 255, 255, 0.2) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -101,7 +101,7 @@
     transition: all 0.3s ease !important;
     padding: 0.5rem 1rem !important;
     border-radius: 8px !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.3) !important;
       transform: scale(1.05) !important;
@@ -116,35 +116,39 @@
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
-  
+
   &__image {
     position: relative;
     overflow: hidden;
-    
+
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.1) 100%
+      );
     }
-    
+
     img {
       transition: transform 0.3s ease;
     }
   }
-  
+
   &:hover &__image img {
     transform: scale(1.05);
   }
-  
+
   &__rating {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.2);
@@ -159,12 +163,12 @@
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  
+
   &:focus-within {
     border-color: #00d4aa;
     box-shadow: 0 4px 20px rgba(0, 212, 170, 0.15);
   }
-  
+
   &__icon {
     color: #00d4aa;
   }
@@ -178,27 +182,27 @@
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-  
+
   &__item {
     transition: all 0.3s ease;
     border-radius: 100%;
-    
+
     &--active {
       background: var(--card-foreground);
       color: var(--all-black) !important;
-      
+
       .bottomNav__icon {
         transform: scale(1.1);
         filter: drop-shadow(0 2px 4px rgba(0, 212, 170, 0.3));
       }
     }
-    
+
     &:hover:not(&--active) {
       color: #666;
       transform: translateY(-1px);
     }
   }
-  
+
   &__icon {
     transition: all 0.3s ease;
     color: var(--text);
@@ -207,7 +211,7 @@
       color: var(--all-black) !important;
     }
   }
-  
+
   &__label {
     font-size: 0.75rem;
     font-weight: 500;
@@ -218,9 +222,9 @@
 /* Avatar Styles */
 .avatar {
   position: relative;
-  
+
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     left: -2px;
@@ -230,7 +234,7 @@
     border-radius: 50%;
     z-index: -1;
   }
-  
+
   &__image,
   &__fallback {
     border: 2px solid #ffffff;
@@ -243,25 +247,25 @@
     &__icon {
       font-size: 1.5rem;
     }
-    
+
     &__name {
       font-size: 0.875rem;
     }
   }
-  
+
   .salonCard {
     &__image {
       height: 120px;
     }
   }
-  
+
   .offerCard {
     padding: 1rem;
-    
+
     &__title {
       font-size: 1.25rem;
     }
-    
+
     &__discount {
       font-size: 1.5rem;
     }
@@ -271,23 +275,23 @@
 @media (max-width: 480px) {
   .header {
     padding: 1rem;
-    
+
     &__greeting {
       font-size: 1rem;
     }
   }
-  
+
   .searchBar {
     margin: 0 1rem;
   }
-  
+
   .serviceCard {
     min-width: 80px;
-    
+
     &__icon {
       font-size: 1.25rem;
     }
-    
+
     &__name {
       font-size: 0.75rem;
     }
@@ -300,15 +304,12 @@
     background: #1a1a1a;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
-  
-  }
-  
-  .bottomNav {
-    background: rgba(26, 26, 26, 0.95);
-    border-top-color: rgba(255, 255, 255, 0.1);
-  }
+}
 
+.bottomNav {
+  background: rgba(26, 26, 26, 0.95);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
 
 /* Animation Classes */
 .fadeIn {

@@ -1,0 +1,38 @@
+// Removido import do Bootstrap para evitar conflitos
+
+// ===== MIXINS RESPONSIVOS SIMPLES =====
+
+// Mixins específicos para facilitar uso
+@mixin mobile-only {
+	@media (max-width: 767px) {
+		@content;
+	}
+}
+
+@mixin tablet-only {
+	@media (min-width: 768px) and (max-width: 991px) {
+		@content;
+	}
+}
+
+@mixin desktop-only {
+	@media (min-width: 992px) {
+		@content;
+	}
+}
+
+@mixin hd-desktop-only {
+	@media (min-width: 1200px) {
+		@content;
+	}
+}
+
+@mixin full-hd-desktop-only {
+	@media (min-width: 1600px) {
+		@content;
+	}
+}
+
+// ===== CLASSES UTILITÁRIAS RESPONSIVAS =====
+// Removido classes globais para evitar conflitos com CSS Modules
+// Use os mixins diretamente nos componentes

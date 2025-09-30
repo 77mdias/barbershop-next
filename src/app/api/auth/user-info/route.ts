@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       console.log("API user-info - Email não fornecido");
       return NextResponse.json(
         { error: "Email é obrigatório" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -32,20 +32,24 @@ export async function GET(request: NextRequest) {
       console.log("API user-info - Usuário não encontrado para email:", email);
       return NextResponse.json(
         { error: "Usuário não encontrado" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     console.log("API user-info - Usuário encontrado:", {
       hasPassword: !!user.password,
-      oauthProviders: user.accounts.map((acc) => acc.provider),
+      oauthProviders: user.accounts.map(
+        (acc: { provider: string }) => acc.provider
+      ),
     });
 
     // Determinar se o usuário tem senha
     const hasPassword = !!user.password;
 
     // Obter provedores OAuth
-    const oauthProviders = user.accounts.map((account) => account.provider);
+    const oauthProviders = user.accounts.map(
+      (account: { provider: string }) => account.provider
+    );
 
     return NextResponse.json({
       hasPassword,
@@ -56,7 +60,7 @@ export async function GET(request: NextRequest) {
     console.error("Erro ao buscar informações do usuário:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

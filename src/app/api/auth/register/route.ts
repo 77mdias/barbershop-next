@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+// import { UserRole } from "@prisma/client";
 import { sendVerificationEmail, generateVerificationToken } from "@/lib/email";
 
 // Função para validar senha com requisitos de segurança
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       // Se já existe com conta OAuth, informar ao usuário
       if (existingUser.accounts && existingUser.accounts.length > 0) {
         const providers = existingUser.accounts
-          .map((acc) => acc.provider)
+          .map((acc: { provider: string }) => acc.provider)
           .join(", ");
         return NextResponse.json(
           {
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         nickname: name, // Manter nickname para compatibilidade
         email: email.toLowerCase(),
         password: hashedPassword,
-        role: UserRole.CUSTOMER,
+        role: "CLIENT", // Definir como cliente por padrão
         isActive: false, // Usuário inativo até verificar email
         emailVerificationToken: verificationToken,
         emailVerificationExpires: verificationExpires,

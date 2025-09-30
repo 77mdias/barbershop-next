@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github, Mail, Eye, EyeOff } from "lucide-react";
-import styles from "@/scss/components/CourseCard.module.scss";
+import styles from "@/app/scss/components/CourseCard.module.scss";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ export default function SignUpForm() {
 
   // Função para validar senha com requisitos de segurança
   const validatePassword = (
-    password: string,
+    password: string
   ): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
@@ -125,7 +125,9 @@ export default function SignUpForm() {
       // Mostrar mensagem de sucesso e redirecionar para verificação
       setError(""); // Limpar qualquer erro anterior
 
-      const verifyUrl = `/auth/verify-email?email=${encodeURIComponent(formData.email)}`;
+      const verifyUrl = `/auth/verify-email?email=${encodeURIComponent(
+        formData.email
+      )}`;
       router.push(verifyUrl);
     } catch (error: any) {
       setError(error.message);
@@ -145,7 +147,7 @@ export default function SignUpForm() {
 
       if (result?.error) {
         console.log("Erro OAuth no SignUp:", result.error);
-        
+
         if (result.error === "OAuthAccountNotLinked") {
           setError(
             "Este email já está cadastrado. Use a senha que você criou ou faça login na página de entrada."
@@ -255,7 +257,11 @@ export default function SignUpForm() {
               <p className="mb-1 font-medium">Sua senha deve conter:</p>
               <div className="grid grid-cols-1 gap-1">
                 <div
-                  className={`flex items-center ${formData.password.length >= 8 ? "text-green-400" : "text-gray-400"}`}
+                  className={`flex items-center ${
+                    formData.password.length >= 8
+                      ? "text-green-400"
+                      : "text-gray-400"
+                  }`}
                 >
                   <span className="mr-1">
                     {formData.password.length >= 8 ? "✓" : "○"}
@@ -263,7 +269,11 @@ export default function SignUpForm() {
                   Pelo menos 8 caracteres
                 </div>
                 <div
-                  className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-400" : "text-gray-400"}`}
+                  className={`flex items-center ${
+                    /[A-Z]/.test(formData.password)
+                      ? "text-green-400"
+                      : "text-gray-400"
+                  }`}
                 >
                   <span className="mr-1">
                     {/[A-Z]/.test(formData.password) ? "✓" : "○"}
@@ -271,7 +281,11 @@ export default function SignUpForm() {
                   Uma letra maiúscula (A-Z)
                 </div>
                 <div
-                  className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-400" : "text-gray-400"}`}
+                  className={`flex items-center ${
+                    /[a-z]/.test(formData.password)
+                      ? "text-green-400"
+                      : "text-gray-400"
+                  }`}
                 >
                   <span className="mr-1">
                     {/[a-z]/.test(formData.password) ? "✓" : "○"}
@@ -279,7 +293,11 @@ export default function SignUpForm() {
                   Uma letra minúscula (a-z)
                 </div>
                 <div
-                  className={`flex items-center ${/\d/.test(formData.password) ? "text-green-400" : "text-gray-400"}`}
+                  className={`flex items-center ${
+                    /\d/.test(formData.password)
+                      ? "text-green-400"
+                      : "text-gray-400"
+                  }`}
                 >
                   <span className="mr-1">
                     {/\d/.test(formData.password) ? "✓" : "○"}
@@ -287,11 +305,17 @@ export default function SignUpForm() {
                   Um número (0-9)
                 </div>
                 <div
-                  className={`flex items-center ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? "text-green-400" : "text-gray-400"}`}
+                  className={`flex items-center ${
+                    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
+                      formData.password
+                    )
+                      ? "text-green-400"
+                      : "text-gray-400"
+                  }`}
                 >
                   <span className="mr-1">
                     {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
-                      formData.password,
+                      formData.password
                     )
                       ? "✓"
                       : "○"}

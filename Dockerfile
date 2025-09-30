@@ -3,7 +3,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 # Instalando dependências do projeto com npm install
-RUN npm install && npm install autoprefixer postcss tailwindcss --save-dev && npm cache clean --force
+RUN npm install && npm install autoprefixer postcss tailwindcss tailwindcss-animate --save-dev && npm cache clean --force
 
 # Estágio de desenvolvimento - com hot reload
 FROM node:20-alpine AS dev
@@ -11,7 +11,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Garantindo que o autoprefixer esteja instalado
-RUN npm install autoprefixer postcss tailwindcss --save-dev
+RUN npm install autoprefixer postcss tailwindcss tailwindcss-animate --save-dev
 # Configurações para melhorar performance no WSL
 ENV WATCHPACK_POLLING=true
 ENV CHOKIDAR_USEPOLLING=true

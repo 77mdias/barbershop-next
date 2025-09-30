@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/ui/notification";
 import { useState } from "react";
-import styles from "@/scss/components/CourseCard.module.scss";
+import styles from "@/app/scss/components/CourseCard.module.scss";
 
 const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
   const router = useRouter();
@@ -34,7 +34,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             error: "OAuthAccountNotLinked",
             attemptedProvider: provider,
             timestamp: new Date().toISOString(),
-          }),
+          })
         );
 
         // Tentar obter o email do resultado ou usar um placeholder
