@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserFormInput, UserFormInputType } from "@/schemas/userSchemas";
 import { createUser, updateUser } from "@/server/userActions";
 
-const USER_ROLES = ["ADMIN", "CUSTOMER", "PROFESSIONAL"] as const;
+const USER_ROLES = ["ADMIN", "CLIENT", "BARBER"] as const;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,11 +32,11 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
   } = useForm<UserFormInputType>({
     resolver: zodResolver(UserFormInput),
     defaultValues: {
-      branchId: initialData?.branchId || "",
+      name: initialData?.name || "",
       nickname: initialData?.nickname || "",
       email: initialData?.email || "",
       password: "",
-      role: initialData?.role || "CUSTOMER",
+      role: initialData?.role || "CLIENT",
       isActive: initialData?.isActive ?? false,
     },
   });
@@ -62,7 +62,8 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
       } else {
   toast.error("Erro ao processar solicitação");
       }
-    } catch (error) {
+    } catch (_error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       toast.error("Erro inesperado ao processar solicitação");
     } finally {
       setIsLoading(false);
@@ -73,15 +74,15 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
         <div className="space-y-2">
-          <Label htmlFor="branchId">Branch *</Label>
+          <Label htmlFor="name">Nome *</Label>
           <Input
-            id="branchId"
-            {...register("branchId")}
-            placeholder="ID do branch"
+            id="name"
+            {...register("name")}
+            placeholder="Nome completo do usuário"
             disabled={isLoading}
           />
-          {errors.branchId && (
-            <p className="text-sm text-red-500">{errors.branchId.message}</p>
+          {errors.name && (
+            <p className="text-sm text-red-500">{errors.name.message}</p>
           )}
         </div>
 

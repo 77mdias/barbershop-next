@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/prisma";
-// import { UserRole } from "@prisma/client";
 import { sendVerificationEmail, generateVerificationToken } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 // Função para validar senha com requisitos de segurança
 function validatePassword(password: string): {
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       emailSent: true,
     });
   } catch (error) {
-    console.error("Erro ao criar usuário:", error);
+    logger.api.error("Error creating user", { error });
     return NextResponse.json(
       { message: "Erro interno do servidor" },
       { status: 500 }

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { 
   Table, 
   TableBody, 
@@ -12,7 +11,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 
 export type Column<T> = {
   key: keyof T | string;
@@ -125,7 +124,7 @@ export default function DataTable<T extends { id: string }>({
                     <TableCell key={index} className={column.className}>
                       {column.render 
                         ? column.render(row)
-                        : String((row as any)[column.key] || "—")
+                        : String(row[column.key as keyof T] || "—")
                       }
                     </TableCell>
                   ))}
@@ -164,13 +163,13 @@ export default function DataTable<T extends { id: string }>({
 // Componentes de utilidade para células comuns
 export function StatusBadge({ 
   status, 
-  variant = "secondary" 
+  variant 
 }: { 
   status: boolean; 
   variant?: "default" | "secondary" | "destructive" | "outline";
 }) {
   return (
-    <Badge variant={status ? "default" : "secondary"}>
+    <Badge variant={status ? (variant || "default") : "secondary"}>
       {status ? "Ativo" : "Inativo"}
     </Badge>
   );

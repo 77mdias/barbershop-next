@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,13 +33,7 @@ function VerifyEmailContent() {
     }
   }, [emailParam]);
 
-  useEffect(() => {
-    if (token) {
-      verifyEmail(token);
-    }
-  }, [token]);
-
-  const verifyEmail = async (verificationToken: string) => {
+  const verifyEmail = useCallback(async (verificationToken: string) => {
     setIsVerifying(true);
     try {
       const response = await fetch(
@@ -59,13 +53,19 @@ function VerifyEmailContent() {
         setVerificationStatus("error");
         toast.error(data.message || "Erro ao verificar email");
       }
-    } catch (error) {
+    } catch {
       setVerificationStatus("error");
       toast.error("Erro ao verificar email");
     } finally {
       setIsVerifying(false);
     }
-  };
+  }, [email, router]);
+
+  useEffect(() => {
+    if (token) {
+      verifyEmail(token);
+    }
+  }, [token, verifyEmail]);
 
   const resendVerificationEmail = async () => {
     if (!email) {
@@ -90,7 +90,7 @@ function VerifyEmailContent() {
       } else {
         toast.error(data.message || "Erro ao reenviar email");
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao reenviar email");
     } finally {
       setIsResending(false);

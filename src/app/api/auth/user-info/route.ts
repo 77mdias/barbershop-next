@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
 
-    console.log("API user-info - Email recebido:", email);
+    logger.api.debug("User info request received", { email });
 
     if (!email) {
-      console.log("API user-info - Email não fornecido");
+      logger.api.warn("Email not provided in user info request");
       return NextResponse.json(
         { error: "Email é obrigatório" },
         { status: 400 }
@@ -29,14 +30,15 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      console.log("API user-info - Usuário não encontrado para email:", email);
+      logger.api.warn("User not found", { email });
       return NextResponse.json(
         { error: "Usuário não encontrado" },
         { status: 404 }
       );
     }
 
-    console.log("API user-info - Usuário encontrado:", {
+    logger.api.debug("User found", {
+      email,
       hasPassword: !!user.password,
       oauthProviders: user.accounts.map(
         (acc: { provider: string }) => acc.provider
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
     });
   } catch (error) {
-    console.error("Erro ao buscar informações do usuário:", error);
+    logger.api.error("Error fetching user information", { error });
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 }

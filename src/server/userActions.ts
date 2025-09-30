@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
-import { UserInput, UserInputType } from "@/schemas/userSchemas";
+import { UserInput } from "@/schemas/userSchemas";
 
 // Cria o usuário
 export async function createUser(raw: unknown) {
@@ -16,7 +16,7 @@ export async function createUser(raw: unknown) {
   }
   const user = await db.user.create({
     data: {
-      branchId: data.branchId,
+      name: data.name,
       nickname: data.nickname,
       role: data.role,
       email: data.email,
@@ -25,7 +25,7 @@ export async function createUser(raw: unknown) {
     },
     select: {
       id: true,
-      branchId: true,
+      name: true,
       nickname: true,
       role: true,
       email: true,
@@ -39,10 +39,9 @@ export async function createUser(raw: unknown) {
 
 // Atualiza usuário, incluindo lógica para hash de senha se fornecida
 const UserUpdateInput = UserInput.partial().extend({ id: z.string() });
-type UserUpdateInputType = z.infer<typeof UserUpdateInput>;
 export async function updateUser(raw: unknown) {
   const { id, ...data } = UserUpdateInput.parse(raw);
-  const updateData: any = { ...data };
+  const updateData: Partial<typeof data> & { password?: string } = { ...data };
   if (data.password) {
     updateData.password = await hash(data.password, 12);
   }
@@ -51,7 +50,7 @@ export async function updateUser(raw: unknown) {
     data: updateData,
     select: {
       id: true,
-      branchId: true,
+      name: true,
       nickname: true,
       role: true,
       email: true,
@@ -77,7 +76,7 @@ export async function listUsers() {
   const users = await db.user.findMany({
     select: {
       id: true,
-      branchId: true,
+      name: true,
       nickname: true,
       role: true,
       email: true,
@@ -95,7 +94,7 @@ export async function getUserById(id: string) {
     where: { id },
     select: {
       id: true,
-      branchId: true,
+      name: true,
       nickname: true,
       role: true,
       email: true,

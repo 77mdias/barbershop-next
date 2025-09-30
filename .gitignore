@@ -30,8 +30,22 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ==================
+# 🔒 ARQUIVOS DE AMBIENTE
+# ==================
+# Protege todos os arquivos .env com dados sensíveis
+.env
+.env.local
+.env.production
+.env.staging
+.env.test
+
+# ✅ PERMITE versionar apenas templates seguros
+!.env.example
+
+# Arquivos de backup de ambiente (caso existam)
+.env.backup
+.env.*.backup
 
 # vercel
 .vercel

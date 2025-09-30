@@ -12,6 +12,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Garantindo que o autoprefixer esteja instalado
 RUN npm install autoprefixer postcss tailwindcss tailwindcss-animate --save-dev
+# Gerando o Prisma Client
+RUN npx prisma generate
 # Configurações para melhorar performance no WSL
 ENV WATCHPACK_POLLING=true
 ENV CHOKIDAR_USEPOLLING=true
@@ -24,6 +26,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Gerando o Prisma Client antes do build
+RUN npx prisma generate
 RUN npm run build
 
 # Estágio de produção - apenas o necessário para executar

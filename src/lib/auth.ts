@@ -5,6 +5,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { UserRole } from "@/generated/prisma";
+import { logger } from "./logger";
 
 import { getServerSession } from "next-auth";
 
@@ -70,7 +72,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           nickname: user.nickname,
-          image: (user as any).image || (user as any).avatar || null,
+          image: user.image || null,
           role: user.role,
         };
       },
@@ -85,15 +87,15 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 dias
   },
   events: {
-    async signIn({ user, account, profile }) {
-      console.log("✅ SignIn event:", {
+    async signIn({ user, account, profile: _profile }) {
+      logger.auth.info("SignIn event", {
         provider: account?.provider,
         email: user.email,
         userId: user.id,
       });
     },
     async createUser({ user }) {
-      console.log("🆕 User created by PrismaAdapter:", {
+      logger.auth.info("User created by PrismaAdapter", {
         email: user.email,
         id: user.id,
       });
@@ -103,15 +105,15 @@ export const authOptions: NextAuthOptions = {
         await db.user.update({
           where: { id: user.id },
           data: {
-            role: "CLIENT",
+            role: UserRole.CLIENT,
             isActive: true,
             emailVerified: new Date(),
             nickname: user.name || user.email?.split("@")[0],
           },
         });
-        console.log("✅ Usuário OAuth configurado com sucesso");
+        logger.auth.info("OAuth user configured successfully", { userId: user.id });
       } catch (error) {
-        console.error("❌ Erro ao configurar usuário OAuth:", error);
+        logger.auth.error("Error configuring OAuth user", { userId: user.id, error });
       }
     },
   },
@@ -127,12 +129,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account: _account }) {
       if (user) {
-        token.role = (user as any).role;
+        token.role = user.role;
         token.id = user.id;
-        token.nickname =
-          (user as any).nickname || user.name || user.email?.split("@")[0];
+        token.nickname = user.nickname || user.name || user.email?.split("@")[0];
         token.name = user.name;
         token.image = user.image;
       }
@@ -140,28 +141,28 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).role = token.role as string;
-        (session.user as any).nickname = token.nickname as string;
-        session.user.name = token.name as string;
-        session.user.image = token.image as string;
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.nickname = token.nickname || null;
+        session.user.name = token.name || "";
+        session.user.image = token.image as string | null | undefined;
       }
 
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log("🔍 NextAuth redirect callback:", { url, baseUrl });
+      logger.auth.debug("NextAuth redirect callback", { url, baseUrl });
 
       // Se a URL é relativa, adiciona o baseUrl
       if (url.startsWith("/")) {
         const redirectUrl = `${baseUrl}${url}`;
-        console.log("🔍 URL relativa, redirecionando para:", redirectUrl);
+        logger.auth.debug("Relative URL, redirecting to", { redirectUrl });
         return redirectUrl;
       }
 
       // Se a URL é do mesmo domínio, permite
       if (url.startsWith(baseUrl)) {
-        console.log("🔍 URL do mesmo domínio, permitindo:", url);
+        logger.auth.debug("Same domain URL, allowing", { url });
         return url;
       }
 
@@ -173,22 +174,19 @@ export const authOptions: NextAuthOptions = {
           const finalUrl = callbackUrl.startsWith("/")
             ? `${baseUrl}${callbackUrl}`
             : callbackUrl;
-          console.log(
-            "🔍 CallbackUrl encontrada, redirecionando para:",
-            finalUrl
-          );
+          logger.auth.debug("CallbackUrl found, redirecting to", { finalUrl });
           return finalUrl;
         }
       }
 
       // Verificar se é uma URL de callback do Stripe
       if (url.includes("session_id=") && url.includes("/pedido/")) {
-        console.log("🔍 URL de callback do Stripe detectada:", url);
+        logger.auth.debug("Stripe callback URL detected", { url });
         return url;
       }
 
       // Se não, volta para o baseUrl
-      console.log("🔍 Redirecionando para baseUrl:", baseUrl);
+      logger.auth.debug("Redirecting to baseUrl", { baseUrl });
       return baseUrl;
     },
   },

@@ -55,7 +55,7 @@ function ThankYouContent() {
       } else {
         toast.error(data.message || "Erro ao reenviar email");
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao reenviar email");
     } finally {
       setIsResending(false);
@@ -123,7 +123,7 @@ function ThankYouContent() {
                 <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
                   2
                 </span>
-                <span>Clique no botão "Verificar Email"</span>
+                <span>Clique no botão &quot;Verificar Email&quot;</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">

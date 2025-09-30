@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error("Erro ao verificar email:", error);
+    logger.api.error("Error verifying email", { error });
     return NextResponse.json(
       { message: "Erro interno do servidor" },
       { status: 500 },
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error("Erro ao reenviar email:", error);
+    logger.api.error("Error resending verification email", { error });
     return NextResponse.json(
       { message: "Erro interno do servidor" },
       { status: 500 },

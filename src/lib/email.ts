@@ -1,8 +1,9 @@
 import nodemailer from "nodemailer";
+import { logger } from "./logger";
 
 // Verificar se as variáveis de ambiente estão configuradas
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-  console.warn("⚠️  EMAIL_USER ou EMAIL_PASSWORD não configurados no .env");
+  logger.api.warn("EMAIL_USER or EMAIL_PASSWORD not configured in .env");
 }
 
 // Configuração do transporter de email
@@ -28,10 +29,10 @@ export async function verifyEmailConfig() {
     }
 
     await transporter.verify();
-    console.log("✅ Configuração de email verificada com sucesso");
+    logger.api.info("Email configuration verified successfully");
     return true;
   } catch (error) {
-    console.error("❌ Erro na configuração de email:", error);
+    logger.api.error("Email configuration error", { error });
     return false;
   }
 }
@@ -78,10 +79,10 @@ export async function sendVerificationEmail(email: string, token: string) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("✅ Email enviado com sucesso para:", email);
+    logger.api.info("Verification email sent successfully", { email, messageId: result.messageId });
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error("❌ Erro ao enviar email:", error);
+    logger.api.error("Error sending verification email", { email, error });
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro desconhecido",
@@ -150,10 +151,10 @@ export async function sendResetPasswordEmail(email: string, token: string) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("✅ Email de reset enviado com sucesso para:", email);
+    logger.api.info("Reset password email sent successfully", { email, messageId: result.messageId });
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error("❌ Erro ao enviar email de reset:", error);
+    logger.api.error("Error sending reset password email", { email, error });
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro desconhecido",

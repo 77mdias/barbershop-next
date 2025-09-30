@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/ui/notification";
 import { useState } from "react";
 import styles from "@/app/scss/components/CourseCard.module.scss";
+import { logger } from "@/lib/logger";
 
 const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
         result?.error === "OAuthAccountNotLinked" ||
         result?.error === "AccessDenied"
       ) {
-        console.log("Erro OAuth detectado, redirecionando para página de erro");
+        logger.auth.warn("OAuth error detected, redirecting to error page", { provider, error: result?.error });
 
         // Salvar informações detalhadas no localStorage para uso na página de erro
         localStorage.setItem("lastOAuthProvider", provider);
@@ -41,11 +42,11 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
         const email =
           result?.url?.split("email=")[1]?.split("&")[0] || "teste@exemplo.com";
         localStorage.setItem("lastAttemptedEmail", email);
-        console.log("Email salvo no localStorage:", email);
+        logger.auth.debug("Email saved to localStorage", { email, provider });
       } else if (result?.error) {
         router.push(`/auth/error?error=${result.error}`);
       }
-    } catch (error) {
+    } catch {
       router.push("/auth/error?error=OAuthSignin");
     } finally {
       setIsOAuthLoading(null);

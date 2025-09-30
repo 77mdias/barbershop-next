@@ -82,7 +82,7 @@ export default function ResetPasswordForm() {
           router.push(`/auth/signin`);
         }, 3000);
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao redefinir senha. Tente novamente.");
     } finally {
       setIsLoading(false);
@@ -120,7 +120,7 @@ export default function ResetPasswordForm() {
         // Mostrar notificação de sucesso
         setSuccess(true);
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao enviar email. Tente novamente.");
     } finally {
       setIsLoading(false);

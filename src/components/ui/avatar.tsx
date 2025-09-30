@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-// import { getInitials } from "@/lib/utils"
+// import { getInitials } from "@/lib/utils";
 import styles from "@/app/components.module.scss";
 
 interface AvatarProps {
@@ -60,11 +61,12 @@ export function Avatar({
     >
       {src && !imageError ? (
         <>
-          <img
+          <Image
             src={src}
             alt={alt || `Avatar de ${name}`}
+            fill
             className={cn(
-              "w-full h-full object-cover transition-opacity duration-200",
+              "object-cover transition-opacity duration-200",
               imageLoaded ? "opacity-100" : "opacity-0"
             )}
             onLoad={() => setImageLoaded(true)}

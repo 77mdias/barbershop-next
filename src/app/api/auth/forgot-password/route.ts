@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { sendResetPasswordEmail, generateResetToken } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🔍 Iniciando processo de reset de senha");
+    logger.api.info("Starting password reset process");
 
     const { email } = await request.json();
-    console.log("📧 Email recebido:", email);
+    logger.api.info("Password reset requested", { email });
 
     if (!email) {
       return NextResponse.json(
@@ -16,19 +17,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("🔗 Testando conexão com o banco...");
+    logger.api.debug("Testing database connection");
 
     // Teste de conexão simples primeiro
     try {
       await db.$connect();
-      console.log("✅ Conexão com banco estabelecida");
+      logger.api.debug("Database connection established");
     } catch (connectError) {
-      console.error("❌ Erro na conexão:", connectError);
+      logger.api.error("Database connection error", { error: connectError });
       throw connectError;
     }
 
     // Verificar se o usuário existe
-    console.log("👤 Buscando usuário no banco...");
+    logger.api.debug("Searching for user in database", { email });
     const user = await db.user.findUnique({
       where: { email: email.toLowerCase() },
     });
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     const emailResult = await sendResetPasswordEmail(email, resetToken);
 
     if (!emailResult.success) {
-      console.error("Erro ao enviar email de reset:", emailResult.error);
+      logger.api.error("Error sending reset email", { email, error: emailResult.error });
       return NextResponse.json(
         { error: "Erro ao enviar email de redefinição" },
         { status: 500 }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Erro ao processar solicitação de reset de senha:", error);
+    logger.api.error("Error processing password reset request", { error });
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 }

@@ -32,14 +32,7 @@ export function Header({
     return "Good evening!"
   }
 
-  const getUserInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map(word => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }
+
 
   return (
     <header className={cn(

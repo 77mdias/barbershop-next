@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 // Função para buscar informações do usuário
 async function getUserAuthInfo(email: string) {
@@ -17,7 +18,7 @@ async function getUserAuthInfo(email: string) {
       return await response.json();
     }
   } catch (error) {
-    console.error("Erro ao buscar informações do usuário:", error);
+    logger.auth.error("Erro ao buscar informações do usuário", error);
   }
   return null;
 }
@@ -61,33 +62,40 @@ export default function ErrorContent() {
   const error = searchParams.get("error") as keyof typeof errors;
   const errorData = errors[error] || errors.default;
   const [showModal, setShowModal] = useState(false);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<{
+    hasPassword: boolean;
+    oauthProviders: string[];
+    email: string;
+    attemptedProvider?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const params = useParams();
 
   // Debug: verificar os parâmetros
-  console.log("ErrorContent - params:", params);
-  console.log("ErrorContent - params type:", typeof params);
-  console.log("ErrorContent - params keys:", Object.keys(params || {}));
+  logger.component.debug("ErrorContent", "Params received", { 
+    params, 
+    type: typeof params, 
+    keys: Object.keys(params || {}) 
+  });
 
   // Extrair slug de forma segura
   const slug =
     typeof params === "object" && params !== null && "slug" in params
-      ? (params as any).slug
+      ? (params as { slug: string }).slug
       : undefined;
 
-  console.log("ErrorContent - slug extraído:", slug);
+  logger.component.debug("ErrorContent", "Slug extraído", { slug });
 
   // Extrair slug do callbackUrl se disponível (pode ter sido passado na URL de erro)
   const callbackUrlParam = searchParams.get("callbackUrl");
-  console.log("ErrorContent - callbackUrl da URL:", callbackUrlParam);
+  logger.component.debug("ErrorContent", "CallbackUrl da URL", { callbackUrlParam });
 
   // Tentar extrair slug do callbackUrl (ex: "/nextstore" -> "nextstore")
   let slugFromCallback: string | undefined;
   if (callbackUrlParam) {
     try {
       const decodedCallback = decodeURIComponent(callbackUrlParam);
-      console.log("ErrorContent - callbackUrl decodificado:", decodedCallback);
+      logger.component.debug("ErrorContent", "CallbackUrl decodificado", { decodedCallback });
 
       // Remover a barra inicial se existir
       const cleanCallback = decodedCallback.startsWith("/")
@@ -97,19 +105,16 @@ export default function ErrorContent() {
       // Se não for uma URL completa (não tem http/https), é provavelmente um slug
       if (!cleanCallback.includes("http") && !cleanCallback.includes("://")) {
         slugFromCallback = cleanCallback;
-        console.log(
-          "ErrorContent - slug extraído do callbackUrl:",
-          slugFromCallback,
-        );
+        logger.component.debug("ErrorContent", "Slug extraído do callbackUrl", { slugFromCallback });
       }
     } catch (error) {
-      console.error("Erro ao decodificar callbackUrl:", error);
+      logger.component.error("ErrorContent", "Erro ao decodificar callbackUrl", error);
     }
   }
 
   // Priorizar slug do callbackUrl, depois do params, depois do localStorage
   const urlSlug = slugFromCallback || slug;
-  console.log("ErrorContent - urlSlug final:", urlSlug);
+  logger.component.debug("ErrorContent", "UrlSlug final", { urlSlug });
 
   // Fallback: tentar obter slug do localStorage (pode ter sido salvo durante o processo de login)
   const storedSlug =
@@ -118,39 +123,34 @@ export default function ErrorContent() {
         sessionStorage.getItem("currentStoreSlug")
       : undefined;
 
-  console.log("ErrorContent - storedSlug final:", storedSlug);
+  logger.component.debug("ErrorContent", "StoredSlug final", { storedSlug });
 
   const finalSlug = urlSlug || storedSlug;
-  console.log("ErrorContent - finalSlug:", finalSlug);
+  logger.component.debug("ErrorContent", "FinalSlug", { finalSlug });
 
   useEffect(() => {
-    console.log("ErrorContent useEffect - error:", error);
-    console.log(
-      "ErrorContent useEffect - searchParams:",
-      searchParams.toString(),
-    );
+    logger.component.debug("ErrorContent", "useEffect iniciado", { 
+      error, 
+      searchParams: searchParams.toString() 
+    });
 
     // Verificar se estamos no cliente e obter slug do localStorage
     if (typeof window !== "undefined") {
       const storedSlug =
         localStorage.getItem("currentStoreSlug") ||
         sessionStorage.getItem("currentStoreSlug");
-      console.log(
-        "ErrorContent useEffect - storedSlug do localStorage:",
-        localStorage.getItem("currentStoreSlug"),
-      );
-      console.log(
-        "ErrorContent useEffect - storedSlug do sessionStorage:",
-        sessionStorage.getItem("currentStoreSlug"),
-      );
-      console.log("ErrorContent useEffect - storedSlug final:", storedSlug);
+      logger.component.debug("ErrorContent", "Slugs do storage", {
+        localStorage: localStorage.getItem("currentStoreSlug"),
+        sessionStorage: sessionStorage.getItem("currentStoreSlug"),
+        storedSlugFinal: storedSlug
+      });
     }
 
     // Mostrar modal automaticamente para erros importantes
     if (error === "OAuthAccountNotLinked" || error === "AccessDenied") {
-      console.log("Erro OAuth detectado, mostrando modal");
+      logger.auth.info("Erro OAuth detectado, mostrando modal", { error });
       setShowModal(true);
-      console.log("showModal definido como true");
+      logger.component.debug("ErrorContent", "showModal definido como true");
 
       // Buscar informações detalhadas do erro
       const errorDetails = localStorage.getItem("oauthErrorDetails");
@@ -161,7 +161,7 @@ export default function ErrorContent() {
           const details = JSON.parse(errorDetails);
           attemptedProvider = details.attemptedProvider;
         } catch (e) {
-          console.error("Erro ao parsear detalhes do erro:", e);
+          logger.auth.error("Erro ao parsear detalhes do erro", e);
         }
       }
 
@@ -170,29 +170,31 @@ export default function ErrorContent() {
         searchParams.get("email") ||
         searchParams.get("error_description")?.split(":")[1];
 
-      console.log("Email da URL:", searchParams.get("email"));
-      console.log("Error description:", searchParams.get("error_description"));
+      logger.auth.debug("Extraindo email da URL", {
+        emailFromUrl: searchParams.get("email"),
+        errorDescription: searchParams.get("error_description")
+      });
 
       // Se não encontrou na URL, tentar localStorage
       if (!email) {
         email = localStorage.getItem("lastAttemptedEmail") || undefined;
-        console.log("Email do localStorage:", email);
+        logger.auth.debug("Email do localStorage", { email });
       }
 
       // Se ainda não encontrou, tentar obter do sessionStorage ou cookies
       if (!email) {
         // Tentar obter do sessionStorage (pode ter sido salvo durante o processo OAuth)
         email = sessionStorage.getItem("oauthEmail") || undefined;
-        console.log("Email do sessionStorage:", email);
+        logger.auth.debug("Email do sessionStorage", { email });
       }
 
-      console.log("Email final encontrado:", email);
+      logger.auth.info("Email final encontrado", { email });
 
       if (email) {
-        console.log("Buscando informações do usuário para:", email);
+        logger.auth.info("Buscando informações do usuário", { email });
         setLoading(true);
         getUserAuthInfo(email).then((info) => {
-          console.log("Informações do usuário recebidas:", info);
+          logger.auth.info("Informações do usuário recebidas", { info });
           // Adicionar informações sobre o provider tentado
           if (info && attemptedProvider) {
             info.attemptedProvider = attemptedProvider;
@@ -201,7 +203,7 @@ export default function ErrorContent() {
           setLoading(false);
         });
       } else {
-        console.log("Nenhum email encontrado, usando informações padrão");
+        logger.auth.warn("Nenhum email encontrado, usando informações padrão");
       }
     }
   }, [error, searchParams]);
@@ -214,10 +216,12 @@ export default function ErrorContent() {
         ? localStorage.getItem("currentStoreSlug") ||
           sessionStorage.getItem("currentStoreSlug")
         : undefined;
-    console.log("handleTryAgain - storedSlug:", storedSlug);
+    logger.component.debug("ErrorContent", "handleTryAgain", { 
+      storedSlug, 
+      callbackUrl: storedSlug ? `/${storedSlug}` : "/",
+      finalSlug 
+    });
     const callbackUrl = storedSlug ? `/${storedSlug}` : "/";
-    console.log("handleTryAgain - callbackUrl:", callbackUrl);
-    console.log("handleTryAgain - finalSlug:", finalSlug);
     router.push(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   };
 
@@ -229,10 +233,12 @@ export default function ErrorContent() {
         ? localStorage.getItem("currentStoreSlug") ||
           sessionStorage.getItem("currentStoreSlug")
         : undefined;
-    console.log("handleGoHome - storedSlug:", storedSlug);
     const targetUrl = storedSlug ? `/${storedSlug}` : "/";
-    console.log("handleGoHome - targetUrl:", targetUrl);
-    console.log("handleGoHome - finalSlug:", finalSlug);
+    logger.component.debug("ErrorContent", "handleGoHome", { 
+      storedSlug, 
+      targetUrl,
+      finalSlug 
+    });
     router.push(targetUrl);
   };
 
@@ -319,13 +325,11 @@ export default function ErrorContent() {
     return details;
   };
 
-  console.log("Renderizando ErrorContent - error:", error);
-  console.log("Renderizando ErrorContent - errorData:", errorData);
-  console.log("Renderizando ErrorContent - showModal:", showModal);
+  logger.component.debug("ErrorContent", "render", { error, errorData, showModal });
 
   // Se for OAuthAccountNotLinked ou AccessDenied, mostrar modal elegante
   if (error === "OAuthAccountNotLinked" || error === "AccessDenied") {
-    console.log("Renderizando modal de erro OAuth");
+    logger.component.debug("ErrorContent", "rendering OAuth error modal");
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)] px-4">
         <div className="text-center">

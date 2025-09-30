@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 // Enum de roles conforme schema.prisma
-export const UserRoleEnum = z.enum(["ADMIN", "CUSTOMER", "PROFESSIONAL"]);
+export const UserRoleEnum = z.enum(["ADMIN", "BARBER", "CLIENT"]);
 
 // Schema de entrada para criação/edição de usuário
 export const UserInput = z.object({
-  branchId: z.string(),
-  nickname: z.string(),
-  role: UserRoleEnum.default("CUSTOMER"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  nickname: z.string().optional(),
+  role: UserRoleEnum.default("CLIENT"),
   email: z.string().email(),
   password: z.string().min(6).optional(),
   isActive: z.boolean().optional(),
@@ -15,8 +15,8 @@ export const UserInput = z.object({
 
 // Schema para formulários (role opcional)
 export const UserFormInput = z.object({
-  branchId: z.string(),
-  nickname: z.string(),
+  name: z.string().min(1, "Nome é obrigatório"),
+  nickname: z.string().optional(),
   role: UserRoleEnum.optional(),
   email: z.string().email(),
   password: z.string().min(6).optional(),

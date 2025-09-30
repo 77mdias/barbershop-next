@@ -119,7 +119,7 @@ export default function Home() {
       {/* Header */}
       <Header
         userName="smith"
-        onFilterClick={() => console.log("Filter clicked")}
+        onFilterClick={() => {/* TODO: Implement filter functionality */}}
       />
 
       {/* Conteúdo principal */}
@@ -129,7 +129,7 @@ export default function Home() {
           placeholder="Search..."
           value={searchTerm}
           onChange={setSearchTerm}
-          onSubmit={(value) => console.log("Search:", value)}
+          onSubmit={(_value) => {/* TODO: Implement search functionality */}}
         />
 
         {/* Seção de serviços */}
@@ -163,7 +163,7 @@ export default function Home() {
                 title={offer.title}
                 discount={offer.discount}
                 period={offer.period}
-                onGetOffer={() => console.log("Get offer:", offer.id)}
+                onGetOffer={() => {/* TODO: Implement get offer functionality */}}
               />
             ))}
           </div>
@@ -188,7 +188,7 @@ export default function Home() {
                 reviewCount={salon.reviewCount}
                 location={salon.location}
                 distance={salon.distance}
-                onClick={() => console.log("Salon clicked:", salon.id)}
+                onClick={() => {/* TODO: Implement salon details navigation */}}
               />
             ))}
           </div>

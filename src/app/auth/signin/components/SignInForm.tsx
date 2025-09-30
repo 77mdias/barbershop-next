@@ -5,12 +5,11 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Github, Mail } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import ButtonLogin from "./ButtonLogin";
 import { useNotification } from "@/components/ui/notification";
 import { Alert } from "@/components/ui/alert";
 import styles from "@/app/scss/components/CourseCard.module.scss";
-import { Button } from "@/components/ui/button";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -61,9 +60,11 @@ export default function SignInForm() {
           setError("Email ou senha inválidos");
         }
       } else {
-        router.push("/");
+        // Redirecionar para a URL de callback ou para a página principal
+        const callbackUrl = searchParams.get("callbackUrl") || "/";
+        router.push(callbackUrl);
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao fazer login. Tente novamente.");
     } finally {
       setIsLoading(false);

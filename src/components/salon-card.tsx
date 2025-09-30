@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import styles from "@/app/components.module.scss";
 
@@ -121,10 +122,11 @@ export function SalonCard({
           styles.salonCard__image
         )}
       >
-        <img
+        <Image
           src={image}
           alt={name}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           onError={(e) => {
             // Fallback para imagem padrão
             e.currentTarget.src = "/images/salon-placeholder.jpg";

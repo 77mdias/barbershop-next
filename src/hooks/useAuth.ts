@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 
 interface UserWithRole {
   id: string;
@@ -20,8 +20,8 @@ export function useAuth() {
     isLoading: status === "loading",
     isAuthenticated: !!user,
     isAdmin: user?.role === UserRole.ADMIN,
-    isSeller: user?.role === UserRole.PROFESSIONAL,
-    isCustomer: user?.role === UserRole.CUSTOMER,
+    isBarber: user?.role === UserRole.BARBER,
+    isClient: user?.role === UserRole.CLIENT,
     session,
     status,
   };

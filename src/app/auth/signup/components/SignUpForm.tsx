@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github, Mail, Eye, EyeOff } from "lucide-react";
 import styles from "@/app/scss/components/CourseCard.module.scss";
+import { logger } from "@/lib/logger";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -129,8 +130,8 @@ export default function SignUpForm() {
         formData.email
       )}`;
       router.push(verifyUrl);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Erro desconhecido");
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +147,7 @@ export default function SignUpForm() {
       });
 
       if (result?.error) {
-        console.log("Erro OAuth no SignUp:", result.error);
+        logger.auth.warn("OAuth error in SignUp", { error: result.error });
 
         if (result.error === "OAuthAccountNotLinked") {
           setError(
@@ -159,7 +160,7 @@ export default function SignUpForm() {
         }
       }
     } catch (error) {
-      console.error("Erro no OAuth:", error);
+      logger.auth.error("OAuth error", { error });
       setError("Erro ao conectar com " + provider + ". Tente novamente.");
     } finally {
       setIsOAuthLoading(null);
