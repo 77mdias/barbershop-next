@@ -4,24 +4,53 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id               String           @id @default(cuid())
-  name             String
-  email            String           @unique
-  phone            String?
-  password         String?
-  role             UserRole         @default(CLIENT)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  servicesProvided Appointment[]    @relation("BarberAppointments")
-  appointments     Appointment[]
-  serviceHistory   ServiceHistory[]
-  promotions       UserPromotion[]
-  vouchers         Voucher[]
+  id                       String           @id @default(cuid())
+  nickname                 String?
+  image                    String?
+  name                     String
+  role                     UserRole         @default(CLIENT)
+  email                    String           @unique
+  emailVerified            DateTime?
+  emailVerificationExpires DateTime?
+  emailVerificationToken   String?
+  phone                    String?
+  password                 String?
+  resetPasswordExpires     DateTime?
+  resetPasswordToken       String?
+  isActive                 Boolean          @default(true)
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  servicesProvided         Appointment[]    @relation("BarberAppointments")
+  appointments             Appointment[]
+  serviceHistory           ServiceHistory[]
+  promotions               UserPromotion[]
+  vouchers                 Voucher[]
+  accounts                 account[]
+}
+
+model account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Service {
