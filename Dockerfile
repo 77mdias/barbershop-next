@@ -5,6 +5,13 @@ COPY package*.json ./
 # Instalando dependências do projeto com npm install
 RUN npm install && npm cache clean --force
 
+# Estágio de dependências para build - inclui devDependencies
+FROM node:20-alpine AS build-deps
+WORKDIR /app
+COPY package*.json ./
+# Instalando todas as dependências incluindo devDependencies para o build
+RUN npm install --include=dev && npm cache clean --force
+
 # Estágio de desenvolvimento - com hot reload
 FROM node:20-alpine AS dev
 WORKDIR /app
@@ -23,7 +30,7 @@ CMD ["npm", "run", "dev"]
 # Estágio de build - compila a aplicação
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build-deps /app/node_modules ./node_modules
 COPY . .
 # Gerando o Prisma Client no ambiente Alpine para garantir engines corretos
 RUN npx prisma generate
