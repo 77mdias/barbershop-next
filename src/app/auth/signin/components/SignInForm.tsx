@@ -63,6 +63,12 @@ export default function SignInForm() {
         // Redirecionar para a URL de callback ou para a página principal
         const callbackUrl = searchParams.get("callbackUrl") || "/";
         router.push(callbackUrl);
+        
+        // Como fallback, usamos window.location após um pequeno delay
+        // para garantir que o redirecionamento aconteça mesmo em produção
+        setTimeout(() => {
+          window.location.href = callbackUrl;
+        }, 500);
       }
     } catch {
       setError("Erro ao fazer login. Tente novamente.");

@@ -19,34 +19,26 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
     setIsOAuthLoading(provider);
 
     try {
-      const result = await signIn(provider);
-
-      if (
-        result?.error === "OAuthAccountNotLinked" ||
-        result?.error === "AccessDenied"
-      ) {
-        logger.auth.warn("OAuth error detected, redirecting to error page", { provider, error: result?.error });
-
-        // Salvar informações detalhadas no localStorage para uso na página de erro
-        localStorage.setItem("lastOAuthProvider", provider);
-        localStorage.setItem(
-          "oauthErrorDetails",
-          JSON.stringify({
-            error: "OAuthAccountNotLinked",
-            attemptedProvider: provider,
-            timestamp: new Date().toISOString(),
-          })
-        );
-
-        // Tentar obter o email do resultado ou usar um placeholder
-        const email =
-          result?.url?.split("email=")[1]?.split("&")[0] || "teste@exemplo.com";
-        localStorage.setItem("lastAttemptedEmail", email);
-        logger.auth.debug("Email saved to localStorage", { email, provider });
-      } else if (result?.error) {
-        router.push(`/auth/error?error=${result.error}`);
+      // Forçar redirecionamento para garantir que funcione em produção
+      logger.auth.info(`Iniciando login OAuth com ${provider}, forçando redirecionamento`);
+      
+      // Usar callbackUrl explícito para dashboard
+      await signIn(provider, { 
+        callbackUrl: "/dashboard",
+        redirect: true // Forçar redirecionamento
+      });
+      
+      // O código abaixo só será executado se o redirecionamento falhar
+      logger.auth.warn(`Redirecionamento OAuth falhou, tentando alternativa`, { provider });
+      
+      if (typeof window !== 'undefined') {
+        // Fallback: redirecionar manualmente após um breve delay
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1000);
       }
-    } catch {
+    } catch (error) {
+      logger.auth.error(`Erro no login OAuth`, { provider, error });
       router.push("/auth/error?error=OAuthSignin");
     } finally {
       setIsOAuthLoading(null);
