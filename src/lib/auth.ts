@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { UserRole } from "@/generated/prisma";
+import { UserRole } from "@prisma/client";
 import { logger } from "./logger";
 
 import { getServerSession } from "next-auth";
@@ -111,9 +111,14 @@ export const authOptions: NextAuthOptions = {
             nickname: user.name || user.email?.split("@")[0],
           },
         });
-        logger.auth.info("OAuth user configured successfully", { userId: user.id });
+        logger.auth.info("OAuth user configured successfully", {
+          userId: user.id,
+        });
       } catch (error) {
-        logger.auth.error("Error configuring OAuth user", { userId: user.id, error });
+        logger.auth.error("Error configuring OAuth user", {
+          userId: user.id,
+          error,
+        });
       }
     },
   },
@@ -133,7 +138,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        token.nickname = user.nickname || user.name || user.email?.split("@")[0];
+        token.nickname =
+          user.nickname || user.name || user.email?.split("@")[0];
         token.name = user.name;
         token.image = user.image;
       }
@@ -186,7 +192,10 @@ export const authOptions: NextAuthOptions = {
             return finalUrl;
           }
         } catch (error) {
-          logger.auth.error("Error parsing URL with callbackUrl", { url, error });
+          logger.auth.error("Error parsing URL with callbackUrl", {
+            url,
+            error,
+          });
           return `${baseUrl}/dashboard`;
         }
       }

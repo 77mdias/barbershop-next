@@ -46,6 +46,32 @@ Esta documentação foi criada especialmente para você, como **aluno**, entende
    - ⏱️ **Tempo estimado:** 30-40 minutos (referência)
    - 🔧 **Prático:** Metodologia de debugging, soluções testadas
 
+### 🔧 **Configuração e Ambiente**
+
+7. **[07 - Estrutura de Variáveis de Ambiente](./07-estrutura-variaveis-ambiente.md)**
+   - 🎯 **O que você vai aprender:** Como organizar e gerenciar variáveis de ambiente
+   - ⏱️ **Tempo estimado:** 15-20 minutos
+   - 🔧 **Prático:** Estrutura .env, segurança, boas práticas
+
+8. **[08 - Guia de Deploy em Produção](./08-guia-deploy-producao.md)**
+   - 🎯 **O que você vai aprender:** Como fazer deploy seguro e eficiente
+   - ⏱️ **Tempo estimado:** 25-30 minutos
+   - 🔧 **Prático:** Estratégias de deploy, checklist de produção
+
+### 📦 **Dependências e Compatibilidade**
+
+9. **[09 - Dependências Compatíveis](./09-dependencias-compativeis.md)**
+   - 🎯 **O que você vai aprender:** Como instalar e gerenciar dependências compatíveis
+   - ⏱️ **Tempo estimado:** 20-25 minutos
+   - 🔧 **Prático:** Resolução de conflitos, stacks recomendadas, troubleshooting
+
+### 🤖 **Guias para Desenvolvimento**
+
+10. **[10 - Guia para Agentes Next.js](./10-guia-agentes-nextjs.md)**
+    - 🎯 **O que você vai aprender:** Diretrizes e regras para desenvolvimento com IA
+    - ⏱️ **Tempo estimado:** 30-40 minutos
+    - 🔧 **Prático:** Padrões de código, fluxos de trabalho, boas práticas
+
 ---
 
 ## 🚀 Roteiro de Estudos Sugerido

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { UserRole } from "@/generated/prisma";
+import { UserRole } from "@prisma/client";
 
 interface UserWithRole {
   id: string;
