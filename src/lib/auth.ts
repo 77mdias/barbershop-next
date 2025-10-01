@@ -151,43 +151,55 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      logger.auth.debug("NextAuth redirect callback", { url, baseUrl });
+      logger.auth.info("NextAuth redirect callback", { url, baseUrl });
+
+      // Solução simplificada para garantir redirecionamento após login
+      // Sempre redirecionar para dashboard após login bem-sucedido
+      if (url.includes("/api/auth/signin") || url.includes("/auth/signin")) {
+        logger.auth.info("Login successful, redirecting to dashboard");
+        return `${baseUrl}/dashboard`;
+      }
 
       // Se a URL é relativa, adiciona o baseUrl
       if (url.startsWith("/")) {
         const redirectUrl = `${baseUrl}${url}`;
-        logger.auth.debug("Relative URL, redirecting to", { redirectUrl });
+        logger.auth.info("Relative URL, redirecting to", { redirectUrl });
         return redirectUrl;
       }
 
       // Se a URL é do mesmo domínio, permite
       if (url.startsWith(baseUrl)) {
-        logger.auth.debug("Same domain URL, allowing", { url });
+        logger.auth.info("Same domain URL, allowing", { url });
         return url;
       }
 
       // Se a URL contém callbackUrl, extrai e usa
       if (url.includes("callbackUrl=")) {
-        const urlObj = new URL(url);
-        const callbackUrl = urlObj.searchParams.get("callbackUrl");
-        if (callbackUrl) {
-          const finalUrl = callbackUrl.startsWith("/")
-            ? `${baseUrl}${callbackUrl}`
-            : callbackUrl;
-          logger.auth.debug("CallbackUrl found, redirecting to", { finalUrl });
-          return finalUrl;
+        try {
+          const urlObj = new URL(url);
+          const callbackUrl = urlObj.searchParams.get("callbackUrl");
+          if (callbackUrl) {
+            const finalUrl = callbackUrl.startsWith("/")
+              ? `${baseUrl}${callbackUrl}`
+              : callbackUrl;
+            logger.auth.info("CallbackUrl found, redirecting to", { finalUrl });
+            return finalUrl;
+          }
+        } catch (error) {
+          logger.auth.error("Error parsing URL with callbackUrl", { url, error });
+          return `${baseUrl}/dashboard`;
         }
       }
 
       // Verificar se é uma URL de callback do Stripe
       if (url.includes("session_id=") && url.includes("/pedido/")) {
-        logger.auth.debug("Stripe callback URL detected", { url });
+        logger.auth.info("Stripe callback URL detected", { url });
         return url;
       }
 
-      // Se não, volta para o baseUrl
-      logger.auth.debug("Redirecting to baseUrl", { baseUrl });
-      return baseUrl;
+      // Se não, volta para o dashboard
+      logger.auth.info("Redirecting to dashboard", { baseUrl });
+      return `${baseUrl}/dashboard`;
     },
   },
   pages: {
