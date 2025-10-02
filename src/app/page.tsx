@@ -1,16 +1,17 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Header } from "@/components/header"
-import { SearchBar } from "@/components/search-bar"
-import { ServiceCard } from "@/components/service-card"
-import { OfferCard } from "@/components/offer-card"
-import { SalonCard } from "@/components/salon-card"
-import { BottomNavigation } from "@/components/bottom-navigation"
+import * as React from "react";
+import { Header } from "@/components/header";
+import { SearchBar } from "@/components/search-bar";
+import { ServiceCard } from "@/components/service-card";
+import { OfferCard } from "@/components/offer-card";
+import { SalonCard } from "@/components/salon-card";
+import { BottomNavigation } from "@/components/bottom-navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Página principal da aplicação Barbershop
- * 
+ *
  * Implementa o layout completo baseado na imagem de referência:
  * - Header com saudação e avatar
  * - Barra de busca
@@ -20,27 +21,28 @@ import { BottomNavigation } from "@/components/bottom-navigation"
  * - Navegação inferior
  */
 export default function Home() {
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [selectedService, setSelectedService] = React.useState("haircuts")
+  const { user, isLoading } = useAuth();
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedService, setSelectedService] = React.useState("haircuts");
 
   // Dados dos serviços disponíveis
   const services = [
     {
       id: "haircuts",
       name: "Haircuts",
-      icon: "✂️"
+      icon: "✂️",
     },
     {
       id: "nail",
       name: "Nail",
-      icon: "💅"
+      icon: "💅",
     },
     {
       id: "facial",
       name: "Facial",
-      icon: "🧴"
-    }
-  ]
+      icon: "🧴",
+    },
+  ];
 
   // Dados das ofertas especiais
   const offers = [
@@ -48,9 +50,9 @@ export default function Home() {
       id: "haircut-offer",
       title: "Haircut",
       discount: "30% Free",
-      period: "Aug 12-Aug 27"
-    }
-  ]
+      period: "Aug 12-Aug 27",
+    },
+  ];
 
   // Dados dos salões próximos
   const nearbySalons = [
@@ -61,65 +63,36 @@ export default function Home() {
       rating: 4.8,
       reviewCount: 127,
       location: "Centro, São Paulo",
-      distance: "1.2 km"
+      distance: "1.2 km",
     },
     {
-      id: "salon-2", 
+      id: "salon-2",
       name: "Classic Cuts",
       image: "/images/salon2.svg",
       rating: 4.6,
       reviewCount: 89,
       location: "Vila Madalena, São Paulo",
-      distance: "2.1 km"
-    }
-  ]
+      distance: "2.1 km",
+    },
+  ];
 
-  // Itens da navegação inferior
-  const navigationItems = [
-    {
-      id: "home",
-      label: "Home",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
-      )
-    },
-    {
-      id: "search",
-      label: "Search", 
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      )
-    },
-    {
-      id: "bookings",
-      label: "Bookings",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      )
-    },
-    {
-      id: "profile",
-      label: "Profile",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      )
-    }
-  ]
+  // Exibe loading enquanto carrega dados do usuário
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[--background] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[--background] flex flex-col items-center">
+    <div className="min-h-screen bg-[--background]">
       {/* Header */}
       <Header
-        userName="smith"
-        onFilterClick={() => {/* TODO: Implement filter functionality */}}
+        userName={user?.name || user?.email?.split('@')[0] || "Usuário"}
+        onFilterClick={() => {
+          /* TODO: Implement filter functionality */
+        }}
       />
 
       {/* Conteúdo principal */}
@@ -129,7 +102,9 @@ export default function Home() {
           placeholder="Search..."
           value={searchTerm}
           onChange={setSearchTerm}
-          onSubmit={(_value) => {/* TODO: Implement search functionality */}}
+          onSubmit={(_value) => {
+            /* TODO: Implement search functionality */
+          }}
         />
 
         {/* Seção de serviços */}
@@ -155,7 +130,7 @@ export default function Home() {
               See all
             </button>
           </div>
-          
+
           <div className="space-y-4">
             {offers.map((offer) => (
               <OfferCard
@@ -163,7 +138,9 @@ export default function Home() {
                 title={offer.title}
                 discount={offer.discount}
                 period={offer.period}
-                onGetOffer={() => {/* TODO: Implement get offer functionality */}}
+                onGetOffer={() => {
+                  /* TODO: Implement get offer functionality */
+                }}
               />
             ))}
           </div>
@@ -177,7 +154,7 @@ export default function Home() {
               See all
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             {nearbySalons.map((salon) => (
               <SalonCard
@@ -188,18 +165,14 @@ export default function Home() {
                 reviewCount={salon.reviewCount}
                 location={salon.location}
                 distance={salon.distance}
-                onClick={() => {/* TODO: Implement salon details navigation */}}
+                onClick={() => {
+                  /* TODO: Implement salon details navigation */
+                }}
               />
             ))}
           </div>
         </section>
       </main>
-
-      {/* Navegação inferior */}
-      <BottomNavigation
-        items={navigationItems}
-        activeItem="home"
-      />
     </div>
-  )
+  );
 }

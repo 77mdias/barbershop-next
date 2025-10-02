@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import styles from "@/app/components.module.scss"
 
@@ -38,12 +39,34 @@ export function BottomNavigation({
   onItemClick,
   className
 }: BottomNavigationProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  
+  // Detecta automaticamente o item ativo baseado na URL atual
+  const currentActiveItem = React.useMemo(() => {
+    if (activeItem) return activeItem
+    
+    const currentItem = items.find(item => {
+      if (!item.href) return false
+      
+      // Página inicial
+      if (item.href === "/" && pathname === "/") return true
+      
+      // Outras páginas
+      if (item.href !== "/" && pathname.startsWith(item.href)) return true
+      
+      return false
+    })
+    
+    return currentItem?.id || items[0]?.id
+  }, [activeItem, items, pathname])
+
   const handleItemClick = (item: NavigationItem) => {
     onItemClick?.(item.id)
     
-    // Se tem href, navega para a URL
+    // Se tem href, navega para a URL usando Next.js router
     if (item.href) {
-      window.location.href = item.href
+      router.push(item.href)
     }
   }
 
@@ -55,7 +78,7 @@ export function BottomNavigation({
     )}>
       <div className="flex items-center gap-[4px] justify-around max-w-md p-1 mx-auto">
         {items.map((item) => {
-          const isActive = activeItem === item.id
+          const isActive = currentActiveItem === item.id
           
           return (
             <button
