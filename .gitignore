@@ -35,6 +35,7 @@ yarn-error.log*
 # ==================
 # Protege todos os arquivos .env com dados sensíveis
 .env
+.env.development
 .env.local
 .env.production
 .env.staging

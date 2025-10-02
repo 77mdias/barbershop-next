@@ -1,29 +1,31 @@
-version: "3.8"
+version: "3.9"
+
 services:
-  # Ambiente de desenvolvimento
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: barbershop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   app:
     build:
       context: .
-      target: dev
-    environment:
-      - NODE_ENV=development
+      dockerfile: Dockerfile.dev
     ports:
-      - "3001:3000"
+      - "3000:3000"
     volumes:
-      - .:/app:delegated
+      - .:/app
+      - /app/node_modules
     env_file:
-      - .env
-    command: sh -c "npm install && npx prisma generate && npm run dev"
+      - .env.development
+    depends_on:
+      - db
 
-  # Ambiente de produção
-  app-prod:
-    build:
-      context: .
-      target: prod
-    environment:
-      - NODE_ENV=production
-    ports:
-      - "8080:3000"
-    env_file:
-      - .env.production
-    restart: always
+volumes:
+  pgdata:

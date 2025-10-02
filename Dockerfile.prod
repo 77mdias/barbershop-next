@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copie arquivos necessários para instalar dependências
+COPY package*.json ./
+
+# Copie a pasta do Prisma antes do npm ci
+COPY prisma ./prisma
+
+# Instale as dependências de produção
+RUN npm ci --only=production
+
+# Copie o restante do código
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

@@ -1,7 +1,52 @@
+# Node modules (serão instalados dentro do container)
 node_modules
 npm-debug.log
-Dockerfile
-docker-compose.yml
-.git
+yarn-error.log
+pnpm-debug.log
+
+# Logs
+logs
+*.log
+
+# Build outputs
 .next
+dist
+build
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de ambiente e configs sensíveis
 .env
+.env.*
+!.env.example
+
+# Prisma
+.prisma
+
+# Testes (pasta de cobertura/testes locais)
+coverage
+test-results
+*.spec.js
+*.spec.ts
+*.test.js
+*.test.ts
+
+# Editor configs
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.override.yml
+
+# Outros (ajuste conforme seu projeto)
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
