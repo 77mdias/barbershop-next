@@ -17,12 +17,22 @@
 /.next/
 /out/
 
+# Prisma
+.prisma/
+prisma/dev.db
+prisma/test.db
+
 # production
 /build
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+
+# Editor configs
+.vscode/
+.idea/
 
 # debug
 npm-debug.log*
@@ -56,3 +66,10 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Outros
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
