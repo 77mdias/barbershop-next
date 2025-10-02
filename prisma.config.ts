@@ -4,8 +4,11 @@ import path from "node:path";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 
+const envFile: string =
+  process.env.NODE_ENV === "development" ? ".env.development" : ".env";
+
 // ⚠️ FORÇA o carregamento do .env ANTES de qualquer coisa
-const envPath = path.resolve(process.cwd(), ".env");
+const envPath = path.resolve(process.cwd(), envFile);
 if (fs.existsSync(envPath)) {
   const result = dotenv.config({ path: envPath });
   if (result.error) {
