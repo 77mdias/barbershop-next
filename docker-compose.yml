@@ -1,32 +1,100 @@
-version: "3.9"
+# ===============================================
+# 🐳 DOCKER COMPOSE - DESENVOLVIMENTO
+# ===============================================
+# Configuração para ambiente de desenvolvimento local
+# com hot reload, PostgreSQL e Prisma Studio
 
 services:
+  # ==================
+  # 📊 BANCO DE DADOS
+  # ==================
   db:
-    image: postgres:15
-    restart: always
+    image: postgres:15-alpine
+    container_name: barbershop-db-dev
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: barbershop
+      POSTGRES_DB: barbershop_dev
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - barbershop_pgdata_dev:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - barbershop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d barbershop_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ==================
+  # 🚀 APLICAÇÃO
+  # ==================
   app:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    container_name: barbershop-app-dev
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3000:3000"     # Next.js
+      - "5555:5555"     # Prisma Studio
+    volumes:
+      # Hot reload - monta código fonte
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
+      - DIRECT_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - barbershop-network
+    stdin_open: true
+    tty: true
+
+  # ==================
+  # 📊 PRISMA STUDIO (Opcional)
+  # ==================
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: barbershop-studio-dev
+    restart: "no"
+    ports:
       - "5555:5555"
     volumes:
       - .:/app
       - /app/node_modules
     env_file:
       - .env.development
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
+    command: ["npx", "prisma", "studio", "--port", "5555", "--hostname", "0.0.0.0"]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - barbershop-network
+    profiles:
+      - studio
+
+# ==================
+# 🌐 REDES E VOLUMES
+# ==================
+networks:
+  barbershop-network:
+    driver: bridge
 
 volumes:
-  pgdata:
+  barbershop_pgdata_dev:
+    driver: local

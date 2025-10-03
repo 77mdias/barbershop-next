@@ -1,23 +1,112 @@
-# Node modules (serão instalados dentro do container)
+# ===============================================
+# 🐳 DOCKERIGNORE - BARBERSHOP NEXT.JS
+# ===============================================
+# Arquivos e pastas que devem ser ignorados durante o build Docker
+
+# ==================
+# 📦 DEPENDÊNCIAS
+# ==================
 node_modules
 npm-debug.log
 yarn-error.log
 pnpm-debug.log
+.pnpm-store
 
-# Logs
-logs
-*.log
-
-# Build outputs
+# ==================
+# 🔨 BUILD OUTPUTS
+# ==================
 .next
 dist
 build
+out
+.vercel
 
-# Sistema operacional
+# ==================
+# 📋 LOGS
+# ==================
+logs
+*.log
+lerna-debug.log*
+
+# ==================
+# 🔧 AMBIENTE E CONFIGS
+# ==================
+.env
+.env.*
+!.env.example
+.envrc
+
+# ==================
+# 🗄️ BANCO DE DADOS
+# ==================
+*.sqlite
+*.sqlite3
+*.db
+
+# ==================
+# 🔄 CONTROLE DE VERSÃO
+# ==================
+.git
+.gitignore
+.gitattributes
+.github
+
+# ==================
+# 💻 IDEs E EDITORES
+# ==================
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# ==================
+# 🖥️ SISTEMA OPERACIONAL
+# ==================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Arquivos de ambiente e configs sensíveis
+# ==================
+# 🐳 DOCKER
+# ==================
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ==================
+# 📄 DOCUMENTAÇÃO
+# ==================
+README.md
+CHANGELOG.md
+docs/
+*.md
+
+# ==================
+# 🧪 TESTES
+# ==================
+coverage
+.nyc_output
+test-results
+playwright-report
+
+# ==================
+# 🚀 DEPLOYMENT
+# ==================
+.vercel
+.netlify
+deploy.sh
+
+# ==================
+# 🛠️ FERRAMENTAS
+# ==================
+.eslintcache
+.tsbuildinfo
+.turbo
 .env
 .env.*
 !.env.example

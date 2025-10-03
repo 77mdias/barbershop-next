@@ -1,20 +1,31 @@
+# ===============================================
+# 🐳 DOCKERFILE PARA DESENVOLVIMENTO
+# ===============================================
+# ⚠️  CONFIGURAÇÃO SIMPLIFICADA - APENAS PARA DEV LOCAL
+# 
+# SEGURANÇA:
+# - Roda como root para compatibilidade com volumes
+# - Build simplificado para velocidade de desenvolvimento
+# - ❌ NÃO USAR EM PRODUÇÃO
+# 
+# Para produção, use Dockerfile.prod que inclui:
+# - Usuário não-privilegiado
+# - Multi-stage build
+# - Security hardening
+# ===============================================
+
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copie package.json e lock para instalar dependências
-COPY package*.json ./
-
-# Copie a pasta do Prisma ANTES do npm install
-COPY prisma ./prisma
-
-# Agora rode o npm install (prisma generate funcionará)
-RUN npm install
-
-# Copie o resto do código
+# Copiar tudo de uma vez para desenvolvimento
 COPY . .
 
-EXPOSE 3000
-EXPOSE 5555
+# Instalar dependências
+RUN npm install
 
-CMD ["npm", "run", "dev"]
+# Expor portas
+EXPOSE 3000 5555
+
+# Comando com geração do Prisma no startup
+CMD ["sh", "-c", "npx prisma generate && npm run dev"]
