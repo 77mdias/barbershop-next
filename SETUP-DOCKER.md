@@ -1,5 +1,7 @@
 # 🎉 Setup Docker Completo - Barbershop Next.js
 
+> **🔧 Atualização (Out/2025)**: O script `docker-manager.sh` foi corrigido para resolver o problema "unknown flag: --profile" com o Prisma Studio. A nova implementação usa o container `app` existente em vez de serviços duplicados.
+
 ## ✅ O que foi configurado
 
 ### 🐳 **Dockerfiles Otimizados**
@@ -61,8 +63,10 @@ npm run docker:dev:migrate
 # Executar seed
 npm run docker:dev:seed
 
-# Abrir Prisma Studio
+# Abrir Prisma Studio (corrigido - agora funciona)
 npm run docker:dev:studio
+# ou
+./scripts/docker-manager.sh studio dev
 ```
 
 ### 3. **Produção**
@@ -122,7 +126,8 @@ npm run docker:clean
 - [ ] App responde: `curl http://localhost:3000`
 - [ ] Health check OK: `curl http://localhost:3000/api/health`
 - [ ] Banco conecta: `./scripts/docker-manager.sh db dev`
-- [ ] Prisma Studio abre: http://localhost:5555
+- [ ] Prisma Studio abre sem erro "--profile": `./scripts/docker-manager.sh studio dev`
+- [ ] Prisma Studio carrega em: http://localhost:5555
 - [ ] Hot reload funciona (editar arquivo e ver mudança)
 
 ### ✅ Produção
@@ -183,6 +188,8 @@ npm run docker:clean
 - **Permissão negada**: `sudo usermod -aG docker $USER; newgrp docker`
 - **Porta ocupada**: `sudo netstat -tulpn | grep :3000`
 - **Containers não sobem**: `./scripts/docker-manager.sh rebuild dev`
+- **Erro "unknown flag: --profile"**: Problema corrigido na versão atual
+- **Prisma Studio não abre**: Verificar se container app está rodando
 
 ### Logs e Debug
 ```bash

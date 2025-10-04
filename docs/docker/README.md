@@ -2,91 +2,161 @@
 
 Este documento explica como configurar e utilizar o ambiente Docker para o projeto Barbershop Next.js.
 
+> **🔧 Atualização (Out/2025)**: Configuração simplificada após correção do script docker-manager.sh. O Prisma Studio agora usa o container `app` existente.
+
 ## Estrutura de Containers
 
-O projeto utiliza multi-stage build para otimizar o tamanho das imagens e separar ambientes:
+O projeto utiliza uma arquitetura simplificada com dois containers principais:
 
 ```
-┌─────────────┐
-│    deps     │ Base comum com dependências
-└─────┬───────┘
-      │
-      ▼
-┌─────────────┐     ┌─────────────┐
-│     dev     │     │   builder   │ 
-└─────────────┘     └──────┬──────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │    prod     │
-                    └─────────────┘
+┌─────────────────┐    ┌─────────────────┐
+│   Container     │    │   Container     │
+│   app           │    │   db            │
+│                 │    │                 │
+│ - Next.js :3000 │◄───┤ - PostgreSQL    │
+│ - Prisma Studio │    │   :5432         │
+│   :5555         │    │                 │
+└─────────────────┘    └─────────────────┘
 ```
 
-## Estágios do Dockerfile
+## Serviços Ativos
 
-### 1. Estágio `deps`
-- Instala todas as dependências do projeto
-- Serve como base para os ambientes de desenvolvimento e produção
+### Desenvolvimento (docker-compose.yml)
+- **app**: Container principal com Next.js e Prisma Studio
+- **db**: PostgreSQL 15 com dados persistentes
 
-### 2. Estágio `dev`
-- Ambiente de desenvolvimento com hot-reload
-- Monta volumes para desenvolvimento ativo
-- Executa `npm run dev`
+### Produção (docker-compose.prod.yml)  
+- **app**: Container otimizado para produção
+- **db**: PostgreSQL com configurações de produção
+- **nginx**: Proxy reverso (opcional)
 
-### 3. Estágio `builder`
-- Compila a aplicação Next.js
-- Gera arquivos estáticos e otimizados
+## Portas e Acesso
 
-### 4. Estágio `prod`
-- Imagem final de produção
-- Contém apenas os arquivos necessários para execução
-- Executa `npm start`
+| Serviço | Porta | URL | Ambiente |
+|---------|-------|-----|----------|
+| Next.js | 3000 | http://localhost:3000 | dev/prod |
+| Prisma Studio | 5555 | http://localhost:5555 | dev only |
+| PostgreSQL | 5432 | localhost:5432 | dev only |
 
 ## Comandos Principais
 
-### Iniciar ambiente de desenvolvimento
+### Usar Script Manager (Recomendado)
 ```bash
-docker-compose up app
-```
-Acesse: http://localhost:3001
+# Subir ambiente completo
+./scripts/docker-manager.sh up dev
 
-### Iniciar ambiente de produção
-```bash
-docker-compose up app-prod
-```
-Acesse: http://localhost:8080
+# Abrir Prisma Studio
+./scripts/docker-manager.sh studio dev
 
-### Reconstruir imagens
+# Ver status dos containers
+./scripts/docker-manager.sh status
+
+# Acessar shell do container
+./scripts/docker-manager.sh shell dev
+
+# Acessar PostgreSQL
+./scripts/docker-manager.sh db dev
+```
+
+### Comandos Docker Diretos
 ```bash
-docker-compose build
+# Desenvolvimento
+docker-compose up -d
+docker-compose logs -f
+docker-compose exec app sh
+
+# Produção
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ## Volumes e Persistência
 
-O ambiente de desenvolvimento utiliza volumes para:
-- Sincronizar código-fonte: `.:/app`
-- Preservar node_modules: `/app/node_modules`
+### Desenvolvimento
+- **Código fonte**: `.:/app` (hot reload)
+- **Node modules**: `/app/node_modules` (performance)
+- **Dados PostgreSQL**: `barbershop_pgdata_dev` (persistente)
+
+### Produção
+- **Apenas dados PostgreSQL**: `barbershop_pgdata_prod` (persistente)
+- **Sem volumes de código** (build incluído na imagem)
 
 ## Troubleshooting
 
+### Prisma Studio não abre
+```bash
+# Verificar se app está rodando
+./scripts/docker-manager.sh status
+
+# Se necessário, reiniciar
+./scripts/docker-manager.sh down dev
+./scripts/docker-manager.sh up dev
+```
+
 ### Porta já em uso
-Se a porta 3001 ou 8080 já estiver em uso, altere no arquivo `docker-compose.yml`:
+```bash
+# Verificar quem está usando a porta
+sudo netstat -tulpn | grep :3000
 
-```yaml
-ports:
-  - "NOVA_PORTA:3000"
+# Parar containers se necessário
+./scripts/docker-manager.sh down dev
 ```
 
-### Problemas de permissão
-Em sistemas Linux, pode ser necessário ajustar permissões:
-
+### Problemas de build
 ```bash
+# Rebuild sem cache
+./scripts/docker-manager.sh rebuild dev
+
+# Limpeza completa
+./scripts/docker-manager.sh clean
+```
+
+### Problemas de permissão (Linux)
+```bash
+# Ajustar permissões dos volumes
 sudo chown -R $(id -u):$(id -g) .
+
+# Adicionar usuário ao grupo docker
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-### Limpeza de imagens
-Para remover imagens antigas e liberar espaço:
+## Logs e Debugging
 
 ```bash
-docker system prune -a
+# Logs de todos os serviços
+./scripts/docker-manager.sh logs dev
+
+# Logs específicos
+docker-compose logs app
+docker-compose logs db
+
+# Debug dentro do container
+./scripts/docker-manager.sh shell dev
+ps aux
+df -h
+env | grep DATABASE
 ```
+
+## Diferenças Dev vs Prod
+
+### Desenvolvimento
+- Hot reload ativo
+- Volumes montados
+- PostgreSQL exposto
+- Container roda como root (volumes)
+- Prisma Studio disponível
+
+### Produção
+- Build otimizado
+- Imagem mínima (~200MB)
+- Container não-root
+- PostgreSQL interno
+- NGINX opcional
+- Health checks ativos
+
+---
+
+📚 **Documentação relacionada**:
+- `DOCKER.md` - Guia completo
+- `SETUP-DOCKER.md` - Setup inicial
+- `docs/docker/CORRECCAO-DOCKER-MANAGER.md` - Detalhes da correção

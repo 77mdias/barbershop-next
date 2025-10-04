@@ -2,6 +2,8 @@
 
 Este guia explica como usar Docker para desenvolvimento e produção do projeto Barbershop Next.js.
 
+> **📋 Atualização**: A partir de outubro/2025, o Prisma Studio foi corrigido para usar o container `app` existente em vez de serviços duplicados com profiles. Veja `docs/docker/CORRECCAO-DOCKER-MANAGER.md` para detalhes.
+
 ## 📋 Pré-requisitos
 
 - **Docker** 20.10+
@@ -109,7 +111,7 @@ barbershop-next/
 ### Desenvolvimento
 
 - **Hot reload** ativado
-- **Prisma Studio** disponível na porta 5555
+- **Prisma Studio** disponível na porta 5555 (executado no container app)
 - **PostgreSQL** exposto na porta 5432
 - **Volumes** montados para desenvolvimento local
 - **Container root** para compatibilidade com volumes
@@ -200,6 +202,30 @@ docker-compose up -d
 ```bash
 # Remove tudo (cuidado!)
 ./scripts/docker-manager.sh clean
+```
+
+### Prisma Studio não abre
+
+```bash
+# Verificar se container app está rodando
+./scripts/docker-manager.sh status
+
+# Se não estiver, subir o ambiente
+./scripts/docker-manager.sh up dev
+
+# Executar Prisma Studio novamente
+./scripts/docker-manager.sh studio dev
+```
+
+### Erro "unknown flag: --profile"
+
+ Este erro foi corrigido na versão atual. Se ainda ocorrer:
+
+```bash
+# Verificar versão do Docker Compose
+docker compose version
+
+# Deve ser 2.0+. Se for menor, atualize o Docker
 ```
 
 ### Prisma não encontra banco

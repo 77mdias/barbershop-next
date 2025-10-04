@@ -61,33 +61,6 @@ services:
     stdin_open: true
     tty: true
 
-  # ==================
-  # 📊 PRISMA STUDIO (Opcional)
-  # ==================
-  prisma-studio:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: barbershop-studio-dev
-    restart: "no"
-    ports:
-      - "5555:5555"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    env_file:
-      - .env.development
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
-    command: ["npx", "prisma", "studio", "--port", "5555", "--hostname", "0.0.0.0"]
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - barbershop-network
-    profiles:
-      - studio
-
 # ==================
 # 🌐 REDES E VOLUMES
 # ==================

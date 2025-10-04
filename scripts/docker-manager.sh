@@ -147,7 +147,19 @@ docker_studio() {
     fi
     
     echo -e "${BLUE}📊 Abrindo Prisma Studio...${NC}"
-    docker compose up -d --profile studio
+    local compose_file=$(get_compose_file dev)
+    
+    # Verificar se o container app está rodando
+    if ! docker compose -f $compose_file ps app | grep -q "running"; then
+        echo -e "${YELLOW}⚠️  Container app não está rodando. Iniciando...${NC}"
+        docker compose -f $compose_file up -d app
+        echo -e "${BLUE}📊 Aguardando container app...${NC}"
+        sleep 5
+    fi
+    
+    # Executar Prisma Studio no container app
+    echo -e "${BLUE}🚀 Iniciando Prisma Studio no container app...${NC}"
+    docker compose -f $compose_file exec -d app npx prisma studio --port 5555 --hostname 0.0.0.0
     echo -e "${GREEN}✅ Prisma Studio disponível em: http://localhost:5555${NC}"
 }
 
