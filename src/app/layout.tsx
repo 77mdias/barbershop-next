@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
-import { BottomNavigation } from "@/components/bottom-navigation";
+import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -105,7 +105,7 @@ export default function RootLayout({
       >
         <Providers>{children}</Providers>
         {/* Navegação inferior */}
-        <BottomNavigation items={navigationItems} />
+        <ConditionalBottomNavigation items={navigationItems} />
       </body>
     </html>
   );

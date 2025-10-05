@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { useAuth } from "@/hooks/useAuth";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { signIn, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { cn } from "@/lib/utils";
 import styles from "@/app/profile/page.module.scss";
@@ -113,12 +115,9 @@ export default function Profile() {
           <p className="text-[--text] mb-6">
             Você precisa estar logado para acessar esta página.
           </p>
-          <button
-            onClick={() => router.push("/auth/signin")}
-            className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
+          <Button onClick={() => signIn(undefined, { callbackUrl: "/profile" })}>
             Fazer Login
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -157,14 +156,22 @@ export default function Profile() {
           </p>
 
           {/* Botão Edit Profile */}
-          <button
-            className={cn(
-              "px-6 py-2 font-medium transition-colors",
-              styles.profileHeader__editButton
-            )}
+          <Button
+            className={cn("px-6 py-2 font-medium transition-colors", styles.profileHeader__editButton)}
+            variant="outline"
+            onClick={() => {/* Aqui pode abrir modal de edição futuramente */}}
           >
             Edit Profile
-          </button>
+          </Button>
+
+          {/* Botão Logout */}
+          <Button
+            className={cn("mt-4 px-6 py-2 font-medium transition-colors", styles.profileHeader__editButton)}
+            variant="destructive"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            Sair da Conta
+          </Button>
         </div>
       </div>
 

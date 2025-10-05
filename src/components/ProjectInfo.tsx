@@ -55,14 +55,14 @@ const ProjectInfo = () => {
       <div className="container relative mx-auto px-4">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
+          <Badge className="mb-4 bg-[var(--card-product)] text-[var(--text)] hover:bg-primary/20">
             <Code className="mr-2 h-4 w-4" />
             Projeto de Desenvolvimento
           </Badge>
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
             Sobre o{" "}
             <span
-              className={`${styles.bgGradientPrimary} bg-clip-text text-transparent`}
+              className={` bg-clip-text`}
             >
               Projeto
             </span>

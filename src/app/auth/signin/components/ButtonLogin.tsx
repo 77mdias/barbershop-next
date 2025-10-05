@@ -50,7 +50,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
       <Button
         type="submit"
         disabled={isLoading}
-        className={`w-full text-white hover:bg-[var(--text-price-secondary)] ${styles.buttonAccent}`}
+        className={`w-full text-white ${styles.buttonAccent}`}
       >
         {isLoading ? "Entrando..." : "Entrar"}
       </Button>
@@ -71,7 +71,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             variant="outline"
             onClick={() => handleOAuthSignIn("github")}
             disabled={isOAuthLoading === "github"}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-white transition-all duration-300 hover:border-primary hover:bg-primary/10"
+            className="w-full border-gray-600 bg-[var(--card-product)] text-white transition-all duration-300 hover:border-primary hover:bg-secondary-50"
           >
             <Github className="mr-2 h-4 w-4" />
             {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
@@ -82,7 +82,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             variant="outline"
             onClick={() => handleOAuthSignIn("google")}
             disabled={isOAuthLoading === "google"}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-white transition-all duration-300 hover:border-primary hover:bg-primary/10"
+            className="w-full border-gray-600 bg-[var(--card-product)] text-white transition-all duration-300 hover:border-primary hover:bg-secondary-50"
           >
             <Mail className="mr-2 h-4 w-4" />
             {isOAuthLoading === "google" ? "Conectando..." : "Google"}

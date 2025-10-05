@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import SignUpForm from "./components/SignUpForm";
-import ProjectInfo from "@/components/ProjectInfo";
+
 
 export default function SignUpPage() {
   return (
@@ -12,7 +12,6 @@ export default function SignUpPage() {
       }
     >
       <SignUpForm />
-      <ProjectInfo />
     </Suspense>
   );
 }
