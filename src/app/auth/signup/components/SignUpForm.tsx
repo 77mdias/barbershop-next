@@ -379,7 +379,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("github")}
                 disabled={isLoading || isOAuthLoading === "github"}
-                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-primary/10`}
+                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-slate-50`}
               >
                 <Github className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
@@ -390,7 +390,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={isLoading || isOAuthLoading === "google"}
-                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-primary/10`}
+                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-slate-50`}
               >
                 <Mail className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "google" ? "Conectando..." : "Google"}
