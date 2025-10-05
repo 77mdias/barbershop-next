@@ -23,9 +23,9 @@ Esta documentação foi criada especialmente para você, como **aluno**, entende
 ### 🔧 **Configuração Prática**
 
 3. **[03 - Dockerfile: Explicado Linha por Linha](./03-dockerfile-explicado-linha-por-linha.md)**
-   - 🎯 **O que você vai aprender:** Como funciona nosso Dockerfile, multi-stage builds
+   - 🎯 **O que você vai aprender:** Dockerfile multi-stage unificado, targets específicos
    - ⏱️ **Tempo estimado:** 25-30 minutos
-   - 🔧 **Prático:** Cada linha explicada, otimizações implementadas
+   - 🔧 **Prático:** Multi-stage build, cache otimizado, deps/dev/builder/prod
 
 4. **[04 - Docker Compose: Explicado](./04-docker-compose-explicado.md)**
    - 🎯 **O que você vai aprender:** Orquestração de containers, dev vs prod

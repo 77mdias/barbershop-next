@@ -36,12 +36,13 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: dev
     container_name: barbershop-app-dev
     restart: unless-stopped
     ports:
-      - "3000:3000"     # Next.js
-      - "5555:5555"     # Prisma Studio
+      - "3000:3000" # Next.js
+      - "5555:5555" # Prisma Studio
     volumes:
       # Hot reload - monta código fonte
       - .:/app

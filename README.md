@@ -80,6 +80,34 @@ bun dev
 http://localhost:3000
 ```
 
+## 🐳 Docker (Opcional)
+
+### Método 1: Script Manager (Recomendado)
+```bash
+# Desenvolvimento completo
+./scripts/docker-manager.sh up dev
+
+# Prisma Studio
+./scripts/docker-manager.sh studio dev
+```
+
+### Método 2: Docker Compose
+```bash
+# Desenvolvimento
+docker compose up -d
+
+# Produção
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### Targets Disponíveis
+- `deps`: Base de dependências (cache otimizado)
+- `dev`: Desenvolvimento com hot reload
+- `builder`: Build de produção  
+- `prod`: Imagem final de produção
+
+> 📖 **Documentação completa:** [Docker Multi-Stage Guide](/docs/docker/GUIA-MULTI-STAGE.md)
+
 ## 📁 Estrutura do Projeto
 
 ```

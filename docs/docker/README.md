@@ -2,33 +2,63 @@
 
 Este documento explica como configurar e utilizar o ambiente Docker para o projeto Barbershop Next.js.
 
-> **🔧 Atualização (Out/2025)**: Configuração simplificada após correção do script docker-manager.sh. O Prisma Studio agora usa o container `app` existente.
+> **🔧 Atualização (Out/2025)**: Migração para **Dockerfile multi-stage unificado** com otimização de cache e arquitetura simplificada.
+
+## Nova Arquitetura Docker Multi-Stage
+
+O projeto agora utiliza um **único Dockerfile** com múltiplos stages otimizados:
+
+```
+┌─────────────────────────────────────────────┐
+│               Dockerfile                    │
+├─────────────────────────────────────────────┤
+│ 📦 deps    → Base de dependências           │
+│ 🛠️  dev     → Desenvolvimento + hot reload   │
+│ 🔨 builder → Build de produção              │
+│ 🚀 prod    → Imagem final de produção       │
+└─────────────────────────────────────────────┘
+```
+
+**Benefícios alcançados:**
+- ⚡ Cache otimizado entre ambientes
+- 🔄 Zero duplicação de código
+- 🛡️ Segurança em produção (usuário não-root)
+- 📦 Imagens menores e mais eficientes
 
 ## Estrutura de Containers
 
-O projeto utiliza uma arquitetura simplificada com dois containers principais:
+O projeto utiliza uma arquitetura com targets específicos do Dockerfile multi-stage:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐
 │   Container     │    │   Container     │
-│   app           │    │   db            │
+│   app:dev       │    │   db            │
 │                 │    │                 │
 │ - Next.js :3000 │◄───┤ - PostgreSQL    │
 │ - Prisma Studio │    │   :5432         │
-│   :5555         │    │                 │
+│   :5555         │    │ - Health checks │
 └─────────────────┘    └─────────────────┘
+      ↓ Build
+┌─────────────────┐
+│   Container     │
+│   app:prod      │
+│                 │
+│ - Next.js :3000 │ ──► Banco Externo
+│ - Usuário       │     (Neon Database)
+│   não-root      │
+└─────────────────┘
 ```
 
 ## Serviços Ativos
 
 ### Desenvolvimento (docker-compose.yml)
-- **app**: Container principal com Next.js e Prisma Studio
+- **app** (target: dev): Container com Next.js, hot reload e Prisma Studio
 - **db**: PostgreSQL 15 com dados persistentes
 
 ### Produção (docker-compose.prod.yml)  
-- **app**: Container otimizado para produção
-- **db**: PostgreSQL com configurações de produção
+- **app** (target: prod): Container otimizado, usuário não-root, sem volumes
 - **nginx**: Proxy reverso (opcional)
+- **Banco**: Externo via Neon Database (não containerizado)
 
 ## Portas e Acesso
 
@@ -37,16 +67,24 @@ O projeto utiliza uma arquitetura simplificada com dois containers principais:
 | Next.js | 3000 | http://localhost:3000 | dev/prod |
 | Prisma Studio | 5555 | http://localhost:5555 | dev only |
 | PostgreSQL | 5432 | localhost:5432 | dev only |
+| Neon Database | - | Via connection string | prod only |
 
 ## Comandos Principais
 
 ### Usar Script Manager (Recomendado)
 ```bash
-# Subir ambiente completo
+# Subir ambiente completo de desenvolvimento
 ./scripts/docker-manager.sh up dev
 
-# Abrir Prisma Studio
+# Subir ambiente de produção
+./scripts/docker-manager.sh up prod
+
+# Abrir Prisma Studio (apenas desenvolvimento)
 ./scripts/docker-manager.sh studio dev
+
+# Build com target específico
+./scripts/docker-manager.sh build dev   # Target: dev
+./scripts/docker-manager.sh build prod  # Target: prod
 
 # Ver status dos containers
 ./scripts/docker-manager.sh status

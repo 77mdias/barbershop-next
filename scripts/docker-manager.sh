@@ -4,6 +4,7 @@
 # 🐳 SCRIPT DE GERENCIAMENTO DOCKER
 # ===============================================
 # Script para facilitar comandos Docker em desenvolvimento e produção
+# Agora usando Dockerfile multi-stage unificado com targets específicos
 # Uso: ./scripts/docker-manager.sh [comando] [ambiente]
 
 set -e
@@ -18,22 +19,29 @@ NC='\033[0m' # No Color
 # Função para exibir ajuda
 show_help() {
     echo -e "${BLUE}🐳 Docker Manager - Barbershop Next.js${NC}"
+    echo -e "${GREEN}🎯 Usando Dockerfile multi-stage unificado${NC}"
     echo ""
     echo "Uso: ./scripts/docker-manager.sh [comando] [ambiente]"
     echo ""
     echo "Comandos disponíveis:"
     echo "  ${GREEN}up [dev|prod]${NC}      - Subir containers"
     echo "  ${GREEN}down [dev|prod]${NC}    - Parar containers"
-    echo "  ${GREEN}build [dev|prod]${NC}   - Fazer build das imagens"
+    echo "  ${GREEN}build [dev|prod]${NC}   - Fazer build das imagens (target específico)"
     echo "  ${GREEN}rebuild [dev|prod]${NC} - Rebuild completo (sem cache)"
     echo "  ${GREEN}logs [dev|prod]${NC}    - Ver logs dos containers"
     echo "  ${GREEN}shell [dev|prod]${NC}   - Acessar shell do container app"
-    echo "  ${GREEN}db [dev|prod]${NC}      - Acessar PostgreSQL"
+    echo "  ${GREEN}db [dev]${NC}           - Acessar PostgreSQL (apenas dev)"
     echo "  ${GREEN}studio [dev]${NC}       - Abrir Prisma Studio"
     echo "  ${GREEN}migrate [dev|prod]${NC} - Executar migrações"
     echo "  ${GREEN}seed [dev|prod]${NC}    - Executar seed do banco"
     echo "  ${GREEN}clean${NC}              - Limpar containers, imagens e volumes"
     echo "  ${GREEN}status${NC}             - Ver status dos containers"
+    echo ""
+    echo "Estrutura Docker Multi-Stage:"
+    echo "  📦 ${YELLOW}deps${NC}    - Base de dependências (cache otimizado)"
+    echo "  🛠️  ${YELLOW}dev${NC}     - Desenvolvimento com hot reload"
+    echo "  🔨 ${YELLOW}builder${NC} - Build de produção"
+    echo "  🚀 ${YELLOW}prod${NC}    - Imagem final de produção"
     echo ""
     echo "Exemplos:"
     echo "  ./scripts/docker-manager.sh up dev"
@@ -128,15 +136,17 @@ docker_shell() {
 
 # Função para acessar PostgreSQL
 docker_db() {
+    if [ "$1" != "dev" ]; then
+        echo -e "${RED}❌ Acesso direto ao PostgreSQL só está disponível em desenvolvimento${NC}"
+        echo -e "${BLUE}ℹ️  Em produção, use banco externo (Neon Database)${NC}"
+        exit 1
+    fi
+    
     validate_env $1
     local compose_file=$(get_compose_file $1)
     
     echo -e "${BLUE}🗄️  Acessando PostgreSQL (ambiente: $1)${NC}"
-    if [ "$1" = "dev" ]; then
-        docker compose -f $compose_file exec db psql -U postgres -d barbershop_dev
-    else
-        docker compose -f $compose_file exec db psql -U postgres -d barbershop_prod
-    fi
+    docker compose -f $compose_file exec db psql -U postgres -d barbershop_dev
 }
 
 # Função para Prisma Studio
