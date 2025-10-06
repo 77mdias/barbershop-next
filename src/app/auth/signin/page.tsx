@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import SignInForm from "./components/SignInForm";
+import { CortesGallerySection } from "@/components/cortes-gallery";
 
 
 export default function SignInPage() {
@@ -12,6 +13,7 @@ export default function SignInPage() {
       }
     >
       <SignInForm />
+      <CortesGallerySection />
     </Suspense>
   );
 }
