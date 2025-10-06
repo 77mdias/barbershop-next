@@ -23,6 +23,13 @@
     /* Cores padrões */
     --all-black: hsl(0, 0%, 1%);
     --all-white: hsl(0, 0%, 90%);
+    --green-pastel: hsl(145, 63%, 49%);
+    --red-pastel: hsl(0, 63%, 49%);
+    --yellow-pastel: hsl(48, 100%, 67%);
+    --blue-pastel: hsl(197, 100%, 50%);
+    --purple-pastel: hsl(280, 100%, 67%);
+    --pink-pastel: hsl(330, 100%, 67%);
+    --orange-pastel: hsl(24, 100%, 67%);
 
     /* Raio dos bordas */
     --radius: 0.5rem;
@@ -40,6 +47,15 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
+
+  @layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+}
+
 
   .dark {
     /* Modo escuro - tema da barbearia */

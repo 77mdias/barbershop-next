@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
 import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
+import HeaderNavigation from "@/components/HeaderNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -123,7 +124,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased flex flex-col items-center pb-12`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <HeaderNavigation />
+          {children}
+        </Providers>
         {/* Navegação inferior */}
         <ConditionalBottomNavigation items={navigationItems} />
       </body>

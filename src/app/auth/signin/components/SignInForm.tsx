@@ -82,7 +82,7 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="mb-12 mt-16 flex justify-center px-4">
+    <div className="mb-12 mt-16 flex justify-center px-4 w-full">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h2 className="mt-6 text-2xl text-[var(--text)] font-bold md:text-3xl">
