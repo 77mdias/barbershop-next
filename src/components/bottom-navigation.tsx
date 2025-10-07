@@ -72,11 +72,11 @@ export function BottomNavigation({
 
   return (
     <nav className={cn(
-      "fixed bottom-0 px-0 py-0 items-center  justify-center rounded-full",
+      "fixed bottom-0 px-0 py-0 items-center mb-4 justify-center rounded-full",
       styles.bottomNav,
       className
     )}>
-      <div className="flex items-center gap-[4px] justify-around max-w-md p-1 mx-auto">
+      <div className="rounded-full bg-black flex items-center gap-[4px] justify-around max-w-md p-1 mx-auto">
         {items.map((item) => {
           const isActive = currentActiveItem === item.id
           
@@ -91,7 +91,7 @@ export function BottomNavigation({
                 "focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2",
                 styles.bottomNav__item,
                 isActive && styles["bottomNav__item--active"],
-                !isActive && "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                !isActive && "text-gray-500 "
               )}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}

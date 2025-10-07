@@ -47,7 +47,7 @@ const Header = () => {
         <nav className="flex items-center space-x-8 justify-center">
           <a
             href="/support"
-            className="group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]"
+            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
           >
             Suporte
             <span
@@ -56,7 +56,7 @@ const Header = () => {
           </a>
           <a
             href="/community"
-            className="group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]"
+            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
           >
             Comunidade
             <span
@@ -65,7 +65,7 @@ const Header = () => {
           </a>
           <a
             href="/prices"
-            className="group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]"
+            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
           >
             Preços
             <span

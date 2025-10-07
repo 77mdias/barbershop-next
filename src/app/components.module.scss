@@ -178,9 +178,9 @@
 .bottomNav {
   display: flex;
   align-items: center;
-  background: var(--all-black) !important;
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: black;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
 
   &__item {
@@ -198,7 +198,7 @@
     }
 
     &:hover:not(&--active) {
-      color: #666;
+      color: black !important;
       transform: translateY(-1px);
     }
   }
@@ -209,7 +209,7 @@
 
     &--active {
       color: var(--all-black) !important;
-    }
+    }    
   }
 
   &__label {
