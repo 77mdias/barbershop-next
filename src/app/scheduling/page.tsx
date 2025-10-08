@@ -9,7 +9,7 @@ interface Service {
   name: string;
   description: string | null;
   duration: number;
-  price: { toNumber(): number };
+  price: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;

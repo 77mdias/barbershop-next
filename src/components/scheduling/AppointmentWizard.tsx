@@ -15,7 +15,7 @@ interface Service {
   name: string;
   description: string | null;
   duration: number;
-  price: { toNumber(): number };
+  price: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -130,186 +130,229 @@ export function AppointmentWizard({
   };
 
   return (
-    <div className={cn("space-y-8", className)}>
+    <div className={cn("w-full max-w-sm mt-16 mx-auto pb-6", className)}>
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Novo Agendamento</h1>
-        <p className="text-muted-foreground">
-          Selecione o serviço, barbeiro, data e horário para seu atendimento
+      <div className="text-center mb-6 px-4">
+        <h1 className="text-2xl font-bold text-[var(--text)] mb-2">Agendar Horário</h1>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Complete as etapas abaixo para fazer seu agendamento
         </p>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex items-center justify-center">
-        <div className="flex items-center space-x-4">
-          {[
-            { key: 'serviceId', icon: Scissors, label: 'Serviço' },
-            { key: 'barberId', icon: User, label: 'Barbeiro' },
-            { key: 'date', icon: Calendar, label: 'Data' },
-            { key: 'time', icon: Clock, label: 'Horário' },
-          ].map((step, index) => {
-            const isCompleted = !!(formData as any)[step.key];
-            const isActive = index === 0 || !!(formData as any)[Object.keys(formData)[index - 1]];
-            
-            return (
-              <div key={step.key} className="flex items-center">
-                <div className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all",
-                  isCompleted 
-                    ? "bg-primary border-primary text-primary-foreground" 
-                    : isActive
-                      ? "border-primary text-primary"
-                      : "border-muted text-muted-foreground"
-                )}>
-                  {isCompleted ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : (
-                    <step.icon className="w-4 h-4" />
-                  )}
-                </div>
-                <span className={cn(
-                  "ml-2 text-sm font-medium",
-                  isCompleted 
-                    ? "text-primary" 
-                    : isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                )}>
-                  {step.label}
-                </span>
-                {index < 3 && (
-                  <div className="w-8 mx-4 h-px bg-border" />
-                )}
-              </div>
-            );
-          })}
+      {/* Progress Indicator */}
+      <div className="px-4 mb-8">
+        <div className="relative">
+          {/* Background line */}
+          <div className="absolute top-5 left-0 right-0 h-0.5 bg-muted" />
+          
+          {/* Progress line */}
+          <div 
+            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+            style={{ 
+              width: `${(Object.keys(formData).filter(key => (formData as any)[key]).length / 4) * 100}%` 
+            }}
+          />
+          
+          {/* Steps */}
+          <div className="relative flex justify-between">
+            {[
+              { key: 'serviceId', icon: Scissors, label: 'Serviço' },
+              { key: 'barberId', icon: User, label: 'Barbeiro' },
+              { key: 'date', icon: Calendar, label: 'Data' },
+              { key: 'time', icon: Clock, label: 'Horário' },
+            ].map((step, index) => {
+                const isCompleted = !!(formData as any)[step.key];
+                const isActive = !isCompleted && (index === 0 || !!(formData as any)[Object.keys(formData)[index - 1]]);
+                
+                return (
+                  <div key={step.key} className="flex flex-col items-center">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center border-2 bg-background transition-all duration-200 relative z-10",
+                      isCompleted 
+                        ? "border-primary bg-primary text-primary-foreground shadow-lg" 
+                        : isActive
+                          ? "border-white bg-black text-white shadow-md"
+                          : "border-muted-foreground/30 text-muted-foreground"
+                    )}>
+                      {isCompleted ? (
+                        <CheckCircle className="w-5 h-5" />
+                      ) : (
+                        <step.icon className="w-4 h-4" />
+                      )}
+                    </div>
+                    <span className={cn(
+                      "text-xs font-medium text-center mt-2 max-w-[60px] leading-tight",
+                      isCompleted 
+                        ? "text-primary font-semibold" 
+                        : isActive
+                          ? "text-primary font-semibold"
+                          : "text-muted-foreground"
+                    )}>
+                      {step.label}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
 
       {/* Step 1: Service Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Scissors className="w-5 h-5" />
-            Passo 1: Escolha o Serviço
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ServiceSelector
-            selectedServiceId={formData.serviceId}
-            onServiceSelect={handleServiceSelect}
-          />
-        </CardContent>
-      </Card>
+      <div className="px-4 mb-6">
+        <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+          <div className="p-4 border-b bg-muted/30">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <Scissors className="w-4 h-4 text-primary" />
+              Escolha o Serviço
+            </h3>
+          </div>
+          <div className="p-4">
+            <ServiceSelector
+              selectedServiceId={formData.serviceId}
+              onServiceSelect={handleServiceSelect}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Step 2: Barber Selection */}
       {formData.serviceId && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Passo 2: Escolha o Barbeiro
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BarberSelector
-              selectedBarberId={formData.barberId}
-              onBarberSelect={handleBarberSelect}
-            />
-          </CardContent>
-        </Card>
+        <div className="px-4 mb-6">
+          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+            <div className="p-4 border-b bg-muted/30">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                Escolha o Barbeiro
+              </h3>
+            </div>
+            <div className="p-4">
+              <BarberSelector
+                selectedBarberId={formData.barberId}
+                onBarberSelect={handleBarberSelect}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Step 3: Date Selection */}
       {formData.barberId && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Passo 3: Escolha a Data
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DatePicker
-              selectedDate={formData.date}
-              onDateSelect={handleDateSelect}
-            />
-          </CardContent>
-        </Card>
+        <div className="px-4 mb-6">
+          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+            <div className="p-4 border-b bg-muted/30">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                Escolha a Data
+              </h3>
+            </div>
+            <div className="p-4">
+              <DatePicker
+                selectedDate={formData.date}
+                onDateSelect={handleDateSelect}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Step 4: Time Selection */}
       {formData.date && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Passo 4: Escolha o Horário
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TimePicker
-              selectedTime={formData.time}
-              onTimeSelect={handleTimeSelect}
-              selectedDate={formData.date}
-              selectedBarberId={formData.barberId}
-              serviceDuration={selectedService?.duration}
-            />
-          </CardContent>
-        </Card>
+        <div className="px-4 mb-6">
+          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+            <div className="p-4 border-b bg-muted/30">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                Escolha o Horário
+              </h3>
+            </div>
+            <div className="p-4">
+              <TimePicker
+                selectedTime={formData.time}
+                onTimeSelect={handleTimeSelect}
+                selectedDate={formData.date}
+                selectedBarberId={formData.barberId}
+                serviceDuration={selectedService?.duration}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Summary and Submit */}
       {isComplete && selectedService && selectedBarber && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumo do Agendamento</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Serviço</p>
-                <p className="font-medium">{selectedService.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  R$ {selectedService.price.toNumber().toFixed(2)} • {selectedService.duration} min
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Barbeiro</p>
-                <p className="font-medium">{selectedBarber.name || 'Barbeiro'}</p>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Data</p>
-                <p className="font-medium">
-                  {formData.date?.toLocaleDateString('pt-BR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Horário</p>
-                <p className="font-medium">{formData.time}</p>
-              </div>
+        <div className="px-4">
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 overflow-hidden">
+            <div className="p-4 border-b border-primary/20">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Confirme seu Agendamento
+              </h3>
             </div>
             
-            <div className="border-t pt-4" />
-            
-            <Button 
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="w-full"
-              size="lg"
-            >
-              {isSubmitting ? "Agendando..." : "Confirmar Agendamento"}
-            </Button>
-          </CardContent>
-        </Card>
+            <div className="p-4 space-y-4">
+              {/* Service Info */}
+              <div className="flex items-start justify-between p-3 bg-card/50 rounded-lg">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Serviço</p>
+                  <p className="font-semibold text-foreground">{selectedService.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedService.duration} min • R$ {Number(selectedService.price).toFixed(2)}
+                  </p>
+                </div>
+                <Scissors className="w-5 h-5 text-primary mt-1" />
+              </div>
+              
+              {/* Barber Info */}
+              <div className="flex items-start justify-between p-3 bg-card/50 rounded-lg">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Barbeiro</p>
+                  <p className="font-semibold text-foreground">{selectedBarber.name || 'Barbeiro'}</p>
+                </div>
+                <User className="w-5 h-5 text-primary mt-1" />
+              </div>
+              
+              {/* Date & Time Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-card/50 rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Data</p>
+                  <p className="font-semibold text-foreground text-sm">
+                    {formData.date?.toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.date?.toLocaleDateString('pt-BR', { weekday: 'long' })}
+                  </p>
+                </div>
+                
+                <div className="p-3 bg-card/50 rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Horário</p>
+                  <p className="font-semibold text-foreground text-sm">{formData.time}</p>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                    Agendando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Confirmar Agendamento
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

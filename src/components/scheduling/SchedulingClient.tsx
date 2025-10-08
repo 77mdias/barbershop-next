@@ -10,7 +10,7 @@ interface Service {
   name: string;
   description: string | null;
   duration: number;
-  price: { toNumber(): number };
+  price: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -75,10 +75,6 @@ export function SchedulingClient({ onSubmit }: SchedulingClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
-      <div className="container mx-auto px-4 py-8">
         <AppointmentWizard onSubmit={handleSubmit} />
-      </div>
-    </div>
   );
 }

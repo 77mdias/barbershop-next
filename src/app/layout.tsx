@@ -75,7 +75,7 @@ const navigationItems = [
   {
     id: "bookings",
     label: "Bookings",
-    href: "/bookings", // 👈 URL para a página de agendamentos
+    href: "/scheduling", // 👈 URL para a página de agendamentos
     icon: (
       <svg
         className="w-6 h-6"

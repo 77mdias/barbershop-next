@@ -94,7 +94,11 @@ export const formatDate = (date: Date, format: string): string => {
     case "dd":
       return date.getDate().toString().padStart(2, "0");
     case "dd/MM/yyyy":
-      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+      return `${date.getDate().toString().padStart(2, "0")}/${(
+        date.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, "0")}/${date.getFullYear()}`;
     case "MMMM 'de' yyyy":
       return `${months[date.getMonth()]} de ${date.getFullYear()}`;
     case "EEEE, dd 'de' MMMM":

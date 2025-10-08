@@ -2,13 +2,15 @@
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/prisma";
 import { ServiceFiltersSchema, type ServiceFiltersInput } from "@/schemas/serviceSchemas";
+import { ServiceService } from "./services/serviceService";
+import { UserService } from "./services/userService";
+import { serializeServicesResult, serializeServices, serializeService } from "@/lib/serializers";
 
 /**
  * Server Action para buscar serviços disponíveis
  */
-export async function getServices(filters?: ServiceFiltersInput) {
+export async function getServices(filters?: Partial<ServiceFiltersInput>) {
   try {
     const validatedFilters = filters ? ServiceFiltersSchema.parse(filters) : {
       active: true,
@@ -16,53 +18,12 @@ export async function getServices(filters?: ServiceFiltersInput) {
       limit: 50
     };
 
-    const where: any = {};
-
-    if (validatedFilters.active !== undefined) where.active = validatedFilters.active;
-    if (validatedFilters.search) {
-      where.OR = [
-        { name: { contains: validatedFilters.search, mode: 'insensitive' } },
-        { description: { contains: validatedFilters.search, mode: 'insensitive' } },
-      ];
-    }
-    if (validatedFilters.minPrice || validatedFilters.maxPrice) {
-      where.price = {};
-      if (validatedFilters.minPrice) where.price.gte = validatedFilters.minPrice;
-      if (validatedFilters.maxPrice) where.price.lte = validatedFilters.maxPrice;
-    }
-    if (validatedFilters.maxDuration) {
-      where.duration = { lte: validatedFilters.maxDuration };
-    }
-
-    const page = validatedFilters.page || 1;
-    const limit = validatedFilters.limit || 50;
-
-    const [services, total] = await Promise.all([
-      db.service.findMany({
-        where,
-        orderBy: [
-          { active: 'desc' },
-          { name: 'asc' },
-        ],
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      db.service.count({ where }),
-    ]);
+    const result = await ServiceService.findMany(validatedFilters);
 
     return {
       success: true,
-      data: {
-        services,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
+      data: serializeServicesResult(result),
     };
-
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);
     return {
@@ -73,98 +34,18 @@ export async function getServices(filters?: ServiceFiltersInput) {
 }
 
 /**
- * Server Action para buscar barbeiros disponíveis
+ * Server Action para buscar serviços ativos (para formulários)
  */
-export async function getBarbers(serviceId?: string, date?: string) {
+export async function getActiveServices() {
   try {
-    const barbers = await db.user.findMany({
-      where: {
-        role: "BARBER",
-        isActive: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        phone: true,
-        email: true,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
-    // Se fornecido serviceId e date, verificar disponibilidade
-    if (serviceId && date) {
-      const service = await db.service.findUnique({
-        where: { id: serviceId },
-        select: { duration: true },
-      });
-
-      if (service) {
-        const targetDate = new Date(date);
-        const startOfDay = new Date(targetDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        
-        const endOfDay = new Date(targetDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        // Buscar agendamentos dos barbeiros no dia
-        const appointments = await db.appointment.findMany({
-          where: {
-            barberId: { in: barbers.map(b => b.id) },
-            date: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-            status: {
-              in: ["SCHEDULED", "CONFIRMED"],
-            },
-          },
-          select: {
-            barberId: true,
-            date: true,
-            service: {
-              select: { duration: true },
-            },
-          },
-        });
-
-        // Adicionar informação de disponibilidade
-        const barbersWithAvailability = barbers.map(barber => {
-          const barberAppointments = appointments.filter(
-            app => app.barberId === barber.id
-          );
-
-          // Calcular slots ocupados (simplificado)
-          const occupiedSlots = barberAppointments.length;
-          const maxSlotsPerDay = 16; // 8 horas * 2 slots por hora
-          const availabilityPercentage = Math.max(0, (maxSlotsPerDay - occupiedSlots) / maxSlotsPerDay * 100);
-
-          return {
-            ...barber,
-            availability: {
-              percentage: Math.round(availabilityPercentage),
-              appointmentsCount: occupiedSlots,
-              hasAvailability: availabilityPercentage > 0,
-            },
-          };
-        });
-
-        return {
-          success: true,
-          data: barbersWithAvailability,
-        };
-      }
-    }
+    const services = await ServiceService.findActive();
 
     return {
       success: true,
-      data: barbers,
+      data: serializeServices(services),
     };
-
   } catch (error) {
-    console.error("Erro ao buscar barbeiros:", error);
+    console.error("Erro ao buscar serviços ativos:", error);
     return {
       success: false,
       error: "Erro interno do servidor",
@@ -173,18 +54,11 @@ export async function getBarbers(serviceId?: string, date?: string) {
 }
 
 /**
- * Server Action para verificar disponibilidade de horários
+ * Server Action para buscar serviço por ID
  */
-export async function getAvailableTimes(
-  date: Date,
-  serviceId: string,
-  barberId?: string
-) {
+export async function getServiceById(id: string) {
   try {
-    // Buscar o serviço para saber a duração
-    const service = await db.service.findUnique({
-      where: { id: serviceId, active: true },
-    });
+    const service = await ServiceService.findById(id);
 
     if (!service) {
       return {
@@ -193,154 +67,109 @@ export async function getAvailableTimes(
       };
     }
 
-    // Buscar barbeiros disponíveis (se não especificado)
-    let barberIds: string[] = [];
-    if (barberId) {
-      barberIds = [barberId];
-    } else {
-      const availableBarbers = await db.user.findMany({
-        where: {
-          role: "BARBER",
-          isActive: true,
-        },
-        select: { id: true },
-      });
-      barberIds = availableBarbers.map(b => b.id);
-    }
-
-    // Buscar agendamentos existentes para o dia
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const existingAppointments = await db.appointment.findMany({
-      where: {
-        barberId: { in: barberIds },
-        date: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-        status: {
-          in: ["SCHEDULED", "CONFIRMED"],
-        },
-      },
-      include: {
-        service: {
-          select: { duration: true },
-        },
-      },
-    });
-
-    // Gerar horários disponíveis
-    const workingHours = {
-      start: 9, // 9h
-      end: 18,  // 18h
-      intervalMinutes: 30, // Intervalos de 30 minutos
+    return {
+      success: true,
+      data: serializeService(service),
     };
+  } catch (error) {
+    console.error("Erro ao buscar serviço:", error);
+    return {
+      success: false,
+      error: "Erro interno do servidor",
+    };
+  }
+}
 
-    const availableSlots: Array<{
-      time: string;
-      barberId: string;
-      barberName: string;
-      available: boolean;
-    }> = [];
-
-    // Para cada barbeiro
-    for (const currentBarberId of barberIds) {
-      const barber = await db.user.findUnique({
-        where: { id: currentBarberId },
-        select: { name: true },
-      });
-
-      if (!barber) continue;
-
-      // Buscar agendamentos deste barbeiro no dia
-      const barberAppointments = existingAppointments.filter(
-        app => app.barberId === currentBarberId
-      );
-
-      // Gerar slots de horário
-      for (let hour = workingHours.start; hour < workingHours.end; hour++) {
-        for (let minute = 0; minute < 60; minute += workingHours.intervalMinutes) {
-          const slotTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          
-          // Criar data/hora completa para verificação
-          const slotDateTime = new Date(date);
-          slotDateTime.setHours(hour, minute, 0, 0);
-
-          // Verificar se não passa do horário limite (considerando duração do serviço)
-          const slotEndTime = new Date(slotDateTime.getTime() + (service.duration * 60 * 1000));
-          const workingEndTime = new Date(date);
-          workingEndTime.setHours(workingHours.end, 0, 0, 0);
-
-          if (slotEndTime > workingEndTime) {
-            continue; // Slot passaria do horário de trabalho
-          }
-
-          // Verificar se há conflito com agendamentos existentes
-          const hasConflict = barberAppointments.some(appointment => {
-            const appointmentStart = new Date(appointment.date);
-            const appointmentEnd = new Date(
-              appointmentStart.getTime() + (appointment.service.duration * 60 * 1000)
-            );
-
-            return (
-              slotDateTime < appointmentEnd && 
-              slotEndTime > appointmentStart
-            );
-          });
-
-          // Verificar se não é no passado
-          const now = new Date();
-          const isInPast = slotDateTime <= now;
-
-          availableSlots.push({
-            time: slotTime,
-            barberId: currentBarberId,
-            barberName: barber.name,
-            available: !hasConflict && !isInPast,
-          });
-        }
-      }
-    }
-
-    // Agrupar por horário
-    const groupedSlots = availableSlots.reduce((acc, slot) => {
-      if (!acc[slot.time]) {
-        acc[slot.time] = [];
-      }
-      acc[slot.time].push(slot);
-      return acc;
-    }, {} as Record<string, typeof availableSlots>);
-
-    // Converter para formato final
-    const availableTimes = Object.entries(groupedSlots).map(([time, slots]) => ({
-      time,
-      slots: slots.map(slot => ({
-        barberId: slot.barberId,
-        barberName: slot.barberName,
-        available: slot.available,
-      })),
-      hasAvailable: slots.some(slot => slot.available),
-    })).sort((a, b) => a.time.localeCompare(b.time));
+/**
+ * Server Action para verificar disponibilidade de um serviço para uma data
+ */
+export async function checkServiceAvailability(serviceId: string, date: Date) {
+  try {
+    const availableSlots = await ServiceService.checkAvailabilityForDate(serviceId, date);
 
     return {
       success: true,
-      data: {
-        date,
-        service: {
-          id: service.id,
-          name: service.name,
-          duration: service.duration,
-        },
-        availableTimes,
-      },
+      data: availableSlots,
     };
-
   } catch (error) {
-    console.error("Erro ao buscar disponibilidade:", error);
+    console.error("Erro ao verificar disponibilidade:", error);
+    return {
+      success: false,
+      error: "Erro interno do servidor",
+    };
+  }
+}
+
+/**
+ * Server Action para buscar estatísticas de um serviço (admin/barber)
+ */
+export async function getServiceStats(serviceId: string) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Usuário não autenticado",
+      };
+    }
+
+    // Apenas admin ou barbeiro podem ver estatísticas
+    if (!["ADMIN", "BARBER"].includes(session.user.role)) {
+      return {
+        success: false,
+        error: "Sem permissão para visualizar estatísticas",
+      };
+    }
+
+    const stats = await ServiceService.getServiceStats(serviceId);
+
+    return {
+      success: true,
+      data: stats,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar estatísticas:", error);
+    return {
+      success: false,
+      error: "Erro interno do servidor",
+    };
+  }
+}
+
+/**
+ * Server Action para buscar serviços populares
+ */
+export async function getPopularServices(limit: number = 5) {
+  try {
+    const services = await ServiceService.findPopular(limit);
+
+    return {
+      success: true,
+      data: services,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar serviços populares:", error);
+    return {
+      success: false,
+      error: "Erro interno do servidor",
+    };
+  }
+}
+
+/**
+ * Server Action para buscar serviços com promoções ativas
+ */
+export async function getServicesWithPromotions() {
+  try {
+    const services = await ServiceService.findWithActivePromotions();
+
+    return {
+      success: true,
+      data: services,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar serviços com promoções:", error);
     return {
       success: false,
       error: "Erro interno do servidor",

@@ -32,7 +32,7 @@ interface Appointment {
     id: string;
     name: string;
     type: string;
-    value: { toNumber(): number };
+    value: number;
   } | null;
   barber: {
     id: string;
@@ -45,13 +45,13 @@ interface Appointment {
     name: string;
     description: string | null;
     duration: number;
-    price: { toNumber(): number };
+    price: number;
   };
   voucher: {
     id: string;
     code: string;
     type: string;
-    value: { toNumber(): number };
+    value: number;
   } | null;
 }
 
@@ -162,13 +162,13 @@ export function AppointmentsList({
 
   // Calcular preço total considerando promoções
   const calculateTotalPrice = (appointment: Appointment) => {
-    const basePrice = appointment.service.price.toNumber();
+    const basePrice = Number(appointment.service.price);
     
     if (!appointment.appliedPromotion) {
       return basePrice;
     }
     
-    const promotionValue = appointment.appliedPromotion.value.toNumber();
+    const promotionValue = Number(appointment.appliedPromotion.value);
     
     switch (appointment.appliedPromotion.type) {
       case 'DISCOUNT_PERCENTAGE':
@@ -305,7 +305,7 @@ export function AppointmentsList({
                         </span>
                         {appointment.appliedPromotion && (
                           <span className="text-muted-foreground line-through ml-1">
-                            R$ {appointment.service.price.toNumber().toFixed(2)}
+                            R$ {Number(appointment.service.price).toFixed(2)}
                           </span>
                         )}
                       </div>

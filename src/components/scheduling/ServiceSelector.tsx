@@ -11,7 +11,7 @@ interface Service {
   name: string;
   description: string | null;
   duration: number;
-  price: Decimal;
+  price: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -156,7 +156,7 @@ export function ServiceSelector({
                     isSelected ? "text-primary" : "text-foreground"
                   )}>
                     <DollarSign className="h-4 w-4" />
-                    <span>R$ {service.price.toNumber().toFixed(2)}</span>
+                    <span>R$ {Number(service.price).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
