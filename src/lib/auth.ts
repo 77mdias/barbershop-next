@@ -10,6 +10,8 @@ import { logger } from "./logger";
 
 import { getServerSession } from "next-auth";
 
+const isProd = process.env.NODE_ENV === "production";
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
   providers: [
@@ -29,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         },
       },
       httpOptions: {
-        timeout: 20000, // 20 segundos - timeout aumentado
+        timeout: 30000, // Aumentado para produção
       },
     }),
     // Credentials Provider para login com email/senha
@@ -40,14 +42,18 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        logger.auth.info("Credentials provider authorize attempt", {
+        const startTime = Date.now();
+
+        logger.auth.info("🔐 Credentials authorize attempt", {
           email: credentials?.email,
           hasPassword: !!credentials?.password,
+          environment: process.env.NODE_ENV,
           timestamp: new Date().toISOString(),
+          userAgent: "production-auth-debug",
         });
 
         if (!credentials?.email || !credentials?.password) {
-          logger.auth.warn("Missing credentials", {
+          logger.auth.warn("❌ Missing credentials", {
             hasEmail: !!credentials?.email,
             hasPassword: !!credentials?.password,
           });
@@ -55,21 +61,31 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // Log da tentativa de busca no banco
+          logger.auth.debug("🔍 Searching user in database", {
+            email: credentials.email,
+            dbUrl: process.env.DATABASE_URL?.substring(0, 20) + "...",
+          });
+
           const user = await db.user.findUnique({
             where: {
               email: credentials.email,
             },
           });
 
-          logger.auth.debug("User lookup result", {
+          const dbTime = Date.now() - startTime;
+
+          logger.auth.debug("📊 Database query completed", {
             email: credentials.email,
             userFound: !!user,
             userActive: user?.isActive,
             hasPassword: !!user?.password,
+            dbQueryTime: `${dbTime}ms`,
+            userId: user?.id,
           });
 
           if (!user || !user.password) {
-            logger.auth.warn("User not found or no password", {
+            logger.auth.warn("❌ User not found or no password", {
               email: credentials.email,
               userExists: !!user,
               hasPassword: !!user?.password,
@@ -79,26 +95,31 @@ export const authOptions: NextAuthOptions = {
 
           // Verificar se o usuário está ativo
           if (!user.isActive) {
-            logger.auth.warn("User not active", {
+            logger.auth.warn("⚠️ User account not active", {
               email: credentials.email,
               userId: user.id,
+              emailVerified: !!user.emailVerified,
             });
             throw new Error("EmailNotVerified");
           }
 
+          // Verificar senha
+          const passwordStartTime = Date.now();
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password
           );
+          const passwordTime = Date.now() - passwordStartTime;
 
-          logger.auth.debug("Password validation", {
+          logger.auth.debug("🔑 Password validation completed", {
             email: credentials.email,
             userId: user.id,
             isValid: isPasswordValid,
+            validationTime: `${passwordTime}ms`,
           });
 
           if (!isPasswordValid) {
-            logger.auth.warn("Invalid password", {
+            logger.auth.warn("❌ Invalid password", {
               email: credentials.email,
               userId: user.id,
             });
@@ -111,19 +132,29 @@ export const authOptions: NextAuthOptions = {
             nickname: user.nickname,
             image: user.image || null,
             role: user.role,
+            name: user.nickname || user.email?.split("@")[0] || "",
           };
 
-          logger.auth.info("Successful credentials authentication", {
+          const totalTime = Date.now() - startTime;
+
+          logger.auth.info("✅ Successful credentials authentication", {
             userId: user.id,
             email: user.email,
             role: user.role,
+            totalTime: `${totalTime}ms`,
+            environment: process.env.NODE_ENV,
           });
 
           return authUser;
         } catch (error) {
-          logger.auth.error("Error in credentials authorize", {
+          const totalTime = Date.now() - startTime;
+
+          logger.auth.error("💥 Error in credentials authorize", {
             email: credentials.email,
             error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+            totalTime: `${totalTime}ms`,
+            environment: process.env.NODE_ENV,
           });
 
           if (error instanceof Error && error.message === "EmailNotVerified") {
@@ -145,11 +176,12 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     async signIn({ user, account, profile: _profile }) {
-      logger.auth.info("SignIn event", {
+      logger.auth.info("🚀 SignIn event triggered", {
         provider: account?.provider,
         email: user.email,
         userId: user.id,
-        userAgent: "production-debug",
+        environment: process.env.NODE_ENV,
+        baseUrl: process.env.NEXTAUTH_URL,
         timestamp: new Date().toISOString(),
       });
     },
@@ -171,12 +203,12 @@ export const authOptions: NextAuthOptions = {
             nickname: user.name || user.email?.split("@")[0],
           },
         });
-        logger.auth.info("OAuth user configured successfully", {
+        logger.auth.info("✅ OAuth user configured successfully", {
           userId: user.id,
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
-        logger.auth.error("Error configuring OAuth user", {
+        logger.auth.error("❌ Error configuring OAuth user", {
           userId: user.id,
           error,
           timestamp: new Date().toISOString(),
@@ -184,49 +216,58 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async session({ session, token }) {
-      logger.auth.info("Session event", {
+      logger.auth.info("📋 Session event", {
         userId: session?.user?.id,
         email: session?.user?.email,
         hasToken: !!token,
+        environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
       });
     },
   },
+  // Configuração melhorada de cookies para produção
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: isProd
+        ? `__Secure-next-auth.session-token`
+        : `next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
       },
     },
     callbackUrl: {
-      name: `next-auth.callback-url`,
+      name: isProd
+        ? `__Secure-next-auth.callback-url`
+        : `next-auth.callback-url`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
       },
     },
     csrfToken: {
-      name: `next-auth.csrf-token`,
+      name: isProd ? `__Secure-next-auth.csrf-token` : `next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
       },
     },
   },
   callbacks: {
-    async jwt({ token, user, account: _account }) {
-      logger.auth.debug("JWT callback", {
+    async jwt({ token, user, account }) {
+      logger.auth.debug("🎫 JWT callback", {
         hasUser: !!user,
         hasToken: !!token,
+        hasAccount: !!account,
+        provider: account?.provider,
         userId: user?.id || token?.id,
+        environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
       });
 
@@ -238,31 +279,33 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.image = user.image;
 
-        logger.auth.info("JWT token updated with user data", {
+        logger.auth.info("✅ JWT token updated with user data", {
           userId: user.id,
           role: user.role,
+          provider: account?.provider,
           timestamp: new Date().toISOString(),
         });
       }
       return token;
     },
     async session({ session, token }) {
-      logger.auth.debug("Session callback", {
+      logger.auth.debug("🔄 Session callback", {
         hasSession: !!session,
         hasToken: !!token,
         tokenId: token?.id,
         sessionEmail: session?.user?.email,
+        environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
       });
 
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.nickname = token.nickname || null;
-        session.user.name = token.name || "";
+        session.user.id = token.id as string;
+        session.user.role = token.role as UserRole;
+        session.user.nickname = token.nickname as string | null;
+        session.user.name = token.name as string;
         session.user.image = token.image as string | null | undefined;
 
-        logger.auth.info("Session updated with token data", {
+        logger.auth.info("✅ Session updated with token data", {
           userId: token.id,
           role: token.role,
           timestamp: new Date().toISOString(),
@@ -272,79 +315,75 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      logger.auth.info("NextAuth redirect callback", {
+      logger.auth.info("🔀 NextAuth redirect callback", {
         url,
         baseUrl,
-        timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
       });
 
-      // Solução simplificada para garantir redirecionamento após login
-      // Sempre redirecionar para dashboard após login bem-sucedido
-      if (url.includes("/api/auth/signin") || url.includes("/auth/signin")) {
-        const redirectUrl = `${baseUrl}/dashboard`;
-        logger.auth.info("Login successful, redirecting to dashboard", {
-          redirectUrl,
-          originalUrl: url,
-        });
-        return redirectUrl;
+      // Para desenvolvimento, manter comportamento simples
+      if (!isProd) {
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+        if (url.startsWith(baseUrl)) return url;
+        return `${baseUrl}/dashboard`;
       }
 
-      // Se a URL é relativa, adiciona o baseUrl
-      if (url.startsWith("/")) {
-        const redirectUrl = `${baseUrl}${url}`;
-        logger.auth.info("Relative URL, redirecting to", { redirectUrl });
-        return redirectUrl;
-      }
+      // PRODUÇÃO: Lógica mais robusta
+      try {
+        // Se a URL é relativa, adiciona o baseUrl
+        if (url.startsWith("/")) {
+          const redirectUrl = `${baseUrl}${url}`;
+          logger.auth.info("🔗 Relative URL redirect", { redirectUrl });
+          return redirectUrl;
+        }
 
-      // Se a URL é do mesmo domínio, permite
-      if (url.startsWith(baseUrl)) {
-        logger.auth.info("Same domain URL, allowing", { url });
-        return url;
-      }
+        // Se a URL é do mesmo domínio, permite
+        if (url.startsWith(baseUrl)) {
+          logger.auth.info("✅ Same domain URL allowed", { url });
+          return url;
+        }
 
-      // Se a URL contém callbackUrl, extrai e usa
-      if (url.includes("callbackUrl=")) {
-        try {
-          const urlObj = new URL(url);
-          const callbackUrl = urlObj.searchParams.get("callbackUrl");
-          if (callbackUrl) {
-            const finalUrl = callbackUrl.startsWith("/")
-              ? `${baseUrl}${callbackUrl}`
-              : callbackUrl;
-            logger.auth.info("CallbackUrl found, redirecting to", { finalUrl });
+        // Extrair callbackUrl se existir
+        const urlObj = new URL(url);
+        const callbackUrl = urlObj.searchParams.get("callbackUrl");
+
+        if (callbackUrl) {
+          const finalUrl = callbackUrl.startsWith("/")
+            ? `${baseUrl}${callbackUrl}`
+            : callbackUrl;
+
+          // Verificar se a URL final é segura
+          if (finalUrl.startsWith(baseUrl)) {
+            logger.auth.info("🎯 CallbackUrl redirect", { finalUrl });
             return finalUrl;
           }
-        } catch (error) {
-          logger.auth.error("Error parsing URL with callbackUrl", {
-            url,
-            error,
-          });
-          return `${baseUrl}/dashboard`;
         }
-      }
 
-      // Verificar se é uma URL de callback do Stripe
-      if (url.includes("session_id=") && url.includes("/pedido/")) {
-        logger.auth.info("Stripe callback URL detected", { url });
-        return url;
+        // Fallback seguro
+        const fallbackUrl = `${baseUrl}/dashboard`;
+        logger.auth.info("🏠 Fallback redirect to dashboard", {
+          fallbackUrl,
+          originalUrl: url,
+        });
+        return fallbackUrl;
+      } catch (error) {
+        logger.auth.error("💥 Error in redirect callback", {
+          url,
+          baseUrl,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        return `${baseUrl}/dashboard`;
       }
-
-      // Se não, volta para o dashboard
-      const fallbackUrl = `${baseUrl}/dashboard`;
-      logger.auth.info("Fallback redirecting to dashboard", {
-        fallbackUrl,
-        originalUrl: url,
-      });
-      return fallbackUrl;
     },
   },
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error", // Redirecionar para página de erro dedicada
-    signOut: "/", // Redirecionar para home após logout
+    error: "/auth/error",
+    signOut: "/",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: isProd ? false : true, // Debug apenas em desenvolvimento
 };
 
 // Helpers para server-side
