@@ -49,6 +49,9 @@ export function BottomNavigation({
     const currentItem = items.find(item => {
       if (!item.href) return false
       
+      // Verificar se pathname existe
+      if (!pathname) return false
+      
       // Página inicial
       if (item.href === "/" && pathname === "/") return true
       

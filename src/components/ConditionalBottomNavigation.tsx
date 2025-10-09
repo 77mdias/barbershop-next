@@ -27,7 +27,7 @@ export function ConditionalBottomNavigation({ items }: ConditionalBottomNavigati
   
   // Verifica se a rota atual deve ocultar a navegação
   const shouldHideNavigation = hideNavigationRoutes.some(route => 
-    pathname.startsWith(route)
+    pathname?.startsWith(route)
   );
   
   if (shouldHideNavigation) {

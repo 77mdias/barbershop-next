@@ -21,8 +21,8 @@ function ThankYouContent() {
   const [email, setEmail] = useState("");
   const [hasResent, setHasResent] = useState(false);
 
-  const emailParam = searchParams.get("email");
-  const verified = searchParams.get("verified") === "true";
+  const emailParam = searchParams?.get("email");
+  const verified = searchParams?.get("verified") === "true";
 
   // Preencher email se fornecido na URL
   useEffect(() => {

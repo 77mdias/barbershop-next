@@ -59,7 +59,7 @@ const errors = {
 export default function ErrorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const error = searchParams.get("error") as keyof typeof errors;
+  const error = searchParams?.get("error") as keyof typeof errors;
   const errorData = errors[error] || errors.default;
   const [showModal, setShowModal] = useState(false);
   const [userInfo, setUserInfo] = useState<{
@@ -87,7 +87,7 @@ export default function ErrorContent() {
   logger.component.debug("ErrorContent", "Slug extraído", { slug });
 
   // Extrair slug do callbackUrl se disponível (pode ter sido passado na URL de erro)
-  const callbackUrlParam = searchParams.get("callbackUrl");
+  const callbackUrlParam = searchParams?.get("callbackUrl");
   logger.component.debug("ErrorContent", "CallbackUrl da URL", { callbackUrlParam });
 
   // Tentar extrair slug do callbackUrl (ex: "/nextstore" -> "nextstore")
@@ -131,7 +131,7 @@ export default function ErrorContent() {
   useEffect(() => {
     logger.component.debug("ErrorContent", "useEffect iniciado", { 
       error, 
-      searchParams: searchParams.toString() 
+      searchParams: searchParams?.toString() || "null" 
     });
 
     // Verificar se estamos no cliente e obter slug do localStorage
@@ -167,12 +167,12 @@ export default function ErrorContent() {
 
       // Buscar informações do usuário - tentar diferentes formas de obter o email
       let email =
-        searchParams.get("email") ||
-        searchParams.get("error_description")?.split(":")[1];
+        searchParams?.get("email") ||
+        searchParams?.get("error_description")?.split(":")[1];
 
       logger.auth.debug("Extraindo email da URL", {
-        emailFromUrl: searchParams.get("email"),
-        errorDescription: searchParams.get("error_description")
+        emailFromUrl: searchParams?.get("email"),
+        errorDescription: searchParams?.get("error_description")
       });
 
       // Se não encontrou na URL, tentar localStorage

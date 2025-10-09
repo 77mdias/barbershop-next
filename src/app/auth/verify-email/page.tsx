@@ -23,8 +23,8 @@ function VerifyEmailContent() {
     "pending" | "success" | "error" | null
   >(null);
 
-  const token = searchParams.get("token");
-  const emailParam = searchParams.get("email");
+  const token = searchParams?.get("token");
+  const emailParam = searchParams?.get("email");
 
   // Preencher email se fornecido na URL
   useEffect(() => {

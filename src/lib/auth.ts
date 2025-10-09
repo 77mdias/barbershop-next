@@ -40,41 +40,98 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const user = await db.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
+        logger.auth.info("Credentials provider authorize attempt", {
+          email: credentials?.email,
+          hasPassword: !!credentials?.password,
+          timestamp: new Date().toISOString(),
         });
 
-        if (!user || !user.password) {
+        if (!credentials?.email || !credentials?.password) {
+          logger.auth.warn("Missing credentials", {
+            hasEmail: !!credentials?.email,
+            hasPassword: !!credentials?.password,
+          });
           return null;
         }
 
-        // Verificar se o usuário está ativo
-        if (!user.isActive) {
-          throw new Error("EmailNotVerified");
-        }
+        try {
+          const user = await db.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+          logger.auth.debug("User lookup result", {
+            email: credentials.email,
+            userFound: !!user,
+            userActive: user?.isActive,
+            hasPassword: !!user?.password,
+          });
 
-        if (!isPasswordValid) {
+          if (!user || !user.password) {
+            logger.auth.warn("User not found or no password", {
+              email: credentials.email,
+              userExists: !!user,
+              hasPassword: !!user?.password,
+            });
+            return null;
+          }
+
+          // Verificar se o usuário está ativo
+          if (!user.isActive) {
+            logger.auth.warn("User not active", {
+              email: credentials.email,
+              userId: user.id,
+            });
+            throw new Error("EmailNotVerified");
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          logger.auth.debug("Password validation", {
+            email: credentials.email,
+            userId: user.id,
+            isValid: isPasswordValid,
+          });
+
+          if (!isPasswordValid) {
+            logger.auth.warn("Invalid password", {
+              email: credentials.email,
+              userId: user.id,
+            });
+            return null;
+          }
+
+          const authUser = {
+            id: user.id,
+            email: user.email,
+            nickname: user.nickname,
+            image: user.image || null,
+            role: user.role,
+          };
+
+          logger.auth.info("Successful credentials authentication", {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+          });
+
+          return authUser;
+        } catch (error) {
+          logger.auth.error("Error in credentials authorize", {
+            email: credentials.email,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+
+          if (error instanceof Error && error.message === "EmailNotVerified") {
+            throw error;
+          }
+
           return null;
         }
-
-        return {
-          id: user.id,
-          email: user.email,
-          nickname: user.nickname,
-          image: user.image || null,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -92,12 +149,15 @@ export const authOptions: NextAuthOptions = {
         provider: account?.provider,
         email: user.email,
         userId: user.id,
+        userAgent: "production-debug",
+        timestamp: new Date().toISOString(),
       });
     },
     async createUser({ user }) {
       logger.auth.info("User created by PrismaAdapter", {
         email: user.email,
         id: user.id,
+        timestamp: new Date().toISOString(),
       });
 
       // Se foi criado via OAuth, configurar campos padrão
@@ -113,13 +173,23 @@ export const authOptions: NextAuthOptions = {
         });
         logger.auth.info("OAuth user configured successfully", {
           userId: user.id,
+          timestamp: new Date().toISOString(),
         });
       } catch (error) {
         logger.auth.error("Error configuring OAuth user", {
           userId: user.id,
           error,
+          timestamp: new Date().toISOString(),
         });
       }
+    },
+    async session({ session, token }) {
+      logger.auth.info("Session event", {
+        userId: session?.user?.id,
+        email: session?.user?.email,
+        hasToken: !!token,
+        timestamp: new Date().toISOString(),
+      });
     },
   },
   cookies: {
@@ -132,9 +202,34 @@ export const authOptions: NextAuthOptions = {
         secure: process.env.NODE_ENV === "production",
       },
     },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   callbacks: {
     async jwt({ token, user, account: _account }) {
+      logger.auth.debug("JWT callback", {
+        hasUser: !!user,
+        hasToken: !!token,
+        userId: user?.id || token?.id,
+        timestamp: new Date().toISOString(),
+      });
+
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -142,28 +237,57 @@ export const authOptions: NextAuthOptions = {
           user.nickname || user.name || user.email?.split("@")[0];
         token.name = user.name;
         token.image = user.image;
+
+        logger.auth.info("JWT token updated with user data", {
+          userId: user.id,
+          role: user.role,
+          timestamp: new Date().toISOString(),
+        });
       }
       return token;
     },
     async session({ session, token }) {
+      logger.auth.debug("Session callback", {
+        hasSession: !!session,
+        hasToken: !!token,
+        tokenId: token?.id,
+        sessionEmail: session?.user?.email,
+        timestamp: new Date().toISOString(),
+      });
+
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.nickname = token.nickname || null;
         session.user.name = token.name || "";
         session.user.image = token.image as string | null | undefined;
+
+        logger.auth.info("Session updated with token data", {
+          userId: token.id,
+          role: token.role,
+          timestamp: new Date().toISOString(),
+        });
       }
 
       return session;
     },
     async redirect({ url, baseUrl }) {
-      logger.auth.info("NextAuth redirect callback", { url, baseUrl });
+      logger.auth.info("NextAuth redirect callback", {
+        url,
+        baseUrl,
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+      });
 
       // Solução simplificada para garantir redirecionamento após login
       // Sempre redirecionar para dashboard após login bem-sucedido
       if (url.includes("/api/auth/signin") || url.includes("/auth/signin")) {
-        logger.auth.info("Login successful, redirecting to dashboard");
-        return `${baseUrl}/dashboard`;
+        const redirectUrl = `${baseUrl}/dashboard`;
+        logger.auth.info("Login successful, redirecting to dashboard", {
+          redirectUrl,
+          originalUrl: url,
+        });
+        return redirectUrl;
       }
 
       // Se a URL é relativa, adiciona o baseUrl
@@ -207,8 +331,12 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Se não, volta para o dashboard
-      logger.auth.info("Redirecting to dashboard", { baseUrl });
-      return `${baseUrl}/dashboard`;
+      const fallbackUrl = `${baseUrl}/dashboard`;
+      logger.auth.info("Fallback redirecting to dashboard", {
+        fallbackUrl,
+        originalUrl: url,
+      });
+      return fallbackUrl;
     },
   },
   pages: {

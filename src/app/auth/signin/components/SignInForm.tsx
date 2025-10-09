@@ -24,6 +24,8 @@ export default function SignInForm() {
 
   // Verificar se há erro na URL e mostrar alerta
   useEffect(() => {
+    if (!searchParams) return;
+    
     const errorParam = searchParams.get("error");
     if (errorParam === "OAuthAccountNotLinked") {
       setOauthError("OAuthAccountNotLinked");
@@ -61,7 +63,7 @@ export default function SignInForm() {
         }
       } else {
         // Redirecionar para a URL de callback ou para a página principal
-        const callbackUrl = searchParams.get("callbackUrl") || "/";
+        const callbackUrl = searchParams?.get("callbackUrl") || "/";
         router.push(callbackUrl);
         
         // Como fallback, usamos window.location após um pequeno delay

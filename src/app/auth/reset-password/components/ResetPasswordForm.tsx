@@ -24,7 +24,7 @@ export default function ResetPasswordForm() {
   const { NotificationContainer } = useNotification();
 
   const searchParams = useSearchParams();
-  const tokenParam = searchParams.get("token");
+  const tokenParam = searchParams?.get("token");
 
   // Verificar se há token na URL
   useEffect(() => {
