@@ -51,7 +51,11 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
       let result;
       
       if (isEdit) {
-        result = await updateUser({ id: initialData!.id, ...data });
+        if (!initialData?.id) {
+          toast.error("ID do usuário não encontrado para edição");
+          return;
+        }
+        result = await updateUser({ id: initialData.id, ...data });
       } else {
         result = await createUser(data);
       }

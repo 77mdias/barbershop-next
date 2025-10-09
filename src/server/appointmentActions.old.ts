@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/prisma";
 import { 
   CreateAppointmentSchema,
   UpdateAppointmentSchema,

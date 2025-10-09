@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getUserAppointments } from "@/server/appointmentActions";
+import { getAppointments } from "@/server/appointmentActions";
 import { AppointmentsList } from "@/components/scheduling/AppointmentsList";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,7 +21,7 @@ export default async function ManageAppointmentsPage() {
   }
 
   // Buscar agendamentos do usuário
-  const appointmentsResult = await getUserAppointments({
+  const appointmentsResult = await getAppointments({
     page: 1,
     limit: 10,
     status: undefined, // Todos os status

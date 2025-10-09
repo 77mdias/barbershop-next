@@ -2,6 +2,7 @@
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/prisma";
 import { ServiceFiltersSchema, type ServiceFiltersInput } from "@/schemas/serviceSchemas";
 import { ServiceService } from "./services/serviceService";
 
@@ -22,28 +23,6 @@ export async function getServices(filters?: Partial<ServiceFiltersInput>) {
       success: true,
       data: result,
     };
-  } catch (error) {
-    console.error("Erro ao buscar serviços:", error);
-    return {
-      success: false,
-      error: "Erro interno do servidor",
-    };
-  }
-}
-
-    return {
-      success: true,
-      data: {
-        services,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
-    };
-
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);
     return {
