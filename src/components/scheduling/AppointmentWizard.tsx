@@ -131,29 +131,34 @@ export function AppointmentWizard({
 
   return (
     <div className={cn("w-full max-w-sm mt-16 mx-auto pb-6", className)}>
-      {/* Header */}
-      <div className="text-center mb-6 px-4">
-        <h1 className="text-2xl font-bold text-[var(--text)] mb-2">Agendar Horário</h1>
+      {/* Header com gradiente suave */}
+      <div className="text-center mb-8 px-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
+          <Calendar className="w-8 h-8 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+          Agendar Horário
+        </h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
           Complete as etapas abaixo para fazer seu agendamento
         </p>
       </div>
 
-      {/* Progress Indicator */}
+      {/* Progress Indicator com design moderno */}
       <div className="px-4 mb-8">
         <div className="relative">
-          {/* Background line */}
-          <div className="absolute top-5 left-0 right-0 h-0.5 bg-muted" />
+          {/* Background line com gradiente */}
+          <div className="absolute top-5 left-0 right-0 h-1 bg-gradient-to-r from-muted via-muted to-muted rounded-full" />
           
-          {/* Progress line */}
+          {/* Progress line com gradiente colorido */}
           <div 
-            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+            className="absolute top-5 left-0 h-1 bg-gradient-to-r from-primary via-accent to-primary rounded-full transition-all duration-500 ease-out shadow-sm"
             style={{ 
               width: `${(Object.keys(formData).filter(key => (formData as any)[key]).length / 4) * 100}%` 
             }}
           />
           
-          {/* Steps */}
+          {/* Steps com design aprimorado */}
           <div className="relative flex justify-between">
             {[
               { key: 'serviceId', icon: Scissors, label: 'Serviço' },
@@ -167,12 +172,12 @@ export function AppointmentWizard({
                 return (
                   <div key={step.key} className="flex flex-col items-center">
                     <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center border-2 bg-background transition-all duration-200 relative z-10",
+                      "w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-10 shadow-lg",
                       isCompleted 
-                        ? "border-primary bg-primary text-primary-foreground shadow-lg" 
+                        ? "border-primary bg-gradient-to-br from-primary to-accent text-white shadow-primary/20" 
                         : isActive
-                          ? "border-white bg-black text-white shadow-md"
-                          : "border-muted-foreground/30 text-muted-foreground"
+                          ? "border-primary bg-gradient-to-br from-primary/10 to-accent/10 text-primary shadow-primary/10"
+                          : "border-muted-foreground/30 bg-background text-muted-foreground"
                     )}>
                       {isCompleted ? (
                         <CheckCircle className="w-5 h-5" />
@@ -181,7 +186,7 @@ export function AppointmentWizard({
                       )}
                     </div>
                     <span className={cn(
-                      "text-xs font-medium text-center mt-2 max-w-[60px] leading-tight",
+                      "text-xs font-medium text-center mt-3 max-w-[60px] leading-tight transition-colors duration-200",
                       isCompleted 
                         ? "text-primary font-semibold" 
                         : isActive
@@ -197,12 +202,14 @@ export function AppointmentWizard({
         </div>
       </div>
 
-      {/* Step 1: Service Selection */}
+      {/* Step 1: Service Selection com design aprimorado */}
       <div className="px-4 mb-6">
-        <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-          <div className="p-4 border-b bg-muted/30">
+        <div className="bg-gradient-to-br from-card to-card/80 rounded-xl border border-border/50 shadow-sm overflow-hidden backdrop-blur-sm">
+          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-muted/50 to-muted/30">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
-              <Scissors className="w-4 h-4 text-primary" />
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Scissors className="w-4 h-4 text-primary" />
+              </div>
               Escolha o Serviço
             </h3>
           </div>
@@ -215,13 +222,15 @@ export function AppointmentWizard({
         </div>
       </div>
 
-      {/* Step 2: Barber Selection */}
+      {/* Step 2: Barber Selection com design aprimorado */}
       {formData.serviceId && (
-        <div className="px-4 mb-6">
-          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-            <div className="p-4 border-b bg-muted/30">
+        <div className="px-4 mb-6 animate-in slide-in-from-top-5 duration-300">
+          <div className="bg-gradient-to-br from-card to-card/80 rounded-xl border border-border/50 shadow-sm overflow-hidden backdrop-blur-sm">
+            <div className="p-4 border-b border-border/50 bg-gradient-to-r from-muted/50 to-muted/30">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-accent/10">
+                  <User className="w-4 h-4 text-accent" />
+                </div>
                 Escolha o Barbeiro
               </h3>
             </div>
@@ -235,13 +244,15 @@ export function AppointmentWizard({
         </div>
       )}
 
-      {/* Step 3: Date Selection */}
+      {/* Step 3: Date Selection com design aprimorado */}
       {formData.barberId && (
-        <div className="px-4 mb-6">
-          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-            <div className="p-4 border-b bg-muted/30">
+        <div className="px-4 mb-6 animate-in slide-in-from-top-5 duration-300">
+          <div className="bg-gradient-to-br from-card to-card/80 rounded-xl border border-border/50 shadow-sm overflow-hidden backdrop-blur-sm">
+            <div className="p-4 border-b border-border/50 bg-gradient-to-r from-muted/50 to-muted/30">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-soft-blue/10">
+                  <Calendar className="w-4 h-4 text-soft-blue" />
+                </div>
                 Escolha a Data
               </h3>
             </div>
@@ -255,13 +266,15 @@ export function AppointmentWizard({
         </div>
       )}
 
-      {/* Step 4: Time Selection */}
+      {/* Step 4: Time Selection com design aprimorado */}
       {formData.date && (
-        <div className="px-4 mb-6">
-          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-            <div className="p-4 border-b bg-muted/30">
+        <div className="px-4 mb-6 animate-in slide-in-from-top-5 duration-300">
+          <div className="bg-gradient-to-br from-card to-card/80 rounded-xl border border-border/50 shadow-sm overflow-hidden backdrop-blur-sm">
+            <div className="p-4 border-b border-border/50 bg-gradient-to-r from-muted/50 to-muted/30">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-soft-orange/10">
+                  <Clock className="w-4 h-4 text-soft-orange" />
+                </div>
                 Escolha o Horário
               </h3>
             </div>
@@ -278,43 +291,49 @@ export function AppointmentWizard({
         </div>
       )}
 
-      {/* Summary and Submit */}
+      {/* Summary and Submit com design elegante */}
       {isComplete && selectedService && selectedBarber && (
-        <div className="px-4">
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 overflow-hidden">
-            <div className="p-4 border-b border-primary/20">
+        <div className="px-4 animate-in slide-in-from-top-5 duration-500">
+          <div className="bg-gradient-to-br from-success/5 via-primary/5 to-accent/5 rounded-xl border border-primary/20 overflow-hidden shadow-lg backdrop-blur-sm">
+            <div className="p-4 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                <div className="p-1.5 rounded-lg bg-success/20">
+                  <CheckCircle className="w-4 h-4 text-success" />
+                </div>
                 Confirme seu Agendamento
               </h3>
             </div>
             
-            <div className="p-4 space-y-4">
-              {/* Service Info */}
-              <div className="flex items-start justify-between p-3 bg-card/50 rounded-lg">
+            <div className="p-5 space-y-4">
+              {/* Service Info com design melhorado */}
+              <div className="flex items-start justify-between p-4 bg-gradient-to-r from-card/80 to-card/60 rounded-xl border border-border/30 shadow-sm">
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Serviço</p>
-                  <p className="font-semibold text-foreground">{selectedService.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1.5">Serviço</p>
+                  <p className="font-semibold text-foreground text-lg">{selectedService.name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
                     {selectedService.duration} min • R$ {Number(selectedService.price).toFixed(2)}
                   </p>
                 </div>
-                <Scissors className="w-5 h-5 text-primary mt-1" />
-              </div>
-              
-              {/* Barber Info */}
-              <div className="flex items-start justify-between p-3 bg-card/50 rounded-lg">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Barbeiro</p>
-                  <p className="font-semibold text-foreground">{selectedBarber.name || 'Barbeiro'}</p>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Scissors className="w-5 h-5 text-primary" />
                 </div>
-                <User className="w-5 h-5 text-primary mt-1" />
               </div>
               
-              {/* Date & Time Info */}
+              {/* Barber Info com design melhorado */}
+              <div className="flex items-start justify-between p-4 bg-gradient-to-r from-card/80 to-card/60 rounded-xl border border-border/30 shadow-sm">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-accent uppercase tracking-wide mb-1.5">Barbeiro</p>
+                  <p className="font-semibold text-foreground text-lg">{selectedBarber.name || 'Barbeiro'}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-accent/10">
+                  <User className="w-5 h-5 text-accent" />
+                </div>
+              </div>
+              
+              {/* Date & Time Info com design em grid */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-card/50 rounded-lg">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Data</p>
+                <div className="p-4 bg-gradient-to-br from-soft-blue/10 to-soft-blue/5 rounded-xl border border-soft-blue/20 shadow-sm">
+                  <p className="text-xs font-medium text-soft-blue uppercase tracking-wide mb-1.5">Data</p>
                   <p className="font-semibold text-foreground text-sm">
                     {formData.date?.toLocaleDateString('pt-BR', {
                       day: '2-digit',
@@ -322,25 +341,26 @@ export function AppointmentWizard({
                       year: 'numeric'
                     })}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {formData.date?.toLocaleDateString('pt-BR', { weekday: 'long' })}
                   </p>
                 </div>
                 
-                <div className="p-3 bg-card/50 rounded-lg">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Horário</p>
+                <div className="p-4 bg-gradient-to-br from-soft-orange/10 to-soft-orange/5 rounded-xl border border-soft-orange/20 shadow-sm">
+                  <p className="text-xs font-medium text-soft-orange uppercase tracking-wide mb-1.5">Horário</p>
                   <p className="font-semibold text-foreground text-sm">{formData.time}</p>
                 </div>
               </div>
               
+              {/* Botão de confirmação com gradiente */}
               <Button 
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                     Agendando...
                   </>
                 ) : (

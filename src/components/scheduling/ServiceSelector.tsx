@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, Clock, DollarSign } from "lucide-react";
+import { Check, Clock, DollarSign, Scissors } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getServices } from "@/server/serviceActions";
 import { Decimal } from "@prisma/client/runtime/library";
@@ -103,8 +103,7 @@ export function ServiceSelector({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <h3 className="text-lg font-semibold text-foreground">Selecione o Serviço</h3>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3">
         {services.map((service) => {
           const isSelected = selectedServiceId === service.id;
           
@@ -113,50 +112,63 @@ export function ServiceSelector({
               key={service.id}
               onClick={() => onServiceSelect(service)}
               className={cn(
-                "group relative rounded-lg border p-4 text-left transition-all duration-200",
-                "hover:shadow-md hover:border-primary/50",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                "group relative rounded-xl p-4 text-left transition-all duration-300",
+                "hover:shadow-md hover:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2",
+                "transform hover:scale-[1.02] active:scale-[0.98]",
                 isSelected
-                  ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border bg-card hover:bg-accent/50"
+                  ? "border-2 border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-lg shadow-primary/20"
+                  : "border border-border bg-gradient-to-br from-card to-card/80 hover:border-primary/30 hover:from-primary/5 hover:to-accent/5"
               )}
             >
-              {/* Indicador de seleção */}
+              {/* Indicador de seleção moderno */}
               {isSelected && (
-                <div className="absolute -top-2 -right-2 rounded-full bg-primary p-1">
-                  <Check className="h-3 w-3 text-primary-foreground" />
+                <div className="absolute -top-2 -right-2 rounded-full bg-gradient-to-br from-primary to-accent p-1.5 shadow-lg">
+                  <Check className="h-3 w-3 text-white" />
                 </div>
               )}
 
               <div className="space-y-3">
-                {/* Nome do serviço */}
-                <h4 className={cn(
-                  "font-medium transition-colors",
-                  isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
-                )}>
-                  {service.name}
-                </h4>
+                {/* Nome do serviço com estilo melhorado */}
+                <div className="flex items-start justify-between">
+                  <h4 className={cn(
+                    "font-semibold text-base transition-colors duration-200",
+                    isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
+                  )}>
+                    {service.name}
+                  </h4>
+                  <div className={cn(
+                    "p-1.5 rounded-lg transition-colors duration-200",
+                    isSelected ? "bg-primary/20" : "bg-muted/50 group-hover:bg-primary/10"
+                  )}>
+                    <Scissors className={cn(
+                      "w-4 h-4 transition-colors duration-200",
+                      isSelected ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                    )} />
+                  </div>
+                </div>
 
-                {/* Descrição */}
+                {/* Descrição com melhor tipografia */}
                 {service.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                     {service.description}
                   </p>
                 )}
 
-                {/* Duração e Preço */}
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{service.duration} min</span>
+                {/* Duração e Preço com design melhorado */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="p-1 rounded bg-muted/50">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm text-muted-foreground font-medium">{service.duration} min</span>
                   </div>
                   
                   <div className={cn(
-                    "flex items-center gap-1 font-medium",
-                    isSelected ? "text-primary" : "text-foreground"
+                    "flex items-center gap-1.5 font-semibold text-lg transition-colors duration-200",
+                    isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
                   )}>
-                    <DollarSign className="h-4 w-4" />
-                    <span>R$ {Number(service.price).toFixed(2)}</span>
+                    <span className="text-sm">R$</span>
+                    <span>{Number(service.price).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -165,12 +177,19 @@ export function ServiceSelector({
         })}
       </div>
 
-      {/* Informação adicional */}
+      {/* Informação de confirmação elegante */}
       {selectedServiceId && (
-        <div className="rounded-lg bg-muted/50 p-3">
-          <p className="text-sm text-muted-foreground">
-            ✓ Serviço selecionado. Agora escolha o barbeiro e horário.
-          </p>
+        <div className="animate-in slide-in-from-top-2 duration-300">
+          <div className="rounded-xl bg-gradient-to-r from-success/10 to-accent/10 border border-success/20 p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-full bg-success/20">
+                <Check className="w-3 h-3 text-success" />
+              </div>
+              <p className="text-sm text-success font-medium">
+                Serviço selecionado! Agora escolha o barbeiro.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>
