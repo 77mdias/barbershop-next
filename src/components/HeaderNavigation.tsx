@@ -113,7 +113,7 @@ const Header = () => {
 
         {/* Botão de Menu Mobile */}
         <button
-          className="p-2 text-white"
+          className="p-2 text-[var(--primary)]"
           onClick={handleMenuToggle}
           aria-label="Toggle menu"
         >
@@ -125,20 +125,6 @@ const Header = () => {
       {isMenuOpen && (
         <div className="glass-card border-t border-border/50 md:hidden">
           <nav className="flex flex-col space-y-4 p-4">
-            <Link
-              href="/auth/signin"
-              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Entrar
-            </Link>
-            <Link
-              href="/auth/signup"
-              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Cadastrar
-            </Link>
             <Link
               href="/support"
               className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}

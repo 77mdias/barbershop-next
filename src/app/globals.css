@@ -20,6 +20,9 @@
     --input: 220 13% 91%;
     --ring: 264 83% 67%;
 
+    /*CORES CARD*/
+    --text-card: 0 0% 100%;
+
     /* Paleta moderna e minimalista */
     --primary: 264 83% 67%;          /* Roxo suave e moderno */
     --primary-foreground: 0 0% 100%;
@@ -78,6 +81,8 @@
     --border: 220 15% 16%;
     --input: 220 15% 16%;
     --ring: 264 83% 67%;
+
+
 
     /* Primárias mantendo a mesma essência */
     --primary: 264 83% 67%;          /* Roxo mais vibrante no dark */

@@ -2,6 +2,7 @@
 .profileHeader {
   position: relative;
   overflow: hidden;
+  color: var(--primary);
 
   &::before {
     content: "";
@@ -50,22 +51,18 @@
   }
 
   &__name {
-    background: linear-gradient(45deg, #ffffff, #f0fdfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
 
   &__email {
-    color: rgba(255, 255, 255, 0.7);
+
     font-weight: 400;
   }
 
   &__editButton {
-    background: linear-gradient(45deg, #06b6d4, #0891b2);
-    color: #1f2937;
+    background: hsl(var(--card-foreground));
+    color: hsl(var(--text-card));
     font-weight: 600;
     border-radius: 9999px;
     padding: 0.5rem 1.5rem;
@@ -76,6 +73,25 @@
       background: linear-gradient(45deg, #0891b2, #0e7490);
       transform: translateY(-1px);
       box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &__editButton_logout {
+    color: hsl(var(--text-card));
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+
+    &:hover {
+      background: linear-gradient(45deg, #dc2626, #b91c1c);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
 
     &:active {

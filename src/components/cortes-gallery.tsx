@@ -79,7 +79,7 @@ const galleryImages: GalleryImage[] = [
 export function CortesGallerySection() {
   return (
     <section className="py-8 px-4">
-      <div className="max-w-7xl mx-auto text-white">
+      <div className="max-w-7xl mx-auto">
         <Gallery
           images={galleryImages}
           title="Nossos Trabalhos"

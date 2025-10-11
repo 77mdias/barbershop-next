@@ -117,7 +117,7 @@ export function Gallery({
       {(title || subtitle) && (
         <div className="text-center mb-8">
           {title && (
-            <h2 className="text-3xl font-bold text-white dark:text-white mb-2">
+            <h2 className="text-3xl font-bold text-[var(--primary)] dark:text-white mb-2">
               {title}
             </h2>
           )}

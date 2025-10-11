@@ -171,7 +171,7 @@ export default function SignUpForm() {
     <div className="content mb-4 w-full mt-16 flex justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-white">Crie sua conta</h2>
+          <h2 className="mt-6 text-3xl font-bold text-[var(--foreground)]">Crie sua conta</h2>
           <p className="mt-2 text-sm text-gray-400">
             Ou{" "}
             <Link
@@ -204,7 +204,7 @@ export default function SignUpForm() {
                 placeholder="Nickname"
                 value={formData.name}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
               />
             </div>
 
@@ -221,7 +221,7 @@ export default function SignUpForm() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
               />
             </div>
 
@@ -238,7 +238,7 @@ export default function SignUpForm() {
                 placeholder="Senha (requisitos abaixo)"
                 value={formData.password}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
               />
               <button
                 type="button"
@@ -339,7 +339,7 @@ export default function SignUpForm() {
                 placeholder="Confirmar senha"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
               />
               <button
                 type="button"
@@ -379,7 +379,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("github")}
                 disabled={isLoading || isOAuthLoading === "github"}
-                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-slate-50`}
+                className={`w-full border-gray-600 text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))]`}
               >
                 <Github className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
@@ -390,7 +390,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={isLoading || isOAuthLoading === "google"}
-                className={`w-full border-gray-600 text-white transition-all duration-300 hover:border-primary hover:bg-slate-50`}
+                className={`w-full border-gray-600 text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))]`}
               >
                 <Mail className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "google" ? "Conectando..." : "Google"}

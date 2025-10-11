@@ -159,7 +159,7 @@ export default function SignInForm() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-gray-600 bg-[var(--card-product)] text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
               />
             </div>
 
@@ -176,7 +176,7 @@ export default function SignInForm() {
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-white placeholder-gray-400"
+                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
               />
               <button
                 type="button"

@@ -136,7 +136,7 @@ export function AppointmentWizard({
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
           <Calendar className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+        <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
           Agendar Horário
         </h1>
         <p className="text-muted-foreground text-sm leading-relaxed">

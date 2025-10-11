@@ -88,13 +88,11 @@ export function BottomNavigation({
               key={item.id}
               onClick={() => handleItemClick(item)}
               className={cn(
-                "bg-[--card]",
                 "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
                 "min-w-[50px] sm:min-w-[60px] min-h-[50px] sm:min-h-[60px]",
-                "focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2",
                 styles.bottomNav__item,
                 isActive && styles["bottomNav__item--active"],
-                !isActive && "text-gray-500 "
+                !isActive
               )}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
@@ -103,7 +101,7 @@ export function BottomNavigation({
               <div className={cn(
                 "transition-all duration-200",
                 styles.bottomNav__icon,
-                isActive && styles["bottomNav__icon--active"]
+                isActive
               )}>
                 {item.icon}
               </div>

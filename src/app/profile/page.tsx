@@ -135,7 +135,7 @@ export default function Profile() {
               styles.profileHeader__avatar
             )}
           >
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-2xl font-bold text-[var(--primary)]">
               {user.name
                 ? user.name.charAt(0).toUpperCase()
                 : user.email.charAt(0).toUpperCase()}
@@ -166,7 +166,7 @@ export default function Profile() {
 
           {/* Botão Logout */}
           <Button
-            className={cn("mt-4 px-6 py-2 font-medium transition-colors", styles.profileHeader__editButton)}
+            className={cn("mt-4 px-6 py-2 rounded-full font-medium transition-colors", styles.profileHeader__editButton_logout)}
             variant="destructive"
             onClick={() => signOut({ callbackUrl: "/" })}
           >
