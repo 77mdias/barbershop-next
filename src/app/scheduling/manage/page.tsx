@@ -30,7 +30,7 @@ export default async function ManageAppointmentsPage() {
   const appointments = appointmentsResult.success ? appointmentsResult.data : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
+    <div className="min-h-screen mt-12 mb-6 bg-gradient-to-br from-background to-muted/30">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
