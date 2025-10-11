@@ -2,6 +2,19 @@
 
 Uma aplicação moderna para agendamento de serviços de barbearia, desenvolvida com **Next.js 14**, **TypeScript** e **Tailwind CSS**.
 
+---
+## 📚 Recomendações de Estudo e Documentação
+
+Este projeto segue as boas práticas do agente de IA para estudo e documentação:
+- Documentação detalhada de cada processo e decisão
+- Comentários explicativos em funções e componentes
+- Todo-list para novas features e melhorias
+- Sugestão de múltiplas soluções para problemas
+- Organização clara em módulos e pastas
+- Incentivo ao aprendizado contínuo
+
+---
+
 ![Barbershop App](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)
@@ -45,6 +58,15 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - Node.js 18+ 
 - npm, yarn, pnpm ou bun
 
+### Login Social e Sessão
+
+O sistema suporta login via GitHub, Google e credenciais. Após rodar o seed, é necessário criar uma nova conta ou usar as contas de teste do seed. Se estiver logado com uma conta antiga, faça logout e registre novamente para evitar erros de sessão.
+
+Contas de teste:
+- Admin: `admin@barbershop.com` / senha: `admin123`
+- Barbeiro: `joao@barbershop.com` / senha: `barbeiro123`
+- Cliente: `carlos@email.com` / senha: `cliente123`
+
 ### Passos
 
 1. **Clone o repositório**
@@ -82,6 +104,9 @@ http://localhost:3000
 
 ## 🐳 Docker (Opcional)
 
+Consulte também:
+- [Guia Multi-Stage Docker](/docs/docker/GUIA-MULTI-STAGE.md)
+
 ### Método 1: Script Manager (Recomendado)
 ```bash
 # Desenvolvimento completo
@@ -109,6 +134,10 @@ docker compose -f docker-compose.prod.yml up -d
 > 📖 **Documentação completa:** [Docker Multi-Stage Guide](/docs/docker/GUIA-MULTI-STAGE.md)
 
 ## 📁 Estrutura do Projeto
+
+Veja também:
+- [Guia de Relacionamentos](/docs/guia-relacionamentos.md)
+- [Fluxos de Vales e Fidelidade](/docs/fluxos-vales-fidelidade.md)
 
 ```
 src/
@@ -200,6 +229,10 @@ Card para exibir ofertas especiais com desconto e período.
 - [ ] Sistema de agendamentos
 - [ ] Pagamentos online (Stripe)
 
+### Dashboard e Controle
+- [ ] Dashboard do Admin: gestão de usuários, serviços, relatórios
+- [ ] Dashboard do Barbeiro: agenda, disponibilidade, controle de agendamentos
+
 ### Planejado
 - [ ] Notificações push
 - [ ] Avaliações e comentários
@@ -215,6 +248,12 @@ Consulte a pasta `docs/` para documentação detalhada:
 - [Banco de Dados](/docs/database/README.md)
 - [Prisma ORM](/docs/prisma/README.md)
 
+- [Dashboard Admin](/docs/dashboard-admin.md)
+- [Dashboard Barbeiro](/docs/dashboard-barber.md)
+- [Exemplos de API](/docs/api-examples.md)
+- [Papéis e Permissões](/docs/roles-permissions.md)
+- [Testes de Fluxos](/docs/test-flows.md)
+
 ### 🗄️ Guias de Banco de Dados
 
 - **[📋 Guia Completo de Desenvolvimento](/docs/database/GUIA-DESENVOLVIMENTO.md)** - Melhores práticas, fluxos de trabalho e procedimentos para desenvolvimento de banco de dados
@@ -224,3 +263,13 @@ Consulte a pasta `docs/` para documentação detalhada:
 ## 📝 Licença
 
 Este projeto está sob a licença MIT.
+
+---
+## ✅ Checklist para Colaboradores
+
+- [ ] Ler o README e docs principais
+- [ ] Seguir boas práticas de estudo e documentação
+- [ ] Comentar funções e registrar decisões
+- [ ] Criar todo-list antes de implementar features
+- [ ] Sugerir múltiplas soluções para problemas
+- [ ] Manter organização dos módulos e pastas

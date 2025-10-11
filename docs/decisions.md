@@ -1,5 +1,19 @@
 # 📚 Documentação de Decisões Técnicas - Barbershop App
 
+---
+## ✅ Recomendações do Agente de Estudo
+
+- Documentar cada decisão e processo prático
+- Comentar funções e componentes
+- Registrar aprendizados em caderno digital
+- Criar todo-list antes de implementar features
+- Sugerir múltiplas soluções para problemas
+- Seguir boas práticas de software
+- Organizar código em módulos claros
+- Atuar como apoio ao raciocínio do desenvolvedor
+
+---
+
 ## 🎯 Visão Geral do Projeto
 
 Este projeto é uma aplicação web moderna para agendamento de serviços de barbearia, desenvolvida com foco em **experiência mobile-first** e **design system consistente**.
@@ -191,6 +205,18 @@ export function getInitials(name: string): string {
 ---
 
 ## 🚀 Próximos Passos Sugeridos
+
+### Checklist de Estudo e Documentação
+- [ ] Registrar decisões técnicas neste arquivo
+- [ ] Comentar funções e componentes
+- [ ] Criar todo-list para novas features
+- [ ] Documentar aprendizados e problemas encontrados
+- [ ] Consultar docs detalhadas:
+  - [Dashboard Admin](./dashboard-admin.md)
+  - [Dashboard Barbeiro](./dashboard-barber.md)
+  - [Papéis e Permissões](./roles-permissions.md)
+  - [Testes de Fluxos](./test-flows.md)
+  - [Exemplos de API](./api-examples.md)
 
 ### 1. Funcionalidades
 - [ ] Sistema de autenticação (NextAuth.js)

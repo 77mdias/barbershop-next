@@ -41,39 +41,24 @@ export function BarberSelector({
     async function loadBarbers() {
       try {
         setLoading(true);
-        // Mock data - substituir pela chamada real da API
-        const mockBarbers: Barber[] = [
-          {
-            id: "1",
-            name: "João Silva",
-            email: "joao@barbershop.com",
-            image: null,
-            role: "BARBER",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: "2", 
-            name: "Pedro Santos",
-            email: "pedro@barbershop.com",
-            image: null,
-            role: "BARBER",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: "3",
-            name: "Carlos Lima",
-            email: "carlos@barbershop.com", 
-            image: null,
-            role: "BARBER",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
-
-        setBarbers(mockBarbers);
+        
+        // Buscar barbeiros reais do banco de dados
+        const response = await fetch('/api/barbers');
+        
+        if (!response.ok) {
+          throw new Error('Erro na resposta da API');
+        }
+        
+        const barbers = await response.json();
+        
+        // Verificar se há erro na resposta
+        if (barbers.error) {
+          setError(barbers.error);
+        } else {
+          setBarbers(barbers);
+        }
       } catch (err) {
+        console.error("Erro ao carregar barbeiros:", err);
         setError("Erro ao carregar barbeiros");
       } finally {
         setLoading(false);

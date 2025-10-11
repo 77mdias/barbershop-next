@@ -86,7 +86,7 @@ export default function Home() {
   }
 
   return (
-    <div className="mt-12 min-h-screen bg-[--background]">
+    <div className="mt-12 mb-8 min-h-screen bg-[--background]">
       {/* Header */}
       <Header
         userName={user?.name || user?.email?.split('@')[0] || "Usuário"}

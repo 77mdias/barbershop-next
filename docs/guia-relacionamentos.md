@@ -1,5 +1,21 @@
 # 🔄 Guia de Relacionamentos - Sistema de Barbearia
 
+---
+## ✅ Recomendações do Agente de Estudo
+
+- Documentar cada consulta e relacionamento importante
+- Comentar funções e exemplos de queries
+- Criar todo-list para novas features de relacionamento
+- Registrar aprendizados e problemas encontrados
+- Consultar docs detalhadas:
+  - [Dashboard Admin](./dashboard-admin.md)
+  - [Dashboard Barbeiro](./dashboard-barber.md)
+  - [Papéis e Permissões](./roles-permissions.md)
+  - [Testes de Fluxos](./test-flows.md)
+  - [Exemplos de API](./api-examples.md)
+
+---
+
 Este guia visual explica como as entidades do sistema de barbearia se relacionam entre si, facilitando a compreensão da arquitetura de dados.
 
 ## 📊 Diagrama de Relacionamentos
@@ -126,6 +142,11 @@ const barbersForService = await prisma.user.findMany({
 
 ## 🧪 Exercício Prático
 
+### Todo-list para Consultas Avançadas
+- [ ] Consulta de clientes com vouchers ativos
+- [ ] Consulta de barbeiros por serviço
+- [ ] Consulta de agendamentos por status
+
 **Desafio:** Escreva uma consulta para encontrar todos os clientes que têm vouchers ativos para um serviço específico.
 
 **Solução:**
@@ -155,6 +176,9 @@ const clientsWithActiveVouchers = await prisma.user.findMany({
 ```
 
 ## 📝 Anotações de Estudo
+
+- Sempre comentar consultas complexas
+- Registrar aprendizados sobre constraints e relacionamentos
 
 - Os relacionamentos no Prisma são bidirecionais, definidos em ambos os lados
 - Relacionamentos nomeados (como `@relation("BarberAppointments")`) são usados quando há múltiplas relações entre os mesmos modelos
