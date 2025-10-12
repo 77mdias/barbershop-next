@@ -233,6 +233,51 @@ Cada projeto deve conter:
   - Instruções para containers
   - Fluxos de autenticação e redefinição de senha
 
+### 📋 Documentação de Desenvolvimento (docs/development/)
+
+**OBRIGATÓRIO**: Sempre verificar e atualizar a documentação de desenvolvimento antes de finalizar qualquer tarefa:
+
+- **TASKS.md** - Lista de tarefas, bugs e melhorias:
+  - ✅ **Atualizar DIARIAMENTE** conforme progresso das atividades
+  - Marcar status: `✅ Concluído`, `🚧 Em Desenvolvimento`, `📝 Planejado`, `💡 Ideia`
+  - Incluir estimativas, assignees e descrições detalhadas
+  - Priorizar com labels: `🔥 Alta`, `📋 Média`, `🔧 Baixa`
+
+- **ROADMAP.md** - Planejamento de funcionalidades e cronograma:
+  - ✅ **Atualizar SEMANALMENTE** ou quando mudanças significativas
+  - Revisar funcionalidades planejadas vs. implementadas
+  - Ajustar cronogramas e prioridades conforme necessário
+
+- **CHANGELOG.md** - Histórico detalhado de mudanças:
+  - ✅ **Atualizar A CADA FEATURE/BUGFIX** implementado
+  - Seguir formato padronizado (Added, Changed, Fixed, Removed)
+  - Incluir versioning semântico quando aplicável
+
+### 🔄 Fluxo Obrigatório de Atualização da Documentação
+
+**ANTES de finalizar qualquer task/feature:**
+
+1. **Verificar `TASKS.md`**:
+   - Marcar task atual como concluída ✅
+   - Adicionar novas tasks identificadas durante desenvolvimento
+   - Atualizar estimativas se necessário
+
+2. **Atualizar `CHANGELOG.md`**:
+   - Documentar todas as mudanças implementadas
+   - Incluir impactos técnicos e de negócio
+   - Referenciar issues/tasks relacionadas
+
+3. **Revisar `ROADMAP.md` (se aplicável)**:
+   - Verificar se funcionalidade afeta planejamento futuro
+   - Atualizar status de milestones
+   - Ajustar dependências entre features
+
+**Checklist de Documentação**:
+- [ ] Task marcada como concluída no TASKS.md
+- [ ] Mudanças documentadas no CHANGELOG.md  
+- [ ] ROADMAP.md revisado (se mudanças significativas)
+- [ ] Novas tasks identificadas adicionadas ao TASKS.md
+
 ---
 
 ## 🧪 7. Testes e Refatoração
@@ -269,6 +314,15 @@ O projeto deve sempre seguir estes princípios:
 3. Autenticação sólida com NextAuth, Zod, bcryptjs.  
 4. Frontend componentizado com Tailwind/Radix/SCSS.  
 5. Infraestrutura com Docker e banco PostgreSQL.  
-6. Documentação clara e acessível.  
+6. **Documentação clara e sempre atualizada** (especialmente docs/development/).  
 7. Testes cobrindo funcionalidades críticas.  
 8. Escalabilidade, manutenibilidade e revisão contínua.  
+
+### 🚨 REGRA CRÍTICA - Documentação de Desenvolvimento
+
+**NUNCA finalize uma task sem atualizar a documentação correspondente:**
+- ✅ **TASKS.md** - Status diário das atividades
+- ✅ **CHANGELOG.md** - Histórico de cada mudança implementada  
+- ✅ **ROADMAP.md** - Planejamento e cronograma (revisão semanal)
+
+**Esta regra é OBRIGATÓRIA e deve ser seguida por todos os desenvolvedores do projeto.**  

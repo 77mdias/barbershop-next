@@ -95,6 +95,7 @@ model ServiceHistory {
   finalPrice   Decimal       @db.Decimal(10, 2)
   rating       Int?
   feedback     String?
+  images       String[]      @default([]) // Array de URLs das imagens
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   userId       String
