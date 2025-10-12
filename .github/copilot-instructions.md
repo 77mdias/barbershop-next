@@ -23,12 +23,12 @@ A modern barbershop appointment booking system built with Next.js 14, TypeScript
 
 ### Development Workflows
 - **Docker-First**: All development occurs in containers - dependencies NOT installed locally
-- **Database**: Use `docker compose exec app npx prisma migrate dev` for migrations
-- **Container Commands**: Use `docker compose exec app [command]` instead of local npm/npx
+- **Professional Architecture**: Separate containers for migrations and application in production
+- **Container Commands**: Use `docker compose exec app [command]` for development
 - **Development**: `docker compose up app` for development server  
-- **Production**: `docker compose -f docker-compose.prod.yml up -d` for production deployment
+- **Production**: `./scripts/deploy-pro.sh deploy` for professional production deployment
 - **Environment**: Separate `.env.development` and `.env.production` files
-- **Security**: Development config uses mounted volumes - production uses multi-stage builds
+- **Security**: Production containers follow principle of least privilege
 
 ## Coding Conventions
 
@@ -94,9 +94,11 @@ import { authOptions } from "@/lib/auth"
 ## Quick Start Commands
 
 ### 🐳 Docker Commands (REQUIRED for this project)
+
+#### **Development (Local)**
 ```bash
 # Initial setup
-docker compose build                                    # Build containers  
+docker compose build                                    # Build development containers  
 docker compose up -d db                                # Start database only
 docker compose exec app npx prisma migrate dev        # Apply database migrations
 docker compose exec app npx prisma db seed            # Seed development data
@@ -118,8 +120,25 @@ docker compose exec app npm run lint                  # Run linting
 docker compose exec app sh                           # Access container terminal
 ```
 
+#### **Production (Professional Architecture)**
+```bash
+# Professional production deployment
+./scripts/deploy-pro.sh deploy                        # Full deploy: migrations + application
+./scripts/deploy-pro.sh migrate                       # Apply migrations only
+./scripts/deploy-pro.sh app-only                      # Deploy application only
+./scripts/deploy-pro.sh logs                          # View production logs
+./scripts/deploy-pro.sh status                        # Check services status
+
+# Manual operations (if needed)
+docker compose -f docker-compose.pro.yml build        # Build production images
+docker compose -f docker-compose.pro.yml --profile migration up migrator  # Run migrations
+docker compose -f docker-compose.pro.yml up -d app    # Start application
+```
+
 ### 🚨 Important Notes
 - **NEVER** use local npm/npx commands - always use `docker compose exec app [command]`
 - Only Docker and Docker Compose need to be installed locally
 - All dependencies and tools run inside containers
-- For production database operations, use `./scripts/db-prod.sh [command]`
+- **Production uses specialized containers** - migrations and application are separated
+- **Use `./scripts/deploy-pro.sh`** for all production operations
+- Development uses `docker-compose.yml`, production uses `docker-compose.pro.yml`

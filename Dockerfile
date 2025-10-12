@@ -87,11 +87,18 @@ RUN adduser -S nextjs -u 1001
 COPY --from=builder /app/package*.json ./
 RUN npm ci --only=production --ignore-scripts && npm cache clean --force
 
+# Copiar schema do Prisma para permitir migrações em produção
+COPY --from=builder /app/prisma ./prisma/
+
 # Copiar arquivos build e assets
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Copiar script de inicialização
+COPY scripts/docker-entrypoint-prod.sh /usr/local/bin/docker-entrypoint-prod.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-prod.sh
 
 # Ajustar permissões
 RUN chown -R nextjs:nodejs /app
@@ -103,6 +110,9 @@ EXPOSE 3000
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node --version || exit 1
+
+# Usar script de inicialização que aplica migrações automaticamente
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-prod.sh"]
 
 # Comando de produção
 CMD ["node", "server.js"]

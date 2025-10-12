@@ -3,12 +3,14 @@
 # Script para executar comandos Prisma em produção
 # Uso: ./scripts/db-prod.sh [comando]
 
-# Carregar variáveis de ambiente
-source .env
-
-# Definir URLs de produção
-export DATABASE_URL="$DATABASE_URL_PROD"
-export DIRECT_URL="$DIRECT_URL_PROD"
+# Carregar variáveis de ambiente de produção
+if [ -f .env.production ]; then
+  source .env.production
+  echo "✅ Carregado .env.production"
+else
+  echo "❌ Arquivo .env.production não encontrado!"
+  exit 1
+fi
 
 # Executar comando baseado no parâmetro
 case "$1" in

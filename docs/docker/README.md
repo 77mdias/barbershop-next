@@ -1,33 +1,35 @@
-# 🐳 Docker e Ambiente de Desenvolvimento
+# 🐳 Arquitetura Docker Profissional - Barbershop Next.js
 
-Este documento explica como configurar e utilizar o ambiente Docker para o projeto Barbershop Next.js.
+Este documento descreve a **arquitetura Docker profissional** implementada seguindo as melhores práticas de produção empresarial.
 
-> **🔧 Atualização (Out/2025)**: Migração para **Dockerfile multi-stage unificado** com otimização de cache e arquitetura simplificada.
+> **� Nova Arquitetura (Out/2025)**: **Separação de responsabilidades** com containers especializados para máxima segurança e performance.
 
-## Nova Arquitetura Docker Multi-Stage
+## 🎯 Princípios da Arquitetura Profissional
 
-O projeto agora utiliza um **único Dockerfile** com múltiplos stages otimizados:
+### ✅ **Princípios Aplicados:**
+- **Separação de Responsabilidades**: Migrações e aplicação em containers separados
+- **Princípio do Menor Privilégio**: Container de produção sem schema do banco
+- **Imutabilidade**: Containers especializados para funções específicas
+- **Segurança**: Superfície de ataque reduzida
+- **Performance**: Imagens otimizadas e startup rápido
+
+### 🏗️ **Arquitetura Multi-Container:**
 
 ```
 ┌─────────────────────────────────────────────┐
-│               Dockerfile                    │
+│            Dockerfile.pro                   │
 ├─────────────────────────────────────────────┤
-│ 📦 deps    → Base de dependências           │
-│ 🛠️  dev     → Desenvolvimento + hot reload   │
-│ 🔨 builder → Build de produção              │
-│ 🚀 prod    → Imagem final de produção       │
+│ 📦 base      → Alpine + dumb-init + security │
+│ � deps      → Dependências de produção      │
+│ 🔨 builder   → Build da aplicação            │
+│ �️ migrator  → Executar migrações (isolado)  │
+│ 🚀 production→ Aplicação limpa (sem schema)  │
 └─────────────────────────────────────────────┘
 ```
 
-**Benefícios alcançados:**
-- ⚡ Cache otimizado entre ambientes
-- 🔄 Zero duplicação de código
-- 🛡️ Segurança em produção (usuário não-root)
-- 📦 Imagens menores e mais eficientes
+---
 
-## Estrutura de Containers
-
-O projeto utiliza uma arquitetura com targets específicos do Dockerfile multi-stage:
+## 📦 Containers Especializados
 
 ```
 ┌─────────────────┐    ┌─────────────────┐
@@ -51,9 +53,83 @@ O projeto utiliza uma arquitetura com targets específicos do Dockerfile multi-s
 
 ## Serviços Ativos
 
-### Desenvolvimento (docker-compose.yml)
-- **app** (target: dev): Container com Next.js, hot reload e Prisma Studio
-- **db**: PostgreSQL 15 com dados persistentes
+### 📦 **Migrator Container** (`barbershop-migrator`)
+- **Propósito**: Executar migrações do banco de dados
+- **Ciclo de vida**: Executa uma vez e termina (`restart: "no"`)
+- **Conteúdo**: Schema Prisma + dependências mínimas
+- **Target**: `migrator` no `Dockerfile.pro`
+- **Segurança**: Acesso isolado ao banco para migrações
+
+### 🚀 **Application Container** (`barbershop-app-prod`)
+- **Propósito**: Executar apenas a aplicação Next.js
+- **Ciclo de vida**: Longa duração (`restart: unless-stopped`)
+- **Conteúdo**: Build da aplicação + dependências de runtime
+- **Target**: `production` no `Dockerfile.pro`
+- **Segurança**: **SEM schema Prisma** - superfície de ataque reduzida
+
+### 🔄 **Nginx Container** (`barbershop-nginx-prod`)
+- **Propósito**: Proxy reverso e load balancer
+- **Ciclo de vida**: Longa duração
+- **Conteúdo**: Nginx Alpine + configurações SSL
+- **Profile**: `proxy` (opcional)
+
+---
+
+## 🚦 Guia de Uso Prático
+
+### 🏗️ **Deploy Profissional (Recomendado)**
+
+```bash
+# Deploy completo: migrações + aplicação
+./scripts/deploy-pro.sh deploy
+
+# Apenas executar migrações
+./scripts/deploy-pro.sh migrate
+
+# Apenas aplicação (pós-migração)
+./scripts/deploy-pro.sh app-only
+
+# Ver logs da aplicação
+./scripts/deploy-pro.sh logs
+
+# Status de todos os serviços
+./scripts/deploy-pro.sh status
+```
+
+### ⚙️ **Comandos Docker Diretos**
+
+```bash
+# Build de todas as imagens
+docker compose -f docker-compose.pro.yml build
+
+# Executar apenas migrações
+docker compose -f docker-compose.pro.yml --profile migration up migrator
+
+# Subir aplicação (depende de migrações)
+docker compose -f docker-compose.pro.yml up -d app
+
+# Subir com proxy nginx
+docker compose -f docker-compose.pro.yml --profile proxy up -d
+
+# Parar todos os serviços
+docker compose -f docker-compose.pro.yml down
+```
+
+### 🛠️ **Desenvolvimento (Ambiente Local)**
+
+```bash
+# Desenvolvimento com hot reload
+docker compose up app
+
+# Banco de desenvolvimento
+docker compose up -d db
+
+# Migrações de desenvolvimento
+docker compose exec app npx prisma migrate dev
+
+# Prisma Studio
+docker compose exec app npx prisma studio
+```
 
 ### Produção (docker-compose.prod.yml)  
 - **app** (target: prod): Container otimizado, usuário não-root, sem volumes
