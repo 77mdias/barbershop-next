@@ -15,7 +15,7 @@ export default function GalleryPage() {
   const { user, isLoading } = useAuth();
 
   return (
-    <div className="min-h-screen mt-16 mb-12 flex flex-col w-full justify-center px-4 bg-background">
+    <div className="container mx-auto mt-16 mb-12 flex flex-col w-full justify-center px-4 bg-background">
       {/* Header da aplicação */}
       <Header userName={user?.name || user?.email?.split('@')[0] || 'User'} />
       

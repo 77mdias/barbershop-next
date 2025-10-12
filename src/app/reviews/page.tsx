@@ -31,10 +31,27 @@ export default async function ReviewsPage() {
 
         {/* Tabs para diferentes funcionalidades */}
         <Tabs defaultValue="list" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="list">Lista de Avaliações</TabsTrigger>
-            <TabsTrigger value="form">Nova Avaliação</TabsTrigger>
-            <TabsTrigger value="stats">Estatísticas</TabsTrigger>
+          <TabsList
+            className="flex flex-wrap w-full gap-1 md:gap-4 px-0.5 py-1 bg-gray-50 rounded-lg shadow-sm"
+          >
+            <TabsTrigger
+              value="list"
+              className="flex-1 min-w-0 px-1.5 py-1.5 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+            >
+              Avaliações
+            </TabsTrigger>
+            <TabsTrigger
+              value="form"
+              className="flex-1 min-w-0 px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+            >
+              Nova Avaliação
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className="flex-1 min-w-0 px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+            >
+              Estatísticas
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="list" className="space-y-6">

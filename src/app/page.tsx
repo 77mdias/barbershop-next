@@ -132,7 +132,7 @@ export default function Home() {
   }
 
   return (
-    <div className="mt-16 mb-12 flex flex-col justify-center px-4 w-full bg-[--background]">
+    <div className="container mx-auto mt-16 mb-12 flex flex-col justify-center px-4 w-full bg-[--background]">
       {/* Header */}
       <Header
         userName={isAuthenticated ? (user?.name || user?.email?.split('@')[0] || "Usuário") : "Visitante"}

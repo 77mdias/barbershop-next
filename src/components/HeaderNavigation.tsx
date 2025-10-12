@@ -2,7 +2,8 @@
 
 //IMPORT DE DEPENDÊNCIAS
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthSafe } from "@/hooks/useAuthSafe";
+import { ClientOnlyAuth } from "./ClientOnlyAuth";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ import styles from "@/app/scss/components/CourseCard.module.scss";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuthSafe();
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -34,60 +35,79 @@ const Header = () => {
               width={32}
               height={32}
             />
-          </Link>
-          <span className={`font-poppins ${styles.textLogo} text-[hsl(var(--foreground))] text-xl font-bold italic`}>
-            Ne
-            <span className="font-poppins text-xl font-extrabold italic text-pink-600">
-              XT
+            <span className={`font-poppins ${styles.textLogo} text-[hsl(var(--foreground))] text-xl font-bold italic`}>
+              Ne
+              <span className="font-poppins text-xl font-extrabold italic text-pink-600">
+                XT
+              </span>
             </span>
-          </span>
+          </Link>
         </div>
 
         {/* Desktop Navigation - Coluna 2 (Centro) */}
         <nav className="flex items-center space-x-8 justify-center">
-          <a
-            href="/support"
-            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
+          <Link
+            href="/"
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
           >
-            Suporte
+            Início
             <span
               className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
             ></span>
-          </a>
-          <a
+          </Link>
+          <Link
+            href="/gallery"
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+          >
+            Galeria
+            <span
+              className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
+            ></span>
+          </Link>
+          <Link
             href="/community"
-            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
           >
             Comunidade
             <span
               className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
             ></span>
-          </a>
-          <a
-            href="/prices"
-            className={`${styles.linkText} group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]`}
+          </Link>
+          <Link
+            href="/scheduling"
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
           >
-            Preços
+            Agendamento
             <span
               className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
             ></span>
-          </a>
-          {user?.role === "ADMIN" && (
-            <a
-              href="/dashboard"
-              className="group relative text-primary-50 transition-colors duration-200 hover:text-[var(--green-pastel)]"
+          </Link>
+          <Link
+              href="/reviews"
+              className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+              onClick={() => setIsMenuOpen(false)}
             >
-              Dashboard
-              <span
-                className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-              ></span>
-            </a>
-          )}
+              Avaliações
+          </Link>
+          <ClientOnlyAuth>
+            {user?.role === "ADMIN" && (
+              <a
+                href="/dashboard"
+                className="group relative text-[var(--foreground)] transition-colors duration-200 hover:text-[var(--green-pastel)]"
+              >
+                Dashboard
+                <span
+                  className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
+                ></span>
+              </a>
+            )}
+          </ClientOnlyAuth>
         </nav>
 
         {/* Botões de Ação - Coluna 3 (Direita) */}
         <div className="flex items-center justify-end space-x-4">
           {/* Aqui podem ser adicionados botões de login, perfil, etc. */}
+          <MenuNavigation />
         </div>
       </div>
 
@@ -153,15 +173,17 @@ const Header = () => {
             >
               Avaliações
             </Link>
-            {user?.role === "ADMIN" && (
-              <Link
-                href="/dashboard"
-                  className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
-                  onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            )}
+            <ClientOnlyAuth>
+              {user?.role === "ADMIN" && (
+                <Link
+                  href="/dashboard"
+                    className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
+                    onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+            </ClientOnlyAuth>
           </nav>
         </div>
       )}

@@ -130,9 +130,9 @@ export function AppointmentWizard({
   };
 
   return (
-    <div className={cn("w-full max-w-sm mt-16 mx-auto pb-6", className)}>
+    <div className={cn("container w-full flex flex-col mt-16 mx-auto pb-6", className)}>
       {/* Header com gradiente suave */}
-      <div className="text-center mb-8 px-4">
+      <div className="text-center mb-8 mt-4 px-4">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
           <Calendar className="w-8 h-8 text-primary" />
         </div>

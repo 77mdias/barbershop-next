@@ -107,7 +107,7 @@ export default function Profile() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen mt-12 flex items-center justify-center bg-[--background] min-w-full">
+      <div className="container mx-auto min-h-screen mt-12 flex items-center justify-center bg-[--background] min-w-full">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-[--text] mb-4">
             Acesso Negado
@@ -124,9 +124,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen mt-12 bg-[--background] min-w-full">
+    <div className="container mx-auto flex flex-col w-full mt-16 bg-[--background]">
       {/* Header com gradiente escuro */}
-      <div className={cn("text-white px-6 pt-12 pb-8", styles.profileHeader)}>
+      <div className={cn("text-white px-6 pt-8 pb-8", styles.profileHeader)}>
         {/* Avatar e informações do usuário */}
         <div className="text-center">
           <div
