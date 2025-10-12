@@ -9,6 +9,7 @@ import { SalonCard } from "@/components/salon-card";
 import ReviewPublic from "@/components/reviewPublic";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 
 /**
@@ -103,9 +104,10 @@ export default function Home() {
 
         {/* Conteúdo principal */}
         <div>
-          <section className="space-y-8">
+          <section className="space-y-8 flex flex-col items-center">
             {/* Barra de busca */}
             <SearchBar
+              className="size-5/6 md:size-5/6 lg:size-3/6"
               placeholder="Search..."
               value={searchTerm}
               onChange={setSearchTerm}
@@ -135,25 +137,25 @@ export default function Home() {
             {!isAuthenticated && (
               <section className="bg-gradient-to-r mx-4 from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
                 <div className="text-center">
-                  <h2 className="text-lg font-bold text-gray-900 mb-2">
+                  <h2 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mb-2">
                     🚀 Faça seu primeiro agendamento!
                   </h2>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm lg:text-lg xl:text-xl text-gray-600 mb-4">
                     Crie sua conta e agende seus serviços com os melhores barbeiros da cidade
                   </p>
                   <div className="flex gap-3 justify-center">
-                    <a 
+                    <Link
                       href="/auth/signup"
-                      className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                      className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm lg:text-lg xl:text-xl font-medium hover:bg-primary-700 transition-colors"
                     >
                       Criar Conta
-                    </a>
-                    <a 
+                    </Link>
+                    <Link
                       href="/auth/signin"
-                      className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-50 transition-colors"
+                      className="border border-primary-600 text-primary-600 px-4 py-2 rounded-lg text-sm lg:text-lg xl:text-xl font-medium hover:bg-primary-50 transition-colors"
                     >
                       Entrar
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </section>

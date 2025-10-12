@@ -157,7 +157,7 @@ export default function Profile() {
 
           {/* Botão Edit Profile */}
           <Button
-            className={cn("px-6 py-2 font-medium transition-colors", styles.profileHeader__editButton)}
+            className={cn("px-6 py-2 font-medium mx-4 transition-colors", styles.profileHeader__editButton)}
             variant="outline"
             onClick={() => {/* Aqui pode abrir modal de edição futuramente */}}
           >
@@ -187,7 +187,7 @@ export default function Profile() {
           <div className="space-y-3">
             <div
               className={cn(
-                "flex items-center justify-between p-4 rounded-lg border",
+                "flex items-center justify-between text-[var(--foreground)] p-4 rounded-lg border",
                 styles.profileContent__menuItem
               )}
             >

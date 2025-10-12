@@ -45,7 +45,7 @@ const Header = () => {
         </div>
 
         {/* Desktop Navigation - Coluna 2 (Centro) */}
-        <nav className="flex items-center space-x-8 justify-center">
+        <nav className="flex items-center lg:space-x-8 lg:text-md md:space-x-2 md:text-sm justify-center">
           <Link
             href="/"
             className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
