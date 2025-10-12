@@ -12,7 +12,7 @@ export default async function ReviewsPage() {
   const session = await getServerSession(authOptions);
   
   if (!session) {
-    redirect('/login');
+    redirect('/auth/signin');
   }
 
   return (
@@ -84,9 +84,6 @@ export default async function ReviewsPage() {
                 {/* Formulário de demonstração com serviceHistoryId fictício */}
                 <ReviewForm
                   serviceHistoryId="demo-service-history-id"
-                  onSuccess={() => {
-                    console.log('Avaliação de demonstração salva!');
-                  }}
                 />
               </CardContent>
             </Card>

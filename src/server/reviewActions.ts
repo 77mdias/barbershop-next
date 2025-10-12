@@ -192,6 +192,59 @@ export async function updateReview(input: UpdateReviewInput) {
 }
 
 /**
+ * Buscar avaliações públicas (sem autenticação) para exibição na homepage
+ */
+export async function getPublicReviews(limit: number = 6) {
+  try {
+    const reviews = await db.serviceHistory.findMany({
+      where: {
+        rating: { not: null }, // Apenas históricos com avaliação
+        feedback: { not: null }, // Apenas com feedback
+      },
+      orderBy: [
+        { rating: 'desc' },
+        { updatedAt: 'desc' },
+      ],
+      take: limit,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          }
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+          }
+        },
+      },
+    });
+
+    // Formatar para o componente ClientReview
+    const formattedReviews = reviews.map(review => ({
+      id: review.id,
+      name: review.user.name || 'Cliente',
+      service: review.service.name,
+      rating: review.rating!,
+      comment: review.feedback!,
+      image: review.user.image || undefined,
+      images: review.images || [],
+      date: review.updatedAt,
+    }));
+
+    return { success: true, data: formattedReviews };
+  } catch (error) {
+    console.error('Erro ao buscar avaliações públicas:', error);
+    return { success: false, error: "Erro interno do servidor" };
+  }
+}
+
+/**
  * Buscar avaliações com filtros e paginação
  */
 export async function getReviews(input: Partial<GetReviewsInput> = {}) {

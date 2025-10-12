@@ -127,9 +127,9 @@ export default function RootLayout({
         <Providers>
           <HeaderNavigation />
           {children}
+          {/* Navegação inferior */}
+          <ConditionalBottomNavigation items={navigationItems} />
         </Providers>
-        {/* Navegação inferior */}
-        <ConditionalBottomNavigation items={navigationItems} />
       </body>
     </html>
   );

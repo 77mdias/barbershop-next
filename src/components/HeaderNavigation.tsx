@@ -22,7 +22,7 @@ const Header = () => {
   };
 
   return (
-    <header className="glass-card fixed left-0 right-0 top-0 z-50 border-b border-border/50">
+    <header className="glass-card fixed left-0 right-0 top-0 z-50 ">
       {/* Desktop Layout */}
       <div className="container mx-auto hidden md:grid grid-cols-3 h-16 items-center px-4">
         {/* Logo - Coluna 1 */}
@@ -35,7 +35,7 @@ const Header = () => {
               height={32}
             />
           </Link>
-          <span className={`font-poppins ${styles.textLogo} text-white text-xl font-bold italic`}>
+          <span className={`font-poppins ${styles.textLogo} text-[hsl(var(--foreground))] text-xl font-bold italic`}>
             Ne
             <span className="font-poppins text-xl font-extrabold italic text-pink-600">
               XT
@@ -102,13 +102,13 @@ const Header = () => {
               width={32}
               height={32}
             />
-          </Link>
-          <span className={`font-poppins ${styles.textLogo} text-white text-xl font-bold italic`}>
-            Ne
-            <span className="font-poppins text-xl font-extrabold italic text-pink-600">
-              XT
+            <span className={`font-poppins ${styles.textLogo} text-[hsl(var(--foreground))] text-xl font-bold italic`}>
+              Ne
+              <span className="font-poppins text-xl font-extrabold italic text-pink-600">
+                XT
+              </span>
             </span>
-          </span>
+          </Link>
         </div>
 
         {/* Botão de Menu Mobile */}
@@ -123,33 +123,40 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="glass-card border-t border-border/50 md:hidden">
+        <div className="glass-card md:hidden">
           <nav className="flex flex-col space-y-4 p-4">
             <Link
               href="/support"
-              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}
+              className={`${styles.linkText} py-2 text-[var(--text)]  transition-colors hover:text-[hsl(var(--soft-green))]`}
               onClick={() => setIsMenuOpen(false)}
             >
               Suporte
             </Link>
             <Link
               href="/community"
-              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}
+              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
               onClick={() => setIsMenuOpen(false)}
             >
               Comunidade
             </Link>
             <Link
               href="/prices"
-              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[var(--green-pastel)]`}
+              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
               onClick={() => setIsMenuOpen(false)}
             >
               Preços
             </Link>
+            <Link
+              href="/reviews"
+              className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Avaliações
+            </Link>
             {user?.role === "ADMIN" && (
               <Link
                 href="/dashboard"
-                  className={`${styles.linkText} py-2 text-foreground/80 transition-colors hover:text-primary`}
+                  className={`${styles.linkText} py-2 text-[var(--text)] transition-colors hover:text-[hsl(var(--soft-green))]`}
                   onClick={() => setIsMenuOpen(false)}
               >
                 Dashboard

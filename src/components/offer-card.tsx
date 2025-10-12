@@ -49,7 +49,7 @@ export function OfferCard({
       )}
 
       {/* Conteúdo */}
-      <div className={cn("relative z-10 flex items-center justify-between", styles.offerCard__content)}>
+      <div className={cn("relative flex items-center justify-between", styles.offerCard__content)}>
         {/* Informações da oferta */}
         <div className="flex-1">
           <h3 className="text-lg sm:text-xl font-bold mb-1">{title}</h3>
