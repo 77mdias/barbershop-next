@@ -16,7 +16,7 @@ export default async function ReviewsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mt-12 mb-8 mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}

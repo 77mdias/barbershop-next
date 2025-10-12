@@ -86,3 +86,36 @@ export function serializeAppointmentsResult(result: {
     appointments: serializeAppointments(result.appointments),
   };
 }
+
+/**
+ * Serializa um histórico de serviço/review convertendo preços para números
+ */
+export function serializeServiceHistory(serviceHistory: any) {
+  return {
+    ...serviceHistory,
+    finalPrice: decimalToNumber(serviceHistory.finalPrice),
+    service: serviceHistory.service
+      ? serializeService(serviceHistory.service)
+      : null,
+  };
+}
+
+/**
+ * Serializa uma lista de históricos de serviço/reviews
+ */
+export function serializeServiceHistories(serviceHistories: any[]) {
+  return serviceHistories.map(serializeServiceHistory);
+}
+
+/**
+ * Serializa resultado paginado de reviews
+ */
+export function serializeReviewsResult(result: {
+  reviews: any[];
+  pagination: any;
+}) {
+  return {
+    ...result,
+    reviews: serializeServiceHistories(result.reviews),
+  };
+}

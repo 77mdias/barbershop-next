@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
+import { serializeReviewsResult, serializeServiceHistory } from "@/lib/serializers";
 import { 
   createReviewSchema, 
   updateReviewSchema, 
@@ -89,7 +90,7 @@ export async function createReview(input: CreateReviewInput) {
 
     return { 
       success: true, 
-      data: updatedServiceHistory,
+      data: serializeServiceHistory(updatedServiceHistory),
       message: "Avaliação criada com sucesso!" 
     };
   } catch (error) {
@@ -176,7 +177,7 @@ export async function updateReview(input: UpdateReviewInput) {
 
     return { 
       success: true, 
-      data: updatedServiceHistory,
+      data: serializeServiceHistory(updatedServiceHistory),
       message: "Avaliação atualizada com sucesso!" 
     };
   } catch (error) {
@@ -294,7 +295,7 @@ export async function getReviews(input: Partial<GetReviewsInput> = {}) {
 
     return {
       success: true,
-      data: {
+      data: serializeReviewsResult({
         reviews,
         pagination: {
           currentPage: validatedInput.page,
@@ -304,7 +305,7 @@ export async function getReviews(input: Partial<GetReviewsInput> = {}) {
           hasPreviousPage,
           limit: validatedInput.limit,
         }
-      }
+      })
     };
   } catch (error) {
     console.error("Erro ao buscar avaliações:", error);

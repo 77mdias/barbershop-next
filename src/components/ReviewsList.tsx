@@ -188,7 +188,7 @@ export function ReviewsList({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">
-                {stats.averageRating.toFixed(1)}
+                {Number(stats.averageRating).toFixed(1)}
               </div>
               <div className="flex justify-center mb-2">
                 {renderStars(Math.round(stats.averageRating))}
@@ -323,7 +323,7 @@ export function ReviewsList({
                         <User size={14} />
                         {review.service.name}
                         <DollarSign size={14} />
-                        R$ {review.finalPrice?.toFixed(2) || review.service.price.toFixed(2)}
+                        R$ {Number(review.finalPrice || review.service.price).toFixed(2)}
                       </div>
                     </div>
 
