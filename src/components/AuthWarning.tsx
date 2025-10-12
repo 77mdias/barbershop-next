@@ -74,8 +74,8 @@ export function AuthWarning({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+    <div className="w-full h-screen flex flex-col bg-gradient-to-br mt-16 from-blue-50 via-white to-purple-50 items-center  justify-start p-4">
+      <Card className="w-full mt-12 max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
         <CardContent className="p-6 text-center space-y-6">
           {/* Ícone e título */}
           <div className="space-y-3">

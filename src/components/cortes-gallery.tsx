@@ -59,7 +59,7 @@ const galleryImages: GalleryImage[] = [
  */
 export function CortesGallerySection() {
   return (
-    <section className="space-y-8 px-4">
+    <section className="w-full container space-y-8 px-4">
       <div className="max-w-7xl mx-auto">
         <Gallery
           images={galleryImages}

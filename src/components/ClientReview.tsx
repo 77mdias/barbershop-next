@@ -54,7 +54,7 @@ export function ClientReview({ reviews = mockReviews, className }: ClientReviewP
 
   return (
     <section className={cn(
-      "bg-slate-100 py-8 px-4 md:py-16 lg:py-20 lg:px-20",
+      "bg-slate-100 rounded-md py-8 px-4 md:py-16 lg:py-20 lg:px-20",
       className
     )}>
       {/* Mobile Layout */}

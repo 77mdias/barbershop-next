@@ -48,7 +48,7 @@ const Header = () => {
         <nav className="flex items-center space-x-8 justify-center">
           <Link
             href="/"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
           >
             Início
             <span
@@ -57,7 +57,7 @@ const Header = () => {
           </Link>
           <Link
             href="/gallery"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
           >
             Galeria
             <span
@@ -66,7 +66,7 @@ const Header = () => {
           </Link>
           <Link
             href="/community"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
           >
             Comunidade
             <span
@@ -75,7 +75,7 @@ const Header = () => {
           </Link>
           <Link
             href="/scheduling"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
           >
             Agendamento
             <span
@@ -84,7 +84,7 @@ const Header = () => {
           </Link>
           <Link
               href="/reviews"
-              className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 hover:text-[hsl(var(--soft-red))]`}
+              className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
               onClick={() => setIsMenuOpen(false)}
             >
               Avaliações

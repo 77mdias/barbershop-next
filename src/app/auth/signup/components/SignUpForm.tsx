@@ -168,7 +168,7 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="content mb-4 w-full mt-16 flex justify-center px-4">
+    <div className="container mx-auto mb-8 w-full flex justify-center px-4 ">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-[var(--foreground)]">Crie sua conta</h2>

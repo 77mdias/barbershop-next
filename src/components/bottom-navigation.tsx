@@ -79,7 +79,7 @@ export function BottomNavigation({
       styles.bottomNav,
       className
     )}>
-      <div className="rounded-full bg-black flex items-center gap-[4px] justify-around max-w-md p-1 mx-auto">
+      <div className="rounded-full bg-black flex items-center gap-[4px] justify-around max-w-md p-1 mx-auto md:hidden">
         {items.map((item) => {
           const isActive = currentActiveItem === item.id
           

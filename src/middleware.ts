@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   const isProfilePage = pathname.startsWith("/profile");
   const isDashboardPage = pathname.startsWith("/dashboard");
   const isSchedulingPage = pathname.startsWith("/scheduling");
-
+  const isReviewsPage = pathname.startsWith("/reviews");
   // Rotas públicas que não precisam de autenticação
   const publicRoutes = [
     "/",
@@ -48,7 +48,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Proteger páginas que requerem autenticação
-  if (!isAuth && (isProfilePage || isDashboardPage || isSchedulingPage)) {
+  if (
+    !isAuth &&
+    (isProfilePage || isDashboardPage || isSchedulingPage || isReviewsPage)
+  ) {
     logger.auth.warn("Access denied - showing auth warning", { pathname });
 
     const authRequiredUrl = new URL("/auth-required", request.url);

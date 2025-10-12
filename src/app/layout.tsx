@@ -122,7 +122,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased flex flex-col items-center pb-12`}
+        className={`${geistSans.variable} ${geistMono.variable}  antialiased flex flex-col items-center `}
       >
         <Providers>
           <HeaderNavigation />

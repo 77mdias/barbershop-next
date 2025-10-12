@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import SignInForm from "./components/SignInForm";
 import { CortesGallerySection } from "@/components/cortes-gallery";
+import ReviewPublic from "@/components/reviewPublic";
 
 
 export default function SignInPage() {
@@ -12,8 +13,13 @@ export default function SignInPage() {
         </div>
       }
     >
-      <SignInForm />
-      <CortesGallerySection />
+      <div className="w-full h-full flex flex-col bg-gradient-to-br mt-16 from-blue-50 via-white to-purple-50 items-center  justify-start py-4">
+        <div className="container mx-auto flex flex-col gap-8">
+          <SignInForm />
+          <ReviewPublic />
+          <CortesGallerySection />
+        </div>
+      </div>
     </Suspense>
   );
 }
