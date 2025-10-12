@@ -2,6 +2,19 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Hotfix] - 2025-10-12
+
+### 🐛 Corrigido
+- **Bug crítico no sistema de avaliações**: Erro ZodError invalid_format na validação de URLs de imagens
+  - **Root Cause**: Schema `createReviewSchema` muito restritivo para arrays opcionais de imagens
+  - **Solução**: Implementada transform function para filtrar strings vazias e validar URLs corretamente
+  - **Arquivo**: `/src/schemas/reviewSchemas.ts`
+  - **Impacto**: Sistema de avaliações agora funciona sem erros de validação
+
+### 🔄 Modificado
+- Schema de validação mais robusto para imagens opcionais
+- Melhor tratamento de arrays vazios e strings inválidas
+
 ## [Em Desenvolvimento] - 2025-10-11
 
 ### ✨ Adicionado

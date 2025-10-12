@@ -27,7 +27,18 @@ export async function createReview(input: CreateReviewInput) {
       return { success: false, error: "Usuário não autenticado" };
     }
 
+    // Debug: log dos dados recebidos
+    console.log("🔍 Dados recebidos no createReview:", JSON.stringify(input, null, 2));
+
     // Validar entrada
+    try {
+      const validatedInput = createReviewSchema.parse(input);
+      console.log("✅ Dados validados:", JSON.stringify(validatedInput, null, 2));
+    } catch (validationError: any) {
+      console.error("❌ Erro de validação:", validationError);
+      return { success: false, error: `Erro de validação: ${validationError.message}` };
+    }
+
     const validatedInput = createReviewSchema.parse(input);
 
     // Verificar se o ServiceHistory existe e pertence ao usuário

@@ -12,15 +12,37 @@ export const createReviewSchema = z.object({
     .int("Avaliação deve ser um número inteiro"),
   feedback: z
     .string()
-    .min(10, "Comentário deve ter pelo menos 10 caracteres")
-    .max(1000, "Comentário deve ter no máximo 1000 caracteres")
     .optional()
-    .or(z.literal("")),
+    .transform((val) => {
+      // Se for string vazia ou undefined, retorna undefined
+      if (!val || val.trim() === "") return undefined;
+      // Se tiver conteúdo, valida tamanho mínimo
+      if (val.length < 10) {
+        throw new Error("Comentário deve ter pelo menos 10 caracteres");
+      }
+      if (val.length > 1000) {
+        throw new Error("Comentário deve ter no máximo 1000 caracteres");
+      }
+      return val;
+    }),
   images: z
-    .array(z.string().url("URL da imagem inválida"))
+    .array(z.string())
     .max(5, "Máximo 5 imagens por avaliação")
     .optional()
-    .default([]),
+    .default([])
+    .transform((images) => {
+      // Filtrar strings vazias e validar URLs
+      const validImages =
+        images?.filter((img) => img && img.trim() !== "") || [];
+      return validImages.filter((img) => {
+        try {
+          new URL(img);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    }),
 });
 
 // Schema para atualização de avaliação
@@ -34,14 +56,36 @@ export const updateReviewSchema = z.object({
     .optional(),
   feedback: z
     .string()
-    .min(10, "Comentário deve ter pelo menos 10 caracteres")
-    .max(1000, "Comentário deve ter no máximo 1000 caracteres")
     .optional()
-    .or(z.literal("")),
+    .transform((val) => {
+      // Se for string vazia ou undefined, retorna undefined
+      if (!val || val.trim() === "") return undefined;
+      // Se tiver conteúdo, valida tamanho mínimo
+      if (val.length < 10) {
+        throw new Error("Comentário deve ter pelo menos 10 caracteres");
+      }
+      if (val.length > 1000) {
+        throw new Error("Comentário deve ter no máximo 1000 caracteres");
+      }
+      return val;
+    }),
   images: z
-    .array(z.string().url("URL da imagem inválida"))
+    .array(z.string())
     .max(5, "Máximo 5 imagens por avaliação")
-    .optional(),
+    .optional()
+    .transform((images) => {
+      // Filtrar strings vazias e validar URLs
+      const validImages =
+        images?.filter((img) => img && img.trim() !== "") || [];
+      return validImages.filter((img) => {
+        try {
+          new URL(img);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    }),
 });
 
 // Schema para busca de avaliações

@@ -36,6 +36,13 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/components/ui/separator.tsx` - Separador visual
     - `/docs/review-system.md` - Documentação completa
 
+- [x] **#002.1** - Bug validação Zod URLs de imagens ✅ **CONCLUÍDO**
+  - **Descrição**: Erro ZodError invalid_format na validação de URLs de imagens vazias
+  - **Root Cause**: Schema muito restritivo para arrays opcionais de imagens
+  - **Solução**: Transform function para filtrar strings vazias e validar URLs
+  - **Assignee**: GitHub Copilot
+  - **Status**: Corrigido em `/src/schemas/reviewSchemas.ts`
+
 ### Features Prioritárias
 - [ ] **#003** - Dashboard do Cliente
   - **Descrição**: Painel para clientes gerenciarem agendamentos

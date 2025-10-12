@@ -25,11 +25,12 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 ### 🚧 Em Desenvolvimento
 
 #### Prioridade Alta
-- [ ] **Sistema de Avaliações Real**
+- [x] **Sistema de Avaliações Real** ✅ **CONCLUÍDO**
   - Integração com banco de dados
   - CRUD de avaliações
   - Upload de imagens
   - Sistema de moderação
+  - **Bug de validação Zod corrigido**
 
 #### Prioridade Média
 - [ ] **Dashboard do Cliente**

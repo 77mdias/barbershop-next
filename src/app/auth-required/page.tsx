@@ -2,15 +2,16 @@ import { Suspense } from 'react';
 import AuthWarning from '@/components/AuthWarning';
 
 interface AuthRequiredPageProps {
-  searchParams: {
+  searchParams: Promise<{
     target?: string;
     redirect?: string;
-  };
+  }>;
 }
 
-export default function AuthRequiredPage({ searchParams }: AuthRequiredPageProps) {
-  const targetRoute = searchParams.target;
-  const redirectUrl = searchParams.redirect || '/auth/signin';
+export default async function AuthRequiredPage({ searchParams }: AuthRequiredPageProps) {
+  const params = await searchParams;
+  const targetRoute = params.target;
+  const redirectUrl = params.redirect || '/auth/signin';
 
   return (
     <Suspense fallback={
