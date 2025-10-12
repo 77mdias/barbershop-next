@@ -22,10 +22,8 @@ export default function TestUploadPage() {
 
         <ReviewForm
           serviceHistoryId="test-service-history-id"
-          onSubmit={handleReviewSubmit}
-        />
-
-        <div className="mt-8 bg-white rounded-lg p-6 shadow-sm">
+          onSuccess={() => console.log('Review submitted successfully!')}
+        />        <div className="mt-8 bg-white rounded-lg p-6 shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Funcionalidades Implementadas:</h2>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start">

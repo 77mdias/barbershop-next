@@ -5,7 +5,8 @@ import { Upload, X, Image as ImageIcon, AlertCircle, Check } from 'lucide-react'
 import { cn } from '@/lib/utils';
 
 interface ImageUploadProps {
-  onUpload: (urls: string[]) => void;
+  onUpload?: (urls: string[]) => void;
+  onUploadComplete?: (urls: string[]) => void;
   maxFiles?: number;
   maxSize?: number; // em MB
   disabled?: boolean;
@@ -23,6 +24,7 @@ interface UploadedFile {
 
 export function ImageUpload({
   onUpload,
+  onUploadComplete,
   maxFiles = 5,
   maxSize = 5,
   disabled = false,
@@ -130,7 +132,8 @@ export function ImageUpload({
 
       // Chamar callback com URLs
       const uploadedUrls = result.files.map((f: any) => f.url);
-      onUpload(uploadedUrls);
+      onUpload?.(uploadedUrls);
+      onUploadComplete?.(uploadedUrls);
 
     } catch (error) {
       console.error('Erro no upload:', error);

@@ -1,189 +1,238 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Star, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { reviewFormSchema, type ReviewFormData } from '@/schemas/reviewSchemas';
+import { createReview, updateReview } from '@/server/reviewActions';
+import { toast } from 'sonner';
 
 interface ReviewFormProps {
   serviceHistoryId: string;
-  onSubmit?: (data: any) => void;
+  existingReview?: {
+    id: string;
+    rating: number;
+    feedback: string | null;
+    images: string[];
+  };
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ReviewForm({ serviceHistoryId, onSubmit }: ReviewFormProps) {
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [images, setImages] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function ReviewForm({ 
+  serviceHistoryId, 
+  existingReview, 
+  onSuccess, 
+  onCancel 
+}: ReviewFormProps) {
+  const [isPending, startTransition] = useTransition();
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  
+  const isEditing = !!existingReview;
+
+  const form = useForm({
+    resolver: zodResolver(reviewFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      rating: existingReview?.rating || 0,
+      feedback: existingReview?.feedback || '',
+      images: existingReview?.images || [],
+    },
+  });
+
+  const { watch, setValue, formState: { errors }, handleSubmit } = form;
+  const currentRating = watch('rating');
+  const currentImages = watch('images');
+  const currentFeedback = watch('feedback');
 
   const handleImageUpload = (uploadedUrls: string[]) => {
-    setImages(prev => [...prev, ...uploadedUrls]);
+    const newImages = [...(currentImages || []), ...uploadedUrls];
+    setValue('images', newImages);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (rating === 0) {
-      alert('Por favor, selecione uma avaliação.');
-      return;
-    }
+  const removeImage = (indexToRemove: number) => {
+    const newImages = (currentImages || []).filter((_, index) => index !== indexToRemove);
+    setValue('images', newImages);
+  };
 
-    setIsSubmitting(true);
+  const onSubmit = async (data: ReviewFormData) => {
+    startTransition(async () => {
+      try {
+        let result;
+        
+        if (isEditing && existingReview) {
+          result = await updateReview({
+            id: existingReview.id,
+            ...data,
+          });
+        } else {
+          result = await createReview({
+            serviceHistoryId,
+            ...data,
+          });
+        }
 
-    try {
-      const reviewData = {
-        serviceHistoryId,
-        rating,
-        feedback,
-        images
-      };
-
-      // Aqui você pode chamar uma API para salvar a avaliação
-      // const response = await fetch('/api/reviews', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(reviewData)
-      // });
-
-      console.log('Dados da avaliação:', reviewData);
-      
-      if (onSubmit) {
-        onSubmit(reviewData);
+        if (result.success) {
+          setSubmitStatus('success');
+          toast.success(result.message || 'Avaliação salva com sucesso!');
+          onSuccess?.();
+        } else {
+          setSubmitStatus('error');
+          toast.error(result.error || 'Erro ao salvar avaliação');
+        }
+      } catch (error) {
+        setSubmitStatus('error');
+        toast.error('Erro inesperado ao salvar avaliação');
+        console.error('Erro no formulário:', error);
       }
+    });
+  };
 
-      // Reset form
-      setRating(0);
-      setFeedback('');
-      setImages([]);
-
-    } catch (error) {
-      console.error('Erro ao enviar avaliação:', error);
-      alert('Erro ao enviar avaliação. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const renderStars = () => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setValue('rating', star)}
+            className={`p-1 rounded transition-colors hover:bg-gray-100 ${
+              currentRating >= star ? 'text-yellow-400' : 'text-gray-300'
+            }`}
+            disabled={isPending}
+          >
+            <Star
+              size={24}
+              fill={currentRating >= star ? 'currentColor' : 'none'}
+              className="transition-colors"
+            />
+          </button>
+        ))}
+      </div>
+    );
   };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Avaliar Serviço</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          {isEditing ? 'Editar Avaliação' : 'Nova Avaliação'}
+          {submitStatus === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
+          {submitStatus === 'error' && <AlertCircle className="w-5 h-5 text-red-500" />}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Rating */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Avaliação *
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Rating Stars */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Avaliação <span className="text-red-500">*</span>
             </label>
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className="p-1 transition-colors"
-                >
-                  <Star
-                    className={`w-8 h-8 ${
-                      star <= rating
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              {rating > 0 && (
-                <>
-                  {rating === 1 && 'Muito ruim'}
-                  {rating === 2 && 'Ruim'}
-                  {rating === 3 && 'Regular'}
-                  {rating === 4 && 'Bom'}
-                  {rating === 5 && 'Excelente'}
-                </>
-              )}
-            </p>
-          </div>
-
-          {/* Feedback */}
-          <div>
-            <label htmlFor="feedback" className="block text-sm font-medium mb-2">
-              Comentário (opcional)
-            </label>
-            <textarea
-              id="feedback"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              placeholder="Conte-nos sobre sua experiência..."
-              maxLength={500}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {feedback.length}/500 caracteres
-            </p>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Fotos (opcional)
-            </label>
-            <ImageUpload
-              onUpload={handleImageUpload}
-              maxFiles={3}
-              maxSize={5}
-              disabled={isSubmitting}
-            />
-            
-            {/* Preview das imagens enviadas */}
-            {images.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-medium mb-2">Imagens enviadas:</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {images.map((url, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={url}
-                        alt={`Upload ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setImages(prev => prev.filter((_, i) => i !== index))}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {renderStars()}
+            {errors.rating && (
+              <p className="text-sm text-red-500">{errors.rating.message}</p>
             )}
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setRating(0);
-                setFeedback('');
-                setImages([]);
-              }}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
+          {/* Feedback Textarea */}
+          <div className="space-y-2">
+            <label htmlFor="feedback" className="text-sm font-medium">
+              Comentário (opcional)
+            </label>
+            <Textarea
+              id="feedback"
+              placeholder="Compartilhe sua experiência... (mínimo 10 caracteres)"
+              value={currentFeedback}
+              onChange={(e) => setValue('feedback', e.target.value)}
+              className="min-h-[100px] resize-none"
+              disabled={isPending}
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>
+                {currentFeedback?.length || 0}/1000 caracteres
+              </span>
+              {currentFeedback && currentFeedback.length >= 10 && (
+                <span className="text-green-600">✓ Válido</span>
+              )}
+            </div>
+            {errors.feedback && (
+              <p className="text-sm text-red-500">{errors.feedback.message}</p>
+            )}
+          </div>
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Fotos (opcional - máximo 5)
+            </label>
+            
+            {/* Display uploaded images */}
+            {currentImages && currentImages.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                {currentImages.map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={imageUrl}
+                      alt={`Imagem ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      disabled={isPending}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload component */}
+            {(!currentImages || currentImages.length < 5) && (
+              <ImageUpload
+                onUploadComplete={handleImageUpload}
+                maxFiles={5 - (currentImages?.length || 0)}
+                disabled={isPending}
+              />
+            )}
+            
+            {errors.images && (
+              <p className="text-sm text-red-500">{errors.images.message}</p>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 pt-4">
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isPending}
+              >
+                Cancelar
+              </Button>
+            )}
             <Button
               type="submit"
-              disabled={rating === 0 || isSubmitting}
+              disabled={isPending || currentRating === 0}
+              className="min-w-[120px]"
             >
-              {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isEditing ? 'Atualizando...' : 'Salvando...'}
+                </>
+              ) : (
+                isEditing ? 'Atualizar' : 'Enviar Avaliação'
+              )}
             </Button>
           </div>
         </form>

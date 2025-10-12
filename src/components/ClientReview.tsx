@@ -20,7 +20,7 @@ const mockReviews: ClientReviewData[] = [
     id: "2",
     mainImage: "/images/cortes/corte3.jpg",
     overlayImage: "/images/cortes/corte4.jpg",
-    testimonial: "Excelente atendimento e corte perfeito! O barbeiro realmente entendeu o que eu queria e superou minhas expectativas. O ambiente é muito profissional e acolhedor.",
+    testimonial: "                  &quot;Muito feliz com o resultado! Meu cabelo ficou exatamente como eu queria.&quot;",
     clientName: "João Silva",
     clientTitle: "Gerente",
     clientCompany: "Tech Solutions"
@@ -99,7 +99,7 @@ export function ClientReview({ reviews = mockReviews, className }: ClientReviewP
           
           {/* Testimonial */}
           <blockquote className="text-slate-900 text-lg leading-relaxed font-normal text-center px-4">
-            "{currentReview.testimonial}"
+            &ldquo;{currentReview.testimonial}&rdquo;
           </blockquote>
           
           {/* Author Info */}
@@ -202,7 +202,7 @@ export function ClientReview({ reviews = mockReviews, className }: ClientReviewP
               
               {/* Testimonial */}
               <blockquote className="text-slate-900 text-xl xl:text-2xl leading-relaxed font-normal">
-                "{currentReview.testimonial}"
+                &ldquo;{currentReview.testimonial}&rdquo;
               </blockquote>
               
               {/* Author Info */}

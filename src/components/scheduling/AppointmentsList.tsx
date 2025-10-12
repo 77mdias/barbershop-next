@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Calendar, 
   Clock, 
@@ -287,11 +287,18 @@ export function AppointmentsList({
 
                       {/* Barbeiro */}
                       <div className="flex items-center gap-2">
-                        <Avatar 
-                          src={appointment.barber.image || undefined}
-                          name={appointment.barber.name}
-                          size="sm"
-                        />
+                        <Avatar className="h-8 w-8">
+                          {appointment.barber.image ? (
+                            <AvatarImage 
+                              src={appointment.barber.image}
+                              alt={appointment.barber.name}
+                            />
+                          ) : (
+                            <AvatarFallback>
+                              {appointment.barber.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
                         <span>{appointment.barber.name}</span>
                       </div>
                     </div>

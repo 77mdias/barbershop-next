@@ -2,14 +2,10 @@ import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
 // Types para garantir que o TypeScript entenda process
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      EMAIL_USER?: string;
-      EMAIL_PASSWORD?: string;
-      NEXTAUTH_URL?: string;
-    }
-  }
+interface ProcessEnv {
+  EMAIL_USER?: string;
+  EMAIL_PASSWORD?: string;
+  NEXTAUTH_URL?: string;
 }
 
 // Verificar se está em ambiente de desenvolvimento
@@ -18,7 +14,9 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // Verificar se as variáveis de ambiente estão configuradas
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
   if (isDevelopment) {
-    logger.api.warn("EMAIL_USER or EMAIL_PASSWORD not configured in .env - usando modo desenvolvimento");
+    logger.api.warn(
+      "EMAIL_USER or EMAIL_PASSWORD not configured in .env - usando modo desenvolvimento"
+    );
   } else {
     logger.api.error("EMAIL_USER or EMAIL_PASSWORD not configured in .env");
   }
@@ -27,7 +25,10 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
 // Configuração do transporter de email
 const createTransporter = () => {
   // Se não tiver configuração em desenvolvimento, simular envio
-  if (isDevelopment && (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)) {
+  if (
+    isDevelopment &&
+    (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)
+  ) {
     // Retorna um mock transporter para desenvolvimento
     return {
       verify: async () => {
@@ -37,13 +38,13 @@ const createTransporter = () => {
       sendMail: async (mailOptions: any) => {
         logger.api.info("Mock email enviado em desenvolvimento", {
           to: mailOptions.to,
-          subject: mailOptions.subject
+          subject: mailOptions.subject,
         });
         return {
           messageId: `mock-${Date.now()}@development.local`,
-          response: "250 Mock email sent successfully"
+          response: "250 Mock email sent successfully",
         };
-      }
+      },
     };
   }
 
@@ -70,7 +71,9 @@ export async function verifyEmailConfig() {
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
       if (isDevelopment) {
-        logger.api.warn("Configurações de email não encontradas - usando modo mock para desenvolvimento");
+        logger.api.warn(
+          "Configurações de email não encontradas - usando modo mock para desenvolvimento"
+        );
         return true; // Em desenvolvimento, permite continuar
       } else {
         throw new Error("Configurações de email não encontradas");
@@ -78,7 +81,7 @@ export async function verifyEmailConfig() {
     }
 
     // Se for o mock transporter, simular verificação
-    if (typeof transporter.verify !== 'function') {
+    if (typeof transporter.verify !== "function") {
       logger.api.info("Mock email transporter verificado com sucesso");
       return true;
     }
@@ -88,7 +91,9 @@ export async function verifyEmailConfig() {
     return true;
   } catch (error) {
     if (isDevelopment) {
-      logger.api.warn("Email configuration error - usando modo mock", { error });
+      logger.api.warn("Email configuration error - usando modo mock", {
+        error,
+      });
       return true; // Em desenvolvimento, não quebra a aplicação
     } else {
       logger.api.error("Email configuration error", { error });
@@ -139,34 +144,36 @@ export async function sendVerificationEmail(email: string, token: string) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    
-    if (isDevelopment && typeof transporter.verify !== 'function') {
-      logger.api.info("Email de verificação simulado enviado com sucesso", { 
-        email, 
+
+    if (isDevelopment && typeof transporter.verify !== "function") {
+      logger.api.info("Email de verificação simulado enviado com sucesso", {
+        email,
         messageId: result.messageId,
-        mode: "development-mock" 
+        mode: "development-mock",
       });
     } else {
-      logger.api.info("Verification email sent successfully", { 
-        email, 
-        messageId: result.messageId 
+      logger.api.info("Verification email sent successfully", {
+        email,
+        messageId: result.messageId,
       });
     }
-    
+
     return { success: true, messageId: result.messageId };
   } catch (error) {
     logger.api.error("Error sending verification email", { email, error });
-    
+
     // Em desenvolvimento, não quebra a aplicação
     if (isDevelopment) {
-      logger.api.warn("Continuando em modo desenvolvimento apesar do erro de email");
+      logger.api.warn(
+        "Continuando em modo desenvolvimento apesar do erro de email"
+      );
       return {
         success: true,
         messageId: `dev-fallback-${Date.now()}`,
-        note: "Email simulado em desenvolvimento"
+        note: "Email simulado em desenvolvimento",
       };
     }
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro desconhecido",
@@ -235,7 +242,10 @@ export async function sendResetPasswordEmail(email: string, token: string) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    logger.api.info("Reset password email sent successfully", { email, messageId: result.messageId });
+    logger.api.info("Reset password email sent successfully", {
+      email,
+      messageId: result.messageId,
+    });
     return { success: true, messageId: result.messageId };
   } catch (error) {
     logger.api.error("Error sending reset password email", { email, error });

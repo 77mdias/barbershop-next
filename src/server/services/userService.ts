@@ -494,6 +494,7 @@ export class UserService {
     });
 
     const slots: Date[] = [];
+    // eslint-disable-next-line prefer-const
     let currentTime = new Date(workStart);
 
     while (

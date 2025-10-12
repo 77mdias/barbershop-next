@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Check, Star, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 interface Barber {
@@ -137,12 +137,18 @@ export function BarberSelector({
               <div className="space-y-3">
                 {/* Informações do barbeiro */}
                 <div className="flex items-center gap-3">
-                  <Avatar 
-                    src={barber.image || undefined}
-                    name={barber.name || "Barbeiro"}
-                    size="lg"
-                    className="ring-2 ring-transparent transition-all group-hover:ring-primary/20"
-                  />
+                  <Avatar className="h-12 w-12 ring-2 ring-transparent transition-all group-hover:ring-primary/20">
+                    {barber.image ? (
+                      <AvatarImage 
+                        src={barber.image}
+                        alt={barber.name || "Barbeiro"}
+                      />
+                    ) : (
+                      <AvatarFallback>
+                        {(barber.name || "B").charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                   
                   <div className="flex-1 min-w-0">
                     <h4 className={cn(

@@ -266,6 +266,7 @@ export class ServiceService {
       workEnd.setHours(18, 0, 0, 0);
 
       const slots: Date[] = [];
+      // eslint-disable-next-line prefer-const
       let currentTime = new Date(workStart);
 
       while (currentTime < workEnd) {
