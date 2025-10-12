@@ -22,10 +22,13 @@ A modern barbershop appointment booking system built with Next.js 14, TypeScript
 - **Pattern**: Use `@/lib/prisma` singleton client, always use transactions for multi-model operations
 
 ### Development Workflows
-- **Database**: Use `npm run db:*` scripts for local dev, `./scripts/db-prod.sh` for production
-- **Docker**: `docker-compose.yml` for local development (simplified config), `docker-compose.prod.yml` for production
+- **Docker-First**: All development occurs in containers - dependencies NOT installed locally
+- **Database**: Use `docker compose exec app npx prisma migrate dev` for migrations
+- **Container Commands**: Use `docker compose exec app [command]` instead of local npm/npx
+- **Development**: `docker compose up app` for development server  
+- **Production**: `docker compose -f docker-compose.prod.yml up -d` for production deployment
 - **Environment**: Separate `.env.development` and `.env.production` files
-- **Security**: Development config uses root user for volume compatibility - NEVER use in production
+- **Security**: Development config uses mounted volumes - production uses multi-stage builds
 
 ## Coding Conventions
 
@@ -89,11 +92,34 @@ import { authOptions } from "@/lib/auth"
 - Test role-based access control thoroughly
 
 ## Quick Start Commands
+
+### 🐳 Docker Commands (REQUIRED for this project)
 ```bash
-npm run dev          # Start development server
-npm run db:migrate   # Apply database migrations
-npm run db:studio    # Open Prisma Studio
-npm run db:seed      # Seed development data
+# Initial setup
+docker compose build                                    # Build containers  
+docker compose up -d db                                # Start database only
+docker compose exec app npx prisma migrate dev        # Apply database migrations
+docker compose exec app npx prisma db seed            # Seed development data
+
+# Daily development  
+docker compose up app                                  # Start development server (with logs)
+docker compose up -d                                  # Start all services in background
+docker compose down                                   # Stop all containers
+
+# Database operations
+docker compose exec app npx prisma studio             # Open Prisma Studio
+docker compose exec app npx prisma migrate dev        # Create new migration
+docker compose exec app npx prisma db push            # Push schema changes (dev only)
+
+# Development tools
+docker compose exec app npm install [package]         # Install new dependency
+docker compose exec app npm run test                  # Run tests
+docker compose exec app npm run lint                  # Run linting
+docker compose exec app sh                           # Access container terminal
 ```
 
-For production database operations, use `./scripts/db-prod.sh [command]`.
+### 🚨 Important Notes
+- **NEVER** use local npm/npx commands - always use `docker compose exec app [command]`
+- Only Docker and Docker Compose need to be installed locally
+- All dependencies and tools run inside containers
+- For production database operations, use `./scripts/db-prod.sh [command]`

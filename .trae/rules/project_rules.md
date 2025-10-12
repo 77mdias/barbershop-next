@@ -7,8 +7,19 @@ Este documento define diretrizes para o desenvolvimento de projetos **Fullstack 
 - **API**: Rotas handlers internas + Server Actions  
 - **Autenticação**: NextAuth + Zod + bcryptjs + múltiplos providers (Google, GitHub, etc)  
 - **Validação & Segurança**: RBAC, validação de email (nodemailer), redefinição de senha  
-- **Infraestrutura**: Docker & Docker Compose  
+- **Infraestrutura**: Docker & Docker Compose (**OBRIGATÓRIO** para projetos maiores)  
 - **Frontend**: Next.js + Tailwind CSS, Radix UI/Shadcn, SCSS modules  
+
+## 🐳 Estratégia de Desenvolvimento com Docker
+
+### Princípio Fundamental
+**Em projetos maiores (multi-ambiente, produção), TODO o desenvolvimento ocorre dentro de containers Docker**. Dependências NÃO são instaladas localmente - apenas Docker e Docker Compose são necessários na máquina do desenvolvedor.
+
+### Critérios para Uso de Docker
+- ✅ **OBRIGATÓRIO**: Projetos com mais de um ambiente (dev, staging, prod)
+- ✅ **OBRIGATÓRIO**: Projetos com banco de dados
+- ✅ **OBRIGATÓRIO**: Projetos em equipe (+ de 1 desenvolvedor)
+- ⚠️ **OPCIONAL**: Projetos pequenos/protótipos individuais
 
 ---
 
@@ -34,12 +45,28 @@ project-root/
 │── prisma/
 │   └── schema.prisma        # Definição do banco
 │── tests/                   # Unitários e integrados
-│── docker-compose.yml
-│── Dockerfile
-│── .env.example
+│── docker-compose.yml       # OBRIGATÓRIO - Configuração de desenvolvimento
+│── docker-compose.prod.yml  # OBRIGATÓRIO - Configuração de produção  
+│── Dockerfile               # OBRIGATÓRIO - Build da aplicação
+│── .env.example             # Template de variáveis de ambiente
 │── README.md
 │── docs/                    # Documentação (API, RBAC, fluxos, containers)
+│   └── docker/              # Documentação específica do Docker
 ```
+
+### 🔧 Comandos Docker vs Comandos Locais
+
+**⚠️ IMPORTANTE**: Em projetos Docker, NUNCA use comandos npm/npx/node diretamente. Use sempre através dos containers:
+
+| ❌ Comando Local | ✅ Comando Docker | Descrição |
+|-----------------|------------------|-----------|
+| `npm install` | `docker compose build` | Instalar dependências |
+| `npm run dev` | `docker compose up app` | Iniciar desenvolvimento |
+| `npx prisma migrate dev` | `docker compose exec app npx prisma migrate dev` | Migrations do Prisma |
+| `npx prisma studio` | `docker compose exec app npx prisma studio` | Prisma Studio |
+| `npm run build` | `docker compose exec app npm run build` | Build da aplicação |
+| `npm test` | `docker compose exec app npm test` | Executar testes |
+| `npx eslint .` | `docker compose exec app npx eslint .` | Linting |
 
 ---
 
@@ -171,24 +198,44 @@ export function Button({ label, onClick }: ButtonProps) {
 
 ## 🐳 5. Docker e Containers
 
-- Criar `Dockerfile` otimizado:
+### 🎯 Configuração Padrão para Projetos Maiores
+
+**OBRIGATÓRIO**: Todo projeto maior deve ter configuração Docker completa:
+
+- **Dockerfile multi-stage** otimizado:
 ```dockerfile
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --frozen-lockfile
+RUN npm ci --only=production && npm cache clean --force
 
 COPY . .
-
 RUN npm run build
 
+# Production stage  
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
 EXPOSE 3000
-CMD ["npm", "start"]
+ENV PORT 3000
+
+CMD ["node", "server.js"]
 ```
 
-- Criar `docker-compose.yml` para banco + app:
+- **docker-compose.yml** para desenvolvimento:
 ```yaml
 version: "3.9"
 services:
@@ -196,18 +243,55 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: appdb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
 
   app:
-    build: .
+    build: 
+      context: .
+      target: builder  # Para desenvolvimento, usar stage builder
     restart: always
-    env_file: .env
+    env_file: .env.development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+
+volumes:
+  db_data:
+```
+
+- **docker-compose.prod.yml** para produção:
+```yaml
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      target: runner  # Para produção, usar stage runner
+    restart: always
+    env_file: .env.production
     ports:
       - "3000:3000"
     depends_on:
@@ -215,6 +299,35 @@ services:
 
 volumes:
   db_data:
+```
+
+### 🚀 Comandos Docker Essenciais
+
+```bash
+# Setup inicial do projeto
+docker compose build                     # Build dos containers
+docker compose up -d db                 # Subir apenas banco
+docker compose exec app npx prisma migrate dev  # Aplicar migrations
+
+# Desenvolvimento diário
+docker compose up app                    # Iniciar desenvolvimento (com logs)
+docker compose up -d                    # Iniciar em background
+docker compose down                     # Parar containers
+
+# Comandos de desenvolvimento
+docker compose exec app npm install [package]       # Instalar nova dependência
+docker compose exec app npx prisma studio          # Abrir Prisma Studio
+docker compose exec app npx prisma migrate dev     # Nova migration
+docker compose exec app npm run test              # Executar testes
+docker compose exec app npm run lint              # Linting
+
+# Debugging e manutenção
+docker compose logs app                 # Ver logs da aplicação
+docker compose exec app sh             # Acessar terminal do container
+docker system prune                    # Limpar images/containers não utilizados
+
+# Produção
+docker compose -f docker-compose.prod.yml up -d     # Deploy produção
 ```
 
 ---
@@ -309,14 +422,28 @@ Cada projeto deve conter:
 
 O projeto deve sempre seguir estes princípios:
 
-1. Estrutura organizada e modular.  
-2. Segurança em RBAC, envs e endpoints.  
-3. Autenticação sólida com NextAuth, Zod, bcryptjs.  
-4. Frontend componentizado com Tailwind/Radix/SCSS.  
-5. Infraestrutura com Docker e banco PostgreSQL.  
+1. **Estrutura organizada e modular**.  
+2. **Segurança em RBAC, envs e endpoints**.  
+3. **Autenticação sólida com NextAuth, Zod, bcryptjs**.  
+4. **Frontend componentizado com Tailwind/Radix/SCSS**.  
+5. **Infraestrutura Docker-first para projetos maiores**.  
 6. **Documentação clara e sempre atualizada** (especialmente docs/development/).  
-7. Testes cobrindo funcionalidades críticas.  
-8. Escalabilidade, manutenibilidade e revisão contínua.  
+7. **Testes cobrindo funcionalidades críticas**.  
+8. **Escalabilidade, manutenibilidade e revisão contínua**.  
+
+### 🐳 REGRA CRÍTICA - Docker-First Development
+
+**Para projetos maiores (multi-ambiente, produção):**
+- ✅ **OBRIGATÓRIO**: Todo desenvolvimento em containers Docker
+- ✅ **OBRIGATÓRIO**: Usar `docker compose exec app [comando]` ao invés de comandos locais
+- ✅ **OBRIGATÓRIO**: Apenas Docker e Docker Compose instalados localmente
+- ❌ **PROIBIDO**: Instalar Node.js, npm, Prisma localmente
+
+**Critérios para Docker:**
+- Projetos com banco de dados → **Docker OBRIGATÓRIO**
+- Projetos em equipe (+ de 1 dev) → **Docker OBRIGATÓRIO**  
+- Projetos com múltiplos ambientes → **Docker OBRIGATÓRIO**
+- Protótipos individuais → **Docker OPCIONAL**
 
 ### 🚨 REGRA CRÍTICA - Documentação de Desenvolvimento
 
