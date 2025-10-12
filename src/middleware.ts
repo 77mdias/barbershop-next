@@ -20,12 +20,13 @@ export async function middleware(request: NextRequest) {
   const isDashboardPage = pathname.startsWith("/dashboard");
   const isSchedulingPage = pathname.startsWith("/scheduling");
 
-  // Definir rotas públicas que não precisam de autenticação
+  // Rotas públicas que não precisam de autenticação
   const publicRoutes = [
     "/",
     "/gallery",
     "/about",
     "/contact",
+    "/auth-required",
     "/client-review-demo",
     "/test-reviews-real",
     "/reviews",
@@ -48,15 +49,25 @@ export async function middleware(request: NextRequest) {
 
   // Proteger páginas que requerem autenticação
   if (!isAuth && (isProfilePage || isDashboardPage || isSchedulingPage)) {
-    logger.auth.warn("Access denied - redirecting to login", { pathname });
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
+    logger.auth.warn("Access denied - showing auth warning", { pathname });
+
+    const authRequiredUrl = new URL("/auth-required", request.url);
+    authRequiredUrl.searchParams.set("target", pathname);
+    authRequiredUrl.searchParams.set("redirect", "/auth/signin");
+
+    return NextResponse.redirect(authRequiredUrl);
   }
 
-  // Proteger páginas de admin (verificar role)
+  // Proteger páginas de admin
   if (isAdminPage) {
     if (!isAuth) {
       logger.auth.warn("Admin access denied - not authenticated", { pathname });
-      return NextResponse.redirect(new URL("/auth/signin", request.url));
+
+      const authRequiredUrl = new URL("/auth-required", request.url);
+      authRequiredUrl.searchParams.set("target", "Área Administrativa");
+      authRequiredUrl.searchParams.set("redirect", "/auth/signin");
+
+      return NextResponse.redirect(authRequiredUrl);
     }
 
     const userRole = token?.role as string;
@@ -75,14 +86,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

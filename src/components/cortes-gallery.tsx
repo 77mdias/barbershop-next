@@ -4,26 +4,7 @@ import { Gallery, type GalleryImage } from "@/components/gallery";
 
 // Dados das imagens da galeria
 const galleryImages: GalleryImage[] = [
-  {
-    src: "/images/cortes/corte-americano2.jpg",
-    alt: "Corte Americano Clássico",
-    title: "Corte Americano Clássico"
-  },
-  {
-    src: "/images/cortes/corte-americano3.jpg",
-    alt: "Corte Americano Moderno",
-    title: "Corte Americano Moderno"
-  },
-  {
-    src: "/images/cortes/cortes-americano.jpg",
-    alt: "Corte Americano Tradicional",
-    title: "Corte Americano Tradicional"
-  },
-  {
-    src: "/images/cortes/corte.jpg",
-    alt: "Corte Clássico",
-    title: "Corte Clássico"
-  },
+  
   {
     src: "/images/cortes/corteluz.jpg",
     alt: "Corte com Luzes",
@@ -78,7 +59,7 @@ const galleryImages: GalleryImage[] = [
  */
 export function CortesGallerySection() {
   return (
-    <section className="py-8 px-4">
+    <section className="space-y-8 px-4">
       <div className="max-w-7xl mx-auto">
         <Gallery
           images={galleryImages}
