@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReviewForm } from '@/components/ReviewForm';
 import { ReviewsList } from '@/components/ReviewsList';
 import { Separator } from '@/components/ui/separator';
+import { ReviewSystemManager } from '@/components/ReviewSystemManager';
 
 export default async function ReviewsPage() {
   const session = await getServerSession(authOptions);
@@ -16,7 +17,7 @@ export default async function ReviewsPage() {
   }
 
   return (
-    <div className="container mt-12 mb-8 mx-auto py-8 px-4">
+    <div className="container mt-12 mb-16 mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
@@ -77,33 +78,7 @@ export default async function ReviewsPage() {
           </TabsContent>
 
           <TabsContent value="form" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Demonstração do Formulário</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Esta é uma demonstração do formulário de avaliação. 
-                  Para usar em produção, é necessário fornecer um serviceHistoryId válido.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-yellow-800">
-                    <strong>Nota:</strong> Este formulário está em modo de demonstração. 
-                    Para funcionar completamente, é necessário:
-                  </p>
-                  <ul className="list-disc list-inside text-sm text-yellow-700 mt-2 space-y-1">
-                    <li>Um histórico de serviço válido (serviceHistoryId)</li>
-                    <li>Que o usuário tenha permissão para avaliar o serviço</li>
-                    <li>Que o serviço não tenha sido avaliado anteriormente</li>
-                  </ul>
-                </div>
-                
-                {/* Formulário de demonstração com serviceHistoryId fictício */}
-                <ReviewForm
-                  serviceHistoryId="demo-service-history-id"
-                />
-              </CardContent>
-            </Card>
+            <ReviewSystemManager userId={session.user.id} />
           </TabsContent>
 
           <TabsContent value="stats" className="space-y-6">

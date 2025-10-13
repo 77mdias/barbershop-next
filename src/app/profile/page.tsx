@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/bottom-navigation";
+import { ProfileMenuItem } from "@/components/ui/profile-menu-item";
 import { cn } from "@/lib/utils";
 import styles from "@/app/profile/page.module.scss";
 
@@ -17,6 +18,11 @@ import styles from "@/app/profile/page.module.scss";
  */
 export default function Profile() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleNavigation = (href: string) => {
+    router.push(href);
+  };
 
   // Itens da navegação inferior (mesmo da home)
   const navigationItems = [
@@ -183,126 +189,96 @@ export default function Profile() {
             Profile Settings
           </h2>
 
-          {/* Menu items */}
+          {/* Menu items refatorados com ProfileMenuItem */}
           <div className="space-y-3">
-            <div
-              className={cn(
-                "flex items-center justify-between text-[var(--foreground)] p-4 rounded-lg border",
-                styles.profileContent__menuItem
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                    />
-                  </svg>
-                </div>
-                <span className="text-[--text] font-medium">
-                  Friend & Social
-                </span>
-              </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
+            <ProfileMenuItem
+              icon={
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  />
+                </svg>
+              }
+              label="Friend & Social"
+              className={styles.profileContent__menuItem}
+            />
 
-            <div
-              className={cn(
-                "flex items-center justify-between p-4 rounded-lg border",
-                styles.profileContent__menuItem
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                    />
-                  </svg>
-                </div>
-                <span className="text-[--text] font-medium">Feedback</span>
-              </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
+            <ProfileMenuItem
+              icon={
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              }
+              label="Feedback"
+              onClick={() => handleNavigation('/dashboard')}
+              className={styles.profileContent__menuItem}
+            />
 
-            <div
-              className={cn(
-                "flex items-center justify-between p-4 rounded-lg border",
-                styles.profileContent__menuItem
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-                    />
-                  </svg>
-                </div>
-                <span className="text-[--text] font-medium">Gift Card</span>
-              </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
+            <ProfileMenuItem
+              icon={
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12Z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22"
+                  />
+                </svg>
+              }
+              label="Meu Dashboard"
+              href="/dashboard"
+              className={styles.profileContent__menuItem}
+            />
+
+            <ProfileMenuItem
+              icon={
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                  />
+                </svg>
+              }
+              label="Gift Card"
+              href="/gift-card"
+              className={styles.profileContent__menuItem}
+            />
           </div>
         </div>
 
@@ -332,9 +308,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Navegação inferior */}
+      <BottomNavigation items={navigationItems} />
     </div>
   );
-  {
-    /* Navegação inferior */
-  }
 }
