@@ -53,17 +53,43 @@ export async function POST(request: NextRequest) {
     });
 
     if (!service) {
-      service = await db.service.create({
-        data: {
-          name: "Corte de Cabelo Clássico",
-          description:
-            "Corte de cabelo tradicional com acabamento profissional",
-          price: 25.0,
-          duration: 30,
-          active: true,
-        },
+      // Criar múltiplos serviços para demo mais rica
+      const services = await db.service.createMany({
+        data: [
+          {
+            name: "Corte de Cabelo Clássico",
+            description:
+              "Corte de cabelo tradicional com acabamento profissional",
+            price: 25.0,
+            duration: 30,
+            active: true,
+          },
+          {
+            name: "Barba + Bigode",
+            description: "Aparação e modelagem de barba e bigode",
+            price: 20.0,
+            duration: 25,
+            active: true,
+          },
+          {
+            name: "Corte + Barba Completo",
+            description: "Pacote completo com corte de cabelo e barba",
+            price: 40.0,
+            duration: 50,
+            active: true,
+          },
+        ],
       });
-      console.log("✅ Serviço criado:", service.id);
+
+      // Buscar o primeiro serviço criado
+      service = await db.service.findFirst({
+        where: { active: true },
+      });
+      console.log("✅ Serviços criados para demo");
+    }
+
+    if (!service) {
+      throw new Error("Não foi possível criar ou encontrar serviços");
     }
 
     // Buscar ou criar um barbeiro

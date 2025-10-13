@@ -88,6 +88,13 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
   if (serviceHistoryId) {
     return (
       <div className="space-y-6">
+        {/* Badge de Demo */}
+        <div className="flex items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+            🎪 MODO DEMONSTRAÇÃO
+          </div>
+        </div>
+
         {message && (
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
@@ -103,14 +110,17 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              Avaliar Serviço
+              Avaliar Serviço (Demo)
             </CardTitle>
+            <p className="text-sm text-gray-600">
+              Este formulário está conectado a um histórico de serviço simulado para demonstração
+            </p>
           </CardHeader>
           <CardContent>
             <ReviewForm
               serviceHistoryId={serviceHistoryId}
               onSuccess={() => {
-                setMessage('✅ Avaliação enviada com sucesso!');
+                setMessage('✅ Avaliação enviada com sucesso! (Dados de demonstração)');
                 setServiceHistoryId(null); // Reset para permitir nova avaliação
               }}
             />
@@ -125,32 +135,40 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Info className="w-5 h-5 text-blue-600" />
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+            DEMO
+          </div>
           Sistema de Avaliações
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            Para fazer uma avaliação, você precisa ter um histórico de serviço concluído. 
-            Como esta é uma demonstração, vamos criar um histórico de teste para você.
-          </p>
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-blue-900 mb-1">Modo Demonstração</h4>
+              <p className="text-sm text-blue-800">
+                Em um ambiente real, os clientes avaliariam apenas serviços que foram concluídos. 
+                Para esta demonstração, vamos simular um histórico de serviço concluído.
+              </p>
+            </div>
+          </div>
         </div>
         
         <Button 
           onClick={createTestData}
           disabled={isCreatingTestData}
-          className="w-full"
+          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
         >
           {isCreatingTestData ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Criando histórico de serviço...
+              Criando histórico de demonstração...
             </>
           ) : (
             <>
               <Database className="w-4 h-4 mr-2" />
-              Criar Histórico de Serviço para Demonstração
+              🎪 Criar Dados de Demonstração
             </>
           )}
         </Button>
