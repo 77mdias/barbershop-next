@@ -309,8 +309,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Navegação inferior */}
-      <BottomNavigation items={navigationItems} />
     </div>
   );
 }
