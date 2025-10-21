@@ -6,10 +6,6 @@ Este guia explica como usar Docker para desenvolvimento e produção do projeto 
 
 ## 📋 Pré-requisitos
 
-- **Docker** 20.10+
-- **Docker Compose** 2.0+
-- **Git** para clonar o repositório
-
 ## 🚀 Quick Start
 
 ### 1. Clone e Configure
@@ -110,40 +106,25 @@ barbershop-next/
 
 ### Desenvolvimento
 
-- **Hot reload** ativado
-- **Prisma Studio** disponível na porta 5555 (executado no container app)
-- **PostgreSQL** exposto na porta 5432
-- **Volumes** montados para desenvolvimento local
-- **Container root** para compatibilidade com volumes
-- **⚠️ Configuração simplificada** - NÃO usar em produção
-
 ### Produção
-
-- **Build otimizado** com multi-stage
-- **Imagem mínima** (~200MB)
-- **Security hardening** aplicado
-- **Health checks** configurados
-- **NGINX proxy** opcional
-- **Resource limits** aplicados
-- **Usuário não-root** obrigatório
 
 ## 📊 Serviços Disponíveis
 
 ### Desenvolvimento
 
-| Serviço | URL/Porta | Descrição |
-|---------|-----------|-----------|
-| Next.js | http://localhost:3000 | Aplicação principal |
-| Prisma Studio | http://localhost:5555 | Interface do banco |
-| PostgreSQL | localhost:5432 | Banco de dados |
+| Serviço       | URL/Porta             | Descrição           |
+| ------------- | --------------------- | ------------------- |
+| Next.js       | http://localhost:3000 | Aplicação principal |
+| Prisma Studio | http://localhost:5555 | Interface do banco  |
+| PostgreSQL    | localhost:5432        | Banco de dados      |
 
 ### Produção
 
-| Serviço | URL/Porta | Descrição |
-|---------|-----------|-----------|
-| Next.js | http://localhost:3000 | Aplicação principal |
-| NGINX | http://localhost:80 | Proxy reverso (opcional) |
-| PostgreSQL | Interno | Banco de dados |
+| Serviço    | URL/Porta             | Descrição                |
+| ---------- | --------------------- | ------------------------ |
+| Next.js    | http://localhost:3000 | Aplicação principal      |
+| NGINX      | http://localhost:80   | Proxy reverso (opcional) |
+| PostgreSQL | Interno               | Banco de dados           |
 
 ## 🗄️ Banco de Dados
 
@@ -219,7 +200,7 @@ docker-compose up -d
 
 ### Erro "unknown flag: --profile"
 
- Este erro foi corrigido na versão atual. Se ainda ocorrer:
+Este erro foi corrigido na versão atual. Se ainda ocorrer:
 
 ```bash
 # Verificar versão do Docker Compose
@@ -242,31 +223,11 @@ sleep 10
 
 ### Desenvolvimento
 
-- **Isolamento**: Containers isolados da rede host
-- **Volumes limitados**: Apenas código do projeto montado
-- **Rede interna**: Comunicação entre containers via rede Docker
-- **⚠️ Root user**: Container roda como root para compatibilidade de volumes
-- **🚨 IMPORTANTE**: Esta configuração é APENAS para desenvolvimento local
-
 ### Produção
-
-- **Multi-stage build**: Reduz superfície de ataque
-- **Imagem mínima**: Alpine Linux como base
-- **Usuário não-root**: Containers rodando como usuário restrito
-- **NGINX com rate limiting**: Proteção contra ataques
-- **Headers de segurança**: Configurados automaticamente
-- **Health checks ativos**: Monitoramento de saúde dos serviços
-- **Resource limits**: Prevenção de DoS por consumo de recursos
 
 ## 📈 Performance
 
 ### Otimizações Aplicadas
-
-- **Layer caching** eficiente
-- **Multi-stage build** para produção
-- **NGINX gzip** compression
-- **Keep-alive** connections
-- **Static files** caching
 
 ### Monitoramento
 
@@ -299,7 +260,3 @@ docker-compose logs nginx
 Ver arquivo `.github/workflows/` para exemplos de automação.
 
 ## 📚 Referências
-
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
-- [Next.js Docker Guide](https://nextjs.org/docs/deployment#docker-image)
