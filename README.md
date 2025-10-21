@@ -337,56 +337,89 @@ Card para exibir ofertas especiais com desconto e período.
 
 ## 📚 Documentação
 
-### 📖 Documentação Principal
+> **🚀 Início Rápido?** Veja [QUICK-START.md](./QUICK-START.md) para setup em 5 minutos!
 
-| Documento | Descrição |
-|-----------|-----------|
-| [SETUP-DOCKER.md](./SETUP-DOCKER.md) | Guia completo de setup Docker |
-| [DOCKER.md](./DOCKER.md) | Comandos e uso do Docker |
-| [INSTALL.md](./INSTALL.md) | Instalação por distribuição |
-| [SECURITY.md](./SECURITY.md) | Segurança e melhores práticas |
-| [CONFIGURAR-EMAIL.md](./CONFIGURAR-EMAIL.md) | Setup de email (Gmail) |
+### 📖 Documentação Essencial
+
+| Documento | Descrição | Para Quem |
+|-----------|-----------|-----------|
+| **[QUICK-START.md](./QUICK-START.md)** ⚡ | Setup em 5 minutos | Todos |
+| **[PROJECT-STATUS.md](./PROJECT-STATUS.md)** 📊 | Status completo do projeto | PO, Leads |
+| **[CONTRIBUTING.md](./CONTRIBUTING.md)** 🤝 | Guia de contribuição | Devs |
+| **[SETUP-DOCKER.md](./SETUP-DOCKER.md)** 🐳 | Setup Docker completo | Devs |
+| **[DOCKER.md](./DOCKER.md)** 🐋 | Comandos Docker | Devs |
+| **[INSTALL.md](./INSTALL.md)** 💻 | Instalação por OS | Devs |
+| **[SECURITY.md](./SECURITY.md)** 🔒 | Considerações de segurança | Todos |
+| **[CONFIGURAR-EMAIL.md](./CONFIGURAR-EMAIL.md)** 📧 | Setup de email | Devs |
 
 ### 🗂️ Documentação por Categoria
 
-#### 🐳 Docker
-- [/docs/docker/README.md](/docs/docker/README.md) - Overview completo
-- [/docs/docker/GUIA-MULTI-STAGE.md](/docs/docker/GUIA-MULTI-STAGE.md) - Build multi-stage
-- [/docs/docker/PRODUCTION.md](/docs/docker/PRODUCTION.md) - Deploy em produção
-- [/docs/docker/COMANDOS-RAPIDOS.md](/docs/docker/COMANDOS-RAPIDOS.md) - Referência rápida
+#### 🐳 Docker & DevOps
+- **[DOCKER.md](./DOCKER.md)** - Guia detalhado de uso
+- **[SETUP-DOCKER.md](./SETUP-DOCKER.md)** - Setup completo com checklist
+- **[/docs/docker/README.md](./docs/docker/README.md)** - Overview completo
+- **[/docs/docker/GUIA-MULTI-STAGE.md](./docs/docker/GUIA-MULTI-STAGE.md)** - Build multi-stage
+- **[/docs/docker/PRODUCTION.md](./docs/docker/PRODUCTION.md)** - Deploy em produção
+- **[/docs/docker/COMANDOS-RAPIDOS.md](./docs/docker/COMANDOS-RAPIDOS.md)** - Referência rápida
 
 #### 🗄️ Database & Prisma
-- [/docs/database/GUIA-DESENVOLVIMENTO.md](/docs/database/GUIA-DESENVOLVIMENTO.md) - Desenvolvimento com banco
-- [/docs/database/EXEMPLOS-PRATICOS.md](/docs/database/EXEMPLOS-PRATICOS.md) - Casos de uso
-- [/docs/database/SCRIPTS.md](/docs/database/SCRIPTS.md) - Scripts npm
-- [/docs/exemplos-consultas-prisma.md](/docs/exemplos-consultas-prisma.md) - Queries Prisma
-- [/docs/estudo-modelo-dados.md](/docs/estudo-modelo-dados.md) - Modelo de dados
+- **[/docs/database/GUIA-DESENVOLVIMENTO.md](./docs/database/GUIA-DESENVOLVIMENTO.md)** - Desenvolvimento com banco
+- **[/docs/database/EXEMPLOS-PRATICOS.md](./docs/database/EXEMPLOS-PRATICOS.md)** - Casos de uso
+- **[/docs/database/SCRIPTS.md](./docs/database/SCRIPTS.md)** - Scripts npm
+- **[/docs/exemplos-consultas-prisma.md](./docs/exemplos-consultas-prisma.md)** - Queries Prisma
+- **[/docs/estudo-modelo-dados.md](./docs/estudo-modelo-dados.md)** - Modelo de dados
 
 #### 👥 Sistema & Features
-- [/docs/roles-permissions.md](/docs/roles-permissions.md) - Roles e permissões
-- [/docs/regras-negocio.md](/docs/regras-negocio.md) - Regras de negócio
-- [/docs/fluxos-vales-fidelidade.md](/docs/fluxos-vales-fidelidade.md) - Vouchers e fidelidade
-- [/docs/review-system.md](/docs/review-system.md) - Sistema de reviews
-- [/docs/upload-system.md](/docs/upload-system.md) - Upload de imagens
-- [/docs/SISTEMA-AGENDAMENTO.md](/docs/SISTEMA-AGENDAMENTO.md) - Agendamentos
+- **[/docs/review-system.md](./docs/review-system.md)** - Sistema de reviews completo
+- **[/docs/upload-system.md](./docs/upload-system.md)** - Upload de imagens
+- **[/docs/roles-permissions.md](./docs/roles-permissions.md)** - Roles e permissões
+- **[/docs/regras-negocio.md](./docs/regras-negocio.md)** - Regras de negócio
+- **[/docs/fluxos-vales-fidelidade.md](./docs/fluxos-vales-fidelidade.md)** - Vouchers e fidelidade
+- **[/docs/SISTEMA-AGENDAMENTO.md](./docs/SISTEMA-AGENDAMENTO.md)** - Sistema de agendamentos
 
 #### 📊 Dashboards & API
-- [/docs/dashboard-admin.md](/docs/dashboard-admin.md) - Dashboard Admin
-- [/docs/dashboard-barber.md](/docs/dashboard-barber.md) - Dashboard Barbeiro
-- [/docs/api-examples.md](/docs/api-examples.md) - Exemplos de API
-- [/docs/test-flows.md](/docs/test-flows.md) - Testes de fluxos
+- **[/docs/dashboard-admin.md](./docs/dashboard-admin.md)** - Dashboard Admin (planejado)
+- **[/docs/dashboard-barber.md](./docs/dashboard-barber.md)** - Dashboard Barbeiro
+- **[/docs/api-examples.md](./docs/api-examples.md)** - Exemplos de API
+- **[/docs/test-flows.md](./docs/test-flows.md)** - Testes de fluxos
 
 #### 🛠️ Desenvolvimento
-- [/docs/development/README.md](/docs/development/README.md) - Overview
-- [/docs/development/ROADMAP.md](/docs/development/ROADMAP.md) - Roadmap do projeto
-- [/docs/development/TASKS.md](/docs/development/TASKS.md) - Tasks e issues
-- [/docs/development/CHANGELOG.md](/docs/development/CHANGELOG.md) - Histórico de mudanças
+- **[/docs/development/README.md](./docs/development/README.md)** - Overview de desenvolvimento
+- **[/docs/development/ROADMAP.md](./docs/development/ROADMAP.md)** - Roadmap completo do projeto
+- **[/docs/development/TASKS.md](./docs/development/TASKS.md)** - Tasks e issues atuais
+- **[/docs/development/CHANGELOG.md](./docs/development/CHANGELOG.md)** - Histórico de mudanças
 
 #### 📚 Guias de Estudo
-- [/docs/estudo/README.md](/docs/estudo/README.md) - Index de estudos
-- [/docs/estudo/01-prisma-conceitos-fundamentais.md](/docs/estudo/01-prisma-conceitos-fundamentais.md)
-- [/docs/estudo/02-docker-conceitos-fundamentais.md](/docs/estudo/02-docker-conceitos-fundamentais.md)
-- [Mais guias...](/docs/estudo/)
+- **[/docs/estudo/README.md](./docs/estudo/README.md)** - Index de guias
+- **[/docs/estudo/01-prisma-conceitos-fundamentais.md](./docs/estudo/01-prisma-conceitos-fundamentais.md)** - Prisma
+- **[/docs/estudo/02-docker-conceitos-fundamentais.md](./docs/estudo/02-docker-conceitos-fundamentais.md)** - Docker
+- **[/docs/estudo/11-START-PROJECTS-DOCKER-GUIDE.md](./docs/estudo/11-START-PROJECTS-DOCKER-GUIDE.md)** - Guia completo
+- **[E mais 7 guias...](./docs/estudo/)** - Conceitos fundamentais
+
+---
+
+### 🎯 Documentação por Persona
+
+#### 👨‍💼 Para Product Owners
+1. **[PROJECT-STATUS.md](./PROJECT-STATUS.md)** - Visão executiva completa
+2. **[ROADMAP.md](./docs/development/ROADMAP.md)** - Planejamento e cronograma
+3. **[TASKS.md](./docs/development/TASKS.md)** - Status das tasks
+
+#### 👨‍💻 Para Desenvolvedores
+1. **[QUICK-START.md](./QUICK-START.md)** - Setup em 5 minutos
+2. **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Como contribuir
+3. **[SETUP-DOCKER.md](./SETUP-DOCKER.md)** - Ambiente de desenvolvimento
+4. **[/docs/development/](./docs/development/)** - Documentação técnica
+
+#### 🎨 Para Designers
+1. **[README.md](./README.md)** - Overview do projeto
+2. **Design System** - Documentação em desenvolvimento
+3. **Componentes UI** - `/src/components/ui/`
+
+#### 🔒 Para DevOps
+1. **[SECURITY.md](./SECURITY.md)** - Segurança
+2. **[/docs/docker/PRODUCTION.md](./docs/docker/PRODUCTION.md)** - Deploy
+3. **[/docs/docker/](./docs/docker/)** - Docker avançado
 
 ## 📝 Licença
 
