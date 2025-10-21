@@ -25,7 +25,12 @@ Este projeto segue as boas práticas do agente de IA para estudo e documentaçã
 - 📱 **Mobile-first** e totalmente responsivo
 - 🎨 **Componentes reutilizáveis** baseados em shadcn/ui
 - 🔧 **TypeScript** para type safety
-- 🎯 **Performance otimizada** com Next.js 14
+- 🎯 **Performance otimizada** com Next.js 15
+- 🔐 **Autenticação completa** com NextAuth.js (GitHub, Google, Credentials)
+- 🗄️ **Database** PostgreSQL com Prisma ORM
+- 🐳 **Docker** ambiente de desenvolvimento e produção
+- ⭐ **Sistema de Reviews** completo com upload de imagens
+- 📊 **Dashboards** personalizados por tipo de usuário
 - 🌙 **Suporte a Dark Mode** (preparado)
 
 ## 📸 Preview
@@ -34,104 +39,158 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 
 - 🏠 **Home**: Visão geral dos serviços e ofertas
 - 🔍 **Busca**: Encontrar serviços e salões próximos
-- 📅 **Agendamentos**: Sistema de reservas (em desenvolvimento)
+- 📅 **Agendamentos**: Sistema completo de reservas
 - 👤 **Perfil**: Gerenciamento de conta do usuário
+- ⭐ **Reviews**: Sistema de avaliações com upload de fotos
+- 📊 **Dashboard**: Painel personalizado para clientes e barbeiros
 
 ## 🛠️ Stack Tecnológica
 
 ### Frontend
-- **Next.js 14** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Utility-first CSS framework
+- **Next.js 15** - Framework React com App Router
+- **TypeScript 5** - Tipagem estática
+- **Tailwind CSS 3.4** - Utility-first CSS framework
 - **SCSS Modules** - Estilização avançada para componentes
+
+### Backend & Database
+- **Prisma ORM 6.17** - Type-safe database client
+- **PostgreSQL** - Database relacional
+- **NextAuth.js 4.24** - Autenticação completa
+- **Zod 4.1** - Validação de schemas
 
 ### UI/UX
 - **shadcn/ui** - Componentes base acessíveis
 - **Radix UI** - Primitivos de UI
 - **Lucide React** - Ícones modernos
 - **clsx + tailwind-merge** - Gerenciamento de classes
+- **React Hook Form 7.63** - Gerenciamento de formulários
+
+### DevOps
+- **Docker & Docker Compose** - Containerização
+- **ESLint 9** - Linting
+- **Nodemailer** - Sistema de emails
 
 ## 📦 Instalação e Uso
 
 ### Pré-requisitos
 
-- Node.js 18+ 
-- npm, yarn, pnpm ou bun
+- **Docker 20.10+** e **Docker Compose 2.0+** (Recomendado)
+- Ou **Node.js 20+** e **npm/yarn/pnpm/bun**
+- **PostgreSQL 14+** (se não usar Docker)
+
+### 🐳 Instalação com Docker (Recomendado)
+
+Este projeto utiliza Docker como ambiente principal de desenvolvimento. Consulte o guia completo:
+- 📖 [SETUP-DOCKER.md](./SETUP-DOCKER.md) - Guia completo de configuração
+- 📖 [INSTALL.md](./INSTALL.md) - Instalação do Docker
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/77mdias/barbershop-next.git
+cd barbershop-next
+
+# 2. Configure ambiente
+cp .env.example .env.development
+# Edite .env.development com suas configurações
+
+# 3. Inicie com Docker
+npm run docker:dev
+
+# 4. Execute migrações e seed
+npm run docker:dev:migrate
+npm run docker:dev:seed
+
+# 5. Acesse a aplicação
+# http://localhost:3000
+```
 
 ### Login Social e Sessão
 
 O sistema suporta login via GitHub, Google e credenciais. Após rodar o seed, é necessário criar uma nova conta ou usar as contas de teste do seed. Se estiver logado com uma conta antiga, faça logout e registre novamente para evitar erros de sessão.
 
-Contas de teste:
+**Contas de teste**:
 - Admin: `admin@barbershop.com` / senha: `admin123`
 - Barbeiro: `joao@barbershop.com` / senha: `barbeiro123`
 - Cliente: `carlos@email.com` / senha: `cliente123`
 
-### Passos
+### 💻 Instalação Local (Sem Docker)
 
-1. **Clone o repositório**
+Se preferir desenvolvimento local sem Docker:
+
 ```bash
-git clone https://github.com/seu-usuario/barbershop-next.git
+# 1. Clone o repositório
+git clone https://github.com/77mdias/barbershop-next.git
 cd barbershop-next
-```
 
-2. **Instale as dependências**
-```bash
+# 2. Instale as dependências
 npm install
-# ou
-yarn install
-# ou
-pnpm install
-# ou
-bun install
-```
 
-3. **Execute o servidor de desenvolvimento**
-```bash
+# 3. Configure ambiente
+cp .env.example .env.development
+# Configure DATABASE_URL e outras variáveis
+
+# 4. Execute migrações
+npm run db:migrate
+
+# 5. Popule o banco (opcional)
+npm run db:seed
+
+# 6. Execute o servidor de desenvolvimento
 npm run dev
-# ou
-yarn dev
-# ou
-pnpm dev
-# ou
-bun dev
+
+# 7. Abra no navegador
+# http://localhost:3000
 ```
 
-4. **Abra no navegador**
-```
-http://localhost:3000
-```
+⚠️ **Importante**: Você precisará de PostgreSQL rodando localmente ou em servidor remoto.
 
-## 🐳 Docker (Opcional)
+## 🐳 Docker - Comandos Principais
 
-Consulte também:
-- [Guia Multi-Stage Docker](/docs/docker/GUIA-MULTI-STAGE.md)
+### Desenvolvimento
 
-### Método 1: Script Manager (Recomendado)
 ```bash
-# Desenvolvimento completo
-./scripts/docker-manager.sh up dev
+# Subir ambiente
+npm run docker:dev
 
-# Prisma Studio
-./scripts/docker-manager.sh studio dev
+# Ver logs
+npm run docker:dev:logs
+
+# Acessar shell do container
+npm run docker:dev:shell
+
+# Executar migrações
+npm run docker:dev:migrate
+
+# Executar seed
+npm run docker:dev:seed
+
+# Abrir Prisma Studio
+npm run docker:dev:studio
+
+# Parar containers
+npm run docker:dev:down
 ```
 
-### Método 2: Docker Compose
+### Produção
+
 ```bash
-# Desenvolvimento
-docker compose up -d
+# Deploy completo (migrações + aplicação)
+./scripts/deploy-pro.sh deploy
 
-# Produção
-docker compose -f docker-compose.prod.yml up -d
+# Ver logs
+./scripts/deploy-pro.sh logs
+
+# Status dos serviços
+./scripts/deploy-pro.sh status
 ```
 
-### Targets Disponíveis
-- `deps`: Base de dependências (cache otimizado)
-- `dev`: Desenvolvimento com hot reload
-- `builder`: Build de produção  
-- `prod`: Imagem final de produção
+### Documentação Completa
 
-> 📖 **Documentação completa:** [Docker Multi-Stage Guide](/docs/docker/GUIA-MULTI-STAGE.md)
+- 📖 [SETUP-DOCKER.md](./SETUP-DOCKER.md) - Setup completo e checklist
+- 📖 [DOCKER.md](./DOCKER.md) - Guia detalhado de uso
+- 📖 [INSTALL.md](./INSTALL.md) - Instalação do Docker por distribuição
+- 📖 [SECURITY.md](./SECURITY.md) - Considerações de segurança
+- 📖 [/docs/docker/](./docs/docker/) - Documentação técnica detalhada
 
 ## 📁 Estrutura do Projeto
 
@@ -192,14 +251,36 @@ src/
 
 ```bash
 # Desenvolvimento
-npm run dev          # Inicia servidor de desenvolvimento
-
-# Build
-npm run build        # Gera build de produção
-npm run start        # Inicia servidor de produção
+npm run dev                    # Inicia servidor de desenvolvimento
+npm run build                  # Gera build de produção
+npm run start                  # Inicia servidor de produção
 
 # Qualidade de código
-npm run lint         # Executa ESLint
+npm run lint                   # Executa ESLint
+npm run lint:fix              # Corrige problemas automaticamente
+npm run type-check            # Verifica tipos TypeScript
+npm run validate              # Lint + Type check
+
+# Database (Local)
+npm run db:migrate            # Executa migrações
+npm run db:push               # Push do schema para banco
+npm run db:seed               # Popula banco com dados de teste
+npm run db:studio             # Abre Prisma Studio
+npm run db:reset              # Reset completo do banco
+
+# Docker (Desenvolvimento)
+npm run docker:dev            # Sobe containers de dev
+npm run docker:dev:down       # Para containers
+npm run docker:dev:logs       # Ver logs
+npm run docker:dev:shell      # Acessa shell do container
+npm run docker:dev:migrate    # Migrações no Docker
+npm run docker:dev:seed       # Seed no Docker
+npm run docker:dev:studio     # Prisma Studio no Docker
+
+# Docker (Produção)
+npm run docker:prod           # Sobe containers de prod
+npm run docker:status         # Status de todos containers
+npm run docker:clean          # Limpeza completa
 ```
 
 ## 📱 Responsividade
@@ -221,50 +302,117 @@ Card para exibir informações de salões próximos com avaliações.
 ### OfferCard
 Card para exibir ofertas especiais com desconto e período.
 
-## 🎯 Próximas Features
+## 🎯 Status do Projeto
 
-### Em Desenvolvimento
-- [ ] Sistema de autenticação (NextAuth.js)
-- [ ] Integração com banco de dados (Prisma)
-- [ ] Sistema de agendamentos
-- [ ] Pagamentos online (Stripe)
+### ✅ Implementado (87.5% das Features Principais)
 
-### Dashboard e Controle
-- [ ] Dashboard do Admin: gestão de usuários, serviços, relatórios
-- [ ] Dashboard do Barbeiro: agenda, disponibilidade, controle de agendamentos
+- ✅ **Sistema de autenticação** (NextAuth.js com GitHub, Google, Credentials)
+- ✅ **Integração com banco de dados** (Prisma + PostgreSQL)
+- ✅ **Sistema de agendamentos** completo
+- ✅ **Dashboard do Cliente** com estatísticas e gestão de reviews
+- ✅ **Dashboard do Barbeiro** com analytics e métricas
+- ✅ **Sistema de Reviews** completo com upload de imagens
+- ✅ **Sistema de Roles** (CLIENT, BARBER, ADMIN)
+- ✅ **Sistema de Vouchers e Promoções**
+- ✅ **Middleware de Proteção** de rotas
+- ✅ **Docker** para desenvolvimento e produção
 
-### Planejado
-- [ ] Notificações push
-- [ ] Avaliações e comentários
-- [ ] Sistema de fidelidade
-- [ ] Chat em tempo real
+### 🚧 Em Desenvolvimento (Semana Atual)
+
+- [ ] **Integração de dados reais** nos dashboards (70% - server actions ok)
+- [ ] **Sistema de notificações** integrado (20%)
+- [ ] **Loading states** e skeleton loaders (0%)
+- [ ] **Testes automatizados** (5% - apenas manuais)
+
+### 📋 Próximas Features
+
+- [ ] **Pagamentos online** (Stripe/Mercado Pago)
+- [ ] **Notificações push**
+- [ ] **Sistema de fidelidade** avançado
+- [ ] **Chat em tempo real**
+- [ ] **Analytics avançados**
+- [ ] **Sistema de busca** com filtros
+- [ ] **PWA** capabilities
+- [ ] **Dashboard Admin** completo
 
 ## 📚 Documentação
 
-Consulte a pasta `docs/` para documentação detalhada:
+### 📖 Documentação Principal
 
-- [Docker e Ambiente](/docs/docker/README.md)
-- [Next.js e TypeScript](/docs/nextjs/README.md)
-- [Banco de Dados](/docs/database/README.md)
-- [Prisma ORM](/docs/prisma/README.md)
+| Documento | Descrição |
+|-----------|-----------|
+| [SETUP-DOCKER.md](./SETUP-DOCKER.md) | Guia completo de setup Docker |
+| [DOCKER.md](./DOCKER.md) | Comandos e uso do Docker |
+| [INSTALL.md](./INSTALL.md) | Instalação por distribuição |
+| [SECURITY.md](./SECURITY.md) | Segurança e melhores práticas |
+| [CONFIGURAR-EMAIL.md](./CONFIGURAR-EMAIL.md) | Setup de email (Gmail) |
 
-- [Dashboard Admin](/docs/dashboard-admin.md)
-- [Dashboard Barbeiro](/docs/dashboard-barber.md)
-- [Exemplos de API](/docs/api-examples.md)
-- [Papéis e Permissões](/docs/roles-permissions.md)
-- [Testes de Fluxos](/docs/test-flows.md)
+### 🗂️ Documentação por Categoria
 
-### 🗄️ Guias de Banco de Dados
+#### 🐳 Docker
+- [/docs/docker/README.md](/docs/docker/README.md) - Overview completo
+- [/docs/docker/GUIA-MULTI-STAGE.md](/docs/docker/GUIA-MULTI-STAGE.md) - Build multi-stage
+- [/docs/docker/PRODUCTION.md](/docs/docker/PRODUCTION.md) - Deploy em produção
+- [/docs/docker/COMANDOS-RAPIDOS.md](/docs/docker/COMANDOS-RAPIDOS.md) - Referência rápida
 
-- **[📋 Guia Completo de Desenvolvimento](/docs/database/GUIA-DESENVOLVIMENTO.md)** - Melhores práticas, fluxos de trabalho e procedimentos para desenvolvimento de banco de dados
-- **[🛠️ Exemplos Práticos](/docs/database/EXEMPLOS-PRATICOS.md)** - Cenários reais, casos de uso e resolução de problemas
-- **[⚙️ Scripts de Banco](/docs/database/SCRIPTS.md)** - Documentação dos scripts npm para gerenciamento de banco de dados
+#### 🗄️ Database & Prisma
+- [/docs/database/GUIA-DESENVOLVIMENTO.md](/docs/database/GUIA-DESENVOLVIMENTO.md) - Desenvolvimento com banco
+- [/docs/database/EXEMPLOS-PRATICOS.md](/docs/database/EXEMPLOS-PRATICOS.md) - Casos de uso
+- [/docs/database/SCRIPTS.md](/docs/database/SCRIPTS.md) - Scripts npm
+- [/docs/exemplos-consultas-prisma.md](/docs/exemplos-consultas-prisma.md) - Queries Prisma
+- [/docs/estudo-modelo-dados.md](/docs/estudo-modelo-dados.md) - Modelo de dados
+
+#### 👥 Sistema & Features
+- [/docs/roles-permissions.md](/docs/roles-permissions.md) - Roles e permissões
+- [/docs/regras-negocio.md](/docs/regras-negocio.md) - Regras de negócio
+- [/docs/fluxos-vales-fidelidade.md](/docs/fluxos-vales-fidelidade.md) - Vouchers e fidelidade
+- [/docs/review-system.md](/docs/review-system.md) - Sistema de reviews
+- [/docs/upload-system.md](/docs/upload-system.md) - Upload de imagens
+- [/docs/SISTEMA-AGENDAMENTO.md](/docs/SISTEMA-AGENDAMENTO.md) - Agendamentos
+
+#### 📊 Dashboards & API
+- [/docs/dashboard-admin.md](/docs/dashboard-admin.md) - Dashboard Admin
+- [/docs/dashboard-barber.md](/docs/dashboard-barber.md) - Dashboard Barbeiro
+- [/docs/api-examples.md](/docs/api-examples.md) - Exemplos de API
+- [/docs/test-flows.md](/docs/test-flows.md) - Testes de fluxos
+
+#### 🛠️ Desenvolvimento
+- [/docs/development/README.md](/docs/development/README.md) - Overview
+- [/docs/development/ROADMAP.md](/docs/development/ROADMAP.md) - Roadmap do projeto
+- [/docs/development/TASKS.md](/docs/development/TASKS.md) - Tasks e issues
+- [/docs/development/CHANGELOG.md](/docs/development/CHANGELOG.md) - Histórico de mudanças
+
+#### 📚 Guias de Estudo
+- [/docs/estudo/README.md](/docs/estudo/README.md) - Index de estudos
+- [/docs/estudo/01-prisma-conceitos-fundamentais.md](/docs/estudo/01-prisma-conceitos-fundamentais.md)
+- [/docs/estudo/02-docker-conceitos-fundamentais.md](/docs/estudo/02-docker-conceitos-fundamentais.md)
+- [Mais guias...](/docs/estudo/)
 
 ## 📝 Licença
 
 Este projeto está sob a licença MIT.
 
 ---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+### Diretrizes
+
+- Siga as convenções de código do projeto
+- Escreva testes para novas funcionalidades
+- Atualize a documentação conforme necessário
+- Siga o [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
 ## ✅ Checklist para Colaboradores
 
 - [ ] Ler o README e docs principais
@@ -273,3 +421,19 @@ Este projeto está sob a licença MIT.
 - [ ] Criar todo-list antes de implementar features
 - [ ] Sugerir múltiplas soluções para problemas
 - [ ] Manter organização dos módulos e pastas
+- [ ] Executar testes antes de submeter PR
+- [ ] Atualizar documentação relevante
+
+---
+
+## 📞 Suporte e Contato
+
+- 📧 **Issues**: [GitHub Issues](https://github.com/77mdias/barbershop-next/issues)
+- 📖 **Documentação**: [/docs](/docs)
+- 💬 **Discussões**: [GitHub Discussions](https://github.com/77mdias/barbershop-next/discussions)
+
+---
+
+**Desenvolvido com ❤️ usando Next.js 15, TypeScript, Prisma e Docker**
+
+**Status do Projeto**: 🚀 **Em desenvolvimento ativo - 87.5% das features principais implementadas**
