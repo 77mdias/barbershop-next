@@ -27,6 +27,11 @@ Este projeto segue as boas práticas do agente de IA para estudo e documentaçã
 - 🔧 **TypeScript** para type safety
 - 🎯 **Performance otimizada** com Next.js 14
 - 🌙 **Suporte a Dark Mode** (preparado)
+- ⭐ **Sistema de Reviews** completo com avaliações e imagens
+- 📊 **Dashboards Dinâmicos** com dados reais e métricas
+- 🔔 **Sistema de Notificações** integrado com Toaster
+- 💀 **Loading States** e Skeleton Loaders para melhor UX
+- 🧪 **Testes Automatizados** com Jest e Testing Library
 
 ## 📸 Preview
 
@@ -35,6 +40,9 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - 🏠 **Home**: Visão geral dos serviços e ofertas
 - 🔍 **Busca**: Encontrar serviços e salões próximos
 - 📅 **Agendamentos**: Sistema de reservas (em desenvolvimento)
+- ⭐ **Reviews**: Sistema completo de avaliações com upload de imagens
+- 📊 **Dashboard**: Painéis personalizados por tipo de usuário
+- 🖼️ **Galeria**: Galeria de trabalhos realizados
 - 👤 **Perfil**: Gerenciamento de conta do usuário
 
 ## 🛠️ Stack Tecnológica
@@ -44,12 +52,26 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - **TypeScript** - Tipagem estática
 - **Tailwind CSS** - Utility-first CSS framework
 - **SCSS Modules** - Estilização avançada para componentes
+- **React Hook Form** - Gerenciamento de formulários
+- **Zod** - Validação de schemas
+
+### Backend
+- **Next.js Server Actions** - API serverless
+- **NextAuth.js** - Autenticação multi-provider
+- **Prisma ORM** - Database toolkit
+- **PostgreSQL** - Banco de dados relacional
 
 ### UI/UX
 - **shadcn/ui** - Componentes base acessíveis
 - **Radix UI** - Primitivos de UI
 - **Lucide React** - Ícones modernos
+- **Sonner** - Sistema de notificações toast
 - **clsx + tailwind-merge** - Gerenciamento de classes
+
+### Testes
+- **Jest** - Framework de testes
+- **Testing Library** - Testes de componentes React
+- **ts-jest** - Suporte TypeScript para Jest
 
 ## 📦 Instalação e Uso
 
@@ -138,30 +160,59 @@ docker compose -f docker-compose.prod.yml up -d
 Veja também:
 - [Guia de Relacionamentos](/docs/guia-relacionamentos.md)
 - [Fluxos de Vales e Fidelidade](/docs/fluxos-vales-fidelidade.md)
+- [Sistema de Reviews](/docs/review-system.md)
+- [Sistema de Upload](/docs/upload-system.md)
 
 ```
 src/
 ├── app/                    # App Router (Next.js 14)
 │   ├── globals.css        # Estilos globais e tokens CSS
-│   ├── layout.tsx         # Layout principal
-│   └── page.tsx           # Página inicial
+│   ├── layout.tsx         # Layout principal com Toaster
+│   ├── page.tsx           # Página inicial
+│   ├── dashboard/         # Dashboards personalizados
+│   │   ├── page.tsx       # Dashboard principal (role-based)
+│   │   └── barber/        # Dashboard específico para barbeiros
+│   ├── reviews/           # Sistema de avaliações
+│   └── api/               # API routes e upload
 ├── components/            # Componentes da aplicação
 │   ├── ui/               # Componentes base reutilizáveis
 │   │   ├── button.tsx    # Componente Button
 │   │   ├── card.tsx      # Componente Card
-│   │   └── avatar.tsx    # Componente Avatar
+│   │   ├── avatar.tsx    # Componente Avatar
+│   │   ├── loading-spinner.tsx  # Spinner de carregamento
+│   │   ├── skeleton.tsx  # Skeleton loader
+│   │   ├── toast.tsx     # Sistema de toast
+│   │   └── sonner.tsx    # Componente Sonner Toaster
 │   ├── header.tsx        # Cabeçalho da aplicação
 │   ├── search-bar.tsx    # Barra de busca
 │   ├── service-card.tsx  # Card de serviços
 │   ├── offer-card.tsx    # Card de ofertas
 │   ├── salon-card.tsx    # Card de salões
+│   ├── ReviewForm.tsx    # Formulário de avaliações
+│   ├── ReviewsList.tsx   # Lista de avaliações
+│   ├── ReviewSection.tsx # Seção de reviews para dashboards
 │   └── bottom-navigation.tsx # Navegação inferior
+├── server/               # Server Actions
+│   ├── reviewActions.ts  # Ações de reviews
+│   └── dashboardActions.ts # Ações de dashboard e métricas
+├── schemas/              # Schemas Zod de validação
+│   └── reviewSchemas.ts  # Validações de reviews
 ├── lib/                  # Utilitários e configurações
-│   └── utils.ts          # Funções auxiliares
+│   ├── utils.ts          # Funções auxiliares
+│   ├── auth.ts           # Configuração NextAuth
+│   ├── prisma.ts         # Cliente Prisma
+│   ├── upload.ts         # Configuração de upload
+│   └── rate-limit.ts     # Rate limiting
+├── __tests__/            # Testes automatizados
+│   ├── ReviewForm.test.tsx
+│   ├── LoadingSpinner.test.tsx
+│   └── Skeleton.test.tsx
 ├── styles/               # Estilos SCSS
 │   └── components.module.scss # Estilos modulares
 └── docs/                 # Documentação
-    └── decisions.md      # Decisões técnicas
+    ├── development/      # Documentação de desenvolvimento
+    ├── docker/           # Documentação Docker
+    └── database/         # Documentação do banco de dados
 ```
 
 ## 🎨 Design System
@@ -193,6 +244,7 @@ src/
 ```bash
 # Desenvolvimento
 npm run dev          # Inicia servidor de desenvolvimento
+npm run test         # Executa testes com Jest
 
 # Build
 npm run build        # Gera build de produção
@@ -200,6 +252,20 @@ npm run start        # Inicia servidor de produção
 
 # Qualidade de código
 npm run lint         # Executa ESLint
+npm run type-check   # Verifica tipos TypeScript
+npm run validate     # Lint + Type check
+
+# Banco de Dados
+npm run db:migrate   # Executa migrações
+npm run db:push      # Push schema para banco
+npm run db:studio    # Abre Prisma Studio
+npm run db:seed      # Popula banco com dados de teste
+
+# Docker (Desenvolvimento)
+npm run docker:dev   # Inicia ambiente Docker
+npm run docker:dev:shell    # Acessa shell do container
+npm run docker:dev:migrate  # Migrações no Docker
+npm run docker:dev:studio   # Prisma Studio no Docker
 ```
 
 ## 📱 Responsividade
@@ -221,38 +287,82 @@ Card para exibir informações de salões próximos com avaliações.
 ### OfferCard
 Card para exibir ofertas especiais com desconto e período.
 
+### ReviewForm
+Formulário completo para criação e edição de avaliações com:
+- Rating de 1-5 estrelas
+- Upload de até 5 imagens
+- Validação em tempo real
+- Loading states
+
+### ReviewsList
+Lista paginada de avaliações com:
+- Filtros por usuário, serviço e barbeiro
+- Estatísticas (média, distribuição)
+- Ações de edição e exclusão
+- Visualização expandida de imagens
+
+### Dashboard Components
+- **DashboardLayout**: Layout base personalizado por role
+- **ReviewSection**: Seção de reviews para dashboards
+- **LoadingSpinner**: Spinner de carregamento reutilizável
+- **Skeleton**: Componentes skeleton para estados de loading
+
 ## 🎯 Próximas Features
 
+### ✅ Implementado Recentemente (Out 2025)
+- [x] Sistema de avaliações completo com upload de imagens
+- [x] Dashboards diferenciados por role (Cliente, Barbeiro, Admin)
+- [x] Integração de dados reais nos dashboards
+- [x] Sistema de notificações com Toaster (Sonner)
+- [x] Loading states e skeleton loaders
+- [x] Testes automatizados (Jest + Testing Library)
+- [x] Server Actions para métricas e analytics
+
 ### Em Desenvolvimento
-- [ ] Sistema de autenticação (NextAuth.js)
-- [ ] Integração com banco de dados (Prisma)
-- [ ] Sistema de agendamentos
+- [ ] Sistema de autenticação (NextAuth.js) - Integração completa
+- [ ] Sistema de agendamentos - Finalização
 - [ ] Pagamentos online (Stripe)
 
 ### Dashboard e Controle
-- [ ] Dashboard do Admin: gestão de usuários, serviços, relatórios
-- [ ] Dashboard do Barbeiro: agenda, disponibilidade, controle de agendamentos
+- [x] Dashboard do Admin: gestão de usuários, serviços, relatórios
+- [x] Dashboard do Barbeiro: agenda, disponibilidade, controle de agendamentos, métricas
 
 ### Planejado
 - [ ] Notificações push
-- [ ] Avaliações e comentários
 - [ ] Sistema de fidelidade
 - [ ] Chat em tempo real
+- [ ] Analytics avançados
+- [ ] Exportação de relatórios
 
 ## 📚 Documentação
 
 Consulte a pasta `docs/` para documentação detalhada:
 
+### Infraestrutura
 - [Docker e Ambiente](/docs/docker/README.md)
+- [Setup Docker](/SETUP-DOCKER.md)
 - [Next.js e TypeScript](/docs/nextjs/README.md)
 - [Banco de Dados](/docs/database/README.md)
 - [Prisma ORM](/docs/prisma/README.md)
 
-- [Dashboard Admin](/docs/dashboard-admin.md)
-- [Dashboard Barbeiro](/docs/dashboard-barber.md)
+### Features e Sistemas
+- [Sistema de Reviews](/docs/review-system.md) - Sistema completo de avaliações
+- [Sistema de Upload](/docs/upload-system.md) - Upload seguro de imagens
+- [Dashboard Admin](/docs/dashboard-admin.md) - Painel administrativo
+- [Dashboard Barbeiro](/docs/dashboard-barber.md) - Painel do barbeiro
+- [Sistema de Agendamento](/docs/SISTEMA-AGENDAMENTO.md)
+
+### Desenvolvimento
+- [Roadmap](/docs/development/ROADMAP.md) - Planejamento e cronograma
+- [Tasks](/docs/development/TASKS.md) - Tarefas e issues
+- [Changelog](/docs/development/CHANGELOG.md) - Histórico de mudanças
+- [Development Guide](/docs/development/README.md)
+
+### Referências Técnicas
 - [Exemplos de API](/docs/api-examples.md)
 - [Papéis e Permissões](/docs/roles-permissions.md)
 - [Testes de Fluxos](/docs/test-flows.md)
+- [Regras de Negócio](/docs/regras-negocio.md)
 
 ### 🗄️ Guias de Banco de Dados
 
