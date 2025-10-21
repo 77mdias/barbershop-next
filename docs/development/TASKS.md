@@ -2,10 +2,50 @@
 
 Lista organizada de tarefas, bugs e melhorias pendentes.
 
-## 🔥 Alta Prioridade
+## 🔥 Alta Prioridade - Semana 3 (21-27 Oct 2025)
 
-### Issues Críticos
+### Issues Críticos da Semana Atual
+
+- [ ] **#010** - Integração de dados reais nos dashboards 🚧 **EM PROGRESSO**
+
+  - **Descrição**: Conectar métricas dos dashboards com dados reais do banco
+  - **Componentes**: Dashboard barbeiro, estatísticas, métricas automáticas
+  - **Estimativa**: 3 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: Server actions funcionais, dashboards mostram dados mockados
+  - **Arquivos a modificar**:
+    - `/src/app/dashboard/barber/page.tsx` - Conectar métricas reais
+    - `/src/app/dashboard/page.tsx` - Estatísticas reais
+    - `/src/components/ReviewSection.tsx` - Dados dinâmicos
+    - `/src/server/reviewActions.ts` - Adicionar getMetrics()
+
+- [ ] **#011** - Sistema de notificações integrado 📱 **NOVA**
+
+  - **Descrição**: Implementar toast notifications para todas as ações
+  - **Componentes**: Toast provider, notificações de sucesso/erro
+  - **Estimativa**: 2 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: UI básico existe, integração pendente
+  - **Arquivos a criar/modificar**:
+    - `/src/components/ui/toast.tsx` - Sistema completo de toast
+    - `/src/providers/ToastProvider.tsx` - Provider global
+    - Integrar em ReviewForm, ReviewsList, dashboards
+
+- [ ] **#012** - Loading states e skeleton loaders 💀 **NOVA**
+  - **Descrição**: Implementar estados de loading em todos os componentes
+  - **Componentes**: Skeleton, LoadingSpinner, estados de carregamento
+  - **Estimativa**: 2 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: Poucos componentes têm loading states
+  - **Arquivos a criar**:
+    - `/src/components/ui/skeleton.tsx` - Skeleton loader
+    - `/src/components/ui/loading-spinner.tsx` - Spinner
+    - Integrar em dashboards, ReviewsList, ReviewForm
+
+### Issues Críticos Concluídos
+
 - [x] **#001** - Upload de imagens para avaliações ✅ **CONCLUÍDO**
+
   - **Descrição**: Implementar sistema seguro de upload
   - **Componentes**: ImageUpload, storage config, API routes, validações
   - **Estimativa**: 2 dias
@@ -21,6 +61,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/docs/upload-system.md` - Documentação completa
 
 - [x] **#002** - Formulário de avaliação ✅ **CONCLUÍDO**
+
   - **Descrição**: CRUD completo para avaliações de clientes
   - **Componentes**: ReviewForm, ReviewsList, validation schemas, server actions
   - **Estimativa**: 3 dias
@@ -37,6 +78,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/docs/review-system.md` - Documentação completa
 
 - [x] **#002.1** - Bug validação Zod URLs de imagens ✅ **CONCLUÍDO**
+
   - **Descrição**: Erro ZodError invalid_format na validação de URLs de imagens vazias
   - **Root Cause**: Schema muito restritivo para arrays opcionais de imagens
   - **Solução**: Transform function para filtrar strings vazias e validar URLs
@@ -66,6 +108,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - ✅ Interface responsiva com métricas e analytics para barbeiros
 
 ### Features Prioritárias
+
 - [x] **#003** - Dashboard do Cliente ✅ **CONCLUÍDO**
   - **Descrição**: Painel para clientes e barbeiros gerenciarem reviews e agendamentos
   - **Páginas**: /dashboard, /dashboard/barber
@@ -73,32 +116,48 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
   - **Assignee**: GitHub Copilot
   - **Status**: Implementado com dashboards diferenciados por role
 
-## 📋 Média Prioridade
+## 📋 Média Prioridade - Semana 3
 
-### UI/UX Improvements
-- [ ] **#004** - Sistema de notificações
-  - **Descrição**: Toast notifications para ações do usuário
-  - **Componentes**: NotificationProvider, Toast
+### Melhorias UX/UI
+
+- [ ] **#013** - Remover modo demonstração 🎪 **NOVA**
+
+  - **Descrição**: Remover badges e textos de "MODO DEMONSTRAÇÃO" dos componentes
+  - **Componentes**: ReviewSystemManager, dashboards
   - **Estimativa**: 1 dia
-  - **Assignee**: -
+  - **Assignee**: GitHub Copilot
+  - **Status**: Vários componentes ainda em modo demo
+  - **Arquivos a modificar**:
+    - `/src/components/ReviewSystemManager.tsx` - Remover badge demo
+    - `/src/app/dashboard/barber/page.tsx` - Dados reais ao invés de "--"
 
-- [ ] **#005** - Loading states
-  - **Descrição**: Skeleton loaders para melhor UX
-  - **Componentes**: Skeleton, LoadingSpinner
+- [ ] **#014** - Testes unitários básicos 🧪 **NOVA**
+  - **Descrição**: Setup básico de testing com Jest + Testing Library
+  - **Componentes**: ReviewForm, ReviewsList, principais UI components
+  - **Estimativa**: 3 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: Apenas testes manuais existem
+  - **Arquivos a criar**:
+    - `jest.config.js` - Configuração Jest
+    - `__tests__/` - Diretório de testes
+    - Tests para componentes críticos
+
+### Features Secundárias
+
+- [ ] **#015** - Sistema de busca básico 🔍 **BACKLOG**
+  - **Descrição**: Busca de reviews por texto, barbeiro, serviço
+  - **Componentes**: SearchBar, filtros avançados
   - **Estimativa**: 2 dias
   - **Assignee**: -
 
-### Features Secundárias
-- [ ] **#006** - Sistema de busca
-  - **Descrição**: Busca de barbeiros e serviços
-  - **Componentes**: SearchBar, SearchResults
-  - **Estimativa**: 3 dias
-  - **Assignee**: -
+### Issues Concluídos - Média Prioridade
 
 ## 🔧 Baixa Prioridade
 
 ### Melhorias Técnicas
+
 - [ ] **#007** - Testes automatizados
+
   - **Descrição**: Setup de testing suite
   - **Tools**: Jest, Testing Library, Playwright
   - **Estimativa**: 4 dias
@@ -111,6 +170,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
   - **Assignee**: -
 
 ### Documentação
+
 - [ ] **#009** - API documentation
   - **Descrição**: Swagger/OpenAPI docs
   - **Tool**: Next.js API routes docs
@@ -120,17 +180,21 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 ## 🐛 Bugs Conhecidos
 
 ### Críticos
+
 - Nenhum identificado
 
 ### Médios
+
 - Nenhum identificado
 
 ### Baixos
+
 - Nenhum identificado
 
 ## 💡 Ideias/Backlog
 
 ### Features Futuras
+
 - [ ] **Chatbot de atendimento**
 - [ ] **AR preview de cortes**
 - [ ] **Sistema de recomendação**
@@ -138,6 +202,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 - [ ] **Sincronização Google Calendar**
 
 ### Melhorias UX
+
 - [ ] **Animações de micro-interações**
 - [ ] **Dark mode support**
 - [ ] **PWA capabilities**
@@ -145,30 +210,51 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ---
 
-## 📊 Sprint Planning
+## 📊 Sprint Planning - Atualizado 21 Oct 2025
 
-### Sprint Atual (11-17 Oct 2025)
-**Objetivo**: Sistema de avaliações funcional
+### Sprint Atual - Semana 3 (21-27 Oct 2025)
+
+**Objetivo**: Finalizar integração de dados reais e melhorar UX
 
 **Tasks selecionadas**:
-- #001 - Upload de imagens
-- #002 - Formulário de avaliação
-- #004 - Sistema de notificações
 
-**Capacity**: 6 story points  
-**Risk**: Baixo
+- #010 - Integração de dados reais nos dashboards (Alta prioridade)
+- #011 - Sistema de notificações integrado (Alta prioridade)
+- #012 - Loading states e skeleton loaders (Alta prioridade)
+- #013 - Remover modo demonstração (Média prioridade)
 
-### Próximo Sprint (18-24 Oct 2025)
-**Objetivo**: Dashboard do cliente
+**Capacity**: 8 story points  
+**Risk**: Médio (integração de dados pode ter complexidades)
+
+### Próximo Sprint - Semana 4 (28 Oct - 3 Nov 2025)
+
+**Objetivo**: Testes e analytics avançados
 
 **Tasks planejadas**:
-- #003 - Dashboard do Cliente
-- #005 - Loading states
-- #006 - Sistema de busca
+
+- #014 - Testes unitários básicos
+- #015 - Sistema de busca básico
+- Analytics avançados para barbeiros
+- Performance optimizations
+
+### Sprint Concluído - Semana 1-2 (11-20 Oct 2025) ✅
+
+**Objetivo**: Sistema de avaliações funcional
+
+**Tasks concluídas**:
+
+- ✅ #001 - Upload de imagens
+- ✅ #002 - Formulário de avaliação
+- ✅ #002.1 - Bug validação Zod
+- ✅ #002.2 - Sistema de Reviews Completo
+- ✅ #003 - Dashboard do Cliente
+
+**Resultado**: 100% concluído - Sistema de reviews totalmente funcional
 
 ---
 
 **Template para novos issues**:
+
 ```markdown
 ## Issue #XXX - [Título]
 
@@ -178,16 +264,20 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 **Labels**: frontend, backend, ui, docs
 
 ### Descrição
+
 [Descrição detalhada]
 
 ### Critérios de Aceite
+
 - [ ] Critério 1
 - [ ] Critério 2
 
 ### Arquivos Afetados
+
 - [ ] arquivo1.tsx
 - [ ] arquivo2.ts
 
 ### Notas Técnicas
+
 [Considerações técnicas importantes]
 ```

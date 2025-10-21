@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
 import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
 import HeaderNavigation from "@/components/HeaderNavigation";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ const navigationItems = [
       </svg>
     ),
   },
-                                                                    {
+  {
     id: "galeria",
     label: "Gallery",
     href: "/gallery", // 👈 URL para a página de galeria
@@ -129,6 +130,7 @@ export default function RootLayout({
           {children}
           {/* Navegação inferior */}
           <ConditionalBottomNavigation items={navigationItems} />
+          <Toaster />
         </Providers>
       </body>
     </html>

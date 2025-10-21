@@ -27,7 +27,6 @@ export async function middleware(request: NextRequest) {
     "/about",
     "/contact",
     "/auth-required",
-    "/client-review-demo",
     "/test-reviews-real",
     "/reviews",
   ];

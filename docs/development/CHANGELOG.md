@@ -5,13 +5,16 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 ## [Major Release] - 2025-10-13
 
 ### ✨ Adicionado - Sistema de Reviews Completo
+
 - **Dashboard Principal**: `/src/app/dashboard/page.tsx`
+
   - Interface personalizada por tipo de usuário (CLIENT/BARBER/ADMIN)
   - Cards de ações rápidas para agendamentos, reviews, perfil e galeria
   - Seção de reviews recentes integrada com estatísticas
   - Layout responsivo com navegação intuitiva
 
 - **Dashboard do Barbeiro**: `/src/app/dashboard/barber/page.tsx`
+
   - Interface profissional com métricas de performance
   - Tabs para reviews, agendamentos, análises e performance
   - Estatísticas detalhadas de reviews recebidas
@@ -25,23 +28,27 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
   - Suporte a filtros por userId/barberId
 
 ### 🔄 Modificado
+
 - **Navegação Principal**: Sistema de reviews integrado à navegação bottom
 - **Página de Reviews**: `/src/app/reviews/page.tsx` otimizada para produção
 - **Estrutura de Componentes**: ClientReview component para evitar imports inexistentes
 
 ### 🗑️ Removido
+
 - **Arquivos de Teste**: Limpeza completa de diretórios de teste
   - `/src/app/test-system/` - Diretório de testes removido
   - `/src/app/api/test-appointments/` - API de teste removida
   - `/src/app/api/test/create-service-history/` - Endpoint de teste removido
 
 ### 🔧 Técnico
+
 - Schemas de validação Zod otimizados
 - Server Actions integradas ao sistema de dashboard
 - TypeScript interfaces completas para todos os componentes
 - Import/export paths corrigidos em toda a aplicação
 
 ### 📁 Arquivos Criados
+
 ```
 src/
 ├── app/
@@ -59,6 +66,7 @@ src/
 ```
 
 ### 🎯 Features Implementadas
+
 - ✅ CRUD completo de reviews com upload de imagens
 - ✅ Validações robustas com Zod schemas
 - ✅ Interface responsiva mobile-first
@@ -71,6 +79,7 @@ src/
 ## [Hotfix] - 2025-10-12
 
 ### 🐛 Corrigido
+
 - **Bug crítico no sistema de avaliações**: Erro ZodError invalid_format na validação de URLs de imagens
   - **Root Cause**: Schema `createReviewSchema` muito restritivo para arrays opcionais de imagens
   - **Solução**: Implementada transform function para filtrar strings vazias e validar URLs corretamente
@@ -78,12 +87,14 @@ src/
   - **Impacto**: Sistema de avaliações agora funciona sem erros de validação
 
 ### 🔄 Modificado
+
 - Schema de validação mais robusto para imagens opcionais
 - Melhor tratamento de arrays vazios e strings inválidas
 
 ## [Em Desenvolvimento] - 2025-10-11
 
 ### ✨ Adicionado
+
 - **ClientReview Component**: Componente de avaliações de clientes
   - Layout mobile-first responsivo
   - Navegação por carrossel com setas e indicadores
@@ -92,10 +103,12 @@ src/
   - Página de demonstração em `/client-review-demo`
 
 ### 🔄 Modificado
+
 - Estrutura de documentação expandida
 - Padrões mobile-first aplicados
 
 ### 📁 Arquivos Criados
+
 ```
 src/
 ├── components/
@@ -113,6 +126,7 @@ src/
 ```
 
 ### 🎯 Próximos Passos
+
 1. Sistema de upload de imagens
 2. Formulário de criação de avaliações
 3. Integração com banco de dados
@@ -123,7 +137,8 @@ src/
 ## [Base Project] - 2025-09-26
 
 ### ✨ Configuração Inicial
-- Next.js 14 com App Router
+
+- Next.js 15 com App Router
 - TypeScript configurado
 - Prisma ORM com PostgreSQL
 - NextAuth.js para autenticação
@@ -131,6 +146,7 @@ src/
 - Docker para desenvolvimento
 
 ### 🏗️ Estrutura Base
+
 - Sistema de agendamento
 - Autenticação multi-provider
 - Middleware de proteção

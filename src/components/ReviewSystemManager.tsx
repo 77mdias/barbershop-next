@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ReviewForm } from '@/components/ReviewForm';
-import { CheckCircle, Database, AlertCircle, Info } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReviewForm } from "@/components/ReviewForm";
+import { CheckCircle, AlertCircle, Info } from "lucide-react";
 
 interface ReviewSystemManagerProps {
   userId: string;
@@ -13,7 +13,7 @@ interface ReviewSystemManagerProps {
 export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
   const [serviceHistoryId, setServiceHistoryId] = useState<string | null>(null);
   const [isCreatingTestData, setIsCreatingTestData] = useState(false);
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasCheckedExisting, setHasCheckedExisting] = useState(false);
 
@@ -24,16 +24,18 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
 
   const checkExistingServiceHistory = async () => {
     try {
-      const response = await fetch('/api/test/create-review-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/test/create-review-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
       const result = await response.json();
-      
+
       if (result.success && result.data?.serviceHistoryId) {
         setServiceHistoryId(result.data.serviceHistoryId);
-        setMessage("Você já possui um histórico de serviço disponível para avaliação!");
+        setMessage(
+          "Você já possui um histórico de serviço disponível para avaliação!"
+        );
         setIsSuccess(true);
       }
     } catch (error) {
@@ -45,27 +47,27 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
 
   const createTestData = async () => {
     setIsCreatingTestData(true);
-    setMessage('');
-    
+    setMessage("");
+
     try {
-      const response = await fetch('/api/test/create-review-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/test/create-review-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         setServiceHistoryId(result.data.serviceHistoryId);
         setMessage(result.message);
         setIsSuccess(true);
       } else {
-        setMessage(result.error || 'Erro ao criar dados de teste');
+        setMessage(result.error || "Erro ao criar dados de teste");
         setIsSuccess(false);
       }
     } catch (error) {
-      console.error('Erro:', error);
-      setMessage('Erro de conexão com o servidor');
+      console.error("Erro:", error);
+      setMessage("Erro de conexão com o servidor");
       setIsSuccess(false);
     } finally {
       setIsCreatingTestData(false);
@@ -78,7 +80,9 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
       <Card>
         <CardContent className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="ml-2 text-gray-600">Verificando histórico de serviços...</span>
+          <span className="ml-2 text-gray-600">
+            Verificando histórico de serviços...
+          </span>
         </CardContent>
       </Card>
     );
@@ -88,13 +92,6 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
   if (serviceHistoryId) {
     return (
       <div className="space-y-6">
-        {/* Badge de Demo */}
-        <div className="flex items-center justify-center">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-            🎪 MODO DEMONSTRAÇÃO
-          </div>
-        </div>
-
         {message && (
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
@@ -105,22 +102,22 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
             </CardContent>
           </Card>
         )}
-        
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              Avaliar Serviço (Demo)
+              Avaliar Serviço
             </CardTitle>
             <p className="text-sm text-gray-600">
-              Este formulário está conectado a um histórico de serviço simulado para demonstração
+              Avalie a qualidade do serviço prestado
             </p>
           </CardHeader>
           <CardContent>
             <ReviewForm
               serviceHistoryId={serviceHistoryId}
               onSuccess={() => {
-                setMessage('✅ Avaliação enviada com sucesso! (Dados de demonstração)');
+                setMessage("✅ Avaliação enviada com sucesso!");
                 setServiceHistoryId(null); // Reset para permitir nova avaliação
               }}
             />
@@ -135,9 +132,7 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-            DEMO
-          </div>
+          <CheckCircle className="w-5 h-5 text-primary" />
           Sistema de Avaliações
         </CardTitle>
       </CardHeader>
@@ -146,29 +141,31 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h4 className="font-medium text-blue-900 mb-1">Modo Demonstração</h4>
+              <h4 className="font-medium text-blue-900 mb-1">
+                Nenhum Serviço Pendente
+              </h4>
               <p className="text-sm text-blue-800">
-                Em um ambiente real, os clientes avaliariam apenas serviços que foram concluídos. 
-                Para esta demonstração, vamos simular um histórico de serviço concluído.
+                Você só pode avaliar serviços que foram concluídos. Complete um
+                serviço para poder deixar sua avaliação.
               </p>
             </div>
           </div>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={createTestData}
           disabled={isCreatingTestData}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+          className="w-full"
         >
           {isCreatingTestData ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Criando histórico de demonstração...
+              Verificando serviços...
             </>
           ) : (
             <>
-              <Database className="w-4 h-4 mr-2" />
-              🎪 Criar Dados de Demonstração
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Verificar Serviços Concluídos
             </>
           )}
         </Button>

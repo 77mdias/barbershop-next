@@ -1,27 +1,33 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Star, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  User, 
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Star,
+  Edit,
+  Trash2,
+  Calendar,
+  User,
   DollarSign,
   Eye,
   EyeOff,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { getReviews, deleteReview, getReviewStats } from '@/server/reviewActions';
-import { ReviewForm } from '@/components/ReviewForm';
-import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+  ChevronRight,
+} from "lucide-react";
+import {
+  getReviews,
+  deleteReview,
+  getReviewStats,
+} from "@/server/reviewActions";
+import { ReviewForm } from "@/components/ReviewForm";
+import { toast } from "sonner";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ReviewsListSkeleton } from "@/components/ui/review-skeleton";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Review {
   id: string;
@@ -76,7 +82,7 @@ export function ReviewsList({
   barberId,
   showActions = true,
   showStats = true,
-  limit = 10
+  limit = 10,
 }: ReviewsListProps) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
@@ -84,7 +90,9 @@ export function ReviewsList({
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
-  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
+  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const loadReviews = async () => {
     setLoading(true);
@@ -101,11 +109,11 @@ export function ReviewsList({
         setReviews(result.data.reviews);
         setTotalPages(result.data.pagination.totalPages);
       } else {
-        toast.error('Erro ao carregar avaliações');
+        toast.error("Erro ao carregar avaliações");
       }
     } catch (error) {
-      console.error('Erro ao carregar avaliações:', error);
-      toast.error('Erro inesperado ao carregar avaliações');
+      console.error("Erro ao carregar avaliações:", error);
+      toast.error("Erro inesperado ao carregar avaliações");
     } finally {
       setLoading(false);
     }
@@ -120,7 +128,7 @@ export function ReviewsList({
         setStats(result.data as ReviewStats);
       }
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      console.error("Erro ao carregar estatísticas:", error);
     }
   };
 
@@ -130,22 +138,22 @@ export function ReviewsList({
   }, [currentPage, userId, serviceId, barberId]);
 
   const handleDeleteReview = async (reviewId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta avaliação?')) {
+    if (!confirm("Tem certeza que deseja excluir esta avaliação?")) {
       return;
     }
 
     try {
       const result = await deleteReview({ id: reviewId });
       if (result.success) {
-        toast.success('Avaliação excluída com sucesso!');
+        toast.success("Avaliação excluída com sucesso!");
         loadReviews();
         loadStats();
       } else {
-        toast.error(result.error || 'Erro ao excluir avaliação');
+        toast.error(result.error || "Erro ao excluir avaliação");
       }
     } catch (error) {
-      console.error('Erro ao excluir avaliação:', error);
-      toast.error('Erro inesperado ao excluir avaliação');
+      console.error("Erro ao excluir avaliação:", error);
+      toast.error("Erro inesperado ao excluir avaliação");
     }
   };
 
@@ -156,9 +164,9 @@ export function ReviewsList({
   };
 
   const toggleImageExpanded = (reviewId: string) => {
-    setExpandedImages(prev => ({
+    setExpandedImages((prev) => ({
       ...prev,
-      [reviewId]: !prev[reviewId]
+      [reviewId]: !prev[reviewId],
     }));
   };
 
@@ -169,7 +177,9 @@ export function ReviewsList({
           <Star
             key={star}
             size={16}
-            className={star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+            className={
+              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            }
           />
         ))}
       </div>
@@ -197,9 +207,11 @@ export function ReviewsList({
                 Baseado em {stats.totalReviews} avaliações
               </p>
             </div>
-            
+
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm">Distribuição de Avaliações</h4>
+              <h4 className="font-semibold text-sm">
+                Distribuição de Avaliações
+              </h4>
               {stats.ratingDistribution.map((item) => (
                 <div key={item.rating} className="flex items-center gap-2">
                   <span className="text-sm w-4">{item.rating}</span>
@@ -208,7 +220,7 @@ export function ReviewsList({
                     <div
                       className="bg-yellow-400 h-2 rounded-full"
                       style={{
-                        width: `${(item.count / stats.totalReviews) * 100}%`
+                        width: `${(item.count / stats.totalReviews) * 100}%`,
                       }}
                     />
                   </div>
@@ -227,8 +239,8 @@ export function ReviewsList({
   if (editingReview) {
     return (
       <div className="space-y-4">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => setEditingReview(null)}
           className="mb-4"
         >
@@ -254,10 +266,7 @@ export function ReviewsList({
       {renderStats()}
 
       {loading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-gray-600">Carregando avaliações...</p>
-        </div>
+        <ReviewsListSkeleton />
       ) : reviews.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
@@ -286,12 +295,12 @@ export function ReviewsList({
                           <Calendar size={14} />
                           {formatDistanceToNow(new Date(review.completedAt), {
                             addSuffix: true,
-                            locale: ptBR
+                            locale: ptBR,
                           })}
                         </div>
                       </div>
                     </div>
-                    
+
                     {showActions && (
                       <div className="flex gap-2">
                         <Button
@@ -323,7 +332,10 @@ export function ReviewsList({
                         <User size={14} />
                         {review.service.name}
                         <DollarSign size={14} />
-                        R$ {Number(review.finalPrice || review.service.price).toFixed(2)}
+                        R${" "}
+                        {Number(
+                          review.finalPrice || review.service.price
+                        ).toFixed(2)}
                       </div>
                     </div>
 
@@ -357,17 +369,19 @@ export function ReviewsList({
                             )}
                           </Button>
                         </div>
-                        
+
                         {expandedImages[review.id] && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {review.images?.map((imageUrl: string, index: number) => (
-                              <img
-                                key={index}
-                                src={imageUrl}
-                                alt={`Foto ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-lg border"
-                              />
-                            ))}
+                            {review.images?.map(
+                              (imageUrl: string, index: number) => (
+                                <img
+                                  key={index}
+                                  src={imageUrl}
+                                  alt={`Foto ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border"
+                                />
+                              )
+                            )}
                           </div>
                         )}
                       </div>
@@ -384,21 +398,23 @@ export function ReviewsList({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft size={16} />
                 Anterior
               </Button>
-              
+
               <span className="text-sm text-gray-600">
                 Página {currentPage} de {totalPages}
               </span>
-              
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Próxima
