@@ -2,6 +2,120 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Major Update] - 2025-10-21
+
+### ✨ Adicionado - Integração de Dados Reais e Melhorias de UX
+
+- **Integração de Dados Reais nos Dashboards**
+  - Server Actions para métricas reais (`dashboardActions.ts`)
+  - `getBarberMetrics()` - Métricas completas do barbeiro
+  - `getDashboardMetrics()` - Métricas por role de usuário
+  - Conexão com banco de dados para estatísticas em tempo real
+
+- **Sistema de Notificações Toaster**
+  - Integração do Sonner no layout principal (`/src/app/layout.tsx`)
+  - Toast notifications para feedback de ações
+  - Suporte a tipos: success, error, warning, info, loading
+  - Customização de duração e posicionamento
+
+- **Loading States e Skeleton Loaders**
+  - `LoadingSpinner` component (`/src/components/ui/loading-spinner.tsx`)
+  - `Skeleton` component (`/src/components/ui/skeleton.tsx`)
+  - `ReviewSkeleton` e `ReviewsListSkeleton` (`/src/components/ui/review-skeleton.tsx`)
+  - Estados de loading em todos os componentes principais
+  - Melhor feedback visual durante carregamento
+
+- **Infraestrutura de Testes**
+  - Configuração Jest + Testing Library (`jest.config.js`)
+  - Setup de ambiente de testes (`/src/tests/setup.ts`)
+  - Testes de componentes:
+    - `ReviewForm.test.tsx` - Testes do formulário de avaliações
+    - `LoadingSpinner.test.tsx` - Testes do spinner
+    - `Skeleton.test.tsx` - Testes dos skeletons
+
+- **Documentação Completa**
+  - `/docs/FEATURES.md` - Documentação de todas as features implementadas
+  - `/docs/TESTING.md` - Guia completo de testes
+  - `/docs/NOTIFICATIONS.md` - Sistema de notificações
+  - `/docs/LOADING-STATES.md` - Loading states e skeletons
+  - Atualização do `README.md` com novas features
+  - Atualização do `dashboard-barber.md` com implementação completa
+
+### 🔄 Modificado
+
+- **Dashboard do Barbeiro** (`/src/app/dashboard/barber/page.tsx`)
+  - Integração com dados reais via `getBarberMetrics()`
+  - Métricas calculadas automaticamente
+  - Sistema de metas com progresso real
+  - Distribuição de ratings com dados do banco
+
+- **Dashboard Principal** (`/src/app/dashboard/page.tsx`)
+  - Conexão com `getDashboardMetrics()`
+  - Estatísticas personalizadas por role
+  - Loading states implementados
+  - Feedback visual melhorado
+
+- **ReviewSystemManager** (`/src/components/ReviewSystemManager.tsx`)
+  - Remoção de elementos de demonstração
+  - Integração com dados reais
+  - Melhor tratamento de erros
+
+- **ReviewsList** (`/src/components/ReviewsList.tsx`)
+  - Loading states com skeletons
+  - Feedback com toast notifications
+  - Performance otimizada
+
+- **Server Actions** (`/src/server/reviewActions.ts`)
+  - Otimização de queries
+  - Melhor tratamento de erros
+  - Logs estruturados
+
+### 📁 Arquivos Criados
+
+```
+src/
+├── server/
+│   └── dashboardActions.ts          # NEW: Ações de servidor para métricas
+├── components/ui/
+│   ├── loading-spinner.tsx          # NEW: Componente spinner
+│   ├── skeleton.tsx                 # NEW: Skeleton base
+│   └── review-skeleton.tsx          # NEW: Skeletons de reviews
+├── __tests__/
+│   ├── ReviewForm.test.tsx          # NEW: Testes de ReviewForm
+│   ├── LoadingSpinner.test.tsx      # NEW: Testes de LoadingSpinner
+│   └── Skeleton.test.tsx            # NEW: Testes de Skeleton
+├── tests/
+│   └── setup.ts                     # NEW: Setup de testes
+└── jest.config.js                   # NEW: Configuração Jest
+
+docs/
+├── FEATURES.md                      # NEW: Documentação de features
+├── TESTING.md                       # NEW: Documentação de testes
+├── NOTIFICATIONS.md                 # NEW: Sistema de notificações
+└── LOADING-STATES.md                # NEW: Loading states
+```
+
+### 🎯 Features Implementadas
+
+- ✅ Integração completa de dados reais
+- ✅ Sistema de notificações toast
+- ✅ Loading states e skeleton loaders
+- ✅ Testes automatizados básicos
+- ✅ Métricas em tempo real
+- ✅ Sistema de metas para barbeiros
+- ✅ Distribuição de ratings
+- ✅ Documentação atualizada
+
+### 📊 Métricas de Progresso
+
+- **Integração de Dados**: 100% ✅
+- **Sistema de Notificações**: 100% ✅
+- **Loading States**: 100% ✅
+- **Testes**: 25% (básico implementado)
+- **Documentação**: 95% (quase completa)
+
+---
+
 ## [Major Release] - 2025-10-13
 
 ### ✨ Adicionado - Sistema de Reviews Completo
