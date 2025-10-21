@@ -1,5 +1,10 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+
+// Força a página a ser dinâmica
+export const dynamic = 'force-dynamic';
 
 export default function NotFound() {
   return (

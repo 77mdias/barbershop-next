@@ -53,7 +53,7 @@ export function ClientReview({ reviews }: ClientReviewProps) {
 
             {/* Testimonial */}
             <blockquote className="text-gray-700 mb-4 text-sm leading-relaxed">
-              "{review.testimonial}"
+              &ldquo;{review.testimonial}&rdquo;
             </blockquote>
 
             {/* Client Info */}
