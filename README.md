@@ -31,6 +31,9 @@ Este projeto segue as boas práticas do agente de IA para estudo e documentaçã
 - 📊 **Dashboards Dinâmicos** com dados reais e métricas
 - 🔔 **Sistema de Notificações** integrado com Toaster
 - 💀 **Loading States** e Skeleton Loaders para melhor UX
+- 📸 **Sistema de Upload** funcional com processamento de imagens
+- 👤 **Profile Management** com modal inline e upload de fotos
+- 🔄 **Session Management** otimizado para updates em tempo real
 - 🧪 **Testes Automatizados** com Jest e Testing Library
 
 ## 📸 Preview
@@ -43,7 +46,8 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - ⭐ **Reviews**: Sistema completo de avaliações com upload de imagens
 - 📊 **Dashboard**: Painéis personalizados por tipo de usuário
 - 🖼️ **Galeria**: Galeria de trabalhos realizados
-- 👤 **Perfil**: Gerenciamento de conta do usuário
+- 👤 **Perfil**: Gerenciamento completo com upload de fotos e modal inline
+- ⚙️ **Configurações**: Interface moderna para edição de dados pessoais
 
 ## 🛠️ Stack Tecnológica
 

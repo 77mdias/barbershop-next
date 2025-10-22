@@ -2,6 +2,110 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Patch v1.4] - 2025-10-22 📸
+
+### ✨ **Atualização de Perfil e Upload de Imagens**
+
+#### **🎨 Redesign Completo do Profile Settings**
+- **Interface Moderna e Minimalista**
+  - Redesign completo da página `/profile/settings` com design clean
+  - Layout mobile-first com componentes bem organizados
+  - Remoção da BottomNavigation para experiência mais focada
+  - Seção de avatar centralizada com preview em tempo real
+  - Cards organizados por seções (Profile Info, Contact Details)
+
+#### **📸 Sistema de Upload de Imagens Funcional**
+- **Endpoint Dedicado** (`/src/app/api/upload/profile/route.ts`)
+  - API route específica para upload de fotos de perfil
+  - Validação de tipos de arquivo (apenas imagens)
+  - Limite de tamanho configurável (5MB)
+  - Processamento com Sharp para otimização
+  - Geração de nomes únicos com timestamps
+- **Server Action Enhanced** (`/src/server/profileActions.ts`)
+  - Nova função `updateProfileImage()` dedicada
+  - Validação de permissões e ownership
+  - Integração com sistema de sessão existente
+  - Suporte a atualizações de imagem independentes
+
+#### **🔄 Sistema de Sessão Aprimorado**
+- **NextAuth Configuration Enhanced** (`/src/lib/auth.ts`)
+  - Session callback otimizado para buscar dados frescos sempre
+  - JWT callback expandido com todos os campos (phone, image, etc.)
+  - Remoção da condição `trigger === 'update'` para updates automáticos
+  - Logging melhorado para debugging de sessão
+- **Types Extended** (`/src/types/next-auth.d.ts`)
+  - Interface Session expandida com phone field
+  - Interface User atualizada com todos os campos necessários
+  - Interface JWT completa para suporte a todos os dados
+- **SessionProvider Optimized** (`/src/providers/SessionProvider.tsx`)
+  - Configuração com `refetchOnWindowFocus={true}`
+  - Otimização para atualizações automáticas de sessão
+
+#### **🎯 Modal de Edição Inline**
+- **EditProfileModal Component** (`/src/components/EditProfileModal.tsx`)
+  - Modal moderno com shadcn/ui Dialog
+  - Upload de foto integrado com preview
+  - Validação em tempo real com React Hook Form + Zod
+  - Estados de loading para UX aprimorada
+  - Cancelar/Salvar com feedback visual
+- **UserAvatar Component** (`/src/components/UserAvatar.tsx`)
+  - Componente reutilizável para exibição de avatares
+  - Fallback automático para iniciais ou ícone
+  - Suporte a diferentes tamanhos (sm, md, lg, xl)
+  - Error handling para imagens quebradas
+  - Design consistente em toda aplicação
+
+#### **🌐 Integração Global de Imagens**
+- **Header Component** (`/src/components/header.tsx`)
+  - Atualizado para usar UserAvatar component
+  - Recebe userImage prop da página principal
+  - Exibição consistente do avatar do usuário
+- **Profile Page** (`/src/app/profile/page.tsx`)
+  - UserAvatar integrado na página de perfil
+  - Modal de edição integrado com estado de refresh
+  - Experiência fluida entre visualização e edição
+- **Admin Dashboard** (`/src/app/dashboard/admin/users/[id]/page.tsx`)
+  - UserAvatar nos detalhes de usuário
+  - Fallback para gradiente quando sem imagem
+- **Home Page** (`/src/app/page.tsx`)
+  - userImage prop passada para Header component
+  - Exibição do avatar na página inicial
+
+#### **🔧 Melhorias Técnicas**
+- **Auth Hook Enhanced** (`/src/hooks/useAuth.ts`)
+  - Interface expandida com phone, image e outros campos
+  - Suporte completo a todos os dados do usuário
+- **Profile Actions Improved** (`/src/server/profileActions.ts`)
+  - updateProfile otimizado com revalidation
+  - Validação aprimorada de email duplicado
+  - Error handling melhorado
+- **Upload System Security**
+  - Validação rigorosa de tipos de arquivo
+  - Sanitização de nomes de arquivo
+  - Verificação de tamanho antes do upload
+  - Processamento seguro com Sharp
+
+### 🚀 **Impactos Técnicos e de Negócio**
+
+#### **Experiência do Usuário**
+- ✅ Interface 300% mais moderna e intuitiva
+- ✅ Upload de fotos funcional com feedback em tempo real
+- ✅ Dados sempre atualizados após edições
+- ✅ Modal de edição inline para experiência fluida
+- ✅ Avatares exibidos consistentemente em toda aplicação
+
+#### **Arquitetura**
+- ✅ Sistema de sessão robusto com updates automáticos
+- ✅ Componentes reutilizáveis (UserAvatar, EditProfileModal)
+- ✅ API endpoints especializados para upload
+- ✅ Separação clara entre visualização e edição
+
+#### **Segurança**
+- ✅ Validação rigorosa de uploads
+- ✅ Verificação de permissões em todas as operações
+- ✅ Processamento seguro de imagens
+- ✅ Sanitização de dados de entrada
+
 ## [Major Release] - 2025-10-22 🎉
 
 ### ✨ Sprint Semana 3 - Conquistas Completas

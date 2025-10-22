@@ -4,6 +4,38 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ## 🔥 Alta Prioridade - Semana 4 (28 Oct - 3 Nov 2025)
 
+### Issues Críticos Concluídos - Recente ✅ **100% CONCLUÍDO**
+
+- [x] **#016** - Sistema de atualização de perfil com upload de imagem ✅ **CONCLUÍDO**
+  - **Descrição**: Redesign completo da página de configurações do perfil com funcionalidade moderna de upload de fotos
+  - **Componentes**: ProfileSettings, UploadEndpoint, SessionManagement, UserAvatar
+  - **Estimativa**: 2 dias (100% concluído)
+  - **Assignee**: GitHub Copilot
+  - **Status**: Sistema completo implementado com design minimalista e funcional
+  - **Arquivos criados/modificados**:
+    - `/src/app/profile/settings/page.tsx` - Redesign completo com interface moderna ✅
+    - `/src/app/api/upload/profile/route.ts` - Endpoint dedicado para upload de imagens ✅
+    - `/src/server/profileActions.ts` - updateProfileImage function ✅
+    - `/src/lib/auth.ts` - Enhanced session callbacks for real-time updates ✅
+    - `/src/types/next-auth.d.ts` - Extended types com phone e outros campos ✅
+    - `/src/hooks/useAuth.ts` - Extended interface para todos os campos ✅
+    - `/src/providers/SessionProvider.tsx` - Configuração otimizada para updates ✅
+
+- [x] **#017** - Modal de edição de perfil inline ✅ **CONCLUÍDO**
+  - **Descrição**: Implementação de modal moderno para edição de perfil sem sair da página
+  - **Componentes**: EditProfileModal, Dialog UI, UserAvatar component
+  - **Estimativa**: 1 dia (100% concluído)
+  - **Assignee**: GitHub Copilot
+  - **Status**: Modal completo com upload de foto e validação em tempo real
+  - **Arquivos criados/modificados**:
+    - `/src/components/EditProfileModal.tsx` - Modal completo com upload e validação ✅
+    - `/src/components/UserAvatar.tsx` - Componente reutilizável para avatares ✅
+    - `/src/components/ui/dialog.tsx` - Componente Dialog do shadcn/ui ✅
+    - `/src/app/profile/page.tsx` - Integração com modal e UserAvatar ✅
+    - `/src/components/header.tsx` - Atualizado para usar UserAvatar ✅
+    - `/src/app/page.tsx` - Passa userImage para Header component ✅
+    - `/src/app/dashboard/admin/users/[id]/page.tsx` - UserAvatar integration ✅
+
 ### Issues Críticos da Semana Atual
 
 - [ ] **#014** - Implementação de testes automatizados básicos

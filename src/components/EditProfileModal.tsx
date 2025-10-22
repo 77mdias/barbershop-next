@@ -145,14 +145,7 @@ export function EditProfileModal({ user, isOpen, onClose, onUpdate }: EditProfil
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             Editar Perfil
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            
           </DialogTitle>
         </DialogHeader>
 
@@ -218,18 +211,7 @@ export function EditProfileModal({ user, isOpen, onClose, onUpdate }: EditProfil
               )}
             </div>
 
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register("email")}
-                placeholder="seu@email.com"
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
-              )}
-            </div>
+            
 
             <div>
               <Label htmlFor="phone">Telefone</Label>
