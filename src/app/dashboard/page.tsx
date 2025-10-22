@@ -68,7 +68,7 @@ export default async function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" />
+                <Calendar className="w-5 h-5" />
                 Agendamentos
               </CardTitle>
             </CardHeader>
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
                 </p>
                 <Button asChild className="w-full">
                   <Link href="/scheduling/manage">
-                    <ClockIcon className="w-4 h-4 mr-2" />
+                    <Clock className="w-4 h-4 mr-2" />
                     Ver Agendamentos
                   </Link>
                 </Button>
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                <StarIcon className="w-5 h-5" />
+                <Star className="w-5 h-5" />
                 Avaliações
               </CardTitle>
             </CardHeader>
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                 </p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/reviews">
-                    <EyeIcon className="w-4 h-4 mr-2" />
+                    <Eye className="w-4 h-4 mr-2" />
                     Ver Reviews
                   </Link>
                 </Button>
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                <UserIcon className="w-5 h-5" />
+                <User className="w-5 h-5" />
                 Perfil
               </CardTitle>
             </CardHeader>
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
                 <p className="text-sm text-gray-600">Configurações da conta</p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/profile">
-                    <UserIcon className="w-4 h-4 mr-2" />
+                    <User className="w-4 h-4 mr-2" />
                     Editar Perfil
                   </Link>
                 </Button>
@@ -140,9 +140,9 @@ export default async function DashboardPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 {isBarber ? (
-                  <ScissorsIcon className="w-5 h-5" />
+                  <Scissors className="w-5 h-5" />
                 ) : (
-                  <HeartIcon className="w-5 h-5" />
+                  <Heart className="w-5 h-5" />
                 )}
                 {isBarber ? "Portfólio" : "Galeria"}
               </CardTitle>
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
                 </p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/gallery">
-                    <EyeIcon className="w-4 h-4 mr-2" />
+                    <Eye className="w-4 h-4 mr-2" />
                     Ver Galeria
                   </Link>
                 </Button>
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <StarIcon className="w-6 h-6" />
+                <Star className="w-6 h-6" />
                 {isBarber ? "Reviews Recebidas" : "Suas Últimas Avaliações"}
               </CardTitle>
               <Button asChild variant="outline" size="sm">
@@ -202,7 +202,7 @@ export default async function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ScissorsIcon className="w-6 h-6" />
+                  <Scissors className="w-6 h-6" />
                   Dashboard do Barbeiro
                 </CardTitle>
               </CardHeader>
@@ -262,13 +262,13 @@ export default async function DashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button asChild className="h-16">
                     <Link href="/dashboard/barber">
-                      <ScissorsIcon className="w-6 h-6 mr-2" />
+                      <Scissors className="w-6 h-6 mr-2" />
                       Dashboard Avançado
                     </Link>
                   </Button>
                   <Button asChild variant="outline" className="h-16">
                     <Link href="/reviews?view=barber">
-                      <StarIcon className="w-6 h-6 mr-2" />
+                      <Star className="w-6 h-6 mr-2" />
                       Gerenciar Reviews
                     </Link>
                   </Button>
