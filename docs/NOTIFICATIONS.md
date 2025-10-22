@@ -1,33 +1,34 @@
-# 🔔 Sistema de Notificações - Barbershop Next
+# � Sistema de Notificações - Barbershop Next
 
-Documentação completa do sistema de notificações toast implementado com Sonner.
+Documentação completa do sistema de toast notifications implementado com componentes customizados.
 
 ---
 
 ## 📋 Visão Geral
 
-**Status**: ✅ Implementado (Outubro 2025)  
-**Biblioteca**: Sonner (Toast notifications)  
+**Status**: ✅ **100% IMPLEMENTADO** (22 Oct 2025)  
+**Implementação**: Sistema customizado com Radix UI Primitives  
 **Integração**: Layout principal da aplicação
 
-O sistema de notificações fornece feedback visual para ações do usuário através de toast notifications elegantes e acessíveis.
+Sistema profissional de notificações toast para feedback visual nas ações dos usuários, substituindo a dependência externa Sonner por uma implementação customizada e otimizada.
 
 ---
 
 ## 🎯 Características
 
 ### Funcionalidades Principais
-- ✅ Toast notifications elegantes
-- ✅ Múltiplos tipos (success, error, warning, info, loading)
-- ✅ Auto-dismiss configurável
-- ✅ Posicionamento flexível
-- ✅ Ações customizáveis
-- ✅ Suporte a Promise (loading → success/error)
-- ✅ Acessibilidade (ARIA)
-- ✅ Animações suaves
-- ✅ Mobile-friendly
+- ✅ Toast notifications customizadas e elegantes
+- ✅ Hook `useToast` personalizado para gerenciamento de estado
+- ✅ 4 tipos principais (success, error, warning, info)
+- ✅ Auto-dismiss configurável por tipo
+- ✅ Múltiplos toasts simultâneos
+- ✅ Emojis integrados para melhor UX
+- ✅ API consistente com utilities `showToast`
+- ✅ Acessibilidade completa (ARIA)
+- ✅ Responsive e mobile-friendly
+- ✅ Integração global no layout
 
-### Tipos de Notificações
+### Tipos de Notificações Implementados
 1. **Success** - Ações bem-sucedidas
 2. **Error** - Erros e problemas
 3. **Warning** - Avisos importantes

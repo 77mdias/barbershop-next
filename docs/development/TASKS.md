@@ -2,9 +2,36 @@
 
 Lista organizada de tarefas, bugs e melhorias pendentes.
 
-## 🔥 Alta Prioridade - Semana 3 (21-27 Oct 2025)
+## 🔥 Alta Prioridade - Semana 4 (28 Oct - 3 Nov 2025)
 
 ### Issues Críticos da Semana Atual
+
+- [ ] **#014** - Implementação de testes automatizados básicos
+
+  - **Descrição**: Configurar Jest e Testing Library para componentes críticos
+  - **Componentes**: ReviewForm, ReviewsList, dashboards, server actions
+  - **Estimativa**: 3 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: Planejado
+  - **Arquivos a criar**:
+    - `/src/__tests__/components/ReviewForm.test.tsx`
+    - `/src/__tests__/components/ReviewsList.test.tsx`
+    - `/src/__tests__/server/dashboardActions.test.ts`
+    - `jest.config.js` updates
+
+- [ ] **#015** - Sistema de busca básico para reviews e usuários
+
+  - **Descrição**: Implementar busca e filtros avançados
+  - **Componentes**: SearchInput, FilterDropdown, enhanced ReviewsList
+  - **Estimativa**: 2 dias
+  - **Assignee**: GitHub Copilot
+  - **Status**: Planejado
+  - **Arquivos a criar**:
+    - `/src/components/ui/SearchInput.tsx`
+    - `/src/components/ui/FilterDropdown.tsx`
+    - Updates to existing listing components
+
+### Issues Críticos Concluídos - Semana 3 ✅ **100% CONCLUÍDO**
 
 - [x] **#010** - Integração de dados reais nos dashboards ✅ **CONCLUÍDO**
 
@@ -229,23 +256,38 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ## 📊 Sprint Planning - Atualizado 22 Oct 2025
 
-### Sprint Atual - Semana 3 (21-27 Oct 2025) 🚀 **CONCLUÍDO**
+### Sprint Atual - Semana 4 (28 Oct - 3 Nov 2025) 📋 **EM PLANEJAMENTO**
+
+**Objetivo**: Testes automatizados, analytics avançados e otimizações
+
+**Tasks planejadas**:
+
+- [ ] #014 - Implementação de testes automatizados básicos (3 story points)
+- [ ] #015 - Sistema de busca básico (2 story points)
+- [ ] Analytics avançados para barbeiros (2 story points)
+- [ ] Performance optimizations (1 story point)
+
+**Capacity**: 8 story points  
+**Progress**: 0/8 points iniciados (0%)
+**Risk**: Baixo (fundações sólidas estabelecidas)
+
+### Sprint Concluído - Semana 3 (21-27 Oct 2025) 🏆 **CONCLUÍDO COM ÊXITO**
 
 **Objetivo**: Finalizar integração de dados reais e polimento da aplicação
 
-**Tasks selecionadas**:
+**Tasks concluídas**:
 
 - ✅ #010 - Integração de dados reais nos dashboards (100% concluído)
 - ✅ #011 - Sistema de notificações integrado (100% concluído)
 - ✅ #012 - Loading states e skeleton loaders (100% concluído)
 - ✅ #013 - Remover modo demonstração (100% concluído)
-- ✅ #016 - Atualização completa da documentação (100% concluído)
+- ✅ **EXTRA** - Dashboard de administrador completo (100% concluído)
 
 **Capacity**: 8 story points  
 **Progress**: 8/8 points concluídos (100%) 🏆
-**Result**: **SPRINT CONCLUÍDO COM SUCESSO** - Todas as metas atingidas
+**Result**: **SPRINT CONCLUÍDO COM SUCESSO** - Todas as metas atingidas + feature extra
 
-### 🎯 **CONQUISTAS DO SPRINT**:
+### 🎯 **CONQUISTAS DO SPRINT SEMANA 3**:
 
 #### **Dashboard de Administrador Completo** 🛡️
 - Dashboard dedicado para role ADMIN com métricas globais
@@ -263,23 +305,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 - Todos os dashboards conectados com métricas reais do banco
 - Server actions otimizadas (getAdminMetrics, getBarberMetrics, getDashboardMetrics)
 - Métricas automáticas funcionando corretamente
-- ✅ #013 - Remover modo demonstração (100% concluído)
-- ✅ #016 - Atualização completa da documentação (100% concluído)
-
-**Capacity**: 8 story points  
-**Progress**: 6/8 points concluídos (75%)
-**Risk**: Baixo (principais implementações finalizadas)
-
-### Próximo Sprint - Semana 4 (28 Oct - 3 Nov 2025)
-
-**Objetivo**: Testes e analytics avançados
-
-**Tasks planejadas**:
-
-- #014 - Testes unitários básicos
-- #015 - Sistema de busca básico
-- Analytics avançados para barbeiros
-- Performance optimizations
+- Remoção completa do modo demonstração
 
 ### Sprint Concluído - Semana 1-2 (11-20 Oct 2025) ✅
 
