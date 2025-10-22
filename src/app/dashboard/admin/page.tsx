@@ -42,24 +42,26 @@ export default async function AdminDashboardPage() {
   const metrics = metricsResult.success ? metricsResult.data : null;
 
   return (
-    <div className="container mt-12 mb-16 mx-auto py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="container mt-20 sm:mt-16 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header Administrativo */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <Shield className="w-8 h-8 text-red-600" />
-                Painel Administrativo
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
+                <span>Painel Administrativo</span>
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
                 Gerencie toda a plataforma e monitore métricas globais
               </p>
             </div>
-            <Badge variant="destructive" className="px-3 py-1">
-              <Shield className="w-4 h-4 mr-1" />
-              Administrador
-            </Badge>
+            <div className="flex justify-start sm:justify-end">
+              <Badge variant="destructive" className="px-3 py-2 text-sm">
+                <Shield className="w-4 h-4 mr-2" />
+                Administrador
+              </Badge>
+            </div>
           </div>
           <Separator />
         </div>
@@ -165,22 +167,24 @@ export default async function AdminDashboardPage() {
 
             {/* Tabs de Gestão */}
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Visão Geral
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
+                <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Visão Geral</span>
+                  <span className="sm:hidden">Visão</span>
                 </TabsTrigger>
-                <TabsTrigger value="users" className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Usuários
+                <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>Usuários</span>
                 </TabsTrigger>
-                <TabsTrigger value="reviews" className="flex items-center gap-2">
-                  <Star className="w-4 h-4" />
-                  Avaliações
+                <TabsTrigger value="reviews" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Avaliações</span>
+                  <span className="sm:hidden">Reviews</span>
                 </TabsTrigger>
-                <TabsTrigger value="system" className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  Sistema
+                <TabsTrigger value="system" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>Sistema</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -272,19 +276,19 @@ export default async function AdminDashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <Button asChild className="w-full">
-                        <Link href="/admin/users">
+                        <Link href="/dashboard/admin/users">
                           <Users className="w-4 h-4 mr-2" />
                           Gerenciar Usuários
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/barbers">
+                        <Link href="/dashboard/admin/barbers">
                           <UserCog className="w-4 h-4 mr-2" />
                           Gerenciar Barbeiros
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/reports">
+                        <Link href="/dashboard/admin/reports">
                           <BarChart3 className="w-4 h-4 mr-2" />
                           Relatórios
                         </Link>

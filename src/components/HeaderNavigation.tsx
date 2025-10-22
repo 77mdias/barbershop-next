@@ -93,7 +93,7 @@ const Header = () => {
             {user?.role === "ADMIN" && (
               <a
                 href="/dashboard"
-                className="group relative text-[var(--foreground)] transition-colors duration-200 hover:text-[var(--green-pastel)]"
+                className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
               >
                 Dashboard
                 <span
