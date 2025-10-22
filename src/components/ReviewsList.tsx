@@ -23,7 +23,7 @@ import {
   getReviewStats,
 } from "@/server/reviewActions";
 import { ReviewForm } from "@/components/ReviewForm";
-import { toast } from "sonner";
+import { showToast } from "@/lib/toast-utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ReviewsListSkeleton } from "@/components/ui/review-skeleton";
 import { formatDistanceToNow } from "date-fns";
@@ -148,15 +148,15 @@ export function ReviewsList({
     try {
       const result = await deleteReview({ id: reviewId });
       if (result.success) {
-        toast.success("Avaliação excluída com sucesso!");
+        showToast.success("Avaliação excluída!", "A avaliação foi removida com sucesso");
         loadReviews();
         loadStats();
       } else {
-        toast.error(result.error || "Erro ao excluir avaliação");
+        showToast.error("Erro ao excluir", result.error || "Erro ao excluir avaliação");
       }
     } catch (error) {
       console.error("Erro ao excluir avaliação:", error);
-      toast.error("Erro inesperado ao excluir avaliação");
+      showToast.error("Erro inesperado", "Erro inesperado ao excluir avaliação");
     }
   };
 

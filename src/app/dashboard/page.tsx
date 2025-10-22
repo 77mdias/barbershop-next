@@ -32,6 +32,11 @@ export default async function DashboardPage() {
   const isBarber = userRole === "BARBER";
   const isAdmin = userRole === "ADMIN";
 
+  // Redirecionar admin para dashboard específico
+  if (isAdmin) {
+    redirect("/dashboard/admin");
+  }
+
   // Buscar métricas do dashboard
   const metricsResult = await getDashboardMetrics(session.user.id);
   const metrics = metricsResult.success ? metricsResult.data : null;

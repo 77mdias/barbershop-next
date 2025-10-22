@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Star, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { reviewFormSchema, type ReviewFormData } from '@/schemas/reviewSchemas';
 import { createReview, updateReview } from '@/server/reviewActions';
-import { toast } from 'sonner';
+import { showToast } from '@/lib/toast-utils';
 
 interface ReviewFormProps {
   serviceHistoryId: string;
@@ -79,15 +79,15 @@ export function ReviewForm({
 
         if (result.success) {
           setSubmitStatus('success');
-          toast.success(result.message || 'Avaliação salva com sucesso!');
+          showToast.success('Avaliação salva!', result.message || 'Sua avaliação foi salva com sucesso');
           onSuccess?.();
         } else {
           setSubmitStatus('error');
-          toast.error(result.error || 'Erro ao salvar avaliação');
+          showToast.error('Erro ao salvar', result.error || 'Erro ao salvar avaliação');
         }
       } catch (error) {
         setSubmitStatus('error');
-        toast.error('Erro inesperado ao salvar avaliação');
+        showToast.error('Erro inesperado', 'Erro inesperado ao salvar avaliação');
         console.error('Erro no formulário:', error);
       }
     });

@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
 import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
 import HeaderNavigation from "@/components/HeaderNavigation";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
