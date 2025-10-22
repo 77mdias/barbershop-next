@@ -98,6 +98,7 @@ export const getReviewsSchema = z.object({
   limit: z.number().min(1).max(50).default(10),
   sortBy: z.enum(["createdAt", "rating", "completedAt"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  showAllReviews: z.boolean().optional().default(false), // Permite ver todas as avaliações (ignora filtros de papel)
 });
 
 // Schema para deletar avaliação

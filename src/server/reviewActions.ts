@@ -289,18 +289,21 @@ export async function getReviews(input: Partial<GetReviewsInput> = {}) {
     };
 
     // Filtros baseados no papel do usuário
-    if (session.user.role === UserRole.CLIENT) {
-      // Cliente só vê suas próprias avaliações
-      whereConditions.userId = session.user.id;
-    } else if (session.user.role === UserRole.BARBER) {
-      // Barbeiro vê avaliações dos serviços que ele prestou
-      whereConditions.appointments = {
-        some: {
-          barberId: session.user.id,
-        },
-      };
+    if (!validatedInput.showAllReviews) {
+      if (session.user.role === UserRole.CLIENT) {
+        // Cliente só vê suas próprias avaliações
+        whereConditions.userId = session.user.id;
+      } else if (session.user.role === UserRole.BARBER) {
+        // Barbeiro vê avaliações dos serviços que ele prestou
+        whereConditions.appointments = {
+          some: {
+            barberId: session.user.id,
+          },
+        };
+      }
+      // ADMIN vê todas as avaliações (não adiciona filtro extra)
     }
-    // ADMIN vê todas as avaliações (não adiciona filtro extra)
+    // Se showAllReviews for true, ignora os filtros de papel e mostra todas
 
     // Aplicar filtros opcionais
     if (validatedInput.userId) {

@@ -1,25 +1,24 @@
-import { Suspense } from 'react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ReviewForm } from '@/components/ReviewForm';
-import { ReviewsList } from '@/components/ReviewsList';
-import { Separator } from '@/components/ui/separator';
-import { ReviewSystemManager } from '@/components/ReviewSystemManager';
+import { Suspense } from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReviewForm } from "@/components/ReviewForm";
+import { ReviewsList } from "@/components/ReviewsList";
+import { Separator } from "@/components/ui/separator";
+import { ReviewSystemManager } from "@/components/ReviewSystemManager";
 
 export default async function ReviewsPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
-    redirect('/auth/signin');
+    redirect("/auth/signin");
   }
 
   return (
     <div className="container mt-12 mb-16 mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
-        
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Sistema de Avaliações</h1>
@@ -31,43 +30,85 @@ export default async function ReviewsPage() {
         <Separator />
 
         {/* Tabs para diferentes funcionalidades */}
-        <Tabs defaultValue="list" className="w-full">
-          <TabsList
-            className="flex flex-wrap w-full gap-1 md:gap-4 px-0.5 py-1 bg-gray-50 rounded-lg shadow-sm"
-          >
+        <Tabs defaultValue="gallery" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 md:gap-2 px-0.5 py-1 bg-gray-50 rounded-lg shadow-sm">
+            <TabsTrigger
+              value="gallery"
+              className="px-1.5 py-1.5 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+            >
+              Galeria Pública
+            </TabsTrigger>
             <TabsTrigger
               value="list"
-              className="flex-1 min-w-0 px-1.5 py-1.5 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+              className="px-1.5 py-1.5 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
             >
-              Avaliações
+              Minhas Avaliações
             </TabsTrigger>
             <TabsTrigger
               value="form"
-              className="flex-1 min-w-0 px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+              className="px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
             >
               Nova Avaliação
             </TabsTrigger>
             <TabsTrigger
               value="stats"
-              className="flex-1 min-w-0 px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
+              className="px-2 py-2 text-xs md:text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition"
             >
               Estatísticas
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="gallery" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Galeria Pública de Avaliações</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Veja as avaliações de todos os clientes da barbearia
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Suspense
+                  fallback={
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-2 text-gray-600">
+                        Carregando avaliações...
+                      </p>
+                    </div>
+                  }
+                >
+                  <ReviewsList
+                    showStats={true}
+                    showActions={false}
+                    limit={10}
+                    showAllReviews={true}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="list" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Todas as Avaliações</CardTitle>
+                <CardTitle>Minhas Avaliações</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Gerencie suas próprias avaliações
+                </p>
               </CardHeader>
               <CardContent>
-                <Suspense fallback={
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Carregando avaliações...</p>
-                  </div>
-                }>
-                  <ReviewsList 
+                <Suspense
+                  fallback={
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-2 text-gray-600">
+                        Carregando avaliações...
+                      </p>
+                    </div>
+                  }
+                >
+                  <ReviewsList
+                    userId={session.user.id}
                     showStats={true}
                     showActions={true}
                     limit={10}
@@ -83,19 +124,20 @@ export default async function ReviewsPage() {
 
           <TabsContent value="stats" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               {/* Stats por Usuário */}
               <Card>
                 <CardHeader>
                   <CardTitle>Minhas Avaliações</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Suspense fallback={
-                    <div className="text-center py-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                    </div>
-                  }>
-                    <ReviewsList 
+                  <Suspense
+                    fallback={
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                      </div>
+                    }
+                  >
+                    <ReviewsList
                       userId={session.user.id}
                       showStats={true}
                       showActions={true}
@@ -112,7 +154,9 @@ export default async function ReviewsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-sm mb-2">1. Componente ReviewForm</h4>
+                    <h4 className="font-semibold text-sm mb-2">
+                      1. Componente ReviewForm
+                    </h4>
                     <div className="bg-gray-100 p-3 rounded text-xs font-mono">
                       {`<ReviewForm 
   serviceHistoryId="hist_123"
@@ -122,7 +166,9 @@ export default async function ReviewsPage() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-sm mb-2">2. Lista de Avaliações</h4>
+                    <h4 className="font-semibold text-sm mb-2">
+                      2. Lista de Avaliações
+                    </h4>
                     <div className="bg-gray-100 p-3 rounded text-xs font-mono">
                       {`<ReviewsList 
   userId="user_123"      // Filtrar por usuário
@@ -136,7 +182,9 @@ export default async function ReviewsPage() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-sm mb-2">3. Server Actions</h4>
+                    <h4 className="font-semibold text-sm mb-2">
+                      3. Server Actions
+                    </h4>
                     <div className="bg-gray-100 p-3 rounded text-xs font-mono">
                       {`import { 
   createReview,
@@ -149,7 +197,9 @@ export default async function ReviewsPage() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-sm mb-2">4. Schemas de Validação</h4>
+                    <h4 className="font-semibold text-sm mb-2">
+                      4. Schemas de Validação
+                    </h4>
                     <div className="bg-gray-100 p-3 rounded text-xs font-mono">
                       {`import { 
   reviewFormSchema,
@@ -168,9 +218,12 @@ export default async function ReviewsPage() {
         <Card className="border-dashed">
           <CardContent className="pt-6">
             <div className="text-center space-y-2">
-              <h3 className="font-semibold">✅ Sistema de Avaliações Implementado</h3>
+              <h3 className="font-semibold">
+                ✅ Sistema de Avaliações Implementado
+              </h3>
               <p className="text-sm text-gray-600">
-                CRUD completo, upload de imagens, validações, responsividade e integração com upload system
+                CRUD completo, upload de imagens, validações, responsividade e
+                integração com upload system
               </p>
               <div className="flex justify-center gap-4 text-xs text-gray-500">
                 <span>• ReviewForm component</span>

@@ -74,7 +74,7 @@ export default async function BarberDashboardPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4" />
+                <Calendar className="w-4 h-4" />
                 Hoje
               </CardTitle>
             </CardHeader>
@@ -93,7 +93,7 @@ export default async function BarberDashboardPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <StarIcon className="w-4 h-4" />
+                <Star className="w-4 h-4" />
                 Avaliação
               </CardTitle>
             </CardHeader>
@@ -114,7 +114,7 @@ export default async function BarberDashboardPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <UsersIcon className="w-4 h-4" />
+                <Users className="w-4 h-4" />
                 Clientes
               </CardTitle>
             </CardHeader>
@@ -135,7 +135,7 @@ export default async function BarberDashboardPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <DollarSignIcon className="w-4 h-4" />
+                <DollarSign className="w-4 h-4" />
                 Receita
               </CardTitle>
             </CardHeader>
@@ -160,28 +160,28 @@ export default async function BarberDashboardPage() {
               value="reviews"
               className="flex items-center gap-2 py-3"
             >
-              <StarIcon className="w-4 h-4" />
+              <Star className="w-4 h-4" />
               Reviews
             </TabsTrigger>
             <TabsTrigger
               value="appointments"
               className="flex items-center gap-2 py-3"
             >
-              <CalendarIcon className="w-4 h-4" />
+              <Calendar className="w-4 h-4" />
               Agendamentos
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
               className="flex items-center gap-2 py-3"
             >
-              <BarChart3Icon className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" />
               Análises
             </TabsTrigger>
             <TabsTrigger
               value="performance"
               className="flex items-center gap-2 py-3"
             >
-              <TrendingUpIcon className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
               Performance
             </TabsTrigger>
           </TabsList>
@@ -235,7 +235,7 @@ export default async function BarberDashboardPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <MessageSquareIcon className="w-6 h-6" />
+                    <MessageSquare className="w-6 h-6" />
                     Suas Reviews Recentes
                   </CardTitle>
                   <Button asChild variant="outline" size="sm">
@@ -268,13 +268,13 @@ export default async function BarberDashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CalendarIcon className="w-6 h-6" />
+                  <Calendar className="w-6 h-6" />
                   Próximos Agendamentos
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-gray-500">
-                  <CalendarIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>
                     Integração com sistema de agendamentos em desenvolvimento
                   </p>
@@ -293,13 +293,13 @@ export default async function BarberDashboardPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3Icon className="w-6 h-6" />
+                    <BarChart3 className="w-6 h-6" />
                     Reviews por Mês
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8 text-gray-500">
-                    <BarChart3Icon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Gráficos de análise em desenvolvimento</p>
                   </div>
                 </CardContent>
@@ -309,7 +309,7 @@ export default async function BarberDashboardPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <StarIcon className="w-6 h-6" />
+                    <Star className="w-6 h-6" />
                     Distribuição de Notas
                   </CardTitle>
                 </CardHeader>
@@ -318,7 +318,7 @@ export default async function BarberDashboardPage() {
                     {[5, 4, 3, 2, 1].map((star) => (
                       <div key={star} className="flex items-center gap-2">
                         <span className="text-sm w-4">{star}</span>
-                        <StarIcon className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-yellow-400 h-2 rounded-full"
@@ -340,14 +340,14 @@ export default async function BarberDashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AwardIcon className="w-6 h-6" />
+                  <Award className="w-6 h-6" />
                   Conquistas e Metas
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-                    <AwardIcon className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
+                    <Award className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
                     <p className="font-semibold text-yellow-800">Top Rated</p>
                     <p className="text-xs text-yellow-600">
                       Média 4.5+ por 3 meses
@@ -355,7 +355,7 @@ export default async function BarberDashboardPage() {
                   </div>
 
                   <div className="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                    <UsersIcon className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                    <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
                     <p className="font-semibold text-blue-800">
                       Client Favorite
                     </p>
@@ -365,7 +365,7 @@ export default async function BarberDashboardPage() {
                   </div>
 
                   <div className="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
-                    <MessageSquareIcon className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                    <MessageSquare className="w-8 h-8 mx-auto text-green-600 mb-2" />
                     <p className="font-semibold text-green-800">
                       Review Master
                     </p>

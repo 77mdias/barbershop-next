@@ -74,6 +74,7 @@ interface ReviewsListProps {
   showActions?: boolean;
   showStats?: boolean;
   limit?: number;
+  showAllReviews?: boolean; // Novo parâmetro para mostrar todas as avaliações
 }
 
 export function ReviewsList({
@@ -83,6 +84,7 @@ export function ReviewsList({
   showActions = true,
   showStats = true,
   limit = 10,
+  showAllReviews = false, // Valor padrão false
 }: ReviewsListProps) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
@@ -103,6 +105,7 @@ export function ReviewsList({
         barberId,
         page: currentPage,
         limit,
+        showAllReviews, // Passa o novo parâmetro
       });
 
       if (result.success && result.data) {
@@ -135,7 +138,7 @@ export function ReviewsList({
   useEffect(() => {
     loadReviews();
     loadStats();
-  }, [currentPage, userId, serviceId, barberId]);
+  }, [currentPage, userId, serviceId, barberId, showAllReviews]);
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!confirm("Tem certeza que deseja excluir esta avaliação?")) {
@@ -270,7 +273,7 @@ export function ReviewsList({
       ) : reviews.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-600">Nenhuma avaliação encontrada.</p>
+            <p className="text-gray-600">Nenhuma avaliação sua encontrada.</p>
           </CardContent>
         </Card>
       ) : (
