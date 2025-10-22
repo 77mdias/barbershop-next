@@ -7,6 +7,9 @@ interface UserWithRole {
   id: string;
   email: string;
   name?: string;
+  nickname?: string;
+  phone?: string;
+  image?: string;
   role: UserRole;
 }
 

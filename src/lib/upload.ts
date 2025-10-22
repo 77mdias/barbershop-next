@@ -178,7 +178,10 @@ export async function validateAndSaveFile(
     const fileHash = generateFileHash(buffer);
     const sanitizedName = sanitizeFilename(file.name);
     const ext = path.extname(sanitizedName) || ".jpg";
-    const filename = `review-${fileHash}-${nanoid(8)}${ext}`;
+    
+    // Usar prefixo específico baseado na subpasta
+    const prefix = subfolder === "profile" ? "profile" : "review";
+    const filename = `${prefix}-${fileHash}-${nanoid(8)}${ext}`;
     const filePath = path.join(uploadDir, filename);
 
     // Verificar se arquivo já existe (baseado em hash)

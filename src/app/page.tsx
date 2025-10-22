@@ -97,6 +97,7 @@ export default function Home() {
         {/* Header */}
         <Header
           userName={isAuthenticated ? (user?.name || user?.email?.split('@')[0] || "Usuário") : "Visitante"}
+          userImage={isAuthenticated ? user?.image : undefined}
           onFilterClick={() => {
             /* TODO: Implement filter functionality */
           }}

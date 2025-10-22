@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -315,11 +315,13 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
             {/* Avatar e Info Rápida */}
             <Card>
               <CardContent className="p-6 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white font-bold text-2xl">
-                    {user.name?.charAt(0).toUpperCase() || "?"}
-                  </span>
-                </div>
+                <UserAvatar
+                  src={user.image}
+                  name={user.name}
+                  email={user.email}
+                  size="xl"
+                  className="w-20 h-20 mx-auto mb-4"
+                />
                 <h3 className="font-bold text-lg">{user.name || "Sem nome"}</h3>
                 <p className="text-gray-600 text-sm mb-3">{user.email}</p>
                 <Badge variant={getRoleBadgeVariant(user.role)} className="mb-2">

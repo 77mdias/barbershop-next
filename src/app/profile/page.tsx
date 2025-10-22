@@ -4,7 +4,9 @@ import * as React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
+import { EditProfileModal } from "@/components/EditProfileModal";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/UserAvatar";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { ProfileMenuItem } from "@/components/ui/profile-menu-item";
 import { cn } from "@/lib/utils";
@@ -19,9 +21,16 @@ import styles from "@/app/profile/page.module.scss";
 export default function Profile() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   const handleNavigation = (href: string) => {
     router.push(href);
+  };
+
+  const handleProfileUpdate = () => {
+    // Força re-render para mostrar dados atualizados
+    setRefreshKey(prev => prev + 1);
   };
 
   // Itens da navegação inferior (mesmo da home)
@@ -130,7 +139,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col w-full mt-16 bg-[--background]">
+    <div key={refreshKey} className="container mx-auto flex flex-col w-full mt-16 bg-[--background]">
       {/* Header com gradiente escuro */}
       <div className={cn("text-white px-6 pt-8 pb-8", styles.profileHeader)}>
         {/* Avatar e informações do usuário */}
@@ -141,11 +150,13 @@ export default function Profile() {
               styles.profileHeader__avatar
             )}
           >
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-2xl font-bold text-[var(--primary)]">
-              {user.name
-                ? user.name.charAt(0).toUpperCase()
-                : user.email.charAt(0).toUpperCase()}
-            </div>
+            <UserAvatar
+              src={user.image}
+              name={user.name}
+              email={user.email}
+              size="xl"
+              className="w-24 h-24"
+            />
           </div>
 
           <h1
@@ -165,7 +176,7 @@ export default function Profile() {
           <Button
             className={cn("px-6 py-2 font-medium mx-4 transition-colors", styles.profileHeader__editButton)}
             variant="outline"
-            onClick={() => {/* Aqui pode abrir modal de edição futuramente */}}
+            onClick={() => setIsEditModalOpen(true)}
           >
             Edit Profile
           </Button>
@@ -191,6 +202,33 @@ export default function Profile() {
 
           {/* Menu items refatorados com ProfileMenuItem */}
           <div className="space-y-3">
+            <ProfileMenuItem
+              icon={
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              }
+              label="Configurações do Perfil"
+              href="/profile/settings"
+              className={styles.profileContent__menuItem}
+            />
+
             <ProfileMenuItem
               icon={
                 <svg
@@ -309,6 +347,15 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Modal de Edição */}
+      {user && (
+        <EditProfileModal
+          user={user}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 }

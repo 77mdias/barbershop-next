@@ -169,7 +169,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 dias
-    updateAge: 24 * 60 * 60, // Atualiza a cada 24h
+    updateAge: 0, // Permite atualizações imediatas
   },
   jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 dias
@@ -274,9 +274,10 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        token.nickname =
-          user.nickname || user.name || user.email?.split("@")[0];
+        token.nickname = user.nickname || user.name || user.email?.split("@")[0];
         token.name = user.name;
+        token.email = user.email;
+        token.phone = user.phone || null;
         token.image = user.image;
 
         logger.auth.info("✅ JWT token updated with user data", {
@@ -288,26 +289,70 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, trigger, newSession }) {
       logger.auth.debug("🔄 Session callback", {
         hasSession: !!session,
         hasToken: !!token,
         tokenId: token?.id,
         sessionEmail: session?.user?.email,
+        trigger,
         environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
       });
 
       if (token) {
+        // Sempre buscar dados atuais do usuário se temos um ID
+        if (token.id) {
+          try {
+            const freshUser = await db.user.findUnique({
+              where: { id: token.id as string },
+              select: {
+                id: true,
+                name: true,
+                nickname: true,
+                email: true,
+                phone: true,
+                image: true,
+                role: true,
+              },
+            });
+
+            if (freshUser) {
+              // Atualizar token com dados frescos SEMPRE
+              token.name = freshUser.name;
+              token.nickname = freshUser.nickname;
+              token.email = freshUser.email;
+              token.phone = freshUser.phone;
+              token.image = freshUser.image;
+              token.role = freshUser.role;
+
+              logger.auth.info("🔄 Session data refreshed from database", {
+                userId: freshUser.id,
+                hasNewImage: !!freshUser.image,
+                trigger,
+                timestamp: new Date().toISOString(),
+              });
+            }
+          } catch (error) {
+            logger.auth.error("❌ Error refreshing user data", {
+              userId: token.id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
+        }
+
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
         session.user.nickname = token.nickname as string | null;
         session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.phone = token.phone as string | null;
         session.user.image = token.image as string | null | undefined;
 
         logger.auth.info("✅ Session updated with token data", {
           userId: token.id,
           role: token.role,
+          hasImage: !!token.image,
           timestamp: new Date().toISOString(),
         });
       }

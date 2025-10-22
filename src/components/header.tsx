@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { UserAvatar } from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
 import styles from "@/app/components.module.scss"
 
@@ -43,18 +43,12 @@ export function Header({
       {/* Seção esquerda - Saudação e Avatar */}
       <div className="flex items-center gap-3">
         <div className={styles.avatar}>
-          <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-            {userImage ? (
-              <AvatarImage 
-                src={userImage}
-                alt={userName}
-              />
-            ) : (
-              <AvatarFallback>
-                {userName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
+          <UserAvatar
+            src={userImage}
+            name={userName}
+            size="lg"
+            className="h-10 w-10 sm:h-12 sm:w-12"
+          />
         </div>
         
         <div className="flex flex-col">
