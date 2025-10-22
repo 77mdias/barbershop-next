@@ -1,0 +1,222 @@
+{
+  "name": "Barbershop Next.js - Full Container Development",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.devcontainer.yml"
+  ],
+  "service": "app",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  // ==================
+  // 🔧 CONFIGURAÇÕES DO VS CODE
+  // ==================
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // TypeScript e JavaScript
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-json",
+        // React e Next.js
+        "burkeholland.simple-react-snippets",
+        "dsznajder.es7-react-js-snippets",
+        // Prisma e Database
+        "Prisma.prisma",
+        "ms-vscode.vscode-postgres",
+        // Docker
+        "ms-azuretools.vscode-docker",
+        // Git e GitHub
+        "GitHub.vscode-pull-request-github",
+        "eamodio.gitlens",
+        // Linting e Formatação
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        // Utilitários
+        "ms-vscode.vscode-thunder-client",
+        "streetsidesoftware.code-spell-checker",
+        "ms-vscode.vscode-todo-highlight",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "bradlc.vscode-tailwindcss",
+        // Temas e Ícones
+        "PKief.material-icon-theme",
+        "GitHub.github-vscode-theme"
+      ],
+      "settings": {
+        // ==================
+        // 📝 EDITOR GERAL
+        // ==================
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.wordWrap": "on",
+        "editor.rulers": [
+          80,
+          120
+        ],
+        "editor.minimap.enabled": true,
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": true,
+        // ==================
+        // 🔍 ARQUIVOS E BUSCA
+        // ==================
+        "files.autoSave": "onFocusChange",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/.git": true,
+          "**/.next": true,
+          "**/dist": true,
+          "**/coverage": true
+        },
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/.next": true,
+          "**/dist": true,
+          "**/coverage": true,
+          "**/prisma/migrations": true
+        },
+        // ==================
+        // 🎨 TYPESCRIPT
+        // ==================
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "typescript.suggest.autoImports": true,
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "typescript.suggest.completeJSDocs": true,
+        // ==================
+        // ⚡ ESLINT
+        // ==================
+        "eslint.workingDirectories": [
+          "./"
+        ],
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        // ==================
+        // 💅 PRETTIER
+        // ==================
+        "prettier.configPath": "./.prettierrc",
+        "prettier.ignorePath": "./.prettierignore",
+        // ==================
+        // 🎯 TAILWIND CSS
+        // ==================
+        "tailwindCSS.includeLanguages": {
+          "typescript": "javascript",
+          "typescriptreact": "javascript"
+        },
+        "tailwindCSS.experimental.classRegex": [
+          [
+            "cva\\(([^)]*)\\)",
+            "[\"'`]([^\"'`]*).*?[\"'`]"
+          ],
+          [
+            "cn\\(([^)]*)\\)",
+            "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"
+          ]
+        ],
+        // ==================
+        // 🗄️ PRISMA
+        // ==================
+        "prisma.showPrismaDataPlatformNotification": false,
+        "[prisma]": {
+          "editor.defaultFormatter": "Prisma.prisma"
+        },
+        // ==================
+        // 🐳 DOCKER
+        // ==================
+        "docker.languageserver.enabled": true,
+        // ==================
+        // 🎨 TEMA E INTERFACE
+        // ==================
+        "workbench.iconTheme": "material-icon-theme",
+        "workbench.colorTheme": "GitHub Dark Default",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash"
+          },
+          "sh": {
+            "path": "/bin/sh"
+          }
+        },
+        // ==================
+        // 🔧 EMMET
+        // ==================
+        "emmet.includeLanguages": {
+          "typescript": "html",
+          "typescriptreact": "html"
+        },
+        // ==================
+        // 📁 EXPLORER
+        // ==================
+        "explorer.fileNesting.enabled": true,
+        "explorer.fileNesting.patterns": {
+          "*.ts": "${capture}.js",
+          "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+          "*.jsx": "${capture}.js",
+          "*.tsx": "${capture}.ts",
+          "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+          "docker-compose.yml": "docker-compose.*.yml, Dockerfile*",
+          "next.config.*": "next-env.d.ts",
+          "tailwind.config.*": "postcss.config.*",
+          "README.*": "LICENSE*, CHANGELOG*"
+        }
+      }
+    }
+  },
+  // ==================
+  // 🚀 LIFECYCLE HOOKS
+  // ==================
+  "postCreateCommand": "/app/.devcontainer/setup.sh",
+  "postStartCommand": "echo '🚀 DevContainer pronto! Aplicação: http://localhost:3000 | Prisma Studio: http://localhost:5555'",
+  "onCreateCommand": "echo '🔄 Configurando devcontainer...'",
+  // ==================
+  // 🔧 CONFIGURAÇÕES DO CONTAINER
+  // ==================
+  "forwardPorts": [
+    3000,
+    5555,
+    5432
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js App",
+      "onAutoForward": "notify"
+    },
+    "5555": {
+      "label": "Prisma Studio",
+      "onAutoForward": "silent"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  },
+  // ==================
+  // 👤 CONFIGURAÇÕES DO USUÁRIO
+  // ==================
+  "remoteUser": "node",
+  "containerUser": "node",
+  // ==================
+  // 🔒 FEATURES ADICIONAIS
+  // ==================
+  // Features removidas devido a incompatibilidade com Alpine Linux
+  // Git e GitHub CLI serão instalados via Dockerfile
+  // ==================
+  // 🎯 MOUNTS ADICIONAIS
+  // ==================
+  "mounts": [
+    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+  ]
+}

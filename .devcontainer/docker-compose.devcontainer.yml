@@ -1,0 +1,94 @@
+# ===============================================
+# 🐳 DOCKER COMPOSE - DEVCONTAINER OVERRIDES
+# ===============================================
+# Configurações específicas para o ambiente devcontainer
+# que complementam o docker-compose.yml principal
+
+services:
+  # ==================
+  # 🚀 APLICAÇÃO - DEVCONTAINER
+  # ==================
+  app:
+    # Sobrescrever comando para manter container ativo
+    command: sleep infinity
+
+    # Variáveis de ambiente específicas para devcontainer
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
+      - DIRECT_URL=postgresql://postgres:postgres@db:5432/barbershop_dev
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=dev-secret-key-change-in-production
+
+    # Volumes adicionais para desenvolvimento
+    volumes:
+      # Mount direto do código sem volumes nomeados para evitar problemas de permissão
+      - .:/app:cached
+
+      # Cache para melhor performance
+      - ~/.npm:/home/node/.npm:cached
+      - ~/.cache:/home/node/.cache:cached
+
+    # Configurações de usuário para evitar problemas de permissão
+    user: node
+
+    # Garantir que o container não pare
+    stdin_open: true
+    tty: true
+
+    # Configurações de desenvolvimento
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: sync+restart
+          path: ./package.json
+          target: /app/package.json
+        - action: sync+restart
+          path: ./prisma
+          target: /app/prisma
+
+  # ==================
+  # 📊 BANCO DE DADOS - DEVCONTAINER
+  # ==================
+  db:
+    # Configurações específicas para desenvolvimento em container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=barbershop_dev
+      # Configurações adicionais para desenvolvimento
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+
+    # Volume persistente específico para devcontainer
+    volumes:
+      - barbershop_pgdata_devcontainer:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
+    # Configurações de performance para desenvolvimento
+    command: >
+      postgres 
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+
+# ==================
+# 🌐 VOLUMES ESPECÍFICOS
+# ==================
+volumes:
+  # Dados do PostgreSQL específicos para devcontainer
+  barbershop_pgdata_devcontainer:
+    driver: local

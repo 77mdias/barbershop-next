@@ -73,3 +73,19 @@ next-env.d.ts
 *.bak
 *.tmp
 *.old
+
+# ==================
+# 🐳 DEVCONTAINER
+# ==================
+# Configurações locais do devcontainer (não versionadas)
+.devcontainer/.env
+.devcontainer/logs/
+.devcontainer/tmp/
+.devcontainer/local-settings.json
+
+# VS Code Server (executado no container)
+.vscode-server/
+.vscode-remote/
+
+# Cache do devcontainer
+.devcontainer-cache/

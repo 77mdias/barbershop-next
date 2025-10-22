@@ -14,8 +14,16 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Configurar timezone
-RUN apk update && apk add --no-cache tzdata || echo "Warning: tzdata package failed to install"
+# Configurar timezone e instalar ferramentas essenciais
+RUN apk update && apk add --no-cache \
+    tzdata \
+    git \
+    github-cli \
+    bash \
+    zsh \
+    curl \
+    postgresql-client \
+    && echo "Tools installed successfully"
 ENV TZ=America/Sao_Paulo
 
 # Copiar apenas arquivos de dependências para melhor cache
@@ -30,6 +38,9 @@ RUN npm ci
 # ==================
 FROM deps AS dev
 WORKDIR /app
+
+# Configurar git globalmente (para desenvolvimento)
+RUN git config --global --add safe.directory /app
 
 # Copiar todo o código para desenvolvimento
 COPY . .

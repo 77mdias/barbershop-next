@@ -1,0 +1,20 @@
+# ===============================================
+# 🚫 GITIGNORE ESPECÍFICO PARA DEVCONTAINER
+# ===============================================
+
+# Arquivos temporários do devcontainer
+.devcontainer/.env
+.devcontainer/logs/
+.devcontainer/tmp/
+
+# Cache do VS Code no container
+.vscode-server/
+.vscode-remote/
+
+# Logs de debug
+debug.log
+*.debug
+
+# Arquivos de configuração local (não devem ser commitados)
+.devcontainer/local-settings.json
+.devcontainer/user-settings.json
