@@ -38,6 +38,35 @@ export default function ProfileSettings() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const [currentImage, setCurrentImage] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Detectar se é mobile para usar estratégias específicas
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkIfMobile = () => {
+      const userAgent = navigator.userAgent;
+      const isMobileDevice = /Mobi|Android/i.test(userAgent);
+      const isTouchDevice = 'ontouchstart' in window;
+      const isSmallScreen = window.innerWidth < 768;
+      
+      const mobile = isMobileDevice || (isTouchDevice && isSmallScreen);
+      console.log("📱 Device detection:", {
+        userAgent,
+        isMobileDevice,
+        isTouchDevice,
+        isSmallScreen,
+        finalResult: mobile
+      });
+      
+      setIsMobile(mobile);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   // Estado local para a imagem atual
   React.useEffect(() => {
@@ -125,41 +154,164 @@ export default function ProfileSettings() {
     }
   };
 
+  // Função alternativa para mobile usando eventos de touch
+  const handleMobileImageUpload = () => {
+    if (!fileInputRef.current) return;
+    
+    console.log("📱 Mobile upload method triggered");
+    
+    // Para mobile, criar um listener direto no input
+    const input = fileInputRef.current;
+    
+    const handleChange = async (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+      
+      if (file) {
+        console.log("📱 Mobile file selected:", file.name);
+        // Usar a mesma função de upload
+        await handleImageUpload({ target } as React.ChangeEvent<HTMLInputElement>);
+      }
+      
+      // Remover listener após uso
+      input.removeEventListener('change', handleChange);
+    };
+    
+    input.addEventListener('change', handleChange);
+    input.click();
+  };
+
+  // Função alternativa para trigger do upload (melhor compatibilidade mobile)
+  const triggerFileInput = () => {
+    console.log("🎯 Triggering file input manually...");
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Debug helper para mostrar informações do dispositivo
+  const showDeviceInfo = () => {
+    const info = {
+      userAgent: navigator.userAgent,
+      isMobile: /Mobi|Android/i.test(navigator.userAgent),
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+      platform: navigator.platform,
+      touchSupport: 'ontouchstart' in window,
+      fileAPISupport: window.File && window.FileReader && window.FileList && window.Blob,
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log("📱 Device Info:", info);
+    
+    // Salvar info no localStorage para debug posterior
+    const debugLogs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
+    debugLogs.push({
+      type: "device-info",
+      data: info,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem("barbershop-debug", JSON.stringify(debugLogs.slice(-10))); // Manter apenas 10 logs
+    
+    // Mostrar info em toast também para debug em produção
+    toast.info(`📱 ${info.isMobile ? 'Mobile' : 'Desktop'} | Touch: ${info.touchSupport ? '✅' : '❌'} | FileAPI: ${info.fileAPISupport ? '✅' : '❌'}`);
+    
+    return info;
+  };
+
+  // Função para salvar logs de upload
+  const saveUploadLog = (step: string, data: any) => {
+    const debugLogs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
+    debugLogs.push({
+      type: "upload-step",
+      step,
+      data,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem("barbershop-debug", JSON.stringify(debugLogs.slice(-20))); // Manter 20 logs
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      isMobile: /Mobi|Android/i.test(navigator.userAgent),
+      filesLength: event.target.files?.length,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log("📱 Upload triggered - Device info:", deviceInfo);
+    saveUploadLog("upload-triggered", deviceInfo);
+
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log("❌ No file selected");
+      saveUploadLog("no-file", { event: "no file selected" });
+      return;
+    }
+
+    const fileInfo = {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified
+    };
+
+    console.log("📄 File details:", fileInfo);
+    saveUploadLog("file-selected", fileInfo);
 
     // Validar tipo de arquivo
     if (!file.type.startsWith("image/")) {
+      console.log("❌ Invalid file type:", file.type);
+      saveUploadLog("invalid-type", { type: file.type });
       toast.error("Apenas imagens são permitidas");
       return;
     }
 
     // Validar tamanho (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
+      console.log("❌ File too large:", file.size);
+      saveUploadLog("file-too-large", { size: file.size });
       toast.error("Imagem muito grande. Máximo 5MB");
       return;
     }
 
     setIsUploadingImage(true);
+    saveUploadLog("upload-started", { fileName: file.name });
 
     try {
+      console.log("🚀 Starting upload process...");
+      
       const formData = new FormData();
       formData.append("file", file);
+
+      console.log("📤 FormData created, sending request...");
+      saveUploadLog("formdata-created", { fileSize: file.size });
 
       const response = await fetch("/api/upload/profile", {
         method: "POST",
         body: formData,
+        // Adicionar headers específicos para mobile
+        headers: {
+          'Accept': 'application/json',
+        }
       });
 
-      const result = await response.json();
+      const responseInfo = {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      };
 
-      console.log("Upload result:", result); // Debug
+      console.log("📥 Response received:", responseInfo);
+      saveUploadLog("response-received", responseInfo);
+
+      const result = await response.json();
+      console.log("📋 Upload result:", result);
+      saveUploadLog("response-parsed", result);
 
       if (response.ok && result.success) {
+        console.log("✅ Upload successful, updating UI...");
+        saveUploadLog("upload-success", { url: result.file.url });
         toast.success("Foto de perfil atualizada!");
-        
-        console.log("Upload bem-sucedido, nova imagem URL:", result.file.url); // Debug
         
         // Atualizar a imagem localmente primeiro para feedback imediato
         setCurrentImage(result.file.url);
@@ -172,17 +324,27 @@ export default function ProfileSettings() {
           }, 500);
         } catch (error) {
           console.error("Erro ao atualizar sessão:", error);
+          saveUploadLog("session-update-error", { error: error.message });
           window.location.reload();
         }
         
       } else {
+        console.log("❌ Upload failed:", result.error);
+        saveUploadLog("upload-failed", { error: result.error });
         toast.error(result.error || "Erro ao fazer upload da imagem");
       }
     } catch (error) {
-      console.error("Erro no upload:", error);
+      console.error("💥 Upload error:", error);
+      saveUploadLog("upload-exception", { error: error.message });
       toast.error("Erro ao fazer upload da imagem");
     } finally {
       setIsUploadingImage(false);
+      saveUploadLog("upload-finished", { timestamp: new Date().toISOString() });
+      
+      // Limpar o input para permitir re-upload do mesmo arquivo
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   };
 
@@ -242,16 +404,41 @@ export default function ProfileSettings() {
               </div>
               
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={handleImageUpload}
                 className="hidden"
                 id="avatar-upload"
                 disabled={isUploadingImage}
+                multiple={false}
               />
               <Label 
                 htmlFor="avatar-upload" 
-                className="absolute -bottom-2 -right-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 cursor-pointer shadow-lg transition-colors disabled:opacity-50"
+                className={cn(
+                  "absolute -bottom-2 -right-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-lg transition-all duration-200 touch-manipulation",
+                  isUploadingImage 
+                    ? "opacity-50 cursor-not-allowed scale-95" 
+                    : "cursor-pointer hover:scale-105"
+                )}
+                onClick={(e) => {
+                  console.log("📱 Label clicked - device info:", { isMobile, isUploadingImage });
+                  
+                  if (isUploadingImage) {
+                    e.preventDefault();
+                    return;
+                  }
+                  
+                  // Para mobile, usar método alternativo mais confiável
+                  if (isMobile) {
+                    e.preventDefault();
+                    handleMobileImageUpload();
+                  } else {
+                    // Para desktop, usar método padrão com delay
+                    setTimeout(() => triggerFileInput(), 50);
+                  }
+                }}
               >
                 {isUploadingImage ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -264,6 +451,47 @@ export default function ProfileSettings() {
             <div className="text-center">
               <h2 className="font-semibold text-gray-900">{user.name}</h2>
               <p className="text-sm text-gray-500">{user.email}</p>
+              {isMobile && (
+                <p className="text-xs text-blue-600 mt-1">
+                  👆 Toque na câmera para alterar foto
+                </p>
+              )}
+              
+              {/* Botão de debug para teste em produção - pode remover depois */}
+              <div className="flex gap-2 justify-center mt-2">
+                <button
+                  type="button"
+                  onClick={showDeviceInfo}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Device Info
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const logs = localStorage.getItem("barbershop-debug");
+                    if (logs) {
+                      console.log("🔍 Debug Logs:", JSON.parse(logs));
+                      toast.info(`📋 ${JSON.parse(logs).length} logs encontrados - verifique o console`);
+                    } else {
+                      toast.info("📋 Nenhum log de debug encontrado");
+                    }
+                  }}
+                  className="text-xs text-green-600 hover:text-green-800 underline"
+                >
+                  Ver Logs
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem("barbershop-debug");
+                    toast.info("🗑️ Logs de debug limpos");
+                  }}
+                  className="text-xs text-red-600 hover:text-red-800 underline"
+                >
+                  Limpar
+                </button>
+              </div>
             </div>
           </div>
         </div>

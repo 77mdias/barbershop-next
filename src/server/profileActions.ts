@@ -170,14 +170,25 @@ export async function getCurrentProfile() {
  */
 export async function updateProfileImage(imageUrl: string) {
   try {
+    console.log("🖼️ updateProfileImage called with URL:", imageUrl);
+    
     const session = await getServerSession(authOptions);
     
+    console.log("📋 Session info:", {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email
+    });
+    
     if (!session?.user?.id) {
+      console.log("❌ No authenticated user session");
       return {
         success: false,
         error: "Usuário não autenticado",
       };
     }
+
+    console.log("🔄 Updating user image in database...");
 
     const updatedUser = await db.user.update({
       where: { id: session.user.id },
@@ -191,6 +202,8 @@ export async function updateProfileImage(imageUrl: string) {
       },
     });
 
+    console.log("✅ User image updated successfully:", updatedUser);
+
     // Revalidar páginas relacionadas
     revalidatePath("/profile");
     revalidatePath("/profile/settings");
@@ -202,7 +215,7 @@ export async function updateProfileImage(imageUrl: string) {
     };
 
   } catch (error) {
-    console.error("Erro ao atualizar imagem de perfil:", error);
+    console.error("💥 Erro ao atualizar imagem de perfil:", error);
     return {
       success: false,
       error: "Erro interno do servidor",
