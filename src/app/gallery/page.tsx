@@ -16,10 +16,15 @@ export default function GalleryPage() {
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-br mt-16 from-blue-50 via-white to-purple-50 items-center  justify-start py-4">
-      <div className="container mx-auto mb-20 flex flex-col w-full justify-center px-4">
+      <div className="container mx-auto mb-20 flex flex-col w-full justify-center ">
         {/* Header da aplicação */}
-        <Header  userName={isAuthenticated ? (user?.name || user?.email?.split('@')[0] || "Usuário") : "Visitante"}
-          />
+        <Header
+          userName={isAuthenticated ? (user?.name || user?.email?.split('@')[0] || "Usuário") : "Visitante"}
+          userImage={isAuthenticated ? user?.image : undefined}
+          onFilterClick={() => {
+            /* TODO: Implement filter functionality */
+          }}
+        />
         
         {/* Espaçamento para compensar o header fixo */}
         <div>

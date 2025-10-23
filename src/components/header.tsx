@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
@@ -25,6 +26,8 @@ export function Header({
   onFilterClick,
   className
 }: HeaderProps) {
+  const router = useRouter()
+  
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return "Good morning!"
@@ -32,7 +35,11 @@ export function Header({
     return "Good evening!"
   }
 
-
+  const handleAvatarClick = () => {
+    /* TODO: Implement avatar click functionality */
+    /* REDIRECIONAR PARA O PERFIL */
+    router.push('/profile');
+  }
 
   return (
     <header className={cn(
@@ -42,7 +49,7 @@ export function Header({
     )}>
       {/* Seção esquerda - Saudação e Avatar */}
       <div className="flex items-center gap-3">
-        <div className={styles.avatar}>
+        <div className={styles.avatar} onClick={handleAvatarClick}>
           <UserAvatar
             src={userImage}
             name={userName}
