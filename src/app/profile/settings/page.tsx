@@ -39,6 +39,7 @@ export default function ProfileSettings() {
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const [currentImage, setCurrentImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [showDebugModal, setShowDebugModal] = React.useState(false);
 
   // Detectar se é mobile para usar estratégias específicas
   const [isMobile, setIsMobile] = React.useState(false);
@@ -216,6 +217,37 @@ export default function ProfileSettings() {
     toast.info(`📱 ${info.isMobile ? 'Mobile' : 'Desktop'} | Touch: ${info.touchSupport ? '✅' : '❌'} | FileAPI: ${info.fileAPISupport ? '✅' : '❌'}`);
     
     return info;
+  };
+
+  // Função para copiar logs para área de transferência
+  const copyLogsToClipboard = async () => {
+    const logs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
+    const logText = JSON.stringify(logs, null, 2);
+    
+    try {
+      await navigator.clipboard.writeText(logText);
+      toast.success("📋 Logs copiados para área de transferência!");
+    } catch (error) {
+      // Fallback para dispositivos que não suportam clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = logText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast.success("📋 Logs copiados!");
+    }
+  };
+
+  // Função para enviar logs por email (abre app de email)
+  const shareLogsViaEmail = () => {
+    const logs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
+    const logText = JSON.stringify(logs, null, 2);
+    const subject = "Barbershop - Debug Logs Upload Mobile";
+    const body = `Logs de debug do upload mobile:\n\n${logText}`;
+    
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
   };
 
   // Função para salvar logs de upload
@@ -407,7 +439,6 @@ export default function ProfileSettings() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleImageUpload}
                 className="hidden"
                 id="avatar-upload"
@@ -457,29 +488,21 @@ export default function ProfileSettings() {
                 </p>
               )}
               
-              {/* Botão de debug para teste em produção - pode remover depois */}
-              <div className="flex gap-2 justify-center mt-2">
+              {/* Botões de debug para teste em produção - pode remover depois */}
+              <div className="flex gap-2 justify-center mt-2 flex-wrap">
                 <button
                   type="button"
                   onClick={showDeviceInfo}
                   className="text-xs text-blue-600 hover:text-blue-800 underline"
                 >
-                  Device Info
+                  📱 Device Info
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    const logs = localStorage.getItem("barbershop-debug");
-                    if (logs) {
-                      console.log("🔍 Debug Logs:", JSON.parse(logs));
-                      toast.info(`📋 ${JSON.parse(logs).length} logs encontrados - verifique o console`);
-                    } else {
-                      toast.info("📋 Nenhum log de debug encontrado");
-                    }
-                  }}
+                  onClick={() => setShowDebugModal(true)}
                   className="text-xs text-green-600 hover:text-green-800 underline"
                 >
-                  Ver Logs
+                  📋 Ver Logs
                 </button>
                 <button
                   type="button"
@@ -489,7 +512,7 @@ export default function ProfileSettings() {
                   }}
                   className="text-xs text-red-600 hover:text-red-800 underline"
                 >
-                  Limpar
+                  🗑️ Limpar
                 </button>
               </div>
             </div>
@@ -603,6 +626,88 @@ export default function ProfileSettings() {
           </form>
         </div>
       </div>
+
+      {/* Modal de Debug - Remove quando não precisar mais */}
+      {showDebugModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">🔍 Debug Logs</h3>
+              <button
+                onClick={() => setShowDebugModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto max-h-[60vh]">
+              {(() => {
+                const logs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
+                
+                if (logs.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-gray-500">
+                      📋 Nenhum log de debug encontrado
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="space-y-4">
+                    {logs.map((log: any, index: number) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded border-l-4 border-blue-500">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium text-sm text-blue-700">
+                            {log.type} {log.step && `- ${log.step}`}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(log.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <pre className="text-xs bg-white p-2 rounded overflow-x-auto whitespace-pre-wrap">
+                          {JSON.stringify(log.data, null, 2)}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+            
+            <div className="p-4 border-t border-gray-200 flex gap-2 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={copyLogsToClipboard}
+                className="flex-1 min-w-0"
+              >
+                📋 Copiar Logs
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={shareLogsViaEmail}
+                className="flex-1 min-w-0"
+              >
+                📧 Enviar por Email
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  localStorage.removeItem("barbershop-debug");
+                  setShowDebugModal(false);
+                  toast.info("🗑️ Logs limpos");
+                }}
+                className="flex-1 min-w-0"
+              >
+                🗑️ Limpar Logs
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
