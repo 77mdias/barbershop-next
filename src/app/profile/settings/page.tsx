@@ -219,6 +219,54 @@ export default function ProfileSettings() {
     return info;
   };
 
+  // Função para testar diretório de uploads
+  const testUploadDir = async () => {
+    try {
+      toast.info("📁 Testando diretório de uploads...");
+      const response = await fetch("/api/test-upload-dir");
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success("✅ Diretórios OK!");
+        console.log("Upload dir test result:", result);
+      } else {
+        toast.error("❌ Problema nos diretórios!");
+        console.error("Upload dir test failed:", result);
+      }
+      
+      // Salvar resultado nos logs
+      saveUploadLog("upload-dir-test", result);
+    } catch (error) {
+      toast.error("❌ Erro ao testar diretórios");
+      console.error("Upload dir test error:", error);
+      saveUploadLog("upload-dir-test-error", { error: error.message });
+    }
+  };
+
+  // Função para testar Sharp no servidor
+  const testSharp = async () => {
+    try {
+      toast.info("🧪 Testando Sharp no servidor...");
+      const response = await fetch("/api/test-sharp");
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success("✅ Sharp funcionando!");
+        console.log("Sharp test result:", result);
+      } else {
+        toast.error("❌ Sharp com problema!");
+        console.error("Sharp test failed:", result);
+      }
+      
+      // Salvar resultado nos logs
+      saveUploadLog("sharp-test", result);
+    } catch (error) {
+      toast.error("❌ Erro ao testar Sharp");
+      console.error("Sharp test error:", error);
+      saveUploadLog("sharp-test-error", { error: error.message });
+    }
+  };
+
   // Função para copiar logs para área de transferência
   const copyLogsToClipboard = async () => {
     const logs = JSON.parse(localStorage.getItem("barbershop-debug") || "[]");
@@ -330,15 +378,31 @@ export default function ProfileSettings() {
       const responseInfo = {
         status: response.status,
         statusText: response.statusText,
-        ok: response.ok
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
       };
 
       console.log("📥 Response received:", responseInfo);
       saveUploadLog("response-received", responseInfo);
 
-      const result = await response.json();
-      console.log("📋 Upload result:", result);
-      saveUploadLog("response-parsed", result);
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log("📄 Raw response text:", responseText);
+        saveUploadLog("raw-response", { text: responseText });
+        
+        result = JSON.parse(responseText);
+        console.log("📋 Upload result:", result);
+        saveUploadLog("response-parsed", result);
+      } catch (parseError) {
+        console.error("❌ JSON parse error:", parseError);
+        saveUploadLog("parse-error", { 
+          error: parseError.message,
+          responseStatus: response.status 
+        });
+        toast.error("Erro ao processar resposta do servidor");
+        return;
+      }
 
       if (response.ok && result.success) {
         console.log("✅ Upload successful, updating UI...");
@@ -676,6 +740,22 @@ export default function ProfileSettings() {
             </div>
             
             <div className="p-4 border-t border-gray-200 flex gap-2 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={testUploadDir}
+                className="flex-1 min-w-0"
+              >
+                📁 Testar Diretórios
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={testSharp}
+                className="flex-1 min-w-0"
+              >
+                🧪 Testar Sharp
+              </Button>
               <Button
                 type="button"
                 variant="outline"
