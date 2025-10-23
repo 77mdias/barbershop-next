@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { validateAndSaveMultipleFiles } from "@/lib/upload";
+import { validateAndSaveMultipleFiles, smartUpload } from "@/lib/upload";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { updateProfileImage } from "@/server/profileActions";
 
@@ -80,11 +80,11 @@ export async function POST(request: NextRequest) {
 
     console.log("🚀 Processing upload...");
 
-    // Processar upload (salvar em pasta "profile" em vez de "reviews") - com tratamento de erro específico
+    // Processar upload (usar smartUpload que detecta mobile automaticamente)
     let result;
     try {
-      result = await validateAndSaveMultipleFiles([file], "profile");
-      console.log("📋 Upload processing result:", result);
+      result = await smartUpload(file, "profile", userAgent);
+      console.log("📋 Smart upload result:", result);
     } catch (uploadError) {
       console.error("❌ Upload processing error:", uploadError);
       return NextResponse.json(
@@ -93,12 +93,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!result.success || !result.files?.[0]) {
+    if (!result.success || !result.url) {
       console.log("❌ Upload failed:", result.error);
       return NextResponse.json({ error: result.error || "Erro no upload" }, { status: 400 });
     }
 
-    const uploadedFile = result.files[0];
+    const uploadedFile = { url: result.url, filename: result.url?.split('/').pop() || '', path: result.url || '', size: file.size };
     
     console.log("✅ File uploaded successfully:", uploadedFile.url);
     

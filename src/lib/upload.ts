@@ -17,7 +17,7 @@ const FILE_SIGNATURES: Record<string, string[]> = {
   "image/webp": ["52494646"],
 };
 
-// Função para verificar assinatura do arquivo
+// Função para verificar assinatura do arquivo (versão mobile-friendly)
 async function verifyFileSignature(
   buffer: Buffer,
   mimeType: string
@@ -36,6 +36,16 @@ async function verifyFileSignature(
     actualHeader: fileHeader,
     bufferLength: buffer.length
   });
+
+  // Para PNG, verificar múltiplas variações (mobile pode ter headers diferentes)
+  if (mimeType === "image/png") {
+    const pngHeaders = ["89504e47", "89504e470d0a1a0a"];
+    const isValidPng = pngHeaders.some((header) => 
+      fileHeader.toLowerCase().startsWith(header.toLowerCase())
+    );
+    console.log(`📋 PNG signature validation result: ${isValidPng}`);
+    return isValidPng;
+  }
 
   const isValid = signatures.some((sig) => fileHeader.toLowerCase().startsWith(sig.toLowerCase()));
   console.log(`📋 Signature validation result: ${isValid}`);
@@ -105,7 +115,7 @@ export async function deleteFile(filePath: string) {
   }
 }
 
-// Função para validar arquivo de upload com segurança extra
+// Função para validar arquivo de upload com segurança extra (mobile-friendly)
 export async function validateAndSaveFile(
   file: File,
   subfolder: string = "reviews"
@@ -149,9 +159,8 @@ export async function validateAndSaveFile(
     const buffer = Buffer.from(bytes);
     console.log(`✅ Buffer created, size: ${buffer.length} bytes`);
 
-    // Verificar se é uma imagem válida usando Sharp (validação mais confiável)
+    // Verificar se é uma imagem válida usando Sharp (validação principal)
     console.log(`🔍 Validating image with Sharp...`);
-    let sharpValidation = false;
     let imageMetadata = null;
     
     try {
@@ -160,69 +169,71 @@ export async function validateAndSaveFile(
         width: imageMetadata.width,
         height: imageMetadata.height,
         format: imageMetadata.format,
-        channels: imageMetadata.channels
+        channels: imageMetadata.channels,
+        hasProfile: imageMetadata.hasProfile,
+        hasAlpha: imageMetadata.hasAlpha
       });
 
-      // Validar dimensões mínimas e máximas
-      if (!imageMetadata.width || !imageMetadata.height) {
-        console.log(`❌ Invalid image dimensions`);
+      // Validar se é realmente uma imagem
+      if (!imageMetadata.width || !imageMetadata.height || !imageMetadata.format) {
+        console.log(`❌ Invalid image - missing metadata`);
         return {
           success: false,
-          error: "Imagem inválida.",
+          error: "Arquivo não é uma imagem válida.",
         };
       }
 
-      if (imageMetadata.width < 100 || imageMetadata.height < 100) {
+      // Validar dimensões mínimas e máximas
+      if (imageMetadata.width < 50 || imageMetadata.height < 50) {
         console.log(`❌ Image too small: ${imageMetadata.width}x${imageMetadata.height}`);
         return {
           success: false,
-          error: "Imagem muito pequena. Mínimo: 100x100 pixels.",
+          error: "Imagem muito pequena. Mínimo: 50x50 pixels.",
         };
       }
 
-      if (imageMetadata.width > 4000 || imageMetadata.height > 4000) {
+      if (imageMetadata.width > 8000 || imageMetadata.height > 8000) {
         console.log(`❌ Image too large: ${imageMetadata.width}x${imageMetadata.height}`);
         return {
           success: false,
-          error: "Imagem muito grande. Máximo: 4000x4000 pixels.",
+          error: "Imagem muito grande. Máximo: 8000x8000 pixels.",
+        };
+      }
+
+      // Validar formatos suportados pelo Sharp
+      const supportedFormats = ["jpeg", "jpg", "png", "webp"];
+      if (!supportedFormats.includes(imageMetadata.format?.toLowerCase() || "")) {
+        console.log(`❌ Unsupported format: ${imageMetadata.format}`);
+        return {
+          success: false,
+          error: "Formato de imagem não suportado.",
         };
       }
       
-      console.log(`✅ Image dimensions valid: ${imageMetadata.width}x${imageMetadata.height}`);
-      sharpValidation = true;
-    } catch (error) {
-      console.log(`❌ Sharp validation failed:`, error);
+      console.log(`✅ Image validation passed: ${imageMetadata.width}x${imageMetadata.height}, format: ${imageMetadata.format}`);
+      
+    } catch (sharpError) {
+      console.log(`❌ Sharp validation failed:`, sharpError);
       return {
         success: false,
-        error: "Arquivo não é uma imagem válida.",
+        error: "Arquivo não é uma imagem válida ou está corrompido.",
       };
     }
 
-    // Verificar assinatura do arquivo (magic numbers) - como validação secundária
-    console.log(`🔍 Verifying file signature...`);
-    const isValidSignature = await verifyFileSignature(buffer, file.type);
+    // Validação adicional (menos restritiva para mobile)
+    console.log(`🔍 Running additional validations...`);
     
-    // Se Sharp validou mas signature falhou, log para análise mas continue (Sharp é mais confiável)
-    if (!isValidSignature) {
-      console.log(`⚠️ File signature validation failed, but Sharp validation passed. Continuing...`);
-      console.log(`📋 File info for analysis:`, {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        sharpFormat: imageMetadata?.format
-      });
-    } else {
-      console.log(`✅ File signature valid`);
-    }
-
-    // Priorizar validação do Sharp sobre magic numbers
-    if (!sharpValidation) {
-      console.log(`❌ Primary validation (Sharp) failed`);
+    // Verificar se o buffer não está vazio
+    if (buffer.length === 0) {
+      console.log(`❌ Empty buffer`);
       return {
         success: false,
-        error: "Arquivo corrompido ou tipo inválido.",
+        error: "Arquivo vazio.",
       };
     }
+
+    // Para mobile, pular verificação de magic numbers se Sharp passou
+    console.log(`✅ All validations passed, proceeding with upload...`);
 
     // Criar diretório se não existir
     const uploadDir = path.join(process.cwd(), "public/uploads", subfolder);
@@ -230,34 +241,39 @@ export async function validateAndSaveFile(
       await fs.access(uploadDir);
     } catch {
       await fs.mkdir(uploadDir, { recursive: true });
+      console.log(`📁 Created upload directory: ${uploadDir}`);
     }
 
     // Gerar nome único e seguro
     const fileHash = generateFileHash(buffer);
     const sanitizedName = sanitizeFilename(file.name);
-    const ext = path.extname(sanitizedName) || ".jpg";
+    const ext = path.extname(sanitizedName) || `.${imageMetadata.format}`;
     
     // Usar prefixo específico baseado na subpasta
     const prefix = subfolder === "profile" ? "profile" : "review";
     const filename = `${prefix}-${fileHash}-${nanoid(8)}${ext}`;
     const filePath = path.join(uploadDir, filename);
 
+    console.log(`📝 Generated filename: ${filename}`);
+
     // Verificar se arquivo já existe (baseado em hash)
-    const existingFile = path.join(uploadDir, `*${fileHash}*`);
     try {
       const files = await fs.readdir(uploadDir);
       const duplicate = files.find((f) => f.includes(fileHash));
       if (duplicate) {
+        console.log(`♻️ Duplicate file found, returning existing: ${duplicate}`);
         return {
           success: true,
           url: `/uploads/${subfolder}/${duplicate}`,
         };
       }
     } catch (error) {
+      console.log(`⚠️ Could not check for duplicates:`, error);
       // Continuar se não conseguir verificar duplicatas
     }
 
     // Processar e salvar imagem com otimização
+    console.log(`🎨 Processing and saving image...`);
     await sharp(buffer)
       .resize(1200, 900, {
         fit: "inside",
@@ -269,6 +285,8 @@ export async function validateAndSaveFile(
       })
       .toFile(filePath);
 
+    console.log(`✅ Image saved successfully: ${filePath}`);
+
     // Retornar URL relativa
     const url = `/uploads/${subfolder}/${filename}`;
 
@@ -277,7 +295,7 @@ export async function validateAndSaveFile(
       url,
     };
   } catch (error) {
-    console.error("Erro ao processar upload:", error);
+    console.error("🚨 Erro ao processar upload:", error);
     return {
       success: false,
       error: "Erro interno do servidor.",
@@ -320,10 +338,163 @@ export interface UploadResponse {
   error?: string;
 }
 
-// Função para processar múltiplos arquivos
+// Função alternativa para upload mobile (mais permissiva)
+export async function validateAndSaveFileMobile(
+  file: File,
+  subfolder: string = "reviews"
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    console.log(`📱 Mobile upload for: ${file.name}`);
+    
+    // Validações básicas apenas
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        success: false,
+        error: "Arquivo muito grande. Tamanho máximo: 5MB.",
+      };
+    }
+
+    if (!file.name || file.name.length > 255) {
+      return {
+        success: false,
+        error: "Nome do arquivo inválido.",
+      };
+    }
+
+    // Verificar se é imagem através do tipo MIME apenas
+    if (!file.type.startsWith('image/')) {
+      return {
+        success: false,
+        error: "Arquivo deve ser uma imagem.",
+      };
+    }
+
+    // Converter para buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    if (buffer.length === 0) {
+      return {
+        success: false,
+        error: "Arquivo vazio.",
+      };
+    }
+
+    // Usar Sharp apenas para verificar se consegue processar
+    let canProcess = false;
+    let metadata = null;
+    
+    try {
+      // Tentar processar a imagem para ver se é válida
+      const processed = await sharp(buffer)
+        .resize(300, 300, { fit: "inside", withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+      
+      if (processed.length > 0) {
+        canProcess = true;
+        metadata = await sharp(buffer).metadata();
+      }
+    } catch (error) {
+      console.log(`❌ Cannot process image:`, error);
+      return {
+        success: false,
+        error: "Imagem não pode ser processada.",
+      };
+    }
+
+    if (!canProcess) {
+      return {
+        success: false,
+        error: "Formato de imagem não suportado.",
+      };
+    }
+
+    // Criar diretório
+    const uploadDir = path.join(process.cwd(), "public/uploads", subfolder);
+    try {
+      await fs.access(uploadDir);
+    } catch {
+      await fs.mkdir(uploadDir, { recursive: true });
+    }
+
+    // Gerar nome do arquivo
+    const fileHash = generateFileHash(buffer);
+    const timestamp = Date.now();
+    const ext = metadata?.format ? `.${metadata.format}` : '.jpg';
+    const filename = `mobile-${timestamp}-${fileHash.substring(0, 8)}${ext}`;
+    const filePath = path.join(uploadDir, filename);
+
+    // Verificar duplicatas
+    try {
+      const files = await fs.readdir(uploadDir);
+      const duplicate = files.find((f) => f.includes(fileHash.substring(0, 8)));
+      if (duplicate) {
+        return {
+          success: true,
+          url: `/uploads/${subfolder}/${duplicate}`,
+        };
+      }
+    } catch (error) {
+      // Ignorar erro de duplicatas
+    }
+
+    // Salvar imagem otimizada
+    await sharp(buffer)
+      .resize(1200, 900, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({
+        quality: 85,
+        progressive: true,
+      })
+      .toFile(filePath);
+
+    const url = `/uploads/${subfolder}/${filename}`;
+    console.log(`✅ Mobile upload successful: ${url}`);
+
+    return {
+      success: true,
+      url,
+    };
+    
+  } catch (error) {
+    console.error("🚨 Mobile upload error:", error);
+    return {
+      success: false,
+      error: "Erro no upload mobile.",
+    };
+  }
+}
+
+// Função para detectar se é mobile e usar função apropriada
+export async function smartUpload(
+  file: File,
+  subfolder: string = "reviews",
+  userAgent?: string
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  // Detectar se é mobile
+  const isMobile = userAgent ? 
+    /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) :
+    false;
+  
+  console.log(`🎯 Smart upload detected: ${isMobile ? 'MOBILE' : 'DESKTOP'}`);
+  
+  if (isMobile) {
+    // Usar função mais permissiva para mobile
+    return await validateAndSaveFileMobile(file, subfolder);
+  } else {
+    // Usar função original para desktop
+    return await validateAndSaveFile(file, subfolder);
+  }
+}
+
+// Função para processar múltiplos arquivos (atualizada para usar smart upload)
 export async function validateAndSaveMultipleFiles(
   files: File[],
-  subfolder: string = "reviews"
+  subfolder: string = "reviews",
+  userAgent?: string
 ): Promise<UploadResponse> {
   try {
     if (files.length > MAX_FILES) {
@@ -334,7 +505,7 @@ export async function validateAndSaveMultipleFiles(
     }
 
     const results = await Promise.all(
-      files.map((file) => validateAndSaveFile(file, subfolder))
+      files.map((file) => smartUpload(file, subfolder, userAgent))
     );
 
     const failedFiles = results.filter((result) => !result.success);

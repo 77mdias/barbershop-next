@@ -6,6 +6,12 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // Log para debug
+    const userAgent = request.headers.get("user-agent") || "unknown";
+    const isMobile = /Mobi|Android/i.test(userAgent);
+    
+    console.log("📸 Upload Images API:", { userAgent, isMobile });
+    
     // Verificar rate limiting
     const rateLimitResult = checkRateLimit(request);
     if (!rateLimitResult.allowed) {
@@ -33,8 +39,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Processar upload
-    const result = await validateAndSaveMultipleFiles(files, "reviews");
+    // Processar upload (passar user agent para detecção de mobile)
+    const result = await validateAndSaveMultipleFiles(files, "reviews", userAgent);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
