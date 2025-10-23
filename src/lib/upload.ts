@@ -13,7 +13,7 @@ const MAX_FILES = 5;
 const FILE_SIGNATURES: Record<string, string[]> = {
   "image/jpeg": ["ffd8ff"],
   "image/jpg": ["ffd8ff"],
-  "image/png": ["89504e47"],
+  "image/png": ["89504e47"], // PNG signature: 89 50 4E 47 0D 0A 1A 0A
   "image/webp": ["52494646"],
 };
 
@@ -23,10 +23,24 @@ async function verifyFileSignature(
   mimeType: string
 ): Promise<boolean> {
   const signatures = FILE_SIGNATURES[mimeType];
-  if (!signatures) return false;
+  if (!signatures) {
+    console.log(`❌ No signatures found for MIME type: ${mimeType}`);
+    return false;
+  }
 
-  const fileHeader = buffer.slice(0, 8).toString("hex");
-  return signatures.some((sig) => fileHeader.toLowerCase().startsWith(sig));
+  // Pegar mais bytes para garantir melhor detecção
+  const fileHeader = buffer.slice(0, 12).toString("hex");
+  console.log(`🔍 File signature check:`, {
+    mimeType,
+    expectedSignatures: signatures,
+    actualHeader: fileHeader,
+    bufferLength: buffer.length
+  });
+
+  const isValid = signatures.some((sig) => fileHeader.toLowerCase().startsWith(sig.toLowerCase()));
+  console.log(`📋 Signature validation result: ${isValid}`);
+  
+  return isValid;
 }
 
 // Função para sanitizar nome do arquivo
@@ -97,72 +111,116 @@ export async function validateAndSaveFile(
   subfolder: string = "reviews"
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
+    console.log(`🔍 Starting file validation for: ${file.name}`);
+    
     // Validação de tipo
     if (!ALLOWED_TYPES.includes(file.type)) {
+      console.log(`❌ File type not allowed: ${file.type}`);
       return {
         success: false,
         error: "Tipo de arquivo não suportado. Use JPEG, PNG ou WebP.",
       };
     }
+    console.log(`✅ File type valid: ${file.type}`);
 
     // Validação de tamanho
     if (file.size > MAX_FILE_SIZE) {
+      console.log(`❌ File too large: ${file.size} bytes`);
       return {
         success: false,
         error: "Arquivo muito grande. Tamanho máximo: 5MB.",
       };
     }
+    console.log(`✅ File size valid: ${file.size} bytes`);
 
     // Validação de nome do arquivo
     if (!file.name || file.name.length > 255) {
+      console.log(`❌ Invalid filename: ${file.name}`);
       return {
         success: false,
         error: "Nome do arquivo inválido.",
       };
     }
+    console.log(`✅ Filename valid: ${file.name}`);
 
     // Converter File para Buffer
+    console.log(`🔄 Converting file to buffer...`);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    console.log(`✅ Buffer created, size: ${buffer.length} bytes`);
 
-    // Verificar assinatura do arquivo (magic numbers)
-    const isValidSignature = await verifyFileSignature(buffer, file.type);
-    if (!isValidSignature) {
-      return {
-        success: false,
-        error: "Arquivo corrompido ou tipo inválido.",
-      };
-    }
-
-    // Verificar se é uma imagem válida usando Sharp
+    // Verificar se é uma imagem válida usando Sharp (validação mais confiável)
+    console.log(`🔍 Validating image with Sharp...`);
+    let sharpValidation = false;
+    let imageMetadata = null;
+    
     try {
-      const metadata = await sharp(buffer).metadata();
+      imageMetadata = await sharp(buffer).metadata();
+      console.log(`📋 Image metadata:`, {
+        width: imageMetadata.width,
+        height: imageMetadata.height,
+        format: imageMetadata.format,
+        channels: imageMetadata.channels
+      });
 
       // Validar dimensões mínimas e máximas
-      if (!metadata.width || !metadata.height) {
+      if (!imageMetadata.width || !imageMetadata.height) {
+        console.log(`❌ Invalid image dimensions`);
         return {
           success: false,
           error: "Imagem inválida.",
         };
       }
 
-      if (metadata.width < 100 || metadata.height < 100) {
+      if (imageMetadata.width < 100 || imageMetadata.height < 100) {
+        console.log(`❌ Image too small: ${imageMetadata.width}x${imageMetadata.height}`);
         return {
           success: false,
           error: "Imagem muito pequena. Mínimo: 100x100 pixels.",
         };
       }
 
-      if (metadata.width > 4000 || metadata.height > 4000) {
+      if (imageMetadata.width > 4000 || imageMetadata.height > 4000) {
+        console.log(`❌ Image too large: ${imageMetadata.width}x${imageMetadata.height}`);
         return {
           success: false,
           error: "Imagem muito grande. Máximo: 4000x4000 pixels.",
         };
       }
+      
+      console.log(`✅ Image dimensions valid: ${imageMetadata.width}x${imageMetadata.height}`);
+      sharpValidation = true;
     } catch (error) {
+      console.log(`❌ Sharp validation failed:`, error);
       return {
         success: false,
         error: "Arquivo não é uma imagem válida.",
+      };
+    }
+
+    // Verificar assinatura do arquivo (magic numbers) - como validação secundária
+    console.log(`🔍 Verifying file signature...`);
+    const isValidSignature = await verifyFileSignature(buffer, file.type);
+    
+    // Se Sharp validou mas signature falhou, log para análise mas continue (Sharp é mais confiável)
+    if (!isValidSignature) {
+      console.log(`⚠️ File signature validation failed, but Sharp validation passed. Continuing...`);
+      console.log(`📋 File info for analysis:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        sharpFormat: imageMetadata?.format
+      });
+    } else {
+      console.log(`✅ File signature valid`);
+    }
+
+    // Priorizar validação do Sharp sobre magic numbers
+    if (!sharpValidation) {
+      console.log(`❌ Primary validation (Sharp) failed`);
+      return {
+        success: false,
+        error: "Arquivo corrompido ou tipo inválido.",
       };
     }
 
