@@ -7,15 +7,20 @@ import { updateProfileImage } from "@/server/profileActions";
 
 export async function POST(request: NextRequest) {
   try {
-    // Log detalhado para debug (incluindo informações do dispositivo)
+    // Log detalhado para debug (incluindo informações do dispositivo e ambiente)
     const userAgent = request.headers.get("user-agent") || "unknown";
     const isMobile = /Mobi|Android/i.test(userAgent);
     const contentType = request.headers.get("content-type") || "unknown";
+    const isProduction = process.env.NODE_ENV === "production";
+    const isVercel = process.env.VERCEL === "1";
     
     console.log("📱 Upload Profile API - Request Info:", {
       userAgent,
       isMobile,
       contentType,
+      isProduction,
+      isVercel,
+      platform: process.platform,
       timestamp: new Date().toISOString()
     });
 
@@ -98,14 +103,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error || "Erro no upload" }, { status: 400 });
     }
 
-    const uploadedFile = { url: result.url, filename: result.url?.split('/').pop() || '', path: result.url || '', size: file.size };
+    const uploadedFile = { 
+      url: result.url, 
+      filename: result.url?.split('/').pop() || '', 
+      path: result.url || '', 
+      size: file.size,
+      base64: result.base64 // Include base64 for production
+    };
     
     console.log("✅ File uploaded successfully:", uploadedFile.url);
+    
+    // Em produção, usar base64 como URL temporariamente
+    const finalUrl = result.base64 || result.url;
     
     // Atualizar a imagem no perfil do usuário - com tratamento de erro específico
     let updateResult;
     try {
-      updateResult = await updateProfileImage(uploadedFile.url);
+      updateResult = await updateProfileImage(finalUrl);
       console.log("📋 Profile update result:", updateResult);
     } catch (profileUpdateError) {
       console.error("❌ Profile update error:", profileUpdateError);
@@ -126,6 +140,7 @@ export async function POST(request: NextRequest) {
       success: true,
       file: uploadedFile,
       message: "Foto de perfil atualizada com sucesso",
+      isProduction: result.base64 ? true : false, // Indicate if using base64
     });
   } catch (error) {
     console.error("💥 Upload profile error (detailed):", {

@@ -4,6 +4,11 @@ import fs from "fs/promises";
 import { nanoid } from "nanoid";
 import crypto from "crypto";
 
+// Detectar ambiente
+const isProd = process.env.NODE_ENV === "production";
+const isVercel = process.env.VERCEL === "1";
+const isReadOnlyFS = isProd || isVercel;
+
 // Tipos de arquivo permitidos
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -61,7 +66,95 @@ function sanitizeFilename(filename: string): string {
     .toLowerCase();
 }
 
-// Função para gerar hash do arquivo (detecção de duplicatas)
+// Função para upload em ambiente read-only (produção)
+export async function uploadToMemoryStorage(
+  file: File,
+  subfolder: string = "reviews"
+): Promise<{ success: boolean; url?: string; error?: string; base64?: string }> {
+  try {
+    console.log(`☁️ Production upload for: ${file.name}`);
+    
+    // Validações básicas
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        success: false,
+        error: "Arquivo muito grande. Tamanho máximo: 5MB.",
+      };
+    }
+
+    if (!file.type.startsWith('image/')) {
+      return {
+        success: false,
+        error: "Arquivo deve ser uma imagem.",
+      };
+    }
+
+    // Converter para buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    if (buffer.length === 0) {
+      return {
+        success: false,
+        error: "Arquivo vazio.",
+      };
+    }
+
+    // Validar com Sharp
+    let metadata = null;
+    let processedBuffer = null;
+    
+    try {
+      metadata = await sharp(buffer).metadata();
+      
+      // Processar e otimizar imagem
+      processedBuffer = await sharp(buffer)
+        .resize(1200, 900, {
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .jpeg({
+          quality: 85,
+          progressive: true,
+        })
+        .toBuffer();
+        
+      console.log(`✅ Image processed: ${metadata.width}x${metadata.height}`);
+      
+    } catch (error) {
+      console.log(`❌ Cannot process image:`, error);
+      return {
+        success: false,
+        error: "Imagem não pode ser processada.",
+      };
+    }
+
+    // Em produção, converter para base64 e retornar data URL
+    const base64 = processedBuffer.toString('base64');
+    const mimeType = `image/${metadata.format || 'jpeg'}`;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    
+    // Simular URL para compatibilidade
+    const fileHash = generateFileHash(processedBuffer);
+    const timestamp = Date.now();
+    const virtualUrl = `/uploads/${subfolder}/prod-${timestamp}-${fileHash.substring(0, 8)}.${metadata.format || 'jpg'}`;
+    
+    console.log(`✅ Production upload successful (base64): ${virtualUrl}`);
+
+    return {
+      success: true,
+      url: virtualUrl,
+      base64: dataUrl, // Para uso direto em <img src={base64} />
+    };
+    
+  } catch (error) {
+    console.error("🚨 Production upload error:", error);
+    return {
+      success: false,
+      error: "Erro no upload de produção.",
+    };
+  }
+}
 function generateFileHash(buffer: Buffer): string {
   return crypto
     .createHash("sha256")
@@ -326,7 +419,7 @@ export function validateImageFile(file: File): boolean {
   return true;
 }
 
-// Tipos de resposta
+// Tipos de resposta (atualizado para suportar base64)
 export interface UploadResponse {
   success: boolean;
   files?: {
@@ -334,6 +427,7 @@ export interface UploadResponse {
     path: string;
     size: number;
     url: string;
+    base64?: string; // Para produção
   }[];
   error?: string;
 }
@@ -468,18 +562,26 @@ export async function validateAndSaveFileMobile(
   }
 }
 
-// Função para detectar se é mobile e usar função apropriada
+// Função inteligente que detecta ambiente e usa estratégia apropriada
 export async function smartUpload(
   file: File,
   subfolder: string = "reviews",
   userAgent?: string
-): Promise<{ success: boolean; url?: string; error?: string }> {
-  // Detectar se é mobile
+): Promise<{ success: boolean; url?: string; error?: string; base64?: string }> {
+  console.log(`🎯 Smart upload - Environment: ${isReadOnlyFS ? 'PRODUCTION (read-only)' : 'DEVELOPMENT'}`);
+  
+  // Em produção com filesystem read-only, usar storage em memória
+  if (isReadOnlyFS) {
+    console.log(`☁️ Using production upload strategy (memory/base64)`);
+    return await uploadToMemoryStorage(file, subfolder);
+  }
+  
+  // Em desenvolvimento, detectar mobile e usar função apropriada
   const isMobile = userAgent ? 
     /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) :
     false;
   
-  console.log(`🎯 Smart upload detected: ${isMobile ? 'MOBILE' : 'DESKTOP'}`);
+  console.log(`🖥️ Using development upload - Device: ${isMobile ? 'MOBILE' : 'DESKTOP'}`);
   
   if (isMobile) {
     // Usar função mais permissiva para mobile
@@ -522,6 +624,7 @@ export async function validateAndSaveMultipleFiles(
       path: result.url || "",
       size: files[index].size,
       url: result.url || "",
+      base64: result.base64, // Include base64 for production
     }));
 
     return {
