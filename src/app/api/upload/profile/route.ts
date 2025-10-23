@@ -39,12 +39,23 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ User authenticated:", session.user.id);
 
-    // Obter dados do FormData
-    const formData = await request.formData();
+    // Obter dados do FormData - com tratamento de erro mais específico
+    let formData;
+    try {
+      formData = await request.formData();
+      console.log("✅ FormData parsed successfully");
+    } catch (formDataError) {
+      console.error("❌ FormData parsing error:", formDataError);
+      return NextResponse.json(
+        { error: "Erro ao processar dados do formulário" },
+        { status: 400 }
+      );
+    }
+
     const file = formData.get("file") as File;
 
     if (!file) {
-      console.log("❌ No file in form data");
+      console.log("❌ No file in form data. FormData keys:", Array.from(formData.keys()));
       return NextResponse.json(
         { error: "Nenhum arquivo enviado" },
         { status: 400 }
@@ -54,7 +65,8 @@ export async function POST(request: NextRequest) {
     console.log("📄 File received:", {
       name: file.name,
       type: file.type,
-      size: file.size
+      size: file.size,
+      constructor: file.constructor.name
     });
 
     // Validar que é apenas uma imagem
@@ -68,10 +80,18 @@ export async function POST(request: NextRequest) {
 
     console.log("🚀 Processing upload...");
 
-    // Processar upload (salvar em pasta "profile" em vez de "reviews")
-    const result = await validateAndSaveMultipleFiles([file], "profile");
-
-    console.log("📋 Upload processing result:", result);
+    // Processar upload (salvar em pasta "profile" em vez de "reviews") - com tratamento de erro específico
+    let result;
+    try {
+      result = await validateAndSaveMultipleFiles([file], "profile");
+      console.log("📋 Upload processing result:", result);
+    } catch (uploadError) {
+      console.error("❌ Upload processing error:", uploadError);
+      return NextResponse.json(
+        { error: `Erro no processamento: ${uploadError.message}` },
+        { status: 500 }
+      );
+    }
 
     if (!result.success || !result.files?.[0]) {
       console.log("❌ Upload failed:", result.error);
@@ -82,10 +102,18 @@ export async function POST(request: NextRequest) {
     
     console.log("✅ File uploaded successfully:", uploadedFile.url);
     
-    // Atualizar a imagem no perfil do usuário
-    const updateResult = await updateProfileImage(uploadedFile.url);
-
-    console.log("📋 Profile update result:", updateResult);
+    // Atualizar a imagem no perfil do usuário - com tratamento de erro específico
+    let updateResult;
+    try {
+      updateResult = await updateProfileImage(uploadedFile.url);
+      console.log("📋 Profile update result:", updateResult);
+    } catch (profileUpdateError) {
+      console.error("❌ Profile update error:", profileUpdateError);
+      return NextResponse.json(
+        { error: `Erro ao atualizar perfil: ${profileUpdateError.message}` },
+        { status: 500 }
+      );
+    }
 
     if (!updateResult.success) {
       console.log("❌ Profile update failed:", updateResult.error);
@@ -100,9 +128,14 @@ export async function POST(request: NextRequest) {
       message: "Foto de perfil atualizada com sucesso",
     });
   } catch (error) {
-    console.error("💥 Upload profile error:", error);
+    console.error("💥 Upload profile error (detailed):", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause
+    });
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: `Erro interno: ${error.message}` },
       { status: 500 }
     );
   }
