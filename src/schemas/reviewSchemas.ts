@@ -31,13 +31,17 @@ export const createReviewSchema = z.object({
     .optional()
     .default([])
     .transform((images) => {
-      // Filtrar strings vazias e validar URLs
+      // Filtrar strings vazias e validar URLs (incluindo URLs relativas)
       const validImages =
         images?.filter((img) => img && img.trim() !== "") || [];
       return validImages.filter((img) => {
+        // Aceitar URLs relativas que começam com / ou URLs absolutas válidas
+        if (img.startsWith('/')) {
+          return true; // URL relativa válida
+        }
         try {
           new URL(img);
-          return true;
+          return true; // URL absoluta válida
         } catch {
           return false;
         }
@@ -116,7 +120,13 @@ export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;
 export const reviewFormSchema = z.object({
   rating: z.number().min(1, "Selecione uma avaliação").max(5),
   feedback: z.string().default(""),
-  images: z.array(z.string()).default([]),
+  images: z
+    .array(z.string())
+    .default([])
+    .transform((images) => {
+      // Filtrar strings vazias mas não validar URLs aqui (deixar para o createReview)
+      return images?.filter((img) => img && img.trim() !== "") || [];
+    }),
 });
 
 export type ReviewFormData = z.infer<typeof reviewFormSchema>;

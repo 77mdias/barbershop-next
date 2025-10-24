@@ -78,18 +78,25 @@ export async function createReview(input: CreateReviewInput) {
     }
 
     // Atualizar o ServiceHistory com a avaliação
+    const updateData: any = {
+      rating: validatedInput.rating,
+      feedback: validatedInput.feedback || null,
+      updatedAt: new Date(),
+    };
+    
+    // Adicionar imagens se fornecidas
+    if (validatedInput.images && validatedInput.images.length > 0) {
+      console.log("💾 Saving images to database:", validatedInput.images);
+      updateData.images = {
+        set: validatedInput.images,
+      };
+    } else {
+      console.log("📝 No images to save");
+    }
+    
     const updatedServiceHistory = await db.serviceHistory.update({
       where: { id: validatedInput.serviceHistoryId },
-      data: {
-        rating: validatedInput.rating,
-        feedback: validatedInput.feedback || null,
-        ...(validatedInput.images && {
-          images: {
-            set: validatedInput.images,
-          },
-        }),
-        updatedAt: new Date(),
-      } as any,
+      data: updateData as any,
       include: {
         user: {
           select: {
@@ -140,8 +147,16 @@ export async function updateReview(input: UpdateReviewInput) {
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Validar entrada
+    // Validar input
     const validatedInput = updateReviewSchema.parse(input);
+    
+    console.log("📝 Updating review:", {
+      id: validatedInput.id,
+      rating: validatedInput.rating,
+      feedback: validatedInput.feedback,
+      images: validatedInput.images,
+      imagesCount: validatedInput.images?.length || 0
+    });
 
     // Verificar se a avaliação existe e autorização do usuário
     const serviceHistory = await db.serviceHistory.findFirst({

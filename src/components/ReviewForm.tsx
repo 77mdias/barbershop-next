@@ -50,9 +50,11 @@ export function ReviewForm({
   const currentImages = watch('images');
   const currentFeedback = watch('feedback');
 
-  const handleImageUpload = (uploadedUrls: string[]) => {
-    const newImages = [...(currentImages || []), ...uploadedUrls];
-    setValue('images', newImages);
+  const handleImageUpload = (allUrls: string[]) => {
+    // O ImageUpload já gerencia todas as URLs (existentes + novas)
+    console.log("🖼️ handleImageUpload called with URLs:", allUrls);
+    setValue('images', allUrls);
+    console.log("🖼️ Form images updated to:", allUrls);
   };
 
   const removeImage = (indexToRemove: number) => {
@@ -61,6 +63,13 @@ export function ReviewForm({
   };
 
   const onSubmit = async (data: ReviewFormData) => {
+    console.log("🚀 ReviewForm submitting data:", {
+      rating: data.rating,
+      feedback: data.feedback,
+      images: data.images,
+      imagesCount: data.images?.length || 0
+    });
+    
     startTransition(async () => {
       try {
         let result;
@@ -71,11 +80,18 @@ export function ReviewForm({
             ...data,
           });
         } else {
+          console.log("📝 Calling createReview with:", {
+            serviceHistoryId,
+            ...data
+          });
+          
           result = await createReview({
             serviceHistoryId,
             ...data,
           });
         }
+
+        console.log("✅ Review operation result:", result);
 
         if (result.success) {
           setSubmitStatus('success');

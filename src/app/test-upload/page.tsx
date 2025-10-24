@@ -12,7 +12,7 @@
 
 import React, { useState } from 'react';
 import { ProfileUpload, ReviewUpload } from '@/components/upload';
-import { getUploadSystemInfo } from '@/lib/upload';
+import { getUploadSystemInfo } from '@/lib/upload-client';
 
 export default function TestUploadPage() {
   const [profileUrl, setProfileUrl] = useState<string>('');

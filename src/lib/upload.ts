@@ -1,12 +1,32 @@
 /**
  * Upload System - Real Implementation
+ * 
+ * ⚠️ This module contains both server and client-safe exports
  */
 
 export { UploadType } from "@/types/upload";
 import { UPLOAD_CONFIG, UploadResult, UploadType } from "@/lib/upload/config";
-import { validateUploadFile } from "@/lib/upload/validators";
-import { processImage } from "@/lib/upload/processors";
-import { createStorageStrategy } from "@/lib/upload/storage";
+
+// Server-only imports (lazy loaded)
+let validateUploadFile: any;
+let processImage: any;
+let createStorageStrategy: any;
+
+// Lazy load server-only modules
+async function loadServerModules() {
+  if (!validateUploadFile) {
+    const validators = await import("@/lib/upload/validators");
+    validateUploadFile = validators.validateUploadFile;
+  }
+  if (!processImage) {
+    const processors = await import("@/lib/upload/processors");
+    processImage = processors.processImage;
+  }
+  if (!createStorageStrategy) {
+    const storage = await import("@/lib/upload/storage");
+    createStorageStrategy = storage.createStorageStrategy;
+  }
+}
 
 // Real upload functions using modular system
 export async function uploadSingleFile(
@@ -16,6 +36,9 @@ export async function uploadSingleFile(
 ): Promise<any> {
   try {
     console.log(`🔧 Processing single file upload: ${file.name}`);
+    
+    // Load server modules
+    await loadServerModules();
     
     // 1. Validate file
     const validation = await validateUploadFile(file, uploadType, userId);
@@ -90,11 +113,16 @@ export async function validateFile(file: File): Promise<any> {
   return await validateUploadFile(file, 'profile');
 }
 
+// Client-safe function to get system info
 export function getUploadSystemInfo(): any {
   return {
-    environment: UPLOAD_CONFIG.isDevelopment ? "development" : "production",
-    storageStrategy: UPLOAD_CONFIG.storage.type,
-    features: ["File validation", "Image processing", "Rate limiting"]
+    environment: typeof window !== 'undefined' ? 'client' : 'server',
+    storageStrategy: "filesystem",
+    features: ["File validation", "Image processing", "Rate limiting"],
+    config: {
+      maxFileSize: UPLOAD_CONFIG.maxFileSize,
+      allowedTypes: UPLOAD_CONFIG.allowedTypes
+    }
   };
 }
 
