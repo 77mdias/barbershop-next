@@ -12,7 +12,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkRateLimit, getClientIP, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { uploadSingleFile, UploadType } from '@/lib/upload';
+import { uploadSingleFileAction } from '@/server/uploadServerActions';
+import { UploadType } from '@/types/upload';
 
 // ===== POST: Upload Profile Image =====
 
@@ -66,8 +67,11 @@ export async function POST(request: NextRequest) {
     
     console.log(`📄 Profile file received: ${file.name} (${file.type}, ${file.size} bytes)`);
     
-    // 4. Upload File
-    const uploadResult = await uploadSingleFile(file, UploadType.PROFILE, userId);
+    // 4. Upload File - create FormData for server action
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    
+    const uploadResult = await uploadSingleFileAction(uploadFormData, UploadType.PROFILE, userId);
     
     if (!uploadResult.success) {
       console.log(`❌ Profile upload failed: ${uploadResult.error}`);
