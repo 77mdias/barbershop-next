@@ -58,7 +58,7 @@ export function UserAvatar({
     )}>
       {shouldShowImage ? (
         <img
-          src={src}
+          src={`${src}?t=${Date.now()}`}
           alt={alt || displayName}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}

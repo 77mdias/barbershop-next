@@ -48,6 +48,8 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
+      # Persiste uploads entre restarts
+      - barbershop_uploads_dev:/app/public/uploads
     env_file:
       - .env.development
     environment:
@@ -71,4 +73,6 @@ networks:
 
 volumes:
   barbershop_pgdata_dev:
+    driver: local
+  barbershop_uploads_dev:
     driver: local

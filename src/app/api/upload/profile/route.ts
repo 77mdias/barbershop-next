@@ -1,156 +1,165 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { validateAndSaveMultipleFiles, smartUpload } from "@/lib/upload";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { updateProfileImage } from "@/server/profileActions";
+/**
+ * 👤 Profile Upload API Route
+ * 
+ * Endpoint para upload de fotos de perfil dos usuários.
+ * Suporta apenas uma imagem por upload com validação rigorosa.
+ * 
+ * @author GitHub Copilot
+ * @since 2024-10-24
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { checkRateLimit, getClientIP, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { uploadSingleFile, UploadType } from '@/lib/upload';
+
+// ===== POST: Upload Profile Image =====
 
 export async function POST(request: NextRequest) {
+  console.log('👤 Profile upload request received');
+  
   try {
-    // Log detalhado para debug (incluindo informações do dispositivo e ambiente)
-    const userAgent = request.headers.get("user-agent") || "unknown";
-    const isMobile = /Mobi|Android/i.test(userAgent);
-    const contentType = request.headers.get("content-type") || "unknown";
-    const isProduction = process.env.NODE_ENV === "production";
-    const isVercel = process.env.VERCEL === "1";
+    // 1. Authentication Check
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      console.log('❌ Unauthorized upload attempt');
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
     
-    console.log("📱 Upload Profile API - Request Info:", {
-      userAgent,
-      isMobile,
-      contentType,
-      isProduction,
-      isVercel,
-      platform: process.platform,
-      timestamp: new Date().toISOString()
-    });
-
-    // Verificar rate limiting
-    const rateLimitResult = checkRateLimit(request);
+    const userId = session.user.id;
+    console.log(`👤 Profile upload for user: ${userId}`);
+    
+    // 2. Rate Limiting
+    const clientIP = getClientIP(request);
+    const rateLimitResult = checkRateLimit(clientIP, userId);
+    
     if (!rateLimitResult.allowed) {
-      console.log("❌ Rate limit exceeded:", rateLimitResult.error);
+      console.log(`🚫 Rate limit exceeded for ${clientIP}:${userId}`);
       return NextResponse.json(
         { error: rateLimitResult.error },
-        { status: 429 }
+        { 
+          status: 429,
+          headers: createRateLimitHeaders({
+            count: 10, // Max reached
+            remaining: 0,
+            resetTime: rateLimitResult.resetTime || Date.now()
+          })
+        }
       );
     }
-
-    // Verificar autenticação
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      console.log("❌ User not authenticated");
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    console.log("✅ User authenticated:", session.user.id);
-
-    // Obter dados do FormData - com tratamento de erro mais específico
-    let formData;
-    try {
-      formData = await request.formData();
-      console.log("✅ FormData parsed successfully");
-    } catch (formDataError) {
-      console.error("❌ FormData parsing error:", formDataError);
-      return NextResponse.json(
-        { error: "Erro ao processar dados do formulário" },
-        { status: 400 }
-      );
-    }
-
-    const file = formData.get("file") as File;
-
+    
+    // 3. Extract File from FormData
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    
     if (!file) {
-      console.log("❌ No file in form data. FormData keys:", Array.from(formData.keys()));
+      console.log('❌ No file provided in form data');
       return NextResponse.json(
-        { error: "Nenhum arquivo enviado" },
+        { error: 'Nenhum arquivo fornecido' },
+        { status: 400 }
+      );
+    }
+    
+    console.log(`📄 Profile file received: ${file.name} (${file.type}, ${file.size} bytes)`);
+    
+    // 4. Upload File
+    const uploadResult = await uploadSingleFile(file, UploadType.PROFILE, userId);
+    
+    if (!uploadResult.success) {
+      console.log(`❌ Profile upload failed: ${uploadResult.error}`);
+      return NextResponse.json(
+        { error: uploadResult.error },
         { status: 400 }
       );
     }
 
-    console.log("📄 File received:", {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      constructor: file.constructor.name
-    });
-
-    // Validar que é apenas uma imagem
-    if (!file.type.startsWith("image/")) {
-      console.log("❌ Invalid file type:", file.type);
-      return NextResponse.json(
-        { error: "Apenas imagens são permitidas" },
-        { status: 400 }
-      );
-    }
-
-    console.log("🚀 Processing upload...");
-
-    // Processar upload (usar smartUpload que detecta mobile automaticamente)
-    let result;
+    // 5. Update User Profile Image in Database
     try {
-      result = await smartUpload(file, "profile", userAgent);
-      console.log("📋 Smart upload result:", result);
-    } catch (uploadError) {
-      console.error("❌ Upload processing error:", uploadError);
-      return NextResponse.json(
-        { error: `Erro no processamento: ${uploadError.message}` },
-        { status: 500 }
-      );
+      const { db } = await import('@/lib/prisma');
+      
+      await db.user.update({
+        where: { id: userId },
+        data: { image: uploadResult.url }
+      });
+      
+      console.log(`✅ User profile image updated in database: ${uploadResult.url}`);
+    } catch (dbError) {
+      console.error('❌ Failed to update user image in database:', dbError);
+      // Continue anyway since file upload was successful
     }
-
-    if (!result.success || !result.url) {
-      console.log("❌ Upload failed:", result.error);
-      return NextResponse.json({ error: result.error || "Erro no upload" }, { status: 400 });
-    }
-
-    const uploadedFile = { 
-      url: result.url, 
-      filename: result.url?.split('/').pop() || '', 
-      path: result.url || '', 
-      size: file.size,
-      base64: result.base64 // Include base64 for production
+    
+    // 6. Success Response
+    console.log(`✅ Profile upload successful: ${uploadResult.url}`);
+    
+    const response = {
+      success: true,
+      file: {
+        url: uploadResult.url,
+        filename: uploadResult.filename,
+        size: uploadResult.size,
+        metadata: uploadResult.metadata
+      },
+      message: 'Foto de perfil atualizada com sucesso'
     };
     
-    console.log("✅ File uploaded successfully:", uploadedFile.url);
+    // Add base64 if available (production)
+    if (uploadResult.base64) {
+      (response.file as any).base64 = uploadResult.base64;
+    }
     
-    // Em produção, usar base64 como URL temporariamente
-    const finalUrl = result.base64 || result.url;
+    return NextResponse.json(response, {
+      headers: createRateLimitHeaders({
+        count: rateLimitResult.remaining ? 10 - rateLimitResult.remaining : 1,
+        remaining: rateLimitResult.remaining || 9,
+        resetTime: rateLimitResult.resetTime || Date.now()
+      })
+    });
     
-    // Atualizar a imagem no perfil do usuário - com tratamento de erro específico
-    let updateResult;
-    try {
-      updateResult = await updateProfileImage(finalUrl);
-      console.log("📋 Profile update result:", updateResult);
-    } catch (profileUpdateError) {
-      console.error("❌ Profile update error:", profileUpdateError);
+  } catch (error) {
+    console.error('💥 Profile upload error:', error);
+    
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// ===== GET: Upload Status/Info =====
+
+export async function GET(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: `Erro ao atualizar perfil: ${profileUpdateError.message}` },
-        { status: 500 }
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
       );
     }
-
-    if (!updateResult.success) {
-      console.log("❌ Profile update failed:", updateResult.error);
-      return NextResponse.json({ error: updateResult.error }, { status: 400 });
-    }
-
-    console.log("🎉 Profile image updated successfully!");
-
+    
+    // Get rate limit status
+    const clientIP = getClientIP(request);
+    const rateLimitStatus = checkRateLimit(clientIP, session.user.id);
+    
     return NextResponse.json({
-      success: true,
-      file: uploadedFile,
-      message: "Foto de perfil atualizada com sucesso",
-      isProduction: result.base64 ? true : false, // Indicate if using base64
+      uploadType: 'profile',
+      maxFileSize: '5MB',
+      allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+      rateLimit: {
+        remaining: rateLimitStatus.remaining,
+        resetTime: rateLimitStatus.resetTime
+      }
     });
+    
   } catch (error) {
-    console.error("💥 Upload profile error (detailed):", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-      cause: error.cause
-    });
+    console.error('💥 Profile upload info error:', error);
     return NextResponse.json(
-      { error: `Erro interno: ${error.message}` },
+      { error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }

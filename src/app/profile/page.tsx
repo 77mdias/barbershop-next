@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import { EditProfileModal } from "@/components/EditProfileModal";
+import { ProfileUploadSimple } from "@/components/upload/ProfileUploadSimple";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/UserAvatar";
 import { BottomNavigation } from "@/components/bottom-navigation";
@@ -22,6 +23,7 @@ export default function Profile() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [isPhotoUploadOpen, setIsPhotoUploadOpen] = React.useState(false);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   const handleNavigation = (href: string) => {
@@ -157,6 +159,17 @@ export default function Profile() {
               size="xl"
               className="w-24 h-24"
             />
+            
+            {/* Botão para editar foto */}
+            <button
+              onClick={() => setIsPhotoUploadOpen(true)}
+              className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-lg transition-colors"
+              title="Alterar foto de perfil"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </button>
           </div>
 
           <h1
@@ -355,6 +368,57 @@ export default function Profile() {
           onClose={() => setIsEditModalOpen(false)}
           onUpdate={handleProfileUpdate}
         />
+      )}
+
+      {/* Modal de Upload de Foto */}
+      {isPhotoUploadOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Alterar Foto de Perfil</h2>
+                <button
+                  onClick={() => setIsPhotoUploadOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <ProfileUploadSimple
+                currentImageUrl={user?.image}
+                onUploadComplete={async (url) => {
+                  console.log('✅ Nova foto de perfil:', url);
+                  
+                  try {
+                    // Atualizar no banco de dados
+                    const response = await fetch('/api/user/update-profile-image', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ imageUrl: url }),
+                    });
+
+                    if (response.ok) {
+                      // Forçar reload da página para atualizar a imagem
+                      window.location.reload();
+                    } else {
+                      console.error('Erro ao atualizar foto no banco');
+                      alert('Foto carregada, mas houve erro ao salvar. Recarregue a página.');
+                    }
+                  } catch (error) {
+                    console.error('Erro ao atualizar perfil:', error);
+                    alert('Foto carregada, mas houve erro ao salvar. Recarregue a página.');
+                  }
+                  
+                  setIsPhotoUploadOpen(false);
+                }}
+                className="mb-4"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

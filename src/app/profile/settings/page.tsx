@@ -407,21 +407,32 @@ export default function ProfileSettings() {
       if (response.ok && result.success) {
         console.log("✅ Upload successful, updating UI...");
         saveUploadLog("upload-success", { url: result.file.url });
-        toast.success("Foto de perfil atualizada!");
         
         // Atualizar a imagem localmente primeiro para feedback imediato
         setCurrentImage(result.file.url);
         
-        // Atualizar sessão e recarregar
+        toast.success("Foto de perfil atualizada!");
+        
+        // Atualizar sessão de forma mais robusta
         try {
-          await update();
+          // 1. Trigger session update
+          const updateResult = await update();
+          console.log("Session update result:", updateResult);
+          
+          // 2. Give time for session to propagate
           setTimeout(() => {
+            // 3. Force page refresh to get updated user data
             window.location.reload();
-          }, 500);
+          }, 1000);
+          
         } catch (error) {
           console.error("Erro ao atualizar sessão:", error);
           saveUploadLog("session-update-error", { error: error.message });
-          window.location.reload();
+          
+          // Fallback: force reload anyway
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         }
         
       } else {
@@ -485,7 +496,7 @@ export default function ProfileSettings() {
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                 {currentImage || user.image ? (
                   <img 
-                    src={currentImage || user.image} 
+                    src={`${currentImage || user.image}?t=${Date.now()}`}
                     alt={user.name} 
                     className="w-full h-full object-cover"
                     onError={(e) => {

@@ -197,7 +197,8 @@ export function ReviewForm({
             {/* Upload component */}
             {(!currentImages || currentImages.length < 5) && (
               <ImageUpload
-                onUploadComplete={handleImageUpload}
+                images={currentImages || []}
+                onImagesChange={handleImageUpload}
                 maxFiles={5 - (currentImages?.length || 0)}
                 disabled={isPending}
               />
