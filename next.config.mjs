@@ -13,6 +13,14 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
+  // Otimizações para reduzir tamanho das functions
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Otimizar Sharp para serverless
+      config.externals = [...(config.externals || []), 'sharp'];
+    }
+    return config;
+  },
   // Força páginas de erro a serem dinâmicas
   async rewrites() {
     return [
