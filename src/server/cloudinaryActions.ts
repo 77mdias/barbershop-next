@@ -19,6 +19,7 @@ export async function uploadToCloudinaryAction(
 ): Promise<{
   success: boolean;
   url?: string;
+  urls?: string[];
   publicUrl?: string;
   error?: string;
 }> {
@@ -33,37 +34,33 @@ export async function uploadToCloudinaryAction(
         api_secret: process.env.CLOUDINARY_API_SECRET,
       });
 
-      const file = formData.get('file') as File;
-      if (!file) {
-        return { success: false, error: 'No file provided' };
-      }
-
-      // Converter File para base64
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
-
-      // Upload para Cloudinary
-      const result = await new Promise<any>((resolve, reject) => {
-        cloudinary.v2.uploader.upload(
-          base64,
-          {
-            folder: `barbershop/${uploadType}`,
-            public_id: `${userId ? `user${userId}-` : ''}${Date.now()}`,
-            transformation: getCloudinaryTransformation(uploadType),
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
+      // Verificar se é upload único ou múltiplo
+      const singleFile = formData.get('file') as File;
+      const multipleFiles = formData.getAll('files') as File[];
+      
+      if (singleFile) {
+        // Upload único
+        const result = await uploadSingleToCloudinary(cloudinary, singleFile, uploadType, userId);
+        return {
+          success: true,
+          url: result.secure_url,
+          publicUrl: result.secure_url,
+        };
+      } else if (multipleFiles.length > 0) {
+        // Upload múltiplo
+        const results = await Promise.all(
+          multipleFiles.map(file => 
+            uploadSingleToCloudinary(cloudinary, file, uploadType, userId)
+          )
         );
-      });
-
-      return {
-        success: true,
-        url: result.secure_url,
-        publicUrl: result.secure_url,
-      };
+        
+        return {
+          success: true,
+          urls: results.map(r => r.secure_url),
+        };
+      } else {
+        return { success: false, error: 'No files provided' };
+      }
     }
 
     // Fallback para sistema local se Cloudinary não configurado
@@ -79,6 +76,34 @@ export async function uploadToCloudinaryAction(
       error: error instanceof Error ? error.message : 'Upload failed'
     };
   }
+}
+
+async function uploadSingleToCloudinary(
+  cloudinary: any, 
+  file: File, 
+  uploadType: UploadType, 
+  userId?: string
+) {
+  // Converter File para base64
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
+
+  // Upload para Cloudinary
+  return new Promise<any>((resolve, reject) => {
+    cloudinary.v2.uploader.upload(
+      base64,
+      {
+        folder: `barbershop/${uploadType}`,
+        public_id: `${userId ? `user${userId}-` : ''}${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        transformation: getCloudinaryTransformation(uploadType),
+      },
+      (error: any, result: any) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+  });
 }
 
 function getCloudinaryTransformation(uploadType: UploadType): string {

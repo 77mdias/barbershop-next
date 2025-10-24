@@ -4,6 +4,11 @@
 .env.production
 .env.staging
 
+# Heavy dependencies to exclude from functions (not from build)
+node_modules/@img/
+node_modules/sharp/
+public/images/cortes/
+
 # Docker (Vercel não usa)
 Dockerfile
 docker-compose.yml

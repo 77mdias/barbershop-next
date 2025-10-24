@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:vercel": "npm uninstall sharp && next build",
     "start": "next start",
     "lint": "eslint",
     "lint:check": "eslint . --ext .ts,.tsx,.js,.jsx",

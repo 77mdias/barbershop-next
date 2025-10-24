@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkRateLimit, getClientIP, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { uploadMultipleFilesAction } from '@/server/uploadServerActions';
+import { uploadToCloudinaryAction } from '@/server/cloudinaryActions';
 import { UploadType } from '@/types/upload';
 
 // ===== POST: Upload Review Images =====
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
       console.log(`  ${index + 1}. ${file.name} (${file.type}, ${file.size} bytes)`);
     });
     
-    // 4. Upload Files - create FormData for server action
+    // 4. Upload Files directly to Cloudinary (no Sharp processing)
     const uploadFormData = new FormData();
     files.forEach(file => uploadFormData.append('files', file));
     
-    const uploadResult = await uploadMultipleFilesAction(uploadFormData, UploadType.REVIEWS, userId);
+    const uploadResult = await uploadToCloudinaryAction(uploadFormData, UploadType.REVIEWS, userId);
     
     if (!uploadResult.success) {
       console.log(`❌ Review upload failed: ${uploadResult.error}`);

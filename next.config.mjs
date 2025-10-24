@@ -16,10 +16,31 @@ const nextConfig = {
   // Otimizações para reduzir tamanho das functions
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Otimizar Sharp para serverless
+      // Excluir Sharp completamente
       config.externals = [...(config.externals || []), 'sharp'];
+
+      // Excluir dependências pesadas
+      config.externals.push({
+        '@img/sharp-libvips-linuxmusl-x64': 'commonjs @img/sharp-libvips-linuxmusl-x64',
+        '@img/sharp-libvips-linux-x64': 'commonjs @img/sharp-libvips-linux-x64',
+        'sharp': 'commonjs sharp'
+      });
     }
     return config;
+  },
+
+  // Configurações específicas para Vercel
+  experimental: {
+    outputFileTracingExcludes: {
+      // Excluir apenas das serverless functions, não do build local
+      'app/api/upload/**': [
+        'node_modules/@img/**/*',
+        'node_modules/sharp/**/*',
+        '.next/cache/**/*',
+        'node_modules/@swc/**/*',
+        'public/images/cortes/**/*',
+      ],
+    },
   },
   // Força páginas de erro a serem dinâmicas
   async rewrites() {
