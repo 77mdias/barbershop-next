@@ -89,30 +89,29 @@ async function uploadSingleToCloudinary(
   const buffer = Buffer.from(bytes);
   const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-  // Upload para Cloudinary
+  // Upload para Cloudinary com transformações no formato correto
+  const transformation = uploadType === UploadType.REVIEWS 
+    ? 'w_800,h_600,c_fit,f_auto,q_auto'
+    : 'w_400,h_400,c_fill,f_auto,q_auto';
+
   return new Promise<any>((resolve, reject) => {
     cloudinary.v2.uploader.upload(
       base64,
       {
         folder: `barbershop/${uploadType}`,
         public_id: `${userId ? `user${userId}-` : ''}${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        transformation: getCloudinaryTransformation(uploadType),
+        resource_type: 'auto',
+        transformation: transformation
       },
       (error: any, result: any) => {
         if (error) reject(error);
-        else resolve(result);
+        else {
+          resolve(result);
+        }
       }
     );
   });
 }
 
-function getCloudinaryTransformation(uploadType: UploadType): string {
-  switch (uploadType) {
-    case UploadType.PROFILE:
-      return 'w_400,h_400,c_fill,f_auto,q_auto';
-    case UploadType.REVIEWS:
-      return 'w_800,h_600,c_fit,f_auto,q_auto';
-    default:
-      return 'w_400,h_400,c_fill,f_auto,q_auto';
-  }
+  });
 }

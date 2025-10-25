@@ -81,26 +81,24 @@ CMD ["npx", "prisma", "migrate", "deploy"]
 # ==================
 FROM base AS production
 
-# Security: Create non-root user
+# Security: Create non-root user FIRST
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001 -G nodejs
 
-# Copy only production dependencies
-COPY --from=deps /app/node_modules ./node_modules/
+# Change to nextjs user BEFORE copying files
+USER nextjs
 
-# Copy built application
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# Copy only production dependencies with correct ownership
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules/
 
-# Fix permissions
-RUN chown -R nextjs:nodejs /app
+# Copy built application with correct ownership
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Security settings
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-USER nextjs
 
 EXPOSE 3000
 

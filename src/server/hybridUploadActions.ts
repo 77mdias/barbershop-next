@@ -23,6 +23,15 @@ export async function hybridUploadAction(
   filename?: string;
   provider?: string;
   error?: string;
+  files?: Array<{
+    url: string;
+    filename: string;
+    size?: number;
+    metadata?: any;
+    base64?: string;
+  }>;
+  totalFiles?: number;
+  successfulFiles?: number;
 }> {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const useCloudinary = process.env.STORAGE_PROVIDER === 'cloudinary';
@@ -82,6 +91,18 @@ async function uploadToCloudinary(
     return {
       success: true,
       urls: results.map(r => r.secure_url),
+      files: results.map(r => ({
+        url: r.secure_url,
+        filename: r.public_id,
+        size: r.bytes,
+        metadata: {
+          width: r.width,
+          height: r.height,
+          format: r.format
+        }
+      })),
+      totalFiles: multipleFiles.length,
+      successfulFiles: results.length,
       provider: 'cloudinary'
     };
   } else {
@@ -99,13 +120,19 @@ async function uploadSingleToCloudinary(
   const buffer = Buffer.from(bytes);
   const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
+  // Definir transformações por tipo de upload
+  const transformation = uploadType === UploadType.REVIEWS
+    ? { width: 800, height: 600, crop: 'fit', fetch_format: 'auto', quality: 'auto' }
+    : { width: 400, height: 400, crop: 'fill', fetch_format: 'auto', quality: 'auto' };
+
   return new Promise<any>((resolve, reject) => {
     cloudinary.v2.uploader.upload(
       base64,
       {
         folder: `barbershop/${uploadType}`,
         public_id: `${userId ? `user${userId}-` : ''}${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        transformation: getCloudinaryTransformation(uploadType),
+        resource_type: 'auto',
+        ...transformation
       },
       (error: any, result: any) => {
         if (error) reject(error);
@@ -146,6 +173,14 @@ async function uploadToLocal(
     return {
       success: true,
       urls: results.map(r => r.url),
+      files: results.map(r => ({
+        url: r.url,
+        filename: r.filename,
+        size: 0, // Local storage doesn't track size easily
+        metadata: {}
+      })),
+      totalFiles: multipleFiles.length,
+      successfulFiles: results.length,
       provider: 'local'
     };
   } else {
@@ -179,15 +214,4 @@ async function uploadSingleToLocal(
   const url = `/uploads/${uploadType}/${filename}`;
   
   return { url, filename };
-}
-
-function getCloudinaryTransformation(uploadType: UploadType): string {
-  switch (uploadType) {
-    case UploadType.PROFILE:
-      return 'w_400,h_400,c_fill,f_auto,q_auto';
-    case UploadType.REVIEWS:
-      return 'w_800,h_600,c_fit,f_auto,q_auto';
-    default:
-      return 'w_400,h_400,c_fill,f_auto,q_auto';
-  }
 }
