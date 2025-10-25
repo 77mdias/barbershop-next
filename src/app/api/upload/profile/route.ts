@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkRateLimit, getClientIP, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { uploadToCloudinaryAction } from '@/server/cloudinaryActions';
+import { hybridUploadAction } from '@/server/hybridUploadActions';
 import { UploadType } from '@/types/upload';
 
 // ===== POST: Upload Profile Image =====
@@ -67,11 +67,11 @@ export async function POST(request: NextRequest) {
     
     console.log(`📄 Profile file received: ${file.name} (${file.type}, ${file.size} bytes)`);
     
-    // 4. Upload File directly to Cloudinary (no Sharp processing)
+    // 4. Upload File - hybrid strategy (local dev, Cloudinary prod)
     const uploadFormData = new FormData();
     uploadFormData.append('file', file);
     
-    const uploadResult = await uploadToCloudinaryAction(uploadFormData, UploadType.PROFILE, userId);
+    const uploadResult = await hybridUploadAction(uploadFormData, UploadType.PROFILE, userId);
     
     if (!uploadResult.success) {
       console.log(`❌ Profile upload failed: ${uploadResult.error}`);
