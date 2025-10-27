@@ -259,6 +259,7 @@ export default function Profile() {
                 </svg>
               }
               label="Friend & Social"
+              href="/profile/social"
               className={styles.profileContent__menuItem}
             />
 
