@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { NotificationBell } from "@/components/NotificationBell";
 
 import MenuNavigation from "./MenuNavigation";
 import styles from "@/app/scss/components/CourseCard.module.scss";
@@ -106,7 +107,12 @@ const Header = () => {
 
         {/* Botões de Ação - Coluna 3 (Direita) */}
         <div className="flex items-center justify-end space-x-4">
-          {/* Aqui podem ser adicionados botões de login, perfil, etc. */}
+          {/* Sino de Notificações - só aparece para usuários autenticados */}
+          <ClientOnlyAuth>
+            {isAuthenticated && <NotificationBell />}
+          </ClientOnlyAuth>
+          
+          {/* Menu de Navegação */}
           <MenuNavigation />
         </div>
       </div>
@@ -131,14 +137,22 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Botão de Menu Mobile */}
-        <button
-          className="p-2 text-[var(--primary)]"
-          onClick={handleMenuToggle}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Botões de Ação Mobile */}
+        <div className="flex items-center space-x-2">
+          {/* Sino de Notificações Mobile - só aparece para usuários autenticados */}
+          <ClientOnlyAuth>
+            {isAuthenticated && <NotificationBell />}
+          </ClientOnlyAuth>
+          
+          {/* Botão de Menu Mobile */}
+          <button
+            className="p-2 text-[var(--primary)]"
+            onClick={handleMenuToggle}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}

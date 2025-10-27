@@ -15,6 +15,7 @@ async function main() {
   await prisma.promotion.deleteMany();
   await prisma.friendship.deleteMany();
   await prisma.friendRequest.deleteMany();
+  await prisma.notification.deleteMany();
   await prisma.service.deleteMany();
   await prisma.user.deleteMany();
 
@@ -291,7 +292,7 @@ async function main() {
   console.log("Amizades criadas com sucesso!");
 
   // Criar solicitações de amizade pendentes
-  await prisma.friendRequest.create({
+  const friendRequest1 = await prisma.friendRequest.create({
     data: {
       senderId: client5.id,
       receiverId: client1.id,
@@ -299,7 +300,7 @@ async function main() {
     },
   });
 
-  await prisma.friendRequest.create({
+  const friendRequest2 = await prisma.friendRequest.create({
     data: {
       senderId: client1.id,
       receiverId: client6.id,
@@ -308,6 +309,104 @@ async function main() {
   });
 
   console.log("Solicitações de amizade criadas com sucesso!");
+
+  // Criar notificações de exemplo
+  await prisma.notification.createMany({
+    data: [
+      // Notificação de solicitação recebida (não lida)
+      {
+        userId: client1.id, // Carlos recebe
+        type: "FRIEND_REQUEST_RECEIVED",
+        title: "Nova solicitação de amizade",
+        message: "Fernanda Costa enviou uma solicitação de amizade",
+        relatedId: friendRequest1.id,
+        read: false,
+        metadata: {
+          senderName: "Fernanda Costa",
+          senderId: client5.id,
+          senderImage: null,
+        },
+        createdAt: new Date(),
+      },
+      // Notificação de solicitação aceita (não lida)
+      {
+        userId: client2.id, // Maria
+        type: "FRIEND_REQUEST_ACCEPTED",
+        title: "Solicitação aceita!",
+        message: "Carlos Cliente aceitou sua solicitação de amizade",
+        relatedId: client1.id,
+        read: false,
+        metadata: {
+          accepterName: "Carlos Cliente",
+          accepterId: client1.id,
+          accepterImage: null,
+        },
+        createdAt: new Date(Date.now() - 3600000), // 1h atrás
+      },
+      // Notificação de código usado (lida)
+      {
+        userId: client3.id, // Ana
+        type: "FRIEND_INVITE_USED",
+        title: "Seu código foi usado!",
+        message: "Roberto Lima usou seu código de convite",
+        relatedId: client4.id,
+        read: true,
+        metadata: {
+          newFriendName: "Roberto Lima",
+          newFriendId: client4.id,
+          newFriendImage: null,
+        },
+        createdAt: new Date(Date.now() - 86400000), // 1 dia atrás
+      },
+      // Notificação de solicitação aceita (lida) - mais antiga
+      {
+        userId: client4.id, // Roberto
+        type: "FRIEND_REQUEST_ACCEPTED",
+        title: "Solicitação aceita!",
+        message: "Ana Silva aceitou sua solicitação de amizade",
+        relatedId: client3.id,
+        read: true,
+        metadata: {
+          accepterName: "Ana Silva",
+          accepterId: client3.id,
+          accepterImage: null,
+        },
+        createdAt: new Date(Date.now() - 172800000), // 2 dias atrás
+      },
+      // Notificação de solicitação recebida (lida) - mais antiga
+      {
+        userId: client6.id, // Marina recebe
+        type: "FRIEND_REQUEST_RECEIVED",
+        title: "Nova solicitação de amizade",
+        message: "Carlos Cliente enviou uma solicitação de amizade",
+        relatedId: friendRequest2.id,
+        read: true,
+        metadata: {
+          senderName: "Carlos Cliente",
+          senderId: client1.id,
+          senderImage: null,
+        },
+        createdAt: new Date(Date.now() - 259200000), // 3 dias atrás
+      },
+      // Notificação de código usado (não lida) - recente
+      {
+        userId: client1.id, // Carlos
+        type: "FRIEND_INVITE_USED",
+        title: "Seu código foi usado!",
+        message: "Marina Santos usou seu código de convite",
+        relatedId: client6.id,
+        read: false,
+        metadata: {
+          newFriendName: "Marina Santos",
+          newFriendId: client6.id,
+          newFriendImage: null,
+        },
+        createdAt: new Date(Date.now() - 1800000), // 30 min atrás
+      },
+    ],
+  });
+
+  console.log("Notificações criadas com sucesso!");
 
   console.log("Seed concluído com sucesso!");
 }

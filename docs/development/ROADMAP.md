@@ -6,6 +6,21 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 
 ### ✅ Concluído
 
+#### 🎉 Sprint 1 - Sistema de Notificações Completo (2025-10-27)
+
+- [x] **NotificationService** - Service layer completo com CRUD e filtros
+- [x] **Server Actions** - Actions para buscar, contar, marcar e deletar notificações
+- [x] **NotificationBell Component** - Sino no header com dropdown e auto-refresh
+- [x] **Página de Notificações** - Interface completa com filtros, ações contextuais e paginação
+- [x] **Integração Automática** - Criação automática em interações sociais
+- [x] **Header Integration** - Sino responsivo integrado no header
+- [x] **Tipos de Notificação** - 4 tipos suportados (solicitações, aceites, rejeições, convites)
+- [x] **Seed com Exemplos** - 6 notificações de teste com dados realistas
+- [x] **UI Components** - Popover, ScrollArea, DropdownMenu adicionados
+- [x] **Documentação Completa** - `/docs/notification-system.md` criada
+- [x] **Design Responsivo** - Funcional em desktop e mobile
+- [x] **Estados de Interface** - Loading, empty states, skeletons implementados
+
 #### Sistema de Profile Management Completo (2025-10-22) 🎉
 
 - [x] **Profile Settings Redesign** - Interface moderna e minimalista com upload de fotos
@@ -49,25 +64,64 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] Componentes UI shadcn/ui
 - [x] Sistema completo de reviews com dashboards diferenciados
 
-### 🚧 Em Desenvolvimento
+### 🚧 Em Desenvolvimento / Planejamento
 
-#### Prioridade Alta
+#### 🚀 Sprint 2 - Notificações em Tempo Real (4-8 Nov 2025)
 
-- [x] **Integração de Dados Reais** ✅ **CONCLUÍDO - 22 Oct 2025**
-  - [x] Conectar dashboards com dados reais do banco ✅
-  - [x] Implementar métricas automáticas ✅
-  - [x] Sistema de estatísticas em tempo real ✅
-  - [x] **EXTRA**: Dashboard completo de administrador ✅
+- [ ] **WebSocket/Server-Sent Events Implementation**
+  - [ ] Configurar infraestrutura de real-time (WebSocket ou SSE)
+  - [ ] Provider React para notificações em tempo real
+  - [ ] Auto-push de notificações sem refresh
+  - [ ] Sincronização multi-tab
+  - [ ] Otimizações de performance e memória
+
+#### 🔔 Sprint 3 - Push Notifications (11-15 Nov 2025)
+
+- [ ] **Browser Push Notifications**
+  - [ ] Service Worker registration
+  - [ ] Push API integration
+  - [ ] Configurações de permissão do usuário
+  - [ ] Templates de notificação push
+  - [ ] Fallback para browsers não suportados
+
+#### 📧 Sprint 4 - Email Notifications (18-22 Nov 2025)
+
+- [ ] **Sistema de Email**
+  - [ ] Templates de email responsivos (HTML/Text)
+  - [ ] Configurações de frequência (instantâneo/digest)
+  - [ ] Email digest diário/semanal
+  - [ ] Unsubscribe/configurações por tipo
+  - [ ] Queue system para emails
+
+#### ⚙️ Sprint 5 - Configurações Avançadas (25-29 Nov 2025)
+
+- [ ] **Preferências de Notificação**
+  - [ ] Página de configurações avançadas
+  - [ ] Toggle por tipo de notificação
+  - [ ] Horários de silêncio (Do Not Disturb)
+  - [ ] Configurações de som/vibração
+  - [ ] Configurações de frequência
+
+#### Prioridade Alta (Após Sprints de Notificação)
+
+- [ ] **Sistema de Testes Automatizados**
+  - [ ] Configurar Jest e Testing Library
+  - [ ] Testes para componentes críticos (ReviewForm, NotificationBell)
+  - [ ] Testes para Server Actions
+  - [ ] Testes de integração para dashboards
+
+- [ ] **Sistema de Busca**
+  - [ ] Busca básica para reviews e usuários
+  - [ ] Filtros avançados
+  - [ ] SearchInput e FilterDropdown components
 
 #### Prioridade Média
 
-- [x] **Sistema de Notificações** ✅ **CONCLUÍDO - 22 Oct 2025**
-
-  - [x] Toast notifications para ações ✅
-  - [x] Hook useToast personalizado ✅
-  - [x] Integração em componentes críticos ✅
-  - [ ] Notificações push (planejado para futuro)
-  - [ ] Email notifications (planejado para futuro)
+- [x] **Sistema de Notificações Base** ✅ **CONCLUÍDO - Sprint 1 (27 Oct 2025)**
+  - [x] NotificationService e Server Actions ✅
+  - [x] NotificationBell component ✅
+  - [x] Página completa de notificações ✅
+  - [x] Integração automática com sistema social ✅
 
 - [x] **Melhorias de UX** ✅ (Parcial - 2025-10-21)
 
@@ -144,6 +198,50 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - Server actions otimizadas e performáticas
 - Métricas automáticas funcionando em tempo real
 - Redirecionamento inteligente por role de usuário
+
+### Semana 4 (28 Oct - 3 Nov 2025) 🎉 **SPRINT 1 CONCLUÍDO**
+
+**FOCO**: Sprint 1 - Sistema de Notificações Completo
+
+#### 🔔 Sprint 1 - Sistema de Notificações - 100% CONCLUÍDO ✅
+
+- [x] **Backend Completo**
+  - [x] NotificationService com CRUD completo ✅
+  - [x] Server Actions para frontend ✅
+  - [x] Integração automática em friendshipActions ✅
+  - [x] Modelo Prisma com relacionamentos ✅
+
+- [x] **Frontend Completo**
+  - [x] NotificationBell component com dropdown ✅
+  - [x] Página /profile/notifications completa ✅
+  - [x] Integração no HeaderNavigation ✅
+  - [x] Estados de loading e empty states ✅
+
+- [x] **Funcionalidades Implementadas**
+  - [x] 4 tipos de notificação suportados ✅
+  - [x] Auto-refresh a cada 30 segundos ✅
+  - [x] Navegação contextual inteligente ✅
+  - [x] Sistema de paginação eficiente ✅
+  - [x] Design responsivo (mobile + desktop) ✅
+
+- [x] **Infraestrutura**
+  - [x] Seed com 6 notificações de exemplo ✅
+  - [x] UI Components necessários (popover, etc.) ✅
+  - [x] Documentação completa criada ✅
+
+### 🚀 Próximas Semanas Planejadas
+
+#### Semana 5 (4-8 Nov 2025) - Sprint 2 Planejado
+**FOCO**: Notificações em Tempo Real
+- [ ] WebSocket/Server-Sent Events
+- [ ] Auto-push sem refresh
+- [ ] Sincronização multi-tab
+
+#### Semana 6 (11-15 Nov 2025) - Sprint 3 Planejado  
+**FOCO**: Push Notifications
+- [ ] Service Worker registration
+- [ ] Browser push notifications
+- [ ] Configurações de permissão
 
 ### Semana 4 (28 Oct - 3 Nov 2025) 📋 **PLANEJADA**
 

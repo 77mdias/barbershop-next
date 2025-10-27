@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { FriendshipService } from "./services/friendshipService";
+import { NotificationService } from "./services/notificationService";
 import {
   SendFriendRequestSchema,
   RespondFriendRequestSchema,
@@ -39,6 +40,20 @@ export async function sendFriendRequest(data: SendFriendRequestInput) {
     const request = await FriendshipService.sendFriendRequest(
       session.user.id,
       validated.receiverId
+    );
+
+    // Criar notificação para o receptor
+    await NotificationService.createNotification(
+      validated.receiverId,
+      "FRIEND_REQUEST_RECEIVED",
+      "Nova solicitação de amizade",
+      `${session.user.name} enviou uma solicitação de amizade`,
+      request.id,
+      { 
+        senderName: session.user.name,
+        senderId: session.user.id,
+        senderImage: session.user.image 
+      }
     );
 
     return {
@@ -98,6 +113,20 @@ export async function respondFriendRequest(data: RespondFriendRequestInput) {
     let result;
     if (validated.action === "ACCEPT") {
       result = await FriendshipService.acceptFriendRequest(validated.requestId);
+      
+      // Criar notificação para quem enviou
+      await NotificationService.createNotification(
+        request.senderId,
+        "FRIEND_REQUEST_ACCEPTED",
+        "Solicitação aceita!",
+        `${session.user.name} aceitou sua solicitação de amizade`,
+        validated.requestId,
+        { 
+          accepterName: session.user.name,
+          accepterId: session.user.id,
+          accepterImage: session.user.image
+        }
+      );
     } else {
       result = await FriendshipService.rejectFriendRequest(validated.requestId);
     }
@@ -459,9 +488,33 @@ export async function acceptInvite(data: AcceptInviteInput) {
 
     const validated = AcceptInviteSchema.parse(data);
 
+    // Buscar informações do convite antes de aceitar
+    const inviter = await FriendshipService.findUserByInviteCode(validated.inviteCode);
+    
+    if (!inviter) {
+      return {
+        success: false,
+        error: "Código de convite inválido",
+      };
+    }
+
     const result = await FriendshipService.acceptInvite(
       session.user.id,
       validated.inviteCode
+    );
+
+    // Notificar dono do código
+    await NotificationService.createNotification(
+      inviter.id,
+      "FRIEND_INVITE_USED",
+      "Seu código foi usado!",
+      `${session.user.name} usou seu código de convite`,
+      session.user.id,
+      { 
+        newFriendName: session.user.name,
+        newFriendId: session.user.id,
+        newFriendImage: session.user.image
+      }
     );
 
     return {
