@@ -28,7 +28,10 @@ import {
   removeFriend,
   getSocialStats,
   generateInviteCode,
+  getReceivedRequests,
+  getSentRequests,
 } from "@/server/friendshipActions";
+import { SearchUsersModal } from "@/components/social/SearchUsersModal";
 
 /**
  * Página Friend & Social - Mobile First
@@ -53,6 +56,8 @@ export default function FriendSocial() {
   });
   const [inviteCode, setInviteCode] = React.useState<string>("");
   const [loadingActions, setLoadingActions] = React.useState<Record<string, boolean>>({});
+  const [isSearchModalOpen, setIsSearchModalOpen] = React.useState(false);
+  const [pendingRequestIds, setPendingRequestIds] = React.useState<string[]>([]);
 
   // Redirect se não autenticado
   React.useEffect(() => {
@@ -71,10 +76,12 @@ export default function FriendSocial() {
   const loadData = async () => {
     setIsLoadingData(true);
     try {
-      const [friendsRes, suggestionsRes, statsRes] = await Promise.all([
+      const [friendsRes, suggestionsRes, statsRes, receivedRes, sentRes] = await Promise.all([
         getFriends(),
         getFriendSuggestions(10),
         getSocialStats(),
+        getReceivedRequests(),
+        getSentRequests(),
       ]);
 
       if (friendsRes.success && friendsRes.data) {
@@ -88,6 +95,16 @@ export default function FriendSocial() {
       if (statsRes.success && statsRes.data) {
         setStats(statsRes.data);
       }
+
+      // Montar lista de IDs pendentes para o modal de busca
+      const pendingIds: string[] = [];
+      if (receivedRes.success && receivedRes.data) {
+        pendingIds.push(...receivedRes.data.map((r: any) => r.sender.id));
+      }
+      if (sentRes.success && sentRes.data) {
+        pendingIds.push(...sentRes.data.map((r: any) => r.receiver.id));
+      }
+      setPendingRequestIds(pendingIds);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast.error("Erro ao carregar dados");
@@ -215,6 +232,7 @@ export default function FriendSocial() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => setIsSearchModalOpen(true)}
             className="text-gray-600 hover:text-gray-900"
           >
             <Search className="h-5 w-5" />
@@ -274,18 +292,41 @@ export default function FriendSocial() {
                   </div>
                   <div className="text-xs text-gray-600 mt-1">Amigos</div>
                 </div>
-                <div className={styles.statItem}>
+                <button
+                  onClick={() => router.push("/profile/social/requests")}
+                  className={cn(
+                    styles.statItem,
+                    "cursor-pointer hover:bg-purple-50 transition-colors rounded-lg -mx-1 px-1 relative"
+                  )}
+                >
                   <div className="text-2xl font-bold text-purple-600">
                     {stats.pendingSentCount}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">Enviadas</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className="text-2xl font-bold text-teal-600">
+                </button>
+                <button
+                  onClick={() => router.push("/profile/social/requests")}
+                  className={cn(
+                    styles.statItem,
+                    "cursor-pointer hover:bg-teal-50 transition-colors rounded-lg -mx-1 px-1 relative"
+                  )}
+                >
+                  <div className="text-2xl font-bold text-teal-600 relative inline-flex">
                     {stats.pendingReceivedCount}
+                    {stats.pendingReceivedCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
+                    )}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">Recebidas</div>
-                </div>
+                  {stats.pendingReceivedCount > 0 && (
+                    <div className="absolute top-1 right-1">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+                      </span>
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -498,6 +539,14 @@ export default function FriendSocial() {
           </>
         )}
       </div>
+
+      {/* Search Modal */}
+      <SearchUsersModal
+        open={isSearchModalOpen}
+        onOpenChange={setIsSearchModalOpen}
+        currentFriends={friends.map((f) => f.id)}
+        pendingRequests={pendingRequestIds}
+      />
     </div>
   );
 }

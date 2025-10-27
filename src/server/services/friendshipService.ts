@@ -554,10 +554,7 @@ export class FriendshipService {
    * Aceita convite via código
    */
   static async acceptInvite(userId: string, inviteCode: string) {
-    const inviter = await db.user.findUnique({
-      where: { inviteCode },
-      select: { id: true },
-    });
+    const inviter = await this.findUserByInviteCode(inviteCode);
 
     if (!inviter) {
       throw new Error("Código de convite inválido");
@@ -569,6 +566,21 @@ export class FriendshipService {
 
     // Enviar solicitação de amizade automaticamente
     return this.sendFriendRequest(userId, inviter.id);
+  }
+
+  /**
+   * Busca usuário pelo código de convite
+   */
+  static async findUserByInviteCode(inviteCode: string) {
+    return db.user.findUnique({
+      where: { inviteCode },
+      select: { 
+        id: true, 
+        name: true, 
+        nickname: true, 
+        image: true 
+      },
+    });
   }
 
   /**

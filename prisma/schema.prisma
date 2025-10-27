@@ -36,6 +36,7 @@ model User {
   friendshipsReceived      Friendship[]     @relation("FriendFriendships")
   friendRequestsSent       FriendRequest[]  @relation("RequestSender")
   friendRequestsReceived   FriendRequest[]  @relation("RequestReceiver")
+  notifications            Notification[]
 }
 
 model account {
@@ -198,6 +199,22 @@ model FriendRequest {
   @@index([senderId])
 }
 
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  userId    String
+  relatedId String?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
 enum UserRole {
   CLIENT
   BARBER
@@ -243,4 +260,11 @@ enum FriendRequestStatus {
   ACCEPTED
   REJECTED
   CANCELLED
+}
+
+enum NotificationType {
+  FRIEND_REQUEST_RECEIVED
+  FRIEND_REQUEST_ACCEPTED
+  FRIEND_REQUEST_REJECTED
+  FRIEND_INVITE_USED
 }

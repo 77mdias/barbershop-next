@@ -205,6 +205,80 @@ export async function actionName(input: InputType) {
 }
 ```
 
+### Notification System
+
+**Location**: `/src/server/services/notificationService.ts` and `/src/server/notificationActions.ts`
+
+**Overview**: Complete notification system implemented in Sprint 1 for real-time social interaction feedback.
+
+**Core Components**:
+- **NotificationService** - Service layer with CRUD operations
+- **NotificationBell** - Header component with dropdown and auto-refresh  
+- **Notifications Page** - Full-featured `/profile/notifications` interface
+- **Auto-Integration** - Automatic creation on social interactions
+
+**Supported Notification Types**:
+```typescript
+enum NotificationType {
+  FRIEND_REQUEST_RECEIVED    // 🔵 New friend request received
+  FRIEND_REQUEST_ACCEPTED    // 🟢 Your request was accepted
+  FRIEND_REQUEST_REJECTED    // 🔴 Your request was rejected  
+  FRIEND_INVITE_USED        // 🟣 Someone used your invite code
+}
+```
+
+**Key Features**:
+- ✅ Auto-refresh every 30 seconds
+- ✅ Badge counter with pulse animation
+- ✅ Contextual navigation (requests page, social page, etc.)
+- ✅ Mark as read (individual/bulk)
+- ✅ Delete notifications
+- ✅ Pagination with "Load more"
+- ✅ Responsive design (desktop + mobile)
+- ✅ Loading states and empty states
+
+**Integration Points**:
+- `friendshipActions.ts` - Auto-creates notifications on social actions
+- `HeaderNavigation.tsx` - NotificationBell integrated in header
+- `/profile/notifications` - Full page with filters and management
+
+**Database Model**:
+```typescript
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // Recipient
+  type      NotificationType
+  title     String   // "New friend request"
+  message   String   // "John sent you a friend request"
+  read      Boolean  @default(false)
+  relatedId String?  // Related entity ID
+  metadata  Json?    // Additional data (sender info, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+**Common Actions**:
+```typescript
+// Get recent notifications for dropdown
+await getRecentNotifications(5)
+
+// Get paginated notifications with filters
+await getAllNotifications(page, limit)
+await getUnreadNotifications(page, limit)
+
+// Mark as read
+await markNotificationAsRead(notificationId)
+await markAllNotificationsAsRead()
+
+// Create notification (automatic in friendshipActions)
+await NotificationService.createNotification(
+  userId, type, title, message, relatedId, metadata
+)
+```
+
+**Documentation**: Full system documentation available at `/docs/notification-system.md`
+
 ### Component Architecture
 
 **Structure**:
@@ -215,6 +289,7 @@ src/components/
 ├── scheduling/         # Appointment booking components
 ├── upload/             # File upload UI components
 ├── HeaderNavigation.tsx
+├── NotificationBell.tsx    # Notification dropdown component (Sprint 1)
 ├── bottom-navigation.tsx
 ├── ReviewForm.tsx      # Review creation with image uploads
 ├── ReviewsList.tsx     # Paginated review display
@@ -225,6 +300,10 @@ src/components/
 - Server Components by default (Next.js 15 App Router)
 - Client Components use `'use client'` directive
 - Providers wrap the app in `/src/app/layout.tsx` (SessionProvider, Toaster)
+
+**Notification Components**:
+- `NotificationBell.tsx` - Header bell with dropdown, auto-refresh, badge counter
+- `/profile/notifications/page.tsx` - Full notifications page with filters and pagination
 
 ### File Upload System
 

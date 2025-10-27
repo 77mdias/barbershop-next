@@ -29,7 +29,7 @@ Este projeto segue as boas práticas do agente de IA para estudo e documentaçã
 - 🌙 **Suporte a Dark Mode** (preparado)
 - ⭐ **Sistema de Reviews** completo com avaliações e imagens
 - 📊 **Dashboards Dinâmicos** com dados reais e métricas
-- 🔔 **Sistema de Notificações** integrado com Toaster
+- 🔔 **Sistema de Notificações** completo com real-time e histórico  
 - 💀 **Loading States** e Skeleton Loaders para melhor UX
 - 📸 **Sistema de Upload** funcional com processamento de imagens
 - 👤 **Profile Management** com modal inline e upload de fotos
@@ -44,7 +44,8 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - 🔍 **Busca**: Encontrar serviços e salões próximos
 - 📅 **Agendamentos**: Sistema de reservas (em desenvolvimento)
 - ⭐ **Reviews**: Sistema completo de avaliações com upload de imagens
-- 📊 **Dashboard**: Painéis personalizados por tipo de usuário
+- � **Notificações**: Sistema completo em tempo real com histórico
+- �📊 **Dashboard**: Painéis personalizados por tipo de usuário
 - 🖼️ **Galeria**: Galeria de trabalhos realizados
 - 👤 **Perfil**: Gerenciamento completo com upload de fotos e modal inline
 - ⚙️ **Configurações**: Interface moderna para edição de dados pessoais
@@ -188,6 +189,7 @@ src/
 │   │   ├── toast.tsx     # Sistema de toast
 │   │   └── sonner.tsx    # Componente Sonner Toaster
 │   ├── header.tsx        # Cabeçalho da aplicação
+│   ├── NotificationBell.tsx # Sino de notificações em tempo real
 │   ├── search-bar.tsx    # Barra de busca
 │   ├── service-card.tsx  # Card de serviços
 │   ├── offer-card.tsx    # Card de ofertas
@@ -198,14 +200,18 @@ src/
 │   └── bottom-navigation.tsx # Navegação inferior
 ├── server/               # Server Actions
 │   ├── reviewActions.ts  # Ações de reviews
+│   ├── notificationActions.ts # Ações de notificações
+│   ├── friendshipActions.ts   # Ações de amizades com notificações
 │   └── dashboardActions.ts # Ações de dashboard e métricas
 ├── schemas/              # Schemas Zod de validação
-│   └── reviewSchemas.ts  # Validações de reviews
+│   ├── reviewSchemas.ts  # Validações de reviews
+│   └── notificationSchemas.ts # Validações de notificações
 ├── lib/                  # Utilitários e configurações
 │   ├── utils.ts          # Funções auxiliares
 │   ├── auth.ts           # Configuração NextAuth
 │   ├── prisma.ts         # Cliente Prisma
 │   ├── upload.ts         # Configuração de upload
+│   ├── NotificationService.ts # Serviço de notificações
 │   └── rate-limit.ts     # Rate limiting
 ├── __tests__/            # Testes automatizados
 │   ├── ReviewForm.test.tsx
@@ -311,11 +317,93 @@ Lista paginada de avaliações com:
 - **LoadingSpinner**: Spinner de carregamento reutilizável
 - **Skeleton**: Componentes skeleton para estados de loading
 
+## 🔔 Sistema de Notificações
+
+O sistema de notificações fornece uma experiência completa em tempo real para interações sociais e eventos do sistema.
+
+### 🚀 Funcionalidades
+
+#### **NotificationBell Component**
+Componente de header com notificações em tempo real:
+- 🔄 **Auto-refresh** a cada 30 segundos
+- 🔢 **Badge contador** para notificações não lidas
+- 📱 **Dropdown interativo** com lista de notificações
+- 🎯 **Navegação contextual** baseada no tipo de notificação
+- 🎨 **Ícones dinâmicos** por categoria
+
+#### **Página de Notificações (/profile/notifications)**
+Interface completa de gerenciamento:
+- 🏷️ **Filtros por categoria**: Todas, Amizades, Sistema, Agendamentos, Promoções
+- ⚡ **Ações em lote**: Marcar como lida, excluir
+- 📄 **Paginação** otimizada para grandes volumes
+- 🎭 **Estados de loading** com skeletons
+- 🔍 **Busca e ordenação** avançada
+
+### 🛠️ Arquitetura Técnica
+
+#### **NotificationService** (`/src/lib/NotificationService.ts`)
+Serviço centralizado para operações CRUD:
+
+```typescript
+// Principais métodos
+createNotification()          // Criar notificação
+getRecentNotifications()      // Buscar recentes (header)
+getNotifications()           // Buscar com paginação (página)
+markAsRead()                 // Marcar como lida
+markAllAsRead()              // Marcar todas como lidas
+deleteNotification()         // Excluir notificação
+getUnreadCount()            // Contar não lidas
+```
+
+#### **Server Actions** (`/src/server/notificationActions.ts`)
+Actions para interação client-server:
+- Validação com Zod schemas
+- Tratamento de erros padronizado
+- Integração com revalidação do Next.js
+
+#### **Integração com Sistema Social**
+Notificações automáticas em `friendshipActions.ts`:
+- 👥 **Convites de amizade** enviados/recebidos
+- ✅ **Aceite de convites**
+- 📩 **Solicitações de conexão**
+
+### 📊 Tipos de Notificação
+
+| Tipo | Descrição | Ícone | Navegação |
+|------|-----------|-------|-----------|
+| `FRIENDSHIP_REQUEST` | Convite de amizade | UserPlus | `/profile/friends` |
+| `FRIENDSHIP_ACCEPTED` | Convite aceito | Heart | `/profile/friends` |
+| `APPOINTMENT_REMINDER` | Lembrete de agendamento | Calendar | `/profile/appointments` |
+| `APPOINTMENT_CONFIRMED` | Agendamento confirmado | CheckCircle | `/profile/appointments` |
+| `PROMOTION_AVAILABLE` | Nova promoção | Gift | `/promotions` |
+| `SYSTEM_ANNOUNCEMENT` | Comunicado do sistema | Bell | `/notifications` |
+
+### 🎯 Experiência do Usuário
+
+#### **Feedback Visual**
+- 🔴 **Badge vermelho** para notificações não lidas
+- ⚪ **Estado "lida"** com opacidade reduzida  
+- 🎨 **Ícones contextuais** por categoria
+- ⏰ **Timestamps** humanizados (ex: "há 2 minutos")
+
+#### **Interações Otimizadas**
+- 👆 **Click no sino**: Abre dropdown com últimas 5 notificações
+- 👆 **Click na notificação**: Navega para página relevante + marca como lida
+- 👆 **"Ver todas"**: Redireciona para página completa
+- ⚡ **Atualização automática**: Sem necessidade de refresh manual
+
 ## 🎯 Próximas Features
 
-### ✅ Implementado Recentemente (Out 2025)
+### ✅ Implementado Recentemente (Sprint 1 - Nov 2024)
+- [x] **Sistema de Notificações Completo** - Real-time, histórico, filtros e ações
+  - [x] NotificationBell component com auto-refresh
+  - [x] Página completa de gerenciamento (/profile/notifications)
+  - [x] NotificationService para operações CRUD
+  - [x] Integração com sistema de amizades
+  - [x] 6 tipos de notificação com navegação contextual
+  - [x] Interface responsiva com loading states
 - [x] Sistema de avaliações completo com upload de imagens
-- [x] Dashboards diferenciados por role (Cliente, Barbeiro, Admin)
+- [x] Dashboards diferenciados por role (Cliente, Barbeiro, Admin)  
 - [x] Integração de dados reais nos dashboards
 - [x] Sistema de notificações com Toaster (Sonner)
 - [x] Loading states e skeleton loaders
@@ -350,6 +438,7 @@ Consulte a pasta `docs/` para documentação detalhada:
 - [Prisma ORM](/docs/prisma/README.md)
 
 ### Features e Sistemas
+- [Sistema de Notificações](/docs/notification-system.md) - Sistema completo em tempo real
 - [Sistema de Reviews](/docs/review-system.md) - Sistema completo de avaliações
 - [Sistema de Upload](/docs/upload-system.md) - Upload seguro de imagens
 - [Dashboard Admin](/docs/dashboard-admin.md) - Painel administrativo
