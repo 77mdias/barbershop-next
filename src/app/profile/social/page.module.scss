@@ -1,0 +1,156 @@
+/* Friend & Social Page Styles - Mobile First */
+
+.socialHeader {
+  backdrop-filter: blur(10px);
+
+  @media (min-width: 768px) {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.statsCard {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #14b8a6);
+    opacity: 0.6;
+  }
+
+  .statItem {
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 0, 0, 0.1),
+        transparent
+      );
+    }
+  }
+}
+
+.inviteCard {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+.friendCard {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.suggestionCard {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Responsive adjustments
+@media (min-width: 768px) {
+  .statsCard {
+    .statItem {
+      padding: 0 1rem;
+    }
+  }
+
+  .friendCard,
+  .suggestionCard {
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .socialHeader {
+    border-radius: 16px 16px 0 0;
+    margin: 0 auto;
+    max-width: 672px; // max-w-2xl
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.friendCard,
+.suggestionCard {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Loading state
+.socialLoading {
+  &__spinner {
+    border-color: rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
