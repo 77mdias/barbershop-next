@@ -13,6 +13,8 @@ async function main() {
   await prisma.serviceHistory.deleteMany();
   await prisma.voucher.deleteMany();
   await prisma.promotion.deleteMany();
+  await prisma.friendship.deleteMany();
+  await prisma.friendRequest.deleteMany();
   await prisma.service.deleteMany();
   await prisma.user.deleteMany();
 
@@ -195,6 +197,117 @@ async function main() {
   });
 
   console.log("Agendamento criado com sucesso!");
+
+  // Criar mais clientes para amizades
+  const client3 = await prisma.user.create({
+    data: {
+      name: "Ana Paula Silva",
+      email: "ana@email.com",
+      password: clientPassword,
+      role: "CLIENT",
+      phone: "11944444444",
+      isActive: true,
+      inviteCode: "ANASILVA",
+    },
+  });
+
+  const client4 = await prisma.user.create({
+    data: {
+      name: "Roberto Lima",
+      email: "roberto@email.com",
+      password: clientPassword,
+      role: "CLIENT",
+      phone: "11933333333",
+      isActive: true,
+      inviteCode: "ROBERLIM",
+    },
+  });
+
+  const client5 = await prisma.user.create({
+    data: {
+      name: "Fernanda Costa",
+      email: "fernanda@email.com",
+      password: clientPassword,
+      role: "CLIENT",
+      phone: "11922222222",
+      isActive: true,
+    },
+  });
+
+  const client6 = await prisma.user.create({
+    data: {
+      name: "Lucas Santos",
+      email: "lucas@email.com",
+      password: clientPassword,
+      role: "CLIENT",
+      phone: "11911111111",
+      isActive: true,
+    },
+  });
+
+  console.log("Clientes adicionais criados com sucesso!");
+
+  // Criar amizades (bidirecionais)
+  // Carlos é amigo de Maria
+  await prisma.friendship.createMany({
+    data: [
+      { userId: client1.id, friendId: client2.id, status: "ACCEPTED" },
+      { userId: client2.id, friendId: client1.id, status: "ACCEPTED" },
+    ],
+  });
+
+  // Carlos é amigo de Ana
+  await prisma.friendship.createMany({
+    data: [
+      { userId: client1.id, friendId: client3.id, status: "ACCEPTED" },
+      { userId: client3.id, friendId: client1.id, status: "ACCEPTED" },
+    ],
+  });
+
+  // Maria é amiga de Ana
+  await prisma.friendship.createMany({
+    data: [
+      { userId: client2.id, friendId: client3.id, status: "ACCEPTED" },
+      { userId: client3.id, friendId: client2.id, status: "ACCEPTED" },
+    ],
+  });
+
+  // Maria é amiga de Roberto
+  await prisma.friendship.createMany({
+    data: [
+      { userId: client2.id, friendId: client4.id, status: "ACCEPTED" },
+      { userId: client4.id, friendId: client2.id, status: "ACCEPTED" },
+    ],
+  });
+
+  // Ana é amiga de Roberto
+  await prisma.friendship.createMany({
+    data: [
+      { userId: client3.id, friendId: client4.id, status: "ACCEPTED" },
+      { userId: client4.id, friendId: client3.id, status: "ACCEPTED" },
+    ],
+  });
+
+  console.log("Amizades criadas com sucesso!");
+
+  // Criar solicitações de amizade pendentes
+  await prisma.friendRequest.create({
+    data: {
+      senderId: client5.id,
+      receiverId: client1.id,
+      status: "PENDING",
+    },
+  });
+
+  await prisma.friendRequest.create({
+    data: {
+      senderId: client1.id,
+      receiverId: client6.id,
+      status: "PENDING",
+    },
+  });
+
+  console.log("Solicitações de amizade criadas com sucesso!");
 
   console.log("Seed concluído com sucesso!");
 }

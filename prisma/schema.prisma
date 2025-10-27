@@ -22,6 +22,7 @@ model User {
   password                 String?
   resetPasswordExpires     DateTime?
   resetPasswordToken       String?
+  inviteCode               String?          @unique // Código único para convites
   isActive                 Boolean          @default(true)
   createdAt                DateTime         @default(now())
   updatedAt                DateTime         @updatedAt
@@ -31,6 +32,10 @@ model User {
   promotions               UserPromotion[]
   vouchers                 Voucher[]
   accounts                 account[]
+  friendshipsInitiated     Friendship[]     @relation("UserFriendships")
+  friendshipsReceived      Friendship[]     @relation("FriendFriendships")
+  friendRequestsSent       FriendRequest[]  @relation("RequestSender")
+  friendRequestsReceived   FriendRequest[]  @relation("RequestReceiver")
 }
 
 model account {
@@ -163,6 +168,36 @@ model PromotionService {
   @@unique([promotionId, serviceId])
 }
 
+model Friendship {
+  id        String           @id @default(cuid())
+  status    FriendshipStatus @default(ACCEPTED)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  userId    String
+  friendId  String
+  user      User             @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  friend    User             @relation("FriendFriendships", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+}
+
+model FriendRequest {
+  id         String              @id @default(cuid())
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  senderId   String
+  receiverId String
+  sender     User                @relation("RequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User                @relation("RequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId])
+  @@index([senderId])
+}
+
 enum UserRole {
   CLIENT
   BARBER
@@ -196,4 +231,16 @@ enum PromotionType {
   FREE_SERVICE
   CASHBACK
   LOYALTY_BONUS
+}
+
+enum FriendshipStatus {
+  ACCEPTED
+  BLOCKED
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 }
