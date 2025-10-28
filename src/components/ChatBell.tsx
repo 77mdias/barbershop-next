@@ -111,7 +111,7 @@ export function ChatBell({ currentUserId }: ChatBellProps) {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-80 p-0 " align="end">
         {/* Header */}
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">

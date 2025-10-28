@@ -102,7 +102,7 @@ export function ChatList({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col w-full h-full bg-white">
       {/* Header */}
       <div className="border-b px-4 py-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Mensagens</h1>

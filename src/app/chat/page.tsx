@@ -20,7 +20,7 @@ export default async function ChatPage() {
   const conversations = result.success && result.data ? result.data : [];
 
   return (
-    <div className="h-screen mt-16 mb-20">
+    <div className="h-full w-full mt-16 mb-20">
       <ChatList
         currentUserId={session.user.id}
         initialConversations={conversations as any}

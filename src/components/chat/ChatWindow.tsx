@@ -158,16 +158,16 @@ export function ChatWindow({
   }, [messages.length]);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="w-full items-center bg-gray-50 flex flex-col h-[100dvh] max-h-screen">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+      <div className="w-full px-4 py-3 flex items-center gap-3 sticky top-16 bg-foreground border-b shadow-md z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
           className="flex-shrink-0"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 text-background" />
         </Button>
 
         <UserAvatar
@@ -179,13 +179,13 @@ export function ChatWindow({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-gray-900 truncate">{friendName}</h2>
-          <p className="text-xs text-gray-500">Online</p>
+          <h2 className="font-semibold text-background truncate">{friendName}</h2>
+          <p className="text-xs text-gray-400">Online</p>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
+  {/* Messages Area */}
+  <ScrollArea className="flex-1 px-4 container " ref={scrollAreaRef}>
         <div className="py-4">
           {/* Load more button */}
           {hasMore && messages.length >= 50 && (
@@ -242,7 +242,7 @@ export function ChatWindow({
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="bg-white border-t shadow-lg px-4 py-3">
+      <div className="bg-white w-full border-t shadow-lg px-4 py-3 sticky bottom-0 ">
         <MessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}

@@ -53,7 +53,7 @@ export default async function ChatConversationPage({
   }
 
   return (
-    <div className="h-screen mt-16">
+    <div className="flex flex-col w-full mt-16 items-center h-full">
       <ChatWindow
         conversationId={conversationId}
         currentUserId={session.user.id}

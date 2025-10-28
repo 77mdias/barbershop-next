@@ -479,7 +479,7 @@ export default function FriendSocial() {
           </div>
         )}
 
-            )
+            
 
             {/* Tab: Sugestões */}
             {activeTab === "suggestions" && (
