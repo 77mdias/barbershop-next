@@ -158,9 +158,9 @@ export function ChatWindow({
   }, [messages.length]);
 
   return (
-    <div className="w-full items-center bg-gray-50 flex flex-col h-[100dvh] max-h-screen">
-      {/* Header */}
-      <div className="w-full px-4 py-3 flex items-center gap-3 sticky top-16 bg-foreground border-b shadow-md z-10">
+    <div className="w-full bg-gray-50 flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100vh-4rem)]">
+      {/* Header - Fixo no topo da conversa */}
+      <div className="w-full px-4 py-3 flex items-center gap-3 bg-foreground border-b shadow-md flex-shrink-0 z-10">
         <Button
           variant="ghost"
           size="icon"
@@ -184,9 +184,9 @@ export function ChatWindow({
         </div>
       </div>
 
-  {/* Messages Area */}
-  <ScrollArea className="flex-1 px-4 container " ref={scrollAreaRef}>
-        <div className="py-4">
+      {/* Messages Area - Ocupa todo o espaço disponível entre header e input */}
+      <ScrollArea className="flex-1 w-full overflow-y-auto" ref={scrollAreaRef}>
+        <div className="px-4 py-4 max-w-4xl mx-auto">
           {/* Load more button */}
           {hasMore && messages.length >= 50 && (
             <div className="text-center mb-4">
@@ -241,13 +241,15 @@ export function ChatWindow({
         </div>
       </ScrollArea>
 
-      {/* Input Area */}
-      <div className="bg-white w-full border-t shadow-lg px-4 py-3 sticky bottom-0 ">
-        <MessageInput
-          onSendMessage={handleSendMessage}
-          isLoading={isSending}
-          placeholder="Digite uma mensagem..."
-        />
+      {/* Input Area - Fixo no bottom */}
+      <div className="bg-white w-full border-t shadow-lg px-4 py-3 flex-shrink-0">
+        <div className="max-w-4xl mx-auto">
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            isLoading={isSending}
+            placeholder="Digite uma mensagem..."
+          />
+        </div>
       </div>
     </div>
   );
