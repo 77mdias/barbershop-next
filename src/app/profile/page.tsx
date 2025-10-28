@@ -12,6 +12,7 @@ import { BottomNavigation } from "@/components/bottom-navigation";
 import { ProfileMenuItem } from "@/components/ui/profile-menu-item";
 import { cn } from "@/lib/utils";
 import styles from "@/app/profile/page.module.scss";
+import { ProfilePageSkeleton } from "@/components/profile/ProfileSkeleton";
 
 /**
  * Página de Perfil do Usuário
@@ -110,16 +111,7 @@ export default function Profile() {
   ];
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[--background] min-w-full">
-        <div
-          className={cn(
-            "animate-spin rounded-full h-12 w-12 border-b-2",
-            styles.profileLoading__spinner
-          )}
-        ></div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (!isAuthenticated || !user) {

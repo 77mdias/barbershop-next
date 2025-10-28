@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangePasswordSchema, type ChangePasswordInput } from "@/schemas/profileSchemas";
 import { changePassword } from "@/server/profileActions";
 import { ArrowLeft, Lock, Save, Eye, EyeOff } from "lucide-react";
+import { ChangePasswordSkeleton } from "@/components/profile/ProfileSkeleton";
 
 /**
  * Página de Alteração de Senha
@@ -78,11 +79,7 @@ export default function ChangePasswordPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ChangePasswordSkeleton />;
   }
 
   if (!isAuthenticated || !user) {

@@ -13,15 +13,16 @@ import { updateProfile } from "@/server/profileActions";
 import { ProfileSettingsSchema, type ProfileSettingsInput } from "@/schemas/profileSchemas";
 import { useSession, signIn } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { 
-  ArrowLeft, 
-  Camera, 
-  User, 
-  Phone, 
-  Mail, 
+import {
+  ArrowLeft,
+  Camera,
+  User,
+  Phone,
+  Mail,
   Edit3,
   Loader2
 } from "lucide-react";
+import { ProfileSettingsSkeleton } from "@/components/profile/ProfileSkeleton";
 
 /**
  * Página de Configurações do Perfil - Design Minimalista
@@ -456,14 +457,7 @@ export default function ProfileSettings() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen mt-20 flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <ProfileSettingsSkeleton />;
   }
 
   if (!isAuthenticated || !user) {

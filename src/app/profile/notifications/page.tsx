@@ -9,16 +9,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  getAllNotifications, 
-  getUnreadNotifications, 
+import {
+  getAllNotifications,
+  getUnreadNotifications,
   getReadNotifications,
   getUnreadCount,
-  markNotificationAsRead, 
+  markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification 
+  deleteNotification
 } from "@/server/notificationActions";
+import { NotificationsListSkeleton } from "@/components/notifications/NotificationSkeleton";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter } from "next/navigation";
@@ -262,28 +262,6 @@ export default function NotificationsPage() {
     }
   };
 
-  // Componente de Loading Skeleton
-  const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Card key={i}>
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Skeleton className="h-5 w-5 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-16" />
-                </div>
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-3/4" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
 
   // Componente Empty State
   const EmptyState = ({ type }: { type: string }) => {
@@ -367,7 +345,7 @@ export default function NotificationsPage() {
         {/* Conteúdo das Tabs */}
         <TabsContent value={activeTab} className="mt-6">
           {isLoading ? (
-            <LoadingSkeleton />
+            <NotificationsListSkeleton count={5} />
           ) : notifications.length === 0 ? (
             <EmptyState type={activeTab} />
           ) : (
