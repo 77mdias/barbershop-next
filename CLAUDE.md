@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A modern barbershop appointment booking system built with Next.js 15, TypeScript, Prisma ORM, and NextAuth.js. Features include appointment scheduling, service management, reviews with image uploads, user role-based dashboards, vouchers/promotions, and a comprehensive design system using Tailwind CSS + shadcn/ui.
+A modern barbershop appointment booking system built with Next.js 15, TypeScript, Prisma ORM, and NextAuth.js. Features include appointment scheduling, service management, reviews with image uploads, user role-based dashboards, vouchers/promotions, social networking (friendships, notifications, real-time chat), and a comprehensive design system using Tailwind CSS + shadcn/ui.
 
 ---
 
@@ -163,7 +163,9 @@ User
 ├── Roles: CLIENT, BARBER, ADMIN
 ├── OAuth accounts (GitHub, Google)
 ├── Email verification & password reset tokens
-└── Relations: appointments, servicesProvided, serviceHistory, vouchers, promotions
+├── Social: friendships, friend requests, invite code
+└── Relations: appointments, servicesProvided, serviceHistory, vouchers, promotions,
+              friendships, notifications, conversationParticipants, messages
 
 Appointment
 ├── Status: SCHEDULED → CONFIRMED → COMPLETED → CANCELLED/NO_SHOW
@@ -189,6 +191,38 @@ Promotion
 ├── isGlobal (available to all) or user-specific via UserPromotion
 ├── minFrequency (loyalty requirement)
 └── M:M relations: servicePromotions, userPromotions
+
+Friendship
+├── Status: ACCEPTED, BLOCKED
+├── Relations: user, friend (both → User)
+└── Bidirectional relationship with unique constraint
+
+FriendRequest
+├── Status: PENDING, ACCEPTED, REJECTED, CANCELLED
+├── Relations: sender, receiver (both → User)
+└── Unique constraint per sender-receiver pair
+
+Notification
+├── Types: FRIEND_REQUEST_RECEIVED, FRIEND_REQUEST_ACCEPTED, FRIEND_REQUEST_REJECTED, FRIEND_INVITE_USED
+├── read: Boolean (default false)
+├── metadata: Json (flexible data storage)
+└── Relations: user (recipient)
+
+Conversation
+├── lastMessageAt: DateTime (for sorting)
+├── Relations: participants (ConversationParticipant), messages
+└── Indexed by lastMessageAt for performance
+
+ConversationParticipant
+├── lastReadAt: DateTime (for marking messages as read)
+├── Relations: conversation, user
+└── Unique constraint: conversationId + userId
+
+Message
+├── content: Text (up to 5000 characters)
+├── isRead: Boolean (default false)
+├── Relations: conversation, sender (User)
+└── Indexed by conversationId + createdAt for pagination
 ```
 
 **Key Relationships**:
@@ -196,6 +230,10 @@ Promotion
 - ServiceHistory.images is a String[] (JSON array of URLs)
 - Promotions can be global or targeted via UserPromotion junction table
 - Vouchers belong to users and optionally a specific service
+- Friendships are bidirectional with unique constraints
+- Conversations require 2 participants (1:1 chat only)
+- Messages belong to conversations and are ordered by createdAt
+- Notifications link to related entities via relatedId + metadata
 
 ### Server Actions Pattern
 
@@ -211,11 +249,17 @@ All data mutations and server-side operations use Next.js Server Actions with `"
 - `dashboardActions.ts` - Dashboard metrics and analytics
 - `adminActions.ts` - Admin operations (requires ADMIN role)
 - `uploadServerActions.ts` - File upload handling
+- `friendshipActions.ts` - Social interactions and friend management
+- `notificationActions.ts` - Notification operations
+- `chatActions.ts` - Chat and messaging operations
 
 **Service Layer**: `/src/server/services/`
 - `userService.ts` - UserService class with static methods
 - `appointmentService.ts` - AppointmentService class
 - `serviceService.ts` - ServiceService class
+- `friendshipService.ts` - FriendshipService class
+- `notificationService.ts` - NotificationService class
+- `chatService.ts` - ChatService class
 
 **Standard Pattern**:
 ```typescript
@@ -314,6 +358,123 @@ await NotificationService.createNotification(
 
 **Documentation**: Full system documentation available at `/docs/notification-system.md`
 
+---
+
+### Chat System
+
+**Location**: `/src/server/services/chatService.ts` and `/src/server/chatActions.ts`
+
+**Overview**: Complete real-time chat system for 1:1 communication between friends, integrated with the social system.
+
+**Core Components**:
+- **ChatService** - Service layer with conversation and message management
+- **ChatBell** - Header component with unread counter and conversation preview
+- **ChatList** - Full list of conversations with search
+- **ChatWindow** - Individual chat interface with real-time updates
+- **Chat Pages** - `/chat` (list) and `/chat/[conversationId]` (conversation)
+
+**Database Models**:
+```typescript
+model Conversation {
+  id            String                    @id @default(cuid())
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  lastMessageAt DateTime?
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String       @db.Text
+  conversationId String
+  senderId       String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+```
+
+**Key Features**:
+- ✅ 1:1 conversations between friends only
+- ✅ Real-time updates via polling (5s messages, 10s conversations)
+- ✅ Unread message counter with badges
+- ✅ Message read status (checkmarks)
+- ✅ Auto-scroll to latest message
+- ✅ Infinite scroll pagination (50 messages/page)
+- ✅ Search conversations by friend name
+- ✅ Mobile-first responsive design
+- ✅ Integration with social page (MessageCircle button)
+
+**ChatService Methods**:
+```typescript
+// Conversation management
+static async getOrCreateConversation(userId1: string, userId2: string)
+static async getUserConversations(userId: string, filters?)
+static async getConversationById(conversationId: string, userId: string)
+
+// Message operations
+static async sendMessage(conversationId: string, senderId: string, content: string)
+static async getMessages(conversationId: string, userId: string, page: number, limit: number)
+static async markMessagesAsRead(conversationId: string, userId: string)
+
+// Counters and stats
+static async getUnreadCount(userId: string)
+static async getChatStats(userId: string)
+
+// Validations
+static async isUserParticipant(conversationId: string, userId: string)
+static async areFriends(userId1: string, userId2: string)
+```
+
+**Server Actions**:
+```typescript
+// Available in /src/server/chatActions.ts
+await getOrCreateConversation({ friendId })  // Create/get conversation
+await getUserConversations({ page, limit })  // List conversations
+await sendMessage({ conversationId, content })  // Send message
+await getMessages({ conversationId, page, limit })  // Get messages
+await markMessagesAsRead({ conversationId })  // Mark as read
+await getUnreadCount()  // Get total unread count
+await getChatStats()  // Get user chat statistics
+```
+
+**Integration Points**:
+- `HeaderNavigation.tsx` - ChatBell integrated next to NotificationBell
+- `/profile/social` - MessageCircle button opens/creates conversations
+- `friendshipService.ts` - Validates friendship before allowing chat
+
+**Real-time Updates**:
+- ChatWindow: Polls for new messages every 5 seconds
+- ChatList: Updates conversations every 10 seconds
+- ChatBell: Updates unread counter every 10 seconds
+
+**Security**:
+- Only friends can create conversations
+- Participants validated on all operations
+- Messages limited to 5000 characters
+- Content sanitized and escaped
+
+**Documentation**: Full system documentation available at `/docs/chat-system.md`
+
+---
+
 ### Component Architecture
 
 **Structure**:
@@ -323,8 +484,17 @@ src/components/
 ├── forms/              # Feature-specific forms (UserForm, DataTable)
 ├── scheduling/         # Appointment booking components
 ├── upload/             # File upload UI components
+├── chat/               # Chat system components
+│   ├── ChatList.tsx         # Conversation list with search
+│   ├── ChatWindow.tsx       # Individual chat interface
+│   ├── MessageBubble.tsx    # Individual message component
+│   ├── MessageInput.tsx     # Smart message input with validation
+│   └── ConversationItem.tsx # Conversation list item
+├── social/             # Social features components
+│   └── SearchUsersModal.tsx
 ├── HeaderNavigation.tsx
-├── NotificationBell.tsx    # Notification dropdown component (Sprint 1)
+├── NotificationBell.tsx    # Notification dropdown component
+├── ChatBell.tsx            # Chat notifications and preview
 ├── bottom-navigation.tsx
 ├── ReviewForm.tsx      # Review creation with image uploads
 ├── ReviewsList.tsx     # Paginated review display
@@ -339,6 +509,14 @@ src/components/
 **Notification Components**:
 - `NotificationBell.tsx` - Header bell with dropdown, auto-refresh, badge counter
 - `/profile/notifications/page.tsx` - Full notifications page with filters and pagination
+
+**Chat Components**:
+- `ChatBell.tsx` - Header chat icon with unread counter and conversation preview
+- `ChatList.tsx` - Full conversation list with search and filters
+- `ChatWindow.tsx` - Chat interface with messages, auto-scroll, and real-time updates
+- `MessageBubble.tsx` - Message display with read status and timestamps
+- `MessageInput.tsx` - Smart textarea with auto-resize and Enter to send
+- `ConversationItem.tsx` - Conversation preview with last message and unread badge
 
 ### File Upload System
 

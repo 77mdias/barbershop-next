@@ -69,7 +69,9 @@ Este projeto segue as boas práticas do agente de IA para estudo e documentaçã
 - 🌙 **Suporte a Dark Mode** (preparado)
 - ⭐ **Sistema de Reviews** completo com avaliações e imagens
 - 📊 **Dashboards Dinâmicos** com dados reais e métricas
-- 🔔 **Sistema de Notificações** completo com real-time e histórico  
+- 🔔 **Sistema de Notificações** completo com real-time e histórico
+- 👥 **Sistema Social** com amizades, solicitações e convites
+- 💬 **Chat Real-Time** (1:1) com polling, read status e badges
 - 💀 **Loading States** e Skeleton Loaders para melhor UX
 - 📸 **Sistema de Upload** funcional com processamento de imagens
 - 👤 **Profile Management** com modal inline e upload de fotos
@@ -84,8 +86,9 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - 🔍 **Busca**: Encontrar serviços e salões próximos
 - 📅 **Agendamentos**: Sistema de reservas (em desenvolvimento)
 - ⭐ **Reviews**: Sistema completo de avaliações com upload de imagens
-- � **Notificações**: Sistema completo em tempo real com histórico
-- �📊 **Dashboard**: Painéis personalizados por tipo de usuário
+- 🔔 **Notificações**: Sistema completo em tempo real com histórico
+- 💬 **Chat**: Sistema de mensagens 1:1 com amigos e polling
+- 📊 **Dashboard**: Painéis personalizados por tipo de usuário
 - 🖼️ **Galeria**: Galeria de trabalhos realizados
 - 👤 **Perfil**: Gerenciamento completo com upload de fotos e modal inline
 - ⚙️ **Configurações**: Interface moderna para edição de dados pessoais
@@ -105,6 +108,7 @@ A aplicação apresenta uma interface moderna e intuitiva para:
 - **NextAuth.js** - Autenticação multi-provider
 - **Prisma ORM** - Database toolkit
 - **PostgreSQL** - Banco de dados relacional
+- **Service Layer** - ChatService, NotificationService, FriendshipService
 
 ### UI/UX
 - **shadcn/ui** - Componentes base acessíveis
@@ -218,6 +222,10 @@ src/
 │   │   ├── page.tsx       # Dashboard principal (role-based)
 │   │   └── barber/        # Dashboard específico para barbeiros
 │   ├── reviews/           # Sistema de avaliações
+│   ├── chat/              # Sistema de mensagens
+│   │   ├── page.tsx       # Lista de conversas
+│   │   └── [conversationId]/  # Chat individual
+│   │       └── page.tsx   # Janela de conversa
 │   └── api/               # API routes e upload
 ├── components/            # Componentes da aplicação
 │   ├── ui/               # Componentes base reutilizáveis
@@ -228,7 +236,14 @@ src/
 │   │   ├── skeleton.tsx  # Skeleton loader
 │   │   ├── toast.tsx     # Sistema de toast
 │   │   └── sonner.tsx    # Componente Sonner Toaster
+│   ├── chat/             # Componentes do sistema de chat
+│   │   ├── ChatList.tsx       # Lista de conversas
+│   │   ├── ChatWindow.tsx     # Janela de mensagens
+│   │   ├── ConversationItem.tsx  # Item de conversa
+│   │   ├── MessageBubble.tsx  # Bolha de mensagem
+│   │   └── MessageInput.tsx   # Input de mensagem
 │   ├── header.tsx        # Cabeçalho da aplicação
+│   ├── ChatBell.tsx      # Sino de chat com contador de não lidas
 │   ├── NotificationBell.tsx # Sino de notificações em tempo real
 │   ├── search-bar.tsx    # Barra de busca
 │   ├── service-card.tsx  # Card de serviços
@@ -239,11 +254,17 @@ src/
 │   ├── ReviewSection.tsx # Seção de reviews para dashboards
 │   └── bottom-navigation.tsx # Navegação inferior
 ├── server/               # Server Actions
+│   ├── services/         # Service Layer
+│   │   ├── chatService.ts      # Serviço de chat
+│   │   ├── notificationService.ts  # Serviço de notificações
+│   │   └── friendshipService.ts    # Serviço de amizades
+│   ├── chatActions.ts    # Ações de chat
 │   ├── reviewActions.ts  # Ações de reviews
 │   ├── notificationActions.ts # Ações de notificações
 │   ├── friendshipActions.ts   # Ações de amizades com notificações
 │   └── dashboardActions.ts # Ações de dashboard e métricas
 ├── schemas/              # Schemas Zod de validação
+│   ├── chatSchemas.ts    # Validações de chat
 │   ├── reviewSchemas.ts  # Validações de reviews
 │   └── notificationSchemas.ts # Validações de notificações
 ├── lib/                  # Utilitários e configurações
@@ -434,7 +455,22 @@ Notificações automáticas em `friendshipActions.ts`:
 
 ## 🎯 Próximas Features
 
-### ✅ Implementado Recentemente (Sprint 1 - Nov 2024)
+### ✅ Implementado Recentemente
+#### Sprint 2 - Sistema de Chat (Out 2024)
+- [x] **Sistema de Chat Completo (1:1)** - Mensagens em tempo real com polling
+  - [x] ChatBell component com contador de não lidas
+  - [x] ChatList com busca e auto-refresh (10s)
+  - [x] ChatWindow com auto-scroll e paginação infinita
+  - [x] MessageBubble com read status (checkmarks)
+  - [x] MessageInput inteligente (Enter para enviar, auto-resize)
+  - [x] ChatService com 12 métodos (CRUD, stats, validações)
+  - [x] 7 Server Actions para chat
+  - [x] 3 modelos no banco (Conversation, ConversationParticipant, Message)
+  - [x] Integração com sistema de amizades
+  - [x] Validação de amizade antes de criar conversa
+  - [x] Interface mobile-first e responsiva
+
+#### Sprint 1 - Sistema de Notificações (Nov 2024)
 - [x] **Sistema de Notificações Completo** - Real-time, histórico, filtros e ações
   - [x] NotificationBell component com auto-refresh
   - [x] Página completa de gerenciamento (/profile/notifications)
@@ -443,7 +479,7 @@ Notificações automáticas em `friendshipActions.ts`:
   - [x] 6 tipos de notificação com navegação contextual
   - [x] Interface responsiva com loading states
 - [x] Sistema de avaliações completo com upload de imagens
-- [x] Dashboards diferenciados por role (Cliente, Barbeiro, Admin)  
+- [x] Dashboards diferenciados por role (Cliente, Barbeiro, Admin)
 - [x] Integração de dados reais nos dashboards
 - [x] Sistema de notificações com Toaster (Sonner)
 - [x] Loading states e skeleton loaders
@@ -462,7 +498,8 @@ Notificações automáticas em `friendshipActions.ts`:
 ### Planejado
 - [ ] Notificações push
 - [ ] Sistema de fidelidade
-- [ ] Chat em tempo real
+- [ ] Chat em grupo (múltiplos participantes)
+- [ ] WebSocket para real-time (substituir polling)
 - [ ] Analytics avançados
 - [ ] Exportação de relatórios
 
@@ -478,6 +515,7 @@ Consulte a pasta `docs/` para documentação detalhada:
 - [Prisma ORM](/docs/prisma/README.md)
 
 ### Features e Sistemas
+- [Sistema de Chat](/docs/chat-system.md) - Sistema de mensagens 1:1 com polling
 - [Sistema de Notificações](/docs/notification-system.md) - Sistema completo em tempo real
 - [Sistema de Reviews](/docs/review-system.md) - Sistema completo de avaliações
 - [Sistema de Upload](/docs/upload-system.md) - Upload seguro de imagens

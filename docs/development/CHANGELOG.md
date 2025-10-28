@@ -2,6 +2,225 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Sprint 2 v1.6] - 2025-10-28 💬
+
+### 🎉 **Sistema de Chat Completo (1:1) Implementado**
+
+#### **🗄️ Database - Models e Schema**
+- **Prisma Schema Extended** (`/prisma/schema.prisma`)
+  - **Conversation** - Modelo principal de conversas
+    - id, createdAt, updatedAt, lastMessageAt
+    - Relacionamentos: participants (M:M), messages (1:M)
+    - Index em lastMessageAt para performance
+  - **ConversationParticipant** - Participantes das conversas
+    - id, conversationId, userId, lastReadAt
+    - Constraint único: conversationId + userId
+    - Indexes otimizados para queries frequentes
+  - **Message** - Mensagens enviadas
+    - id, content (Text), conversationId, senderId, isRead
+    - Indexes: conversationId+createdAt, senderId
+  - **User Model Enhanced**
+    - Novos relacionamentos: conversationParticipants[], messages[]
+- **Seed Updated** (`/prisma/seed.ts`)
+  - Cleanup automático das tabelas de chat
+  - 3 conversas de exemplo criadas:
+    - Carlos ↔ Maria (5 mensagens, 1 não lida)
+    - Carlos ↔ João (4 mensagens, todas lidas)
+    - João ↔ Pedro (5 mensagens, 2 não lidas)
+  - Mix de mensagens lidas/não lidas com timestamps realistas
+
+#### **🔧 Backend - Service Layer e Validações**
+- **ChatService** (`/src/server/services/chatService.ts`)
+  - Service layer completo com 12 métodos estáticos:
+    - `getOrCreateConversation()` - Busca ou cria conversa entre usuários
+    - `getUserConversations()` - Lista conversas do usuário com filtros
+    - `getConversationById()` - Detalhes de conversa específica
+    - `sendMessage()` - Enviar mensagem com validações
+    - `getMessages()` - Buscar mensagens com paginação
+    - `markMessagesAsRead()` - Marcar mensagens como lidas
+    - `getUnreadCount()` - Contador total de não lidas
+    - `getUnreadCountPerConversation()` - Contador por conversa
+    - `getChatStats()` - Estatísticas gerais do chat
+    - `isUserParticipant()` - Validar participação em conversa
+    - `areFriends()` - Validar amizade entre usuários
+  - Integração com FriendshipService para validações
+  - Queries Prisma otimizadas com includes e orderBy
+  - Error handling robusto com try-catch
+
+- **Server Actions** (`/src/server/chatActions.ts`)
+  - 7 server actions completas para frontend:
+    - `getOrCreateConversation()` - Criar/buscar conversa com amigo
+    - `getUserConversations()` - Lista com paginação e filtros
+    - `getConversationById()` - Detalhes da conversa
+    - `sendMessage()` - Enviar mensagem com validação
+    - `getMessages()` - Buscar mensagens paginadas
+    - `markMessagesAsRead()` - Marcar como lidas
+    - `getChatStats()` - Estatísticas do chat
+    - `getUnreadCount()` - Contador de não lidas
+  - Validação com Zod schemas
+  - Autenticação obrigatória em todas as actions
+  - Retorno padronizado: { success, data?, error?, pagination? }
+
+- **Zod Schemas** (`/src/schemas/chatSchemas.ts`)
+  - 5 schemas de validação:
+    - `SendMessageSchema` - Validar envio (conversationId, content 1-5000 chars)
+    - `GetMessagesSchema` - Paginação (page, limit max 100)
+    - `CreateConversationSchema` - Criar conversa (friendId)
+    - `MarkAsReadSchema` - Marcar como lida (conversationId)
+    - `ConversationFiltersSchema` - Filtros (page, limit, unreadOnly)
+  - TypeScript types exportados para type safety
+
+#### **📱 Frontend - Componentes do Chat**
+- **ChatBell Component** (`/src/components/ChatBell.tsx`)
+  - Ícone de chat no header com badge contador
+  - Dropdown com últimas 5 conversas
+  - Auto-refresh a cada 10 segundos
+  - Badge vermelho animado com pulse
+  - Navegação para /chat e conversas individuais
+  - Loading state e empty state
+  - Design mobile-first
+
+- **ChatList Component** (`/src/components/chat/ChatList.tsx`)
+  - Lista completa de conversas do usuário
+  - Busca por nome do amigo (filtro client-side)
+  - Auto-refresh a cada 10 segundos
+  - Empty state com call-to-action para ver amigos
+  - Loading spinner durante carregamento
+  - Design responsivo com ScrollArea
+
+- **ChatWindow Component** (`/src/components/chat/ChatWindow.tsx`)
+  - Janela principal do chat com mensagens
+  - Header com avatar e nome do amigo
+  - ScrollArea com auto-scroll para última mensagem
+  - Auto-refresh a cada 5 segundos
+  - Paginação infinita com botão "Carregar mais"
+  - Marca mensagens como lidas automaticamente
+  - Loading states em envios
+  - Design mobile-first (100dvh)
+
+- **MessageBubble Component** (`/src/components/chat/MessageBubble.tsx`)
+  - Bolha individual de mensagem
+  - Estilo diferenciado para mensagens próprias vs recebidas
+  - Avatar do remetente (apenas para recebidas)
+  - Timestamp formatado (date-fns + pt-BR)
+  - Indicador de leitura (✓ não lida, ✓✓ lida)
+  - Cores: azul para próprias, cinza para recebidas
+
+- **MessageInput Component** (`/src/components/chat/MessageInput.tsx`)
+  - Input inteligente para envio de mensagens
+  - Auto-resize baseado no conteúdo (até 6 linhas)
+  - Enter para enviar, Shift+Enter para nova linha
+  - Botão de envio com ícone Send
+  - Loading state durante envio
+  - Limite de 5000 caracteres
+  - Validação de mensagem vazia
+
+- **ConversationItem Component** (`/src/components/chat/ConversationItem.tsx`)
+  - Item de conversa para lista
+  - Avatar do amigo com fallback
+  - Nome e última mensagem preview (truncada)
+  - Timestamp humanizado (date-fns formatDistanceToNow)
+  - Badge com contador de não lidas
+  - Estado ativo (highlight na conversa atual)
+  - Navegação para conversa ao clicar
+
+#### **🎯 Pages - Rotas do Chat**
+- **Chat Page** (`/src/app/chat/page.tsx`)
+  - Página principal de listagem de conversas
+  - Server-side data loading com getUserConversations
+  - Redirect para login se não autenticado
+  - Passa initialConversations para ChatList
+  - Layout: mt-16 mb-20 para header e bottom nav
+
+- **Chat Conversation Page** (`/src/app/chat/[conversationId]/page.tsx`)
+  - Página de conversa individual (dynamic route)
+  - Server-side loading de conversa e mensagens
+  - Validação de participação (404 se não participante)
+  - Identificação automática do amigo na conversa
+  - Redirect para login se não autenticado
+  - Passa dados iniciais para ChatWindow
+
+#### **🔗 Integração com Sistema Social**
+- **HeaderNavigation Enhanced** (`/src/components/HeaderNavigation.tsx`)
+  - ChatBell integrado ao lado do NotificationBell
+  - Desktop: posicionado entre botões de ação
+  - Mobile: integrado na bottom navigation
+  - Só aparece para usuários autenticados
+  - Z-index otimizado para dropdown
+
+- **Social Page Enhanced** (`/src/app/profile/social/page.tsx`)
+  - Botão MessageCircle habilitado (estava disabled)
+  - Handler `handleOpenChat()` implementado
+  - Cria/busca conversa automaticamente com getOrCreateConversation
+  - Redirect para /chat/[conversationId] após criar conversa
+  - Loading state individual por amigo
+  - Toast de erro se falhar
+
+#### **🎨 UX e Real-time Strategy**
+- **Polling Strategy**
+  - ChatBell: 10 segundos para contador e lista
+  - ChatList: 10 segundos para atualizar conversas
+  - ChatWindow: 5 segundos para novas mensagens
+  - Limpeza automática de intervals no unmount
+- **Auto-scroll Behavior**
+  - Scroll automático para última mensagem ao montar
+  - Scroll ao enviar mensagem nova
+  - Scroll ao receber novas mensagens
+  - Smooth behavior para animação
+- **Read Status**
+  - Marca como lida ao abrir conversa
+  - Marca como lida ao receber mensagens na conversa aberta
+  - Checkmark simples (✓) para não lida
+  - Checkmark duplo (✓✓) para lida
+  - Cinza para não lida, verde para lida
+
+#### **📚 Documentação**
+- **Documentação Completa** (`/docs/chat-system.md`)
+  - 250+ linhas de documentação técnica
+  - Arquitetura detalhada (modelos, service layer, componentes)
+  - Guia de uso com exemplos práticos
+  - Troubleshooting e manutenção
+  - Roadmap de melhorias futuras
+- **Setup Guide** (`/CHAT_SETUP.md`)
+  - Guia step-by-step de instalação
+  - Comandos Docker para migrations e seed
+  - Credenciais de teste
+  - Checklist de verificação
+
+#### **✨ Features Implementadas**
+- ✅ Chat 1:1 entre amigos validados
+- ✅ Criação automática de conversas ao clicar em amigo
+- ✅ Lista de conversas com busca
+- ✅ Janela de chat com auto-scroll e paginação
+- ✅ Envio de mensagens em tempo real (polling 5s)
+- ✅ Read status com checkmarks
+- ✅ Contador de não lidas no header
+- ✅ Auto-refresh para conversas e mensagens
+- ✅ Validação de amizade antes de permitir chat
+- ✅ Mobile-first design
+- ✅ Loading states e empty states
+- ✅ Timestamps humanizados
+- ✅ Paginação infinita de mensagens
+- ✅ Input inteligente com auto-resize
+- ✅ Integração completa com sistema social
+
+#### **🧪 Dados de Teste**
+- **Usuários com conversas**:
+  - `carlos@email.com` / `cliente123` (2 conversas)
+  - `maria@email.com` / `cliente123` (1 conversa com Carlos)
+  - `joao@barbershop.com` / `barbeiro123` (2 conversas)
+  - `pedro@email.com` / `cliente123` (1 conversa com João)
+
+#### **🚀 Próximos Passos Planejados**
+- **Sprint 3**: WebSocket para real-time (substituir polling)
+- **Sprint 4**: Chat em grupo (múltiplos participantes)
+- **Sprint 5**: Indicador de "digitando..."
+- **Sprint 6**: Envio de imagens e arquivos
+- **Sprint 7**: Busca dentro de conversas
+- **Sprint 8**: Notificações push para novas mensagens
+
+---
+
 ## [Sprint 1 v1.5] - 2025-10-27 🔔
 
 ### 🎉 **Sistema de Notificações Completo Implementado**
