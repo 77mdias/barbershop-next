@@ -92,6 +92,41 @@ After running `docker compose exec app npm run db:seed`:
 
 ---
 
+
+## Deploy Profissional: Separação App vs Migrator
+
+**Padrão recomendado para produção:**
+- Imagem `app`: só executa o código da aplicação e Prisma Client já gerado. Não contém migrations nem schema. Nunca altera o banco.
+- Imagem `migrator`: inclui a pasta `prisma/` com migrations e schema. Só é usada para rodar comandos administrativos (migrate deploy, db push, etc).
+
+**Motivos:**
+- Segurança: app nunca altera o schema do banco em produção.
+- Controle: só o migrator pode rodar migrations, garantindo rastreabilidade.
+- Performance: imagem de produção menor e mais rápida.
+
+**Fluxo correto para migrations em produção:**
+1. Crie/atualize migrations localmente (dev):
+  ```bash
+  docker compose exec app npx prisma migrate dev --name <nome>
+  ```
+2. Commit/push das migrations.
+3. Rebuild da imagem migrator:
+  ```bash
+  docker compose -f docker-compose.pro.yml build migrator
+  ```
+4. Rode o migrator para aplicar as migrations:
+  ```bash
+  ./scripts/deploy-pro.sh migrate
+  # ou
+  docker compose -f docker-compose.pro.yml --profile migration run --rm migrator
+  ```
+5. Suba/reinicie o app de produção.
+
+**Nunca rode migrations pelo app de produção!**
+
+Se as migrations não aparecem no banco de produção, sempre verifique se a imagem do migrator foi rebuildada após criar novas migrations.
+
+---
 ## Architecture Overview
 
 ### Authentication & Authorization

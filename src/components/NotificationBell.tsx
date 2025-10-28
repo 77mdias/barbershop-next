@@ -135,9 +135,9 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="sm"
-          className="relative h-9 w-9 rounded-full"
+          className="relative h-9 w-9 px-0 rounded-full"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"

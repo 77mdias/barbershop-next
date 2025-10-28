@@ -22,7 +22,9 @@ export function ConditionalBottomNavigation({ items }: ConditionalBottomNavigati
     '/auth/reset-password',
     '/auth/verify-email',
     '/auth/thank-you',
-    '/auth/error'
+    '/auth/error',
+    '/chat/[conversationId]',
+    '/chat'
   ];
   
   // Verifica se a rota atual deve ocultar a navegação

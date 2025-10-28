@@ -3,6 +3,46 @@
 Uma aplicação moderna para agendamento de serviços de barbearia, desenvolvida com **Next.js 14**, **TypeScript** e **Tailwind CSS**.
 
 ---
+
+## 🚦 Fluxo Profissional de Deploy e Migrations (App vs Migrator)
+
+**Este projeto segue o padrão profissional de separação entre imagem de produção (app) e migrator para máxima segurança e rastreabilidade.**
+
+### Como funciona?
+- **Imagem de produção (`app`)**: Só executa o código da aplicação e o Prisma Client já gerado. Não contém migrations nem schema do Prisma. Nunca altera o banco de dados.
+- **Imagem migrator (`migrator`)**: Inclui a pasta `prisma/` com migrations e schema. Só é usada para rodar comandos administrativos (migrate deploy, db push, etc) e nunca serve requisições do app.
+
+### Por que isso é importante?
+- **Segurança**: O app nunca tem permissão de alterar o schema do banco em produção.
+- **Controle**: Só quem faz build e executa o migrator pode alterar o banco, garantindo rastreabilidade e deploys auditáveis.
+- **Performance**: Imagem de produção menor e mais rápida.
+
+### Fluxo correto para migrations em produção
+1. **Crie/atualize migrations localmente** (dev):
+  ```bash
+  docker compose exec app npx prisma migrate dev --name <nome-da-migration>
+  ```
+2. **Faça commit e push das migrations** para o repositório.
+3. **Rebuild da imagem migrator** (sempre que houver nova migration!):
+  ```bash
+  docker compose -f docker-compose.pro.yml build migrator
+  ```
+4. **Aplique as migrations em produção**:
+  ```bash
+  ./scripts/deploy-pro.sh migrate
+  # ou
+  docker compose -f docker-compose.pro.yml --profile migration run --rm migrator
+  ```
+5. **Só depois** suba/reinicie o app de produção:
+  ```bash
+  ./scripts/deploy-pro.sh app-only
+  ```
+
+> **Nunca rode migrations pelo app de produção!**
+
+Se as migrations não aparecem no banco de produção, sempre verifique se a imagem do migrator foi rebuildada após criar novas migrations.
+
+---
 ## 📚 Recomendações de Estudo e Documentação
 
 Este projeto segue as boas práticas do agente de IA para estudo e documentação:
