@@ -1,4 +1,29 @@
-# 🎉 Setup Docker Completo - Barbershop Next.js
+
+# 🚦 Deploy Profissional: App vs Migrator
+
+**Em produção, siga o padrão seguro de separar a imagem da aplicação (app) da imagem de migração (migrator):**
+- O container `app` só executa o código e nunca altera o banco.
+- O container `migrator` inclui a pasta `prisma/` e só é usado para rodar migrations.
+
+**Fluxo correto:**
+1. Crie/atualize migrations localmente e faça commit/push.
+2. Sempre rode o build do migrator após novas migrations:
+	```bash
+	docker compose -f docker-compose.pro.yml build migrator
+	```
+3. Rode as migrations:
+	```bash
+	./scripts/deploy-pro.sh migrate
+	# ou
+	docker compose -f docker-compose.pro.yml --profile migration run --rm migrator
+	```
+4. Só depois suba/reinicie o app de produção.
+
+> **Nunca rode migrations pelo app de produção!**
+
+Se as migrations não aparecem no banco, verifique se o migrator foi rebuildado.
+
+---
 
 > **🔧 Atualização (Out/2025)**: O script `docker-manager.sh` foi corrigido para resolver o problema "unknown flag: --profile" com o Prisma Studio. A nova implementação usa o container `app` existente em vez de serviços duplicados.
 

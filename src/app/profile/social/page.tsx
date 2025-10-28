@@ -31,6 +31,7 @@ import {
   getReceivedRequests,
   getSentRequests,
 } from "@/server/friendshipActions";
+import { getOrCreateConversation } from "@/server/chatActions";
 import { SearchUsersModal } from "@/components/social/SearchUsersModal";
 
 /**
@@ -198,6 +199,23 @@ export default function FriendSocial() {
 
   const handleRemoveSuggestion = (userId: string) => {
     setSuggestions((prev) => prev.filter((s) => s.id !== userId));
+  };
+
+  const handleOpenChat = async (friendId: string) => {
+    setLoadingActions((prev) => ({ ...prev, [`chat-${friendId}`]: true }));
+    try {
+      const result = await getOrCreateConversation({ friendId });
+
+      if (result.success && result.data) {
+        router.push(`/chat/${result.data.id}`);
+      } else {
+        toast.error(result.error || "Erro ao abrir chat");
+      }
+    } catch (error) {
+      toast.error("Erro ao abrir chat");
+    } finally {
+      setLoadingActions((prev) => ({ ...prev, [`chat-${friendId}`]: false }));
+    }
   };
 
   if (isLoading) {
@@ -427,9 +445,15 @@ export default function FriendSocial() {
                             variant="ghost"
                             size="icon"
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            disabled
+                            onClick={() => handleOpenChat(friend.id)}
+                            disabled={loadingActions[`chat-${friend.id}`]}
+                            title="Enviar mensagem"
                           >
-                            <MessageCircle className="h-5 w-5" />
+                            {loadingActions[`chat-${friend.id}`] ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                              <MessageCircle className="h-5 w-5" />
+                            )}
                           </Button>
                           <Button
                             variant="ghost"
@@ -437,6 +461,7 @@ export default function FriendSocial() {
                             className="text-red-500 hover:text-red-600 hover:bg-red-50"
                             onClick={() => handleRemoveFriend(friend.id)}
                             disabled={loadingActions[friend.id]}
+                            title="Remover amigo"
                           >
                             {loadingActions[friend.id] ? (
                               <Loader2 className="h-5 w-5 animate-spin" />
@@ -454,7 +479,7 @@ export default function FriendSocial() {
           </div>
         )}
 
-            )
+            
 
             {/* Tab: Sugestões */}
             {activeTab === "suggestions" && (

@@ -16,6 +16,9 @@ async function main() {
   await prisma.friendship.deleteMany();
   await prisma.friendRequest.deleteMany();
   await prisma.notification.deleteMany();
+  await prisma.message.deleteMany();
+  await prisma.conversationParticipant.deleteMany();
+  await prisma.conversation.deleteMany();
   await prisma.service.deleteMany();
   await prisma.user.deleteMany();
 
@@ -407,6 +410,144 @@ async function main() {
   });
 
   console.log("Notificações criadas com sucesso!");
+
+  // 🔵 **CRIAR CONVERSAS E MENSAGENS** 🔵
+  // Conversa 1: Carlos (client1) e Maria (client2) - AMIGOS
+  const conversation1 = await prisma.conversation.create({
+    data: {
+      participants: {
+        create: [
+          { userId: client1.id, lastReadAt: new Date() },
+          { userId: client2.id, lastReadAt: new Date(Date.now() - 3600000) }, // 1h atrás (tem não lidas)
+        ],
+      },
+      messages: {
+        create: [
+          {
+            senderId: client1.id,
+            content: "Oi Maria! Tudo bem?",
+            isRead: true,
+            createdAt: new Date(Date.now() - 7200000), // 2h atrás
+          },
+          {
+            senderId: client2.id,
+            content: "Oi Carlos! Tudo ótimo e você?",
+            isRead: true,
+            createdAt: new Date(Date.now() - 7000000),
+          },
+          {
+            senderId: client1.id,
+            content: "Também! Vi que você foi no barbeiro ontem. Como ficou?",
+            isRead: true,
+            createdAt: new Date(Date.now() - 6800000),
+          },
+          {
+            senderId: client2.id,
+            content: "Adorei! O João é muito profissional. Recomendo demais!",
+            isRead: true,
+            createdAt: new Date(Date.now() - 6600000),
+          },
+          {
+            senderId: client1.id,
+            content: "Que legal! Vou marcar com ele semana que vem então 😊",
+            isRead: false, // Maria ainda não leu
+            createdAt: new Date(Date.now() - 1800000), // 30 min atrás
+          },
+        ],
+      },
+      lastMessageAt: new Date(Date.now() - 1800000),
+    },
+  });
+
+  // Conversa 2: Carlos (client1) e João Barbeiro (barber1) - AMIGOS
+  const conversation2 = await prisma.conversation.create({
+    data: {
+      participants: {
+        create: [
+          { userId: client1.id, lastReadAt: new Date() },
+          { userId: barber1.id, lastReadAt: new Date() },
+        ],
+      },
+      messages: {
+        create: [
+          {
+            senderId: client1.id,
+            content: "Oi João! Tem horário disponível quinta-feira às 14h?",
+            isRead: true,
+            createdAt: new Date(Date.now() - 86400000), // 1 dia atrás
+          },
+          {
+            senderId: barber1.id,
+            content: "Oi Carlos! Sim, tem sim. Pode agendar pelo sistema. 👍",
+            isRead: true,
+            createdAt: new Date(Date.now() - 82800000),
+          },
+          {
+            senderId: client1.id,
+            content: "Perfeito! Acabei de agendar. Até quinta!",
+            isRead: true,
+            createdAt: new Date(Date.now() - 82000000),
+          },
+          {
+            senderId: barber1.id,
+            content: "Até lá! ✂️",
+            isRead: true,
+            createdAt: new Date(Date.now() - 81800000),
+          },
+        ],
+      },
+      lastMessageAt: new Date(Date.now() - 81800000),
+    },
+  });
+
+  // Conversa 3: João Barbeiro (barber1) e Pedro Barbeiro (barber2) - AMIGOS
+  const conversation3 = await prisma.conversation.create({
+    data: {
+      participants: {
+        create: [
+          { userId: barber1.id, lastReadAt: new Date(Date.now() - 7200000) }, // Tem não lidas
+          { userId: barber2.id, lastReadAt: new Date() },
+        ],
+      },
+      messages: {
+        create: [
+          {
+            senderId: barber2.id,
+            content: "João, você viu aquele novo produto de barba que chegou?",
+            isRead: true,
+            createdAt: new Date(Date.now() - 172800000), // 2 dias atrás
+          },
+          {
+            senderId: barber1.id,
+            content: "Vi sim! Testei ontem com um cliente. Ficou ótimo!",
+            isRead: true,
+            createdAt: new Date(Date.now() - 169200000),
+          },
+          {
+            senderId: barber2.id,
+            content: "Que bom! Vou testar hoje também. Valeu pela dica! 👊",
+            isRead: true,
+            createdAt: new Date(Date.now() - 165600000),
+          },
+          {
+            senderId: barber2.id,
+            content: "Ah, e você tem algum cliente disponível pra trocar de horário amanhã? Tive um imprevisto...",
+            isRead: false, // João não leu
+            createdAt: new Date(Date.now() - 3600000), // 1h atrás
+          },
+          {
+            senderId: barber2.id,
+            content: "É pra às 10h da manhã",
+            isRead: false, // João não leu
+            createdAt: new Date(Date.now() - 3000000),
+          },
+        ],
+      },
+      lastMessageAt: new Date(Date.now() - 3000000),
+    },
+  });
+
+  console.log("Conversas e mensagens criadas com sucesso!");
 
   console.log("Seed concluído com sucesso!");
 }

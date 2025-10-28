@@ -24,8 +24,7 @@ show_help() {
 
 run_migrations() {
     echo "🔄 Executando migrações..."
-    docker compose -f docker-compose.pro.yml --profile migration up migrator
-    
+    docker compose -f docker-compose.pro.yml --profile migration run --rm migrator
     if [ $? -eq 0 ]; then
         echo "✅ Migrações aplicadas com sucesso!"
     else
