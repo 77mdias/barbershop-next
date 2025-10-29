@@ -158,7 +158,7 @@ export function ChatWindow({
   }, [messages.length]);
 
   return (
-    <div className="w-full bg-gray-50 flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100vh-4rem)]">
+    <div className="w-full  flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100vh-4rem)]">
       {/* Header - Fixo no topo da conversa */}
       <div className="w-full px-4 py-3 flex items-center gap-3 bg-foreground border-b shadow-md flex-shrink-0 z-10">
         <Button
@@ -242,7 +242,7 @@ export function ChatWindow({
       </ScrollArea>
 
       {/* Input Area - Fixo no bottom */}
-      <div className="bg-white w-full border-t shadow-lg px-4 py-3 flex-shrink-0">
+      <div className=" w-full border-t shadow-lg px-4 py-3 flex-shrink-0">
         <div className="max-w-4xl mx-auto">
           <MessageInput
             onSendMessage={handleSendMessage}

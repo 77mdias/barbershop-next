@@ -43,7 +43,7 @@ export function Header({
 
   return (
     <header className={cn(
-      "flex gap-4 align-center justify-between items-center w-full p-4 sm:p-6 text-black",
+      "flex gap-4 align-center justify-between items-center w-full p-4 sm:p-6 text-foreground",
       styles.header,
       className
     )}>
@@ -59,7 +59,7 @@ export function Header({
         </div>
         
         <div className="flex flex-col">
-          <span className="text-xs sm:text-sm text-gray-700">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             Hello {userName}
           </span>
           <span className={cn(

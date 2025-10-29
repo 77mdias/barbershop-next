@@ -228,24 +228,24 @@ export default function FriendSocial() {
   }
 
   return (
-    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col bg-gray-50">
+    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col ">
       {/* Header */}
-      <div className={cn("bg-white border-b sticky top-16 z-10", styles.socialHeader)}>
+      <div className={cn("border-b sticky top-16 z-10", styles.socialHeader)}>
         <div className="flex items-center justify-between px-4 py-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-semibold text-gray-900">Friend & Social</h1>
+          <h1 className="text-lg font-semibold text-foreground">Friend & Social</h1>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsSearchModalOpen(true)}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <Search className="h-5 w-5" />
           </Button>
@@ -259,7 +259,7 @@ export default function FriendSocial() {
               "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
               activeTab === "friends"
                 ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <div className="flex items-center justify-center gap-2">
@@ -273,7 +273,7 @@ export default function FriendSocial() {
               "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
               activeTab === "suggestions"
                 ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <div className="flex items-center justify-center gap-2">
@@ -296,13 +296,13 @@ export default function FriendSocial() {
             {activeTab === "friends" && (
           <div className="space-y-4">
             {/* Stats Card */}
-            <div className={cn("bg-white rounded-2xl p-6 shadow-sm border border-gray-100", styles.statsCard)}>
+            <div className={cn("bg-card rounded-2xl p-6 shadow-sm border border-border", styles.statsCard)}>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className={styles.statItem}>
                   <div className="text-2xl font-bold text-blue-600">
                     {stats.friendsCount}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Amigos</div>
+                  <div className="text-xs text-foreground mt-1">Amigos</div>
                 </div>
                 <button
                   onClick={() => router.push("/profile/social/requests")}
@@ -314,7 +314,7 @@ export default function FriendSocial() {
                   <div className="text-2xl font-bold text-purple-600">
                     {stats.pendingSentCount}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Enviadas</div>
+                  <div className="text-xs text-foreground mt-1">Enviadas</div>
                 </button>
                 <button
                   onClick={() => router.push("/profile/social/requests")}
@@ -329,7 +329,7 @@ export default function FriendSocial() {
                       <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
                     )}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">Recebidas</div>
+                  <div className="text-xs text-foreground mt-1">Recebidas</div>
                   {stats.pendingReceivedCount > 0 && (
                     <div className="absolute top-1 right-1">
                       <span className="relative flex h-3 w-3">
@@ -379,20 +379,20 @@ export default function FriendSocial() {
 
             {/* Friends List */}
             <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-gray-700 px-1 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground px-1 flex items-center justify-between">
                 <span>Meus Amigos</span>
-                <span className="text-xs text-gray-500 font-normal">
+                <span className="text-xs text-muted-foreground font-normal">
                   {friends.length} amigos
                 </span>
               </h2>
 
               {friends.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-                  <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                <div className="bg-card rounded-2xl p-8 text-center shadow-sm border border-border">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-foreground mb-2">
                     Nenhum amigo ainda
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Comece a conectar com outras pessoas da comunidade
                   </p>
                   <Button
@@ -410,7 +410,7 @@ export default function FriendSocial() {
                     <div
                       key={friend.id}
                       className={cn(
-                        "bg-white rounded-xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md",
+                        "bg-card rounded-xl p-4 shadow-sm border border-border transition-all hover:shadow-md",
                         styles.friendCard
                       )}
                     >
@@ -424,10 +424,10 @@ export default function FriendSocial() {
                             className="w-12 h-12 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 truncate">
+                            <h3 className="font-semibold text-foreground truncate">
                               {friend.name}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className="capitalize text-xs">
                                 {friend.role === "BARBER" ? "Barbeiro" : "Cliente"}
                               </span>

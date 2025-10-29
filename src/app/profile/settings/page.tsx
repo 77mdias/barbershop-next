@@ -465,7 +465,7 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen mt-20 mb-8 min-w-full flex flex-col  bg-gray-50">
+    <div className="min-h-screen mt-20 mb-16 min-w-full flex flex-col  bg-background">
       {/* Header simples e moderno */}
       <div className=" border-b w-full">
         <div className="flex items-center justify-between px-4 py-4">
@@ -473,18 +473,18 @@ export default function ProfileSettings() {
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-semibold text-gray-900">Configurações</h1>
+          <h1 className="text-lg font-semibold text-foreground">Configurações</h1>
           <div className="w-10"></div>
         </div>
       </div>
 
       <div className=" py-6 px-4 max-w-2xl ">
         {/* Avatar Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
@@ -500,7 +500,7 @@ export default function ProfileSettings() {
                     }}
                   />
                 ) : (
-                  <User className="h-10 w-10 text-gray-400" />
+                  <User className="h-10 w-10 text-foreground" />
                 )}
               </div>
               
@@ -549,8 +549,8 @@ export default function ProfileSettings() {
             </div>
             
             <div className="text-center">
-              <h2 className="font-semibold text-gray-900">{user.name}</h2>
-              <p className="text-sm text-gray-500">{user.email}</p>
+              <h2 className="font-semibold text-foreground">{user.name}</h2>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
               {isMobile && (
                 <p className="text-xs text-blue-600 mt-1">
                   👆 Toque na câmera para alterar foto
@@ -589,20 +589,20 @@ export default function ProfileSettings() {
         </div>
 
         {/* Form Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl shadow-sm border border-border">
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
             
             {/* Nome Completo */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-gray-700 flex items-center">
-                <User className="h-4 w-4 mr-2 text-gray-400" />
+              <Label htmlFor="name" className="text-sm font-medium text-foreground flex items-center">
+                <User className="h-4 w-4 mr-2 text-foreground" />
                 Nome Completo
               </Label>
               <Input
                 id="name"
                 type="text"
                 {...register("name")}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="border-border text-[hsl(var(--color-text))] bg-foreground focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 placeholder="Digite seu nome completo"
               />
               {errors.name && (
@@ -612,15 +612,15 @@ export default function ProfileSettings() {
 
             {/* Apelido */}
             <div className="space-y-2">
-              <Label htmlFor="nickname" className="text-sm font-medium text-gray-700 flex items-center">
-                <Edit3 className="h-4 w-4 mr-2 text-gray-400" />
+              <Label htmlFor="nickname" className="text-sm font-medium text-foreground flex items-center">
+                <Edit3 className="h-4 w-4 mr-2 text-foreground" />
                 Apelido
               </Label>
               <Input
                 id="nickname"
                 type="text"
                 {...register("nickname")}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="border-border text-[hsl(var(--color-text))] bg-foreground focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 placeholder="Como gosta de ser chamado?"
               />
               {errors.nickname && (
@@ -630,15 +630,15 @@ export default function ProfileSettings() {
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center">
-                <Mail className="h-4 w-4 mr-2 text-gray-400" />
+              <Label htmlFor="email" className="text-sm font-medium text-foreground flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-foreground" />
                 Email
               </Label>
               <Input
                 id="email"
                 type="email"
                 {...register("email")}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="border-border text-[hsl(var(--color-text))] bg-foreground focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 placeholder="seu@email.com"
               />
               {errors.email && (
@@ -648,15 +648,15 @@ export default function ProfileSettings() {
 
             {/* Telefone */}
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-medium text-gray-700 flex items-center">
-                <Phone className="h-4 w-4 mr-2 text-gray-400" />
+              <Label htmlFor="phone" className="text-sm font-medium text-foreground flex items-center">
+                <Phone className="h-4 w-4 mr-2 text-foreground" />
                 Telefone
               </Label>
               <Input
                 id="phone"
                 type="tel"
                 {...register("phone")}
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="border-border bg-foreground text-[hsl(var(--color-text))] focus:border-blue-500 focus:ring-blue-500 transition-colors"
                 placeholder="(11) 99999-9999"
               />
               {errors.phone && (

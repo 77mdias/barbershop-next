@@ -130,7 +130,7 @@ export function AppointmentWizard({
   };
 
   return (
-    <div className={cn("container w-full flex flex-col mt-16 mx-auto pb-6", className)}>
+    <div className={cn("container w-full flex flex-col mt-16 mb-12 mx-auto pb-6", className)}>
       {/* Header com gradiente suave */}
       <div className="text-center mb-8 mt-4 px-4">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
@@ -176,7 +176,7 @@ export function AppointmentWizard({
                       isCompleted 
                         ? "border-primary bg-gradient-to-br from-primary to-accent text-white shadow-primary/20" 
                         : isActive
-                          ? "border-primary bg-gradient-to-br from-primary/10 to-accent/10 text-primary shadow-primary/10"
+                          ? "border-primary from-primary/10 to-accent/10 text-primary shadow-primary/10"
                           : "border-muted-foreground/30 bg-background text-muted-foreground"
                     )}>
                       {isCompleted ? (

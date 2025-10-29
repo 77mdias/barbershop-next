@@ -135,9 +135,9 @@ export function SalonCard({
       </div>
 
       {/* Informações do salão */}
-      <div className="p-3 sm:p-4 bg-[--card]">
+      <div className="p-3 sm:p-4 bg-card">
         {/* Nome do salão */}
-        <h3 className="font-semibold text-[--text] mb-1 sm:mb-2 truncate text-sm sm:text-base">
+        <h3 className="font-semibold text-foreground mb-1 sm:mb-2 truncate text-sm sm:text-base">
           {name}
         </h3>
 

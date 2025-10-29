@@ -133,7 +133,7 @@ export default function Profile() {
   }
 
   return (
-    <div key={refreshKey} className="container mx-auto flex flex-col w-full mt-16 bg-[--background]">
+    <div key={refreshKey} className="container mx-auto flex flex-col w-full mt-16 mb-16 bg-[--background]">
       {/* Header com gradiente escuro */}
       <div className={cn("text-white px-6 pt-8 pb-8", styles.profileHeader)}>
         {/* Avatar e informações do usuário */}
@@ -179,7 +179,7 @@ export default function Profile() {
 
           {/* Botão Edit Profile */}
           <Button
-            className={cn("px-6 py-2 font-medium mx-4 transition-colors", styles.profileHeader__editButton)}
+            className={cn("px-6 py-2 font-medium mx-4 text-text transition-colors", styles.profileHeader__editButton)}
             variant="outline"
             onClick={() => setIsEditModalOpen(true)}
           >
@@ -231,7 +231,7 @@ export default function Profile() {
               }
               label="Configurações do Perfil"
               href="/profile/settings"
-              className={styles.profileContent__menuItem}
+              className={`bg-card shadow-md ${styles.profileContent__menuItem}`}
             />
 
             <ProfileMenuItem
@@ -252,7 +252,7 @@ export default function Profile() {
               }
               label="Friend & Social"
               href="/profile/social"
-              className={styles.profileContent__menuItem}
+              className={`bg-card shadow-md ${styles.profileContent__menuItem}`}
             />
 
             <ProfileMenuItem
@@ -273,7 +273,7 @@ export default function Profile() {
               }
               label="Feedback"
               onClick={() => handleNavigation('/dashboard')}
-              className={styles.profileContent__menuItem}
+              className={`bg-card shadow-md ${styles.profileContent__menuItem}`}
             />
 
             <ProfileMenuItem
@@ -300,7 +300,7 @@ export default function Profile() {
               }
               label="Meu Dashboard"
               href="/dashboard"
-              className={styles.profileContent__menuItem}
+              className={`bg-card shadow-md ${styles.profileContent__menuItem}`}
             />
 
             <ProfileMenuItem
@@ -321,7 +321,7 @@ export default function Profile() {
               }
               label="Gift Card"
               href="/gift-card"
-              className={styles.profileContent__menuItem}
+              className={`bg-card shadow-md ${styles.profileContent__menuItem}`}
             />
           </div>
         </div>

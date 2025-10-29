@@ -22,7 +22,7 @@ interface ClientReviewProps {
 export function ClientReview({ reviews }: ClientReviewProps) {
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>Nenhuma avaliação disponível no momento.</p>
       </div>
     );
@@ -52,7 +52,7 @@ export function ClientReview({ reviews }: ClientReviewProps) {
             </div>
 
             {/* Testimonial */}
-            <blockquote className="text-gray-700 mb-4 text-sm leading-relaxed">
+            <blockquote className="text-muted-foreground mb-4 text-sm leading-relaxed">
               &ldquo;{review.testimonial}&rdquo;
             </blockquote>
 
@@ -67,11 +67,11 @@ export function ClientReview({ reviews }: ClientReviewProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 text-sm truncate">
+                <p className="font-medium text-foreground text-sm truncate">
                   {review.clientName}
                 </p>
                 {review.serviceType && (
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {review.serviceType}
                   </p>
                 )}

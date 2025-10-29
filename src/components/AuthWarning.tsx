@@ -74,25 +74,25 @@ export function AuthWarning({
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-gradient-to-br mt-16 from-blue-50 via-white to-purple-50 items-center  justify-start p-4">
-      <Card className="w-full mt-12 max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+    <div className="w-full h-screen flex flex-col mt-16  items-center  justify-start p-4">
+      <Card className="w-full mt-12 max-w-md shadow-xl border-0 bg-card backdrop-blur-sm">
         <CardContent className="p-6 text-center space-y-6">
           {/* Ícone e título */}
           <div className="space-y-3">
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
               <Lock className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-text">
               Autenticação Necessária
             </h1>
           </div>
 
           {/* Mensagem principal */}
           <div className="space-y-2">
-            <p className="text-gray-600">
-              Para acessar <span className="font-semibold text-gray-900">{getRouteDisplayName(targetRoute)}</span> você precisa estar autenticado.
+            <p className="text-foreground">
+              Para acessar <span className="font-semibold text-text">{getRouteDisplayName(targetRoute)}</span> você precisa estar autenticado.
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Você será redirecionado para login automaticamente em:
             </p>
           </div>
@@ -130,7 +130,7 @@ export function AuthWarning({
 
           {/* Informação adicional */}
           <div className="pt-4 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Não tem uma conta? 
               <button 
                 onClick={() => router.push('/auth/signup')}

@@ -35,7 +35,7 @@ export function ServiceCard({
       onClick={onClick}
       className={cn(
         // Base styles
-        "flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl transition-all duration-300",
+        "flex flex-col items-center bg-card justify-center p-3 sm:p-4 rounded-2xl transition-all duration-300",
         "min-w-[80px] sm:min-w-[90px] h-[80px] sm:h-[90px] gap-1 sm:gap-2",
         "focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2",
         styles.serviceCard,
@@ -48,7 +48,6 @@ export function ServiceCard({
 
         // Estado ativo
         isActive && [
-          "bg-[--card-foreground]",
           "shadow-lg shadow-primary-500/25",
           styles["serviceCard--active"],
         ],

@@ -92,7 +92,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br mt-16 from-blue-50 via-white to-purple-50 items-center  justify-start py-4">
+    <div className="w-full h-full flex flex-col mt-16  items-center  justify-start py-4">
       <div className="container mx-auto  mb-20 flex flex-col justify-center  w-full">
         {/* Header */}
         <Header

@@ -206,7 +206,7 @@ export function ReviewsList({
               <div className="flex justify-center mb-2">
                 {renderStars(Math.round(stats.averageRating))}
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Baseado em {stats.totalReviews} avaliações
               </p>
             </div>
@@ -227,7 +227,7 @@ export function ReviewsList({
                       }}
                     />
                   </div>
-                  <span className="text-sm text-gray-600 w-8">
+                  <span className="text-sm text-muted-foreground w-8">
                     {item.count}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ export function ReviewsList({
       ) : reviews.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-600">Nenhuma avaliação sua encontrada.</p>
+            <p className="text-muted-foreground">Nenhuma avaliação sua encontrada.</p>
           </CardContent>
         </Card>
       ) : (
@@ -294,7 +294,7 @@ export function ReviewsList({
                       </Avatar>
                       <div>
                         <h4 className="font-semibold">{review.user.name}</h4>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar size={14} />
                           {formatDistanceToNow(new Date(review.completedAt), {
                             addSuffix: true,
@@ -330,8 +330,8 @@ export function ReviewsList({
                       <Badge variant="secondary">{review.rating || 0}/5</Badge>
                     </div>
 
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                    <div className="bg-card p-3 rounded-lg">
+                      <div className="flex items-center gap-2 text-sm text-foreground mb-2">
                         <User size={14} />
                         {review.service.name}
                         <DollarSign size={14} />
@@ -343,7 +343,7 @@ export function ReviewsList({
                     </div>
 
                     {review.feedback && (
-                      <p className="text-gray-700 leading-relaxed">
+                      <p className="text-muted-foreground leading-relaxed">
                         {review.feedback}
                       </p>
                     )}
