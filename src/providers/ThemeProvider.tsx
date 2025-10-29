@@ -7,50 +7,59 @@ import {
   ResolvedTheme,
 } from "@/contexts/ThemeContext";
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>("light");
-  const [mounted, setMounted] = useState(false);
+// Função para obter o tema inicial (executa no cliente)
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "system";
 
-  // Inicialização do tema
-  useEffect(() => {
-    setMounted(true);
-
-    // Detecta preferência do sistema
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemTheme(mediaQuery.matches ? "dark" : "light");
-
-    // Carrega preferência salva
+  try {
     const stored = localStorage.getItem("theme") as Theme | null;
     if (stored === "light" || stored === "dark" || stored === "system") {
-      setThemeState(stored);
-    } else {
-      setThemeState("system"); // Default: seguir o sistema
+      return stored;
     }
-  }, []);
+  } catch (e) {
+    // localStorage não disponível
+  }
 
-  // Listener de mudanças no sistema
+  return "system"; // Default: seguir o sistema
+}
+
+// Função para detectar tema do sistema
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  } catch (e) {
+    return "light";
+  }
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme);
+
+  // Resolução do tema efetivo
+  const resolvedTheme: ResolvedTheme =
+    theme === "system" ? systemTheme : theme;
+
+  // Aplicação inicial do tema (roda uma única vez)
   useEffect(() => {
-    if (!mounted) return;
-
+    // Detecta preferência do sistema
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const systemDark = mediaQuery.matches;
+    setSystemTheme(systemDark ? "dark" : "light");
 
+    // Listener de mudanças no sistema
     const handleChange = (e: MediaQueryListEvent) => {
       setSystemTheme(e.matches ? "dark" : "light");
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [mounted]);
+  }, []);
 
-  // Resolução do tema efetivo
-  const resolvedTheme: ResolvedTheme =
-    theme === "system" ? systemTheme : theme;
-
-  // Aplicação do tema ao DOM
+  // Aplicação do tema ao DOM (sempre que o tema resolvido mudar)
   useEffect(() => {
-    if (!mounted) return;
-
     const root = document.documentElement;
 
     if (resolvedTheme === "dark") {
@@ -58,13 +67,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("dark");
     }
-  }, [resolvedTheme, mounted]);
+  }, [resolvedTheme]);
 
   // Persistência em localStorage
   useEffect(() => {
-    if (!mounted) return;
-    localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (e) {
+      // localStorage não disponível
+    }
+  }, [theme]);
 
   // Funções de controle
   const setTheme = (newTheme: Theme) => {
@@ -81,11 +93,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return prev === "dark" ? "light" : "dark";
     });
   };
-
-  // Evita hidratação mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider
