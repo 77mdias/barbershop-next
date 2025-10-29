@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
 import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
@@ -122,9 +123,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}  antialiased flex flex-col items-center `}
+      >
         {/* Script anti-FOUC: Aplica o tema antes da renderização para evitar flash */}
-        <script
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -140,10 +145,6 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable}  antialiased flex flex-col items-center `}
-      >
         <Providers>
           <HeaderNavigation />
           {children}
