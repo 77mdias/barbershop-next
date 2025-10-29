@@ -518,6 +518,87 @@ src/components/
 - `MessageInput.tsx` - Smart textarea with auto-resize and Enter to send
 - `ConversationItem.tsx` - Conversation preview with last message and unread badge
 
+### Theme System
+
+**Location**: `/src/providers/ThemeProvider.tsx`, `/src/components/ThemeToggle.tsx`
+
+**Overview**: Complete dark/light mode system with automatic OS theme detection and persistence.
+
+**Core Components**:
+- **ThemeContext** (`/src/contexts/ThemeContext.tsx`) - Theme context definition with TypeScript types
+- **ThemeProvider** (`/src/providers/ThemeProvider.tsx`) - Main theme logic with system detection and persistence
+- **useTheme Hook** (`/src/hooks/useTheme.ts`) - Custom hook for theme access in components
+- **ThemeToggle** (`/src/components/ThemeToggle.tsx`) - Animated toggle button with Sun/Moon icons
+
+**Key Features**:
+- ✅ Automatic detection of OS theme preference (light/dark)
+- ✅ Manual toggle via button in header
+- ✅ localStorage persistence across sessions
+- ✅ Real-time sync with system theme changes
+- ✅ FOUC (Flash of Unstyled Content) prevention via inline script
+- ✅ Smooth animations (300ms transitions with rotate/scale)
+- ✅ Fully accessible (ARIA labels, keyboard navigation)
+- ✅ Responsive (desktop and mobile)
+
+**Theme Modes**:
+```typescript
+type Theme = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
+
+// "system" follows OS preference
+// "light" and "dark" are explicit user choices
+```
+
+**Usage**:
+```typescript
+import { useTheme } from "@/hooks/useTheme";
+
+function MyComponent() {
+  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+
+  // Toggle between light/dark
+  <button onClick={toggleTheme}>Toggle Theme</button>
+
+  // Set specific theme
+  <button onClick={() => setTheme("dark")}>Dark</button>
+  <button onClick={() => setTheme("light")}>Light</button>
+  <button onClick={() => setTheme("system")}>Follow System</button>
+
+  // Check current theme
+  {resolvedTheme === "dark" ? <MoonIcon /> : <SunIcon />}
+}
+```
+
+**Integration**:
+- ThemeProvider wraps the entire app in `/src/providers/SessionProvider.tsx`
+- ThemeToggle is integrated in `HeaderNavigation` (desktop + mobile)
+- Anti-FOUC script in `/src/app/layout.tsx` applies theme before first paint
+- Uses Tailwind's class-based dark mode (`darkMode: 'class'`)
+- Leverages existing CSS variables in `globals.css` (no CSS changes needed)
+
+**Technical Details**:
+- Theme state persisted in `localStorage.theme`
+- Listens to `matchMedia('prefers-color-scheme: dark')` for system changes
+- Applies/removes `.dark` class on `<html>` element
+- Script inline in `<head>` runs before React hydration to prevent flash
+- `suppressHydrationWarning` on `<html>` to avoid hydration mismatch
+
+**Testing**:
+```bash
+# Start development server
+docker compose up app
+
+# In browser:
+# 1. Click Sun/Moon icon in header to toggle
+# 2. Check localStorage: localStorage.getItem('theme')
+# 3. Change OS theme to verify real-time sync
+# 4. Reload page to verify persistence
+```
+
+**Documentation**: Full planning and architecture in `/docs/theme-switch-mode-planning.md`
+
+---
+
 ### File Upload System
 
 **Hybrid Strategy**: Local filesystem (dev) + Cloudinary (production)
