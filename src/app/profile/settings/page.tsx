@@ -20,9 +20,11 @@ import {
   Phone,
   Mail,
   Edit3,
-  Loader2
+  Loader2,
+  Sun
 } from "lucide-react";
 import { ProfileSettingsSkeleton } from "@/components/profile/ProfileSkeleton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
  * Página de Configurações do Perfil - Design Minimalista
@@ -662,6 +664,21 @@ export default function ProfileSettings() {
               {errors.phone && (
                 <p className="text-xs text-red-500">{errors.phone.message}</p>
               )}
+            </div>
+
+            {/* Seção de Tema */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground flex items-center">
+                <Sun className="h-4 w-4 mr-2 text-foreground" />
+                Modo de Aparência
+              </Label>
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/50">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-foreground">Tema da Interface</span>
+                  <span className="text-xs text-muted-foreground">Alternar entre modo claro e escuro</span>
+                </div>
+                <ThemeToggle />
+              </div>
             </div>
 
             {/* Botões de Ação */}

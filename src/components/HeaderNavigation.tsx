@@ -11,7 +11,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ChatBell } from "@/components/ChatBell";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 import MenuNavigation from "./MenuNavigation";
 import styles from "@/app/scss/components/CourseCard.module.scss";
@@ -119,9 +118,6 @@ const Header = () => {
             )}
           </ClientOnlyAuth>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
-
           {/* Menu de Navegação */}
           <MenuNavigation />
         </div>
@@ -158,9 +154,6 @@ const Header = () => {
               </>
             )}
           </ClientOnlyAuth>
-
-          {/* Theme Toggle Mobile */}
-          <ThemeToggle />
 
           {/* Botão de Menu Mobile */}
           <button

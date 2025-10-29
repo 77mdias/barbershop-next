@@ -160,14 +160,14 @@ export function ChatWindow({
   return (
     <div className="w-full  flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100vh-4rem)]">
       {/* Header - Fixo no topo da conversa */}
-      <div className="w-full px-4 py-3 flex items-center gap-3 bg-foreground border-b shadow-md flex-shrink-0 z-10">
+      <div className="bg-card w-full px-4 py-3 flex items-center gap-3 border-b shadow-md flex-shrink-0 z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
           className="flex-shrink-0"
         >
-          <ArrowLeft className="h-5 w-5 text-background" />
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
 
         <UserAvatar
@@ -179,8 +179,8 @@ export function ChatWindow({
         />
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-background truncate">{friendName}</h2>
-          <p className="text-xs text-gray-400">Online</p>
+          <h2 className="font-semibold text-foreground truncate">{friendName}</h2>
+          <p className="text-xs text-muted-foreground">Online</p>
         </div>
       </div>
 

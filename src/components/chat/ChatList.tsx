@@ -102,14 +102,14 @@ export function ChatList({
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-white">
+    <div className="flex flex-col w-full h-full">
       {/* Header */}
       <div className="border-b px-4 py-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Mensagens</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Mensagens</h1>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Buscar conversas..."
@@ -120,7 +120,7 @@ export function ChatList({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -136,11 +136,11 @@ export function ChatList({
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <MessageCircle className="h-16 w-16 text-gray-300 mb-4" />
-            <h3 className="font-semibold text-gray-900 mb-2">
+            <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="font-semibold text-foreground mb-2">
               {searchQuery ? "Nenhuma conversa encontrada" : "Nenhuma conversa ainda"}
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               {searchQuery
                 ? "Tente buscar por outro nome"
                 : "Comece uma conversa com seus amigos"}

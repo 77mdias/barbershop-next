@@ -54,9 +54,9 @@ export function ConversationItem({
     <div
       onClick={handleClick}
       className={cn(
-        "flex items-center gap-3 p-4 cursor-pointer transition-all border-b border-gray-100",
-        "hover:bg-gray-50 active:bg-gray-100",
-        isActive && "bg-blue-50 hover:bg-blue-50 border-l-4 border-l-blue-600"
+        "flex items-center gap-3 p-4 cursor-pointer transition-all border-b border-border",
+        "hover:bg-card active:bg-card",
+        isActive && "bg-blue-50 hover:bg-card border-l-4 border-l-blue-600"
       )}
     >
       {/* Avatar */}
@@ -71,7 +71,7 @@ export function ConversationItem({
 
         {/* Unread badge on avatar */}
         {unreadCount > 0 && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <div className="absolute -top-1 -right-1 bg-red-500 text-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </div>
         )}
@@ -84,7 +84,7 @@ export function ConversationItem({
           <h3
             className={cn(
               "font-semibold truncate",
-              unreadCount > 0 ? "text-gray-900" : "text-gray-700"
+              unreadCount > 0 ? "text-foreground" : "text-foreground"
             )}
           >
             {friendName}
@@ -92,7 +92,7 @@ export function ConversationItem({
 
           {/* Timestamp */}
           {timeAgo && (
-            <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
               {timeAgo}
             </span>
           )}
@@ -104,8 +104,8 @@ export function ConversationItem({
             className={cn(
               "text-sm truncate",
               unreadCount > 0
-                ? "text-gray-900 font-medium"
-                : "text-gray-500"
+                ? "text-foreground font-medium"
+                : "text-muted-foreground"
             )}
           >
             {lastMessage}
