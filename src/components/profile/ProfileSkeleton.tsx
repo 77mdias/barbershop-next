@@ -43,7 +43,7 @@ export function ProfileMenuSkeleton() {
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+            className="bg-card rounded-xl p-4 shadow-sm border border-border"
           >
             <div className="flex items-center gap-3">
               <Skeleton className="h-4 w-4 rounded" />
@@ -55,7 +55,7 @@ export function ProfileMenuSkeleton() {
       </div>
 
       {/* Informações da conta */}
-      <div className="mt-6 p-4 rounded-lg bg-white border border-gray-100">
+      <div className="mt-6 p-4 rounded-lg bg-card border border-border">
         <Skeleton className="h-5 w-44 mb-3" />
         <div className="space-y-2">
           <div className="flex justify-between">
@@ -77,9 +77,9 @@ export function ProfileMenuSkeleton() {
  */
 export function ProfileSettingsSkeleton() {
   return (
-    <div className="min-h-screen mt-20 mb-8 min-w-full flex flex-col bg-gray-50">
+    <div className="min-h-screen mt-20 mb-8 min-w-full flex flex-col bg-background">
       {/* Header */}
-      <div className="border-b w-full bg-white">
+      <div className="border-b w-full bg-card">
         <div className="flex items-center justify-between px-4 py-4">
           <Skeleton className="h-10 w-10 rounded" />
           <Skeleton className="h-6 w-32" />
@@ -89,7 +89,7 @@ export function ProfileSettingsSkeleton() {
 
       <div className="py-6 px-4 max-w-2xl">
         {/* Avatar Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Skeleton className="w-24 h-24 rounded-full" />
@@ -103,7 +103,7 @@ export function ProfileSettingsSkeleton() {
         </div>
 
         {/* Form Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl shadow-sm border border-border">
           <div className="p-6 space-y-6">
             {/* Form fields */}
             {[1, 2, 3, 4].map((i) => (
@@ -165,7 +165,7 @@ export function ChangePasswordSkeleton() {
       {/* Conteúdo Principal */}
       <div className="flex-1 px-6 py-6">
         <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200/80">
+          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
             <div className="space-y-6">
               {/* 3 campos de senha */}
               {[1, 2, 3].map((i) => (

@@ -155,12 +155,12 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 
   &:focus-within {
-    border-color: #00d4aa;
-    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.15);
+    border-color: hsl(var(--primary));
+    box-shadow: 0 4px 20px hsl(var(--primary) / 0.15);
   }
 
   &__icon {
-    color: #00d4aa;
+    color: hsl(var(--primary));
   }
 }
 
@@ -169,18 +169,18 @@
   display: flex;
   align-items: center;
   backdrop-filter: blur(20px);
-  background: black;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
 
   .bottomNav__item {
     border-radius: 100%;
     transition: all 0.3s ease;
     color: hsl(1, 69%, 67%);
-    
+
     &:hover {
       transform: scale(1.07);
-      color: #00d4aa;
+      color: hsl(var(--primary));
     }
 
     &--active {
@@ -222,7 +222,7 @@
 
   &__image,
   &__fallback {
-    border: 2px solid #ffffff;
+    border: 2px solid hsl(var(--card));
   }
 }
 
@@ -284,17 +284,7 @@
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .salonCard {
-    
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-}
-
-.bottomNav {
-  background: rgba(26, 26, 26, 0.95);
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
+/* Dark mode is handled via Tailwind's class-based approach and CSS variables */
 
 /* Animation Classes */
 .fadeIn {

@@ -87,7 +87,7 @@ export function SalonCard({
       stars.push(
         <svg
           key={`empty-${i}`}
-          className="w-3 h-3 sm:w-4 sm:h-4 text-gray-300"
+          className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -110,7 +110,7 @@ export function SalonCard({
       onClick={onClick}
       className={cn(
         "overflow-hidden cursor-pointer transition-all duration-200",
-        "border border-gray-100",
+        "border border-border",
         styles.salonCard,
         className
       )}
@@ -149,13 +149,13 @@ export function SalonCard({
           )}
         >
           <div className="flex items-center">{renderStars(rating)}</div>
-          <span className="text-xs sm:text-sm text-gray-600">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             {rating} ({reviewCount})
           </span>
         </div>
 
         {/* Localização e distância */}
-        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
           <span className="truncate">{location}</span>
           <span className="ml-2 font-medium">{distance}</span>
         </div>

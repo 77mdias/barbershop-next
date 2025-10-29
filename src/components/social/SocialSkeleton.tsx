@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  */
 export function SocialHeaderSkeleton() {
   return (
-    <div className="bg-white border-b sticky top-16 z-10">
+    <div className="bg-card border-b sticky top-16 z-10">
       <div className="flex items-center justify-between px-4 py-4">
         <Skeleton className="h-10 w-10 rounded" />
         <Skeleton className="h-6 w-36" />
@@ -31,7 +31,7 @@ export function SocialHeaderSkeleton() {
  */
 export function SocialStatsCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
       <div className="grid grid-cols-3 gap-4 text-center">
         {[1, 2, 3].map((i) => (
           <div key={i} className="space-y-2">
@@ -67,7 +67,7 @@ export function InviteCardSkeleton() {
  */
 export function FriendCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
@@ -109,7 +109,7 @@ export function FriendsListSkeleton({ count = 5 }: { count?: number }) {
  */
 export function SuggestionCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
       <div className="flex items-center gap-3 mb-3">
         <Skeleton className="w-12 h-12 rounded-full" />
         <div className="flex-1 min-w-0 space-y-2">
@@ -131,7 +131,7 @@ export function SuggestionCardSkeleton() {
 export function SuggestionsListSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
         <Skeleton className="h-4 w-56" />
       </div>
       <div className="space-y-2">
@@ -148,7 +148,7 @@ export function SuggestionsListSkeleton({ count = 5 }: { count?: number }) {
  */
 export function FriendRequestSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
       <div className="flex items-center gap-3 mb-3">
         <Skeleton className="w-12 h-12 rounded-full" />
         <div className="flex-1 min-w-0 space-y-2">
@@ -182,7 +182,7 @@ export function ReceivedRequestsListSkeleton({ count = 3 }: { count?: number }) 
  */
 export function SentRequestSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Skeleton className="w-12 h-12 rounded-full" />
@@ -241,7 +241,7 @@ export function SocialPageSuggestionsSkeleton() {
  */
 export function SocialPageSkeleton() {
   return (
-    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col bg-gray-50">
+    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col bg-background">
       <SocialHeaderSkeleton />
       <SocialPageFriendsSkeleton />
     </div>
@@ -253,9 +253,9 @@ export function SocialPageSkeleton() {
  */
 export function FriendRequestsPageSkeleton() {
   return (
-    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col bg-gray-50">
+    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col bg-background">
       {/* Header */}
-      <div className="bg-white border-b sticky top-16 z-10">
+      <div className="bg-card border-b sticky top-16 z-10">
         <div className="flex items-center justify-between px-4 py-4">
           <Skeleton className="h-10 w-10 rounded" />
           <Skeleton className="h-6 w-56" />

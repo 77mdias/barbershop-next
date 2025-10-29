@@ -42,7 +42,7 @@ export function ServiceCard({
 
         // Estado inativo
         !isActive && [
-          "hover:bg-gray-50 hover:border-gray-200",
+          "hover:bg-muted hover:border-border",
           "shadow-sm hover:shadow-md",
         ],
 

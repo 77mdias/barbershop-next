@@ -138,10 +138,10 @@ export default function Home() {
             {!isAuthenticated && (
               <section className="bg-gradient-to-r mx-4 from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
                 <div className="text-center">
-                  <h2 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-lg lg:text-xl xl:text-2xl font-bold text-foreground mb-2">
                     🚀 Faça seu primeiro agendamento!
                   </h2>
-                  <p className="text-sm lg:text-lg xl:text-xl text-gray-600 mb-4">
+                  <p className="text-sm lg:text-lg xl:text-xl text-muted-foreground mb-4">
                     Crie sua conta e agende seus serviços com os melhores barbeiros da cidade
                   </p>
                   <div className="flex gap-3 justify-center">
