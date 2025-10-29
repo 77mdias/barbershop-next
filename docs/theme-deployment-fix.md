@@ -1,5 +1,15 @@
 # Theme System Deployment Fix
 
+## Histórico de Correções
+
+### Tentativa 1: Script com Next/Script (Falhou)
+Usou `Script` component com `strategy="beforeInteractive"` - incompatível com App Router
+
+### Tentativa 2: Abordagem Simplificada (✅ Sucesso)
+Removeu script externo completamente e simplificou o ThemeProvider
+
+---
+
 ## Problema Identificado
 
 O deploy falhou devido a um erro no `src/app/layout.tsx`:
@@ -199,3 +209,130 @@ docker compose build app
 **Data da Correção**: 2025-10-29
 **Autor**: Claude Code (Anthropic)
 **Status**: ✅ Corrigido e Testado
+
+---
+
+## Solução Final (Versão Simplificada)
+
+### ✅ Abordagem Adotada
+
+Após testes, optamos por **remover o script externo completamente** e usar apenas React hooks no ThemeProvider.
+
+### Código Final
+
+#### 1. Layout.tsx (Limpo)
+```tsx
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+#### 2. ThemeProvider.tsx (Simplificado)
+```tsx
+// Funções helper
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "system";
+  try {
+    const stored = localStorage.getItem("theme") as Theme | null;
+    if (stored === "light" || stored === "dark" || stored === "system") {
+      return stored;
+    }
+  } catch (e) {}
+  return "system";
+}
+
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  } catch (e) {
+    return "light";
+  }
+}
+
+// Provider simplificado
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme);
+
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme;
+
+  // Aplicação do tema ao DOM
+  useEffect(() => {
+    const root = document.documentElement;
+    if (resolvedTheme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [resolvedTheme]);
+
+  // Persistência
+  useEffect(() => {
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (e) {}
+  }, [theme]);
+
+  // Listener de sistema
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? "dark" : "light");
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return (
+    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+```
+
+### Vantagens da Solução Final
+
+✅ **Simplicidade**: Código mais limpo e fácil de manter
+✅ **Compatibilidade**: Totalmente compatível com Next.js 15 App Router
+✅ **Build Success**: Sem erros de build ou deploy
+✅ **Funcionalidade Completa**: Detecção de sistema, persistência, toggle
+✅ **Performance**: Menos código, melhor performance
+
+### Trade-offs
+
+⚠️ **FOUC Mínimo**: Pode haver um pequeno flash na primeira carga
+- Aceitável para a maioria das aplicações
+- Alternativa seria usar CSS-only dark mode (sem JS)
+- Pode ser mitigado com loading states
+
+### Resultado Final
+
+**Status**: ✅ **Deploy Bem-Sucedido**
+**Commit**: `a3e07e3` - refactor: simplify theme system implementation
+**Build**: Passa sem erros
+**Funcionalidade**: 100% operacional
+
+---
+
+## Lições Aprendidas
+
+1. **Next.js 15 App Router** tem restrições sobre scripts no `<head>`
+2. **Simplicidade é melhor** - abordagem React-first é mais confiável
+3. **Script beforeInteractive** não funciona bem no App Router
+4. **FOUC aceitável** em troca de compatibilidade e simplicidade
+5. **Estado inicial** pode ser definido em funções helper
+
+---
+
+**Última Atualização**: 2025-10-29
+**Status**: ✅ Resolvido e Deployado
