@@ -21,10 +21,12 @@ import {
   Mail,
   Edit3,
   Loader2,
-  Sun
+  Sun,
+  Moon
 } from "lucide-react";
 import { ProfileSettingsSkeleton } from "@/components/profile/ProfileSkeleton";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
+import type { Theme } from "@/contexts/ThemeContext";
 
 /**
  * Página de Configurações do Perfil - Design Minimalista
@@ -38,11 +40,17 @@ export default function ProfileSettings() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { update } = useSession();
   const router = useRouter();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const [currentImage, setCurrentImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [showDebugModal, setShowDebugModal] = React.useState(false);
+
+  // Novos estados para mudanças pendentes
+  const [pendingImageFile, setPendingImageFile] = React.useState<File | null>(null);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [pendingTheme, setPendingTheme] = React.useState<Theme | null>(null);
 
   // Detectar se é mobile para usar estratégias específicas
   const [isMobile, setIsMobile] = React.useState(false);
@@ -113,32 +121,79 @@ export default function ProfileSettings() {
   }, [isAuthenticated, isLoading, router]);
 
   const onSubmit = async (data: ProfileSettingsInput) => {
-    console.log("Form submitted with data:", data); // Debug
-    console.log("User ID:", user?.id); // Debug
-    
+    console.log("Form submitted with data:", data);
+    console.log("User ID:", user?.id);
+
     if (!user?.id) {
       toast.error("Usuário não encontrado");
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
+      // PASSO 1: Aplicar tema pendente (se houver)
+      if (pendingTheme) {
+        console.log("Aplicando tema pendente:", pendingTheme);
+        setTheme(pendingTheme);
+        setPendingTheme(null); // Limpar tema pendente
+      }
+
+      // PASSO 2: Fazer upload da imagem pendente (se houver)
+      if (pendingImageFile) {
+        console.log("Fazendo upload da imagem pendente...");
+        setIsUploadingImage(true);
+
+        try {
+          const formData = new FormData();
+          formData.append("file", pendingImageFile);
+
+          const response = await fetch("/api/upload/profile", {
+            method: "POST",
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || "Erro ao fazer upload da imagem");
+          }
+
+          console.log("Upload da imagem concluído com sucesso");
+          // Limpar estados de imagem pendente
+          setPendingImageFile(null);
+          setImagePreview(null);
+
+        } catch (uploadError) {
+          console.error("Erro no upload da imagem:", uploadError);
+          toast.error(uploadError instanceof Error ? uploadError.message : "Erro ao fazer upload da imagem");
+          setIsSubmitting(false);
+          setIsUploadingImage(false);
+          return; // Abortar se upload falhar
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
+      // PASSO 3: Atualizar campos do perfil
       const result = await updateProfile({
         id: user.id,
         ...data,
       });
 
-      console.log("Update result:", result); // Debug
+      console.log("Update result:", result);
 
       if (result.success) {
         toast.success("Perfil atualizado com sucesso!");
-        
-        // Força atualização da sessão através de re-autenticação silenciosa
+
+        // Força atualização da sessão
         try {
-          await update(); // Tenta atualizar primeiro
-          
-          // Se isso não funcionar, força reload completo
+          await update();
+
+          // Reload completo para garantir que todas as mudanças sejam aplicadas
           setTimeout(() => {
             window.location.reload();
           }, 500);
@@ -146,7 +201,7 @@ export default function ProfileSettings() {
           console.error("Erro ao atualizar sessão:", error);
           window.location.reload();
         }
-        
+
       } else {
         toast.error(result.error || "Erro ao atualizar perfil");
       }
@@ -314,37 +369,17 @@ export default function ProfileSettings() {
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const deviceInfo = {
-      userAgent: navigator.userAgent,
-      isMobile: /Mobi|Android/i.test(navigator.userAgent),
-      filesLength: event.target.files?.length,
-      timestamp: new Date().toISOString()
-    };
-
-    console.log("📱 Upload triggered - Device info:", deviceInfo);
-    saveUploadLog("upload-triggered", deviceInfo);
-
     const file = event.target.files?.[0];
     if (!file) {
       console.log("❌ No file selected");
-      saveUploadLog("no-file", { event: "no file selected" });
       return;
     }
 
-    const fileInfo = {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified
-    };
-
-    console.log("📄 File details:", fileInfo);
-    saveUploadLog("file-selected", fileInfo);
+    console.log("📄 File selected:", file.name);
 
     // Validar tipo de arquivo
     if (!file.type.startsWith("image/")) {
       console.log("❌ Invalid file type:", file.type);
-      saveUploadLog("invalid-type", { type: file.type });
       toast.error("Apenas imagens são permitidas");
       return;
     }
@@ -352,110 +387,60 @@ export default function ProfileSettings() {
     // Validar tamanho (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
       console.log("❌ File too large:", file.size);
-      saveUploadLog("file-too-large", { size: file.size });
       toast.error("Imagem muito grande. Máximo 5MB");
       return;
     }
 
-    setIsUploadingImage(true);
-    saveUploadLog("upload-started", { fileName: file.name });
+    // Armazenar arquivo para upload posterior
+    setPendingImageFile(file);
 
-    try {
-      console.log("🚀 Starting upload process...");
-      
-      const formData = new FormData();
-      formData.append("file", file);
+    // Criar preview da imagem
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+      console.log("✅ Image preview created");
+    };
+    reader.readAsDataURL(file);
 
-      console.log("📤 FormData created, sending request...");
-      saveUploadLog("formdata-created", { fileSize: file.size });
+    toast.info("Imagem selecionada. Clique em 'Salvar Alterações' para aplicar.");
 
-      const response = await fetch("/api/upload/profile", {
-        method: "POST",
-        body: formData,
-        // Adicionar headers específicos para mobile
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      const responseInfo = {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      };
-
-      console.log("📥 Response received:", responseInfo);
-      saveUploadLog("response-received", responseInfo);
-
-      let result;
-      try {
-        const responseText = await response.text();
-        console.log("📄 Raw response text:", responseText);
-        saveUploadLog("raw-response", { text: responseText });
-        
-        result = JSON.parse(responseText);
-        console.log("📋 Upload result:", result);
-        saveUploadLog("response-parsed", result);
-      } catch (parseError) {
-        console.error("❌ JSON parse error:", parseError);
-        saveUploadLog("parse-error", { 
-          error: parseError.message,
-          responseStatus: response.status 
-        });
-        toast.error("Erro ao processar resposta do servidor");
-        return;
-      }
-
-      if (response.ok && result.success) {
-        console.log("✅ Upload successful, updating UI...");
-        saveUploadLog("upload-success", { url: result.file.url });
-        
-        // Atualizar a imagem localmente primeiro para feedback imediato
-        setCurrentImage(result.file.url);
-        
-        toast.success("Foto de perfil atualizada!");
-        
-        // Atualizar sessão de forma mais robusta
-        try {
-          // 1. Trigger session update
-          const updateResult = await update();
-          console.log("Session update result:", updateResult);
-          
-          // 2. Give time for session to propagate
-          setTimeout(() => {
-            // 3. Force page refresh to get updated user data
-            window.location.reload();
-          }, 1000);
-          
-        } catch (error) {
-          console.error("Erro ao atualizar sessão:", error);
-          saveUploadLog("session-update-error", { error: error.message });
-          
-          // Fallback: force reload anyway
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
-        }
-        
-      } else {
-        console.log("❌ Upload failed:", result.error);
-        saveUploadLog("upload-failed", { error: result.error });
-        toast.error(result.error || "Erro ao fazer upload da imagem");
-      }
-    } catch (error) {
-      console.error("💥 Upload error:", error);
-      saveUploadLog("upload-exception", { error: error.message });
-      toast.error("Erro ao fazer upload da imagem");
-    } finally {
-      setIsUploadingImage(false);
-      saveUploadLog("upload-finished", { timestamp: new Date().toISOString() });
-      
-      // Limpar o input para permitir re-upload do mesmo arquivo
-      if (event.target) {
-        event.target.value = '';
-      }
+    // Limpar o input para permitir re-upload do mesmo arquivo
+    if (event.target) {
+      event.target.value = '';
     }
+  };
+
+  // Função para alternar tema (não aplica imediatamente)
+  const handleThemeToggle = () => {
+    // Determinar próximo tema
+    const nextTheme: Theme = theme === "system"
+      ? (resolvedTheme === "dark" ? "light" : "dark")
+      : (theme === "dark" ? "light" : "dark");
+
+    setPendingTheme(nextTheme);
+    const themeName = nextTheme === "dark" ? "escuro" : "claro";
+    toast.info(`Tema ${themeName} será aplicado ao salvar.`);
+  };
+
+  // Função para cancelar e resetar todas as mudanças pendentes
+  const handleCancel = () => {
+    // Resetar estados de imagem pendente
+    setPendingImageFile(null);
+    setImagePreview(null);
+
+    // Resetar tema pendente
+    setPendingTheme(null);
+
+    // Resetar formulário para valores originais
+    if (user) {
+      setValue("name", user.name || "");
+      setValue("nickname", user.nickname || "");
+      setValue("phone", user.phone || "");
+      setValue("email", user.email || "");
+    }
+
+    // Voltar para página anterior
+    router.back();
   };
 
   if (isLoading) {
@@ -490,15 +475,19 @@ export default function ProfileSettings() {
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                {currentImage || user.image ? (
-                  <img 
-                    src={`${currentImage || user.image}?t=${Date.now()}`}
-                    alt={user.name} 
+                {imagePreview || currentImage || user.image ? (
+                  <img
+                    src={imagePreview || `${currentImage || user.image}?t=${Date.now()}`}
+                    alt={user.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       // Fallback se a imagem não carregar
-                      console.log("Erro ao carregar imagem:", currentImage || user.image);
-                      setCurrentImage(null);
+                      console.log("Erro ao carregar imagem:", imagePreview || currentImage || user.image);
+                      if (imagePreview) {
+                        setImagePreview(null);
+                      } else {
+                        setCurrentImage(null);
+                      }
                     }}
                   />
                 ) : (
@@ -675,9 +664,42 @@ export default function ProfileSettings() {
               <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/50">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-foreground">Tema da Interface</span>
-                  <span className="text-xs text-muted-foreground">Alternar entre modo claro e escuro</span>
+                  <span className="text-xs text-muted-foreground">
+                    {pendingTheme
+                      ? `Mudando para ${pendingTheme === "dark" ? "escuro" : "claro"} ao salvar`
+                      : "Alternar entre modo claro e escuro"
+                    }
+                  </span>
                 </div>
-                <ThemeToggle />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleThemeToggle}
+                  aria-label={
+                    (pendingTheme || resolvedTheme) === "dark"
+                      ? "Mudar para tema claro"
+                      : "Mudar para tema escuro"
+                  }
+                  className="relative h-9 w-9"
+                >
+                  {/* Ícone Sol - Visível em light mode */}
+                  <Sun
+                    className={`h-5 w-5 transition-all duration-300 ${
+                      (pendingTheme || resolvedTheme) === "dark"
+                        ? "rotate-90 scale-0 opacity-0"
+                        : "rotate-0 scale-100 opacity-100"
+                    }`}
+                  />
+                  {/* Ícone Lua - Visível em dark mode */}
+                  <Moon
+                    className={`absolute h-5 w-5 transition-all duration-300 ${
+                      (pendingTheme || resolvedTheme) === "dark"
+                        ? "rotate-0 scale-100 opacity-100"
+                        : "-rotate-90 scale-0 opacity-0"
+                    }`}
+                  />
+                </Button>
               </div>
             </div>
 
@@ -686,7 +708,7 @@ export default function ProfileSettings() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.back()}
+                onClick={handleCancel}
                 disabled={isSubmitting}
                 className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50"
               >
