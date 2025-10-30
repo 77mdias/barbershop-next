@@ -2,22 +2,29 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ReviewForm } from "@/components/ReviewForm";
 
 // Mock server actions
-const mockCreateReview = jest.fn();
-const mockUpdateReview = jest.fn();
-
 jest.mock("@/server/reviewActions", () => ({
-  createReview: mockCreateReview,
-  updateReview: mockUpdateReview,
+  createReview: jest.fn(),
+  updateReview: jest.fn(),
 }));
 
-// Mock toast
-const mockToast = {
-  success: jest.fn(),
-  error: jest.fn(),
-};
-jest.mock("sonner", () => ({
-  toast: mockToast,
+// Get mocked functions
+import * as reviewActions from "@/server/reviewActions";
+const mockCreateReview = reviewActions.createReview as jest.MockedFunction<typeof reviewActions.createReview>;
+const mockUpdateReview = reviewActions.updateReview as jest.MockedFunction<typeof reviewActions.updateReview>;
+
+// Mock toast utilities
+jest.mock("@/lib/toast-utils", () => ({
+  showToast: {
+    success: jest.fn(),
+    error: jest.fn(),
+    warning: jest.fn(),
+    info: jest.fn(),
+  },
 }));
+
+// Get mocked toast
+import * as toastUtils from "@/lib/toast-utils";
+const mockShowToast = toastUtils.showToast as jest.Mocked<typeof toastUtils.showToast>;
 
 describe("ReviewForm", () => {
   const defaultProps = {
@@ -35,8 +42,8 @@ describe("ReviewForm", () => {
   test("renders review form with rating stars", () => {
     render(<ReviewForm {...defaultProps} />);
 
-    expect(screen.getByText("Avaliar Serviço")).toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(6); // 5 stars + submit button
+    expect(screen.getByText("Nova Avaliação")).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(7); // 5 stars + upload button + submit button
   });
 
   test("allows user to select rating", async () => {
@@ -105,7 +112,8 @@ describe("ReviewForm", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockToast.success).toHaveBeenCalledWith(
+      expect(mockShowToast.success).toHaveBeenCalledWith(
+        "Avaliação salva!",
         "Review created successfully"
       );
     });
@@ -129,7 +137,10 @@ describe("ReviewForm", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockToast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(mockShowToast.error).toHaveBeenCalledWith(
+        "Erro ao salvar",
+        "Something went wrong"
+      );
     });
   });
 

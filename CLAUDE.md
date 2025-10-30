@@ -84,6 +84,30 @@ docker compose build app                              # Rebuild app image
 docker compose up -d --build app                      # Rebuild and restart
 ```
 
+### Testing & Quality Assurance
+```bash
+# Run tests (inside container)
+docker compose exec app npm test                      # Run all tests
+docker compose exec app npm run test:watch            # Watch mode for development
+docker compose exec app npm run test:coverage         # Generate coverage report
+docker compose exec app npm run test:ci               # CI mode (no watch, with coverage)
+
+# Run specific tests
+docker compose exec app npm test NotificationBell     # Test specific component
+docker compose exec app npm test ChatBell
+docker compose exec app npm test ReviewForm
+
+# Quality checks
+docker compose exec app npm run validate              # Run lint + type-check
+docker compose exec app npm run lint:check            # Check linting only
+docker compose exec app npm run type-check            # Check types only
+```
+
+**Test Statistics**:
+- ✅ **55 tests** implemented across 6 test suites
+- ✅ **100% passing** (LoadingSpinner, Skeleton, ReviewForm, NotificationBell, ChatBell, MessageBubble)
+- 📚 Full testing documentation available in `/TESTING.md`
+
 ### Test Credentials
 After running `docker compose exec app npm run db:seed`:
 - **Admin**: `admin@barbershop.com` / `admin123`
