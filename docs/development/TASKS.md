@@ -56,6 +56,17 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ### Issues Críticos Concluídos - Recente ✅ **100% CONCLUÍDO**
 
+- [x] **#014** - Testes unitários básicos 🧪 ✅ **CONCLUÍDA**
+  - **Descrição**: Setup básico de testing com Jest + Testing Library
+  - **Componentes**: ReviewForm, ReviewsList, principais UI components
+  - **Estimativa**: 2 dias (30% concluído)
+  - **Assignee**: GitHub Copilot
+  - **Status**: Estrutura básica de testes configurada
+  - **Arquivos a criar**:
+    - `jest.config.js` - Configuração Jest ✅
+    - `__tests__/` - Diretório de testes ✅
+    - Tests para componentes críticos
+
 - [x] **#016** - Sistema de atualização de perfil com upload de imagem ✅ **CONCLUÍDO**
   - **Descrição**: Redesign completo da página de configurações do perfil com funcionalidade moderna de upload de fotos
   - **Componentes**: ProfileSettings, UploadEndpoint, SessionManagement, UserAvatar
@@ -88,18 +99,6 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ### Issues Críticos da Semana Atual
 
-- [ ] **#014** - Implementação de testes automatizados básicos
-
-  - **Descrição**: Configurar Jest e Testing Library para componentes críticos
-  - **Componentes**: ReviewForm, ReviewsList, dashboards, server actions
-  - **Estimativa**: 3 dias
-  - **Assignee**: GitHub Copilot
-  - **Status**: Planejado
-  - **Arquivos a criar**:
-    - `/src/__tests__/components/ReviewForm.test.tsx`
-    - `/src/__tests__/components/ReviewsList.test.tsx`
-    - `/src/__tests__/server/dashboardActions.test.ts`
-    - `jest.config.js` updates
 
 - [ ] **#015** - Sistema de busca básico para reviews e usuários
 
@@ -257,16 +256,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/components/ReviewSystemManager.tsx` - Badge demo removido
     - `/src/app/dashboard/barber/page.tsx` - Dados reais implementados
 
-- [ ] **#014** - Testes unitários básicos 🧪 **EM PROGRESSO**
-  - **Descrição**: Setup básico de testing com Jest + Testing Library
-  - **Componentes**: ReviewForm, ReviewsList, principais UI components
-  - **Estimativa**: 2 dias (30% concluído)
-  - **Assignee**: GitHub Copilot
-  - **Status**: Estrutura básica de testes configurada
-  - **Arquivos a criar**:
-    - `jest.config.js` - Configuração Jest
-    - `__tests__/` - Diretório de testes
-    - Tests para componentes críticos
+
 
 ### Features Secundárias
 
