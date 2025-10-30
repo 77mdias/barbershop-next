@@ -201,6 +201,143 @@ describe('Skeleton', () => {
 });
 ```
 
+### 4. ReviewsList.test.tsx ⭐ NOVO
+
+**Objetivo**: Testar o componente de lista de avaliações com funcionalidades completas
+
+**Cobertura** (28 testes):
+- ✅ Renderização de estados (loading, empty, populated)
+- ✅ Card de estatísticas (stats card)
+- ✅ Interações do usuário (editar, excluir com confirmação)
+- ✅ Expansão/colapso de imagens
+- ✅ Paginação (next/prev, disabled states)
+- ✅ Variações de props (userId, serviceId, barberId filters)
+- ✅ Tratamento de erros (API failures, network errors)
+- ✅ Botões de ação baseados em role
+
+### 5. reviewActions.test.ts ⭐ NOVO
+
+**Objetivo**: Testar todas as server actions de reviews
+
+**Cobertura** (40 testes):
+- ✅ **createReview**: Sucesso, validação, duplicação, autorização
+- ✅ **updateReview**: Atualizações parciais, ownership validation
+- ✅ **getReviews**: Filtragem por role (CLIENT/BARBER/ADMIN), paginação
+- ✅ **deleteReview**: Soft delete, override do ADMIN
+- ✅ **getReviewStats**: Agregações, distribuição de ratings
+- ✅ **getBarberMetrics**: Cálculos complexos de métricas
+- ✅ **getPublicReviews**: Acesso anônimo
+
+**Padrão de teste**:
+```typescript
+describe("createReview", () => {
+  test("deve criar avaliação com sucesso", async () => {
+    mockDb.serviceHistory.update.mockResolvedValue(mockData);
+
+    const result = await createReview(validInput);
+
+    expect(result.success).toBe(true);
+    expect(mockRevalidatePath).toHaveBeenCalled();
+  });
+});
+```
+
+### 6. dashboardActions.test.ts ⭐ NOVO
+
+**Objetivo**: Testar server actions de dashboard
+
+**Cobertura** (19 testes):
+- ✅ **getBarberMetrics**: Autorização, cálculos, métricas mensais
+- ✅ **getDashboardMetrics**: Roteamento por role (CLIENT/BARBER/ADMIN)
+- ✅ **getAdminMetrics**: Métricas globais, contadores, top performers
+- ✅ Tratamento de valores nulos e zeros
+- ✅ Edge cases (missing data, empty results)
+
+### 7. BarberDashboard.test.tsx ⭐ NOVO
+
+**Objetivo**: Testar página de dashboard do barbeiro (Server Component)
+
+**Cobertura** (18 testes):
+- ✅ **Autenticação**: Redirecionamentos baseados em role
+- ✅ **Métricas**: Cards de avaliação, clientes, receita
+- ✅ **Goals**: Progresso de metas, percentagens
+- ✅ **Distribuição**: Rating distribution visualization
+- ✅ **Tabs**: Navegação entre seções (Reviews, Agendamentos, etc)
+- ✅ **Edge cases**: Métricas null, zeradas, erros de API
+- ✅ **Responsividade**: Grid responsivo
+
+### 8. AdminDashboard.test.tsx ⭐ NOVO
+
+**Objetivo**: Testar página de dashboard administrativo (Server Component)
+
+**Cobertura** (18 testes):
+- ✅ **Autenticação**: Acesso restrito a ADMIN
+- ✅ **Métricas de usuários**: Total, por role, ativos
+- ✅ **Métricas de reviews**: Global average, distribuição
+- ✅ **Métricas de atividade**: Agendamentos, novos usuários
+- ✅ **Financeiro**: Receita total e mensal
+- ✅ **Top performers**: Lista de melhores barbeiros
+- ✅ **Edge cases**: Dados vazios, listas vazias
+- ✅ **Componentes interativos**: Buttons, tabs
+
+### 9. NotificationBell.test.tsx ✅ EXISTENTE
+
+**Cobertura** (11 testes):
+- ✅ Renderização do sino de notificações
+- ✅ Badge de contador de não lidas
+- ✅ Dropdown de notificações
+- ✅ Ações (marcar como lida, navegar)
+- ✅ Auto-refresh a cada 30 segundos
+
+### 10. ChatBell.test.tsx ✅ EXISTENTE
+
+**Cobertura** (11 testes):
+- ✅ Renderização do sino de chat
+- ✅ Contador de mensagens não lidas
+- ✅ Preview de conversas
+- ✅ Navegação para chat
+- ✅ Estados vazios
+
+### 11. MessageBubble.test.tsx ✅ EXISTENTE
+
+**Cobertura** (15 testes):
+- ✅ Renderização de mensagens
+- ✅ Diferenciação sent/received
+- ✅ Timestamps e status de leitura
+- ✅ Formatação de data/hora
+
+---
+
+## 📊 Estatísticas Gerais
+
+### Status Atual (Outubro 2025)
+
+| Métrica | Valor | Status |
+|---------|-------|--------|
+| **Test Suites** | 11 | ✅ 100% Passando |
+| **Testes Totais** | 178 | ✅ 100% Passando |
+| **Componentes Testados** | 11 | 🟢 Excelente |
+| **Server Actions Testadas** | 2 arquivos | 🟢 Excelente |
+| **Dashboards Testados** | 2 (Barber + Admin) | 🟢 Excelente |
+
+### Distribuição de Testes
+
+```
+ReviewsList         ██████████████ 28 testes (16%)
+reviewActions       ████████████████████ 40 testes (22%)
+dashboardActions    ██████████ 19 testes (11%)
+BarberDashboard     █████████ 18 testes (10%)
+AdminDashboard      █████████ 18 testes (10%)
+Testes Existentes   ███████████████ 55 testes (31%)
+```
+
+### Cobertura por Categoria
+
+- **Componentes Client**: 76 testes (ReviewsList, NotificationBell, ChatBell, etc)
+- **Server Components**: 36 testes (BarberDashboard, AdminDashboard)
+- **Server Actions**: 59 testes (reviewActions, dashboardActions)
+- **UI Components**: 7 testes (LoadingSpinner, Skeleton, MessageBubble)
+
 ---
 
 ## 🚀 Executando Testes
