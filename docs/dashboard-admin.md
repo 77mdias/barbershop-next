@@ -6,17 +6,52 @@ Este documento detalha a estrutura, permissões e funcionalidades do painel admi
 
 ## 📋 Visão Geral
 
-**Status**: ✅ **100% IMPLEMENTADO** (22 Oct 2025)  
-**Rota**: `/dashboard/admin` (rota dedicada)  
-**Acesso**: Apenas usuários com `role: ADMIN`
+**Status**: ✅ **PARCIALMENTE IMPLEMENTADO** (Atualizado: 1 Nov 2025)
+**Rota**: `/dashboard/admin` (rota dedicada)
+**Acesso**: Apenas usuários com `role: ADMIN` 🔒 **SEGURO**
 
-O dashboard do admin é um painel de controle centralizado completo que permite gerenciar toda a aplicação, incluindo usuários, serviços, reviews e métricas globais com dados reais.
+O dashboard do admin é um painel de controle centralizado que permite gerenciar toda a aplicação, incluindo usuários, serviços, reviews e métricas globais com dados reais.
+
+### 🔒 Correções de Segurança Recentes (1 Nov 2025)
+
+**CRÍTICO**: Vulnerabilidades de segurança foram corrigidas em todas as funções admin:
+- ✅ Todas as 6 funções em `adminActions.ts` agora validam autenticação + role ADMIN
+- ✅ Middleware corrigido para proteger `/dashboard/admin/*` corretamente
+- ✅ Prevenção de escalação de privilégios implementada
+- ✅ Proteção contra acesso não autorizado a dados sensíveis
+
+**Antes**: Qualquer pessoa (incluindo não autenticados) podia listar usuários, ver dados financeiros e promover-se a ADMIN.
+**Depois**: Sistema completamente seguro com validação em todas as camadas.
 
 ---
 
 ## 🎯 Funcionalidades
 
-### Implementadas ✅ **100% FUNCIONAL**
+### ✅ Implementadas e Funcionais
+
+#### 0. **Segurança** 🔒 **CRÍTICO - IMPLEMENTADO** (1 Nov 2025)
+- **Autenticação e Autorização**: Todas as funções admin validam session + role ADMIN
+- **Middleware Corrigido**: Proteção de rotas `/dashboard/admin/*` funcionando
+- **Prevenção de Escalação**: Impossível promover-se a ADMIN sem autorização
+- **Arquivos Protegidos**:
+  - ✅ `/src/server/adminActions.ts` - 6 funções com validação completa
+  - ✅ `/src/middleware.ts` - Proteção de rota corrigida
+
+#### 0.1 **Gestão de Serviços** 🛠️ **IMPLEMENTADO** (1 Nov 2025)
+- **CRUD Completo**: Criar, editar, deletar e listar serviços
+- **Smart Delete**: Soft delete se serviço tem histórico, hard delete se não tem
+- **Toggle Status**: Ativar/desativar serviços rapidamente
+- **Estatísticas**: Cards com métricas (total, ativos, inativos, agendamentos, preço médio)
+- **Validações**: Zod schemas, prevenção de duplicatas, role ADMIN
+- **Arquivos Criados**:
+  - ✅ `/src/server/serviceAdminActions.ts` - 6 server actions seguras
+  - ✅ `/src/app/dashboard/admin/services/page.tsx` - Página de gestão
+- **Pendente**:
+  - ⏳ Forms client-side para criar/editar serviços
+  - ⏳ Handlers dos botões toggle/delete
+  - ⏳ Filtros e busca funcionais
+
+### ✅ Implementadas - Parcialmente Funcionais
 
 #### 1. **Dashboard Completo Multi-Tabs**
 - **Visão Geral**: Métricas globais e estatísticas principais
@@ -407,23 +442,53 @@ export async function createPromotion(data: {
 
 ## 🎯 Próximas Implementações
 
-### Prioridade Alta
-- [ ] Interface de gerenciamento de usuários
-- [ ] CRUD completo de serviços
-- [ ] Sistema de criação de promoções
-- [ ] Página de relatórios básica
+### 🔥 Prioridade ALTA - Funcionalidades Core
 
-### Prioridade Média
+- [ ] **#022** - Componentes Client para Forms de Serviços
+  - Criar ServiceForm com validação client-side
+  - Páginas /services/new e /services/[id]/edit
+  - Handlers dos botões toggle/delete
+  - Modal de confirmação de exclusão
+  - Loading states
+
+- [ ] **#023** - CRUD de Promoções
+  - Criar `promotionAdminActions.ts` (CRUD completo)
+  - Criar página `/dashboard/admin/promotions`
+  - Forms de criação/edição de promoções
+  - Suporte a promoções globais vs específicas
+  - Vincular promoções a serviços (M:M)
+
+- [ ] **#024** - Soft Delete e Edição de Usuários
+  - Adicionar campo `isActive` ao schema Prisma
+  - Migration para novo campo
+  - Implementar `deleteUser()` com soft delete real
+  - Criar `updateUser()` server action
+  - Form handler em users/[id]/page.tsx
+
+### 🟡 Prioridade MÉDIA - UX e Refinamentos
+
+- [ ] **#025** - Filtros e Busca Funcionais
+  - Busca em users (nome/email)
+  - Filtros em barbers (performance)
+  - Busca em services (nome/descrição)
+  - Paginação real (backend + frontend)
+  - Componentes reutilizáveis
+
+- [ ] **#026** - Correção de Dados Mockados
+  - Calcular receita real do banco
+  - Top barbeiros com queries reais
+  - Remover Math.random() e hardcoded values
+  - Queries para crescimento mensal
+  - Métricas de horários movimentados
+
+### 🟢 Prioridade BAIXA - Melhorias Futuras
+
 - [ ] Exportação de relatórios (PDF/Excel)
-- [ ] Gráficos e analytics avançados
-- [ ] Sistema de notificações administrativas
-- [ ] Logs de atividades do sistema
-
-### Prioridade Baixa
+- [ ] Gráficos e analytics avançados (charts.js)
+- [ ] Sistema de audit logs (quem fez o quê)
 - [ ] Dashboard customizável
-- [ ] Temas e personalização
+- [ ] Notificações administrativas em tempo real
 - [ ] Integrações com ferramentas externas
-- [ ] API para terceiros
 
 ---
 

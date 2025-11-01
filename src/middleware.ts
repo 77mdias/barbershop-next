@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAuth = !!token;
   const isAuthPage = pathname.startsWith("/auth");
-  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminPage = pathname.startsWith("/dashboard/admin");
   const isProfilePage = pathname.startsWith("/profile");
   const isDashboardPage = pathname.startsWith("/dashboard");
   const isSchedulingPage = pathname.startsWith("/scheduling");
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
     }
 
     const userRole = token?.role as string;
-    if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
+    if (userRole !== "ADMIN") {
       logger.auth.warn("Admin access denied - insufficient role", {
         userRole,
         pathname,
