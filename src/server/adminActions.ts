@@ -1,5 +1,7 @@
 "use server";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 
 // Tipos para os dados retornados
@@ -38,6 +40,25 @@ interface ReportsData {
  */
 export async function getUsersForAdmin() {
   try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+        data: [],
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores",
+        data: [],
+      };
+    }
+
     const users = await db.user.findMany({
       select: {
         id: true,
@@ -70,6 +91,25 @@ export async function getUsersForAdmin() {
  */
 export async function getBarbersForAdmin() {
   try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+        data: [],
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores",
+        data: [],
+      };
+    }
+
     const barbeiros = await db.user.findMany({
       where: {
         role: "BARBER",
@@ -135,6 +175,25 @@ export async function getBarbersForAdmin() {
  */
 export async function getReportsData() {
   try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+        data: null,
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores",
+        data: null,
+      };
+    }
+
     // Dados básicos
     const totalClients = await db.user.count({
       where: { role: "CLIENT" },
@@ -220,6 +279,23 @@ export async function getReportsData() {
  */
 export async function updateUserRole(userId: string, newRole: "CLIENT" | "BARBER" | "ADMIN") {
   try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores podem alterar roles",
+      };
+    }
+
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: { role: newRole },
@@ -250,6 +326,23 @@ export async function updateUserRole(userId: string, newRole: "CLIENT" | "BARBER
  */
 export async function getUserById(userId: string) {
   try {
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores",
+      };
+    }
+
     const user = await db.user.findUnique({
       where: { id: userId },
       select: {
@@ -302,9 +395,23 @@ export async function getUserById(userId: string) {
  */
 export async function deleteUser(userId: string) {
   try {
-    // Em um sistema real, seria melhor fazer soft delete
-    // Por agora, vamos apenas simular a operação
-    
+    // Verificar autenticação
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Não autenticado",
+      };
+    }
+
+    // Verificar role ADMIN
+    if (session.user.role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Acesso negado: apenas administradores podem inativar usuários",
+      };
+    }
+
     // Verificar se o usuário existe
     const user = await db.user.findUnique({
       where: { id: userId },
@@ -317,18 +424,17 @@ export async function deleteUser(userId: string) {
       };
     }
 
-    // Em produção, implementar soft delete:
+    // TODO: Implementar soft delete quando campo isActive for adicionado ao schema
     // await db.user.update({
     //   where: { id: userId },
-    //   data: { 
+    //   data: {
     //     isActive: false,
-    //     deactivatedAt: new Date()
     //   }
     // });
 
     return {
       success: true,
-      message: "Usuário inativado com sucesso",
+      message: "Função de inativação será implementada quando campo isActive for adicionado ao schema Prisma",
     };
   } catch (error) {
     console.error("Erro ao deletar usuário:", error);
