@@ -271,7 +271,8 @@ All data mutations and server-side operations use Next.js Server Actions with `"
 - `userActions.ts` - User management
 - `profileActions.ts` - Profile updates
 - `dashboardActions.ts` - Dashboard metrics and analytics
-- `adminActions.ts` - Admin operations (requires ADMIN role)
+- `adminActions.ts` - Admin operations (requires ADMIN role) 🔒 **SECURED** (1 Nov 2025)
+- `serviceAdminActions.ts` - Service CRUD for admins (requires ADMIN role) ✨ **NEW** (1 Nov 2025)
 - `uploadServerActions.ts` - File upload handling
 - `friendshipActions.ts` - Social interactions and friend management
 - `notificationActions.ts` - Notification operations
@@ -947,14 +948,28 @@ docker compose exec app npm run validate          # Lint + Type check
 
 ## Important Notes for AI Assistants
 
-1. **Always check authentication** before performing server actions that modify data
-2. **Use transactions** for multi-model operations (e.g., creating appointment + updating voucher status)
-3. **Validate input** with Zod schemas before database operations
-4. **Handle errors gracefully** with user-friendly messages, never expose stack traces
-5. **Consider role-based access** - not all users can access all data
-6. **Image uploads require rate limiting checks** - enforce limits via `/src/lib/rate-limiter.ts`
-7. **ServiceHistory.images is an array** - handle multiple image URLs correctly
-8. **Promotions can be global or targeted** - check both `isGlobal` and `UserPromotion` table
-9. **Appointment status transitions** follow a strict lifecycle - validate state changes
-10. **Session data is always fresh** - no need to manually refetch user data after updates
-11. **⚠️ CRITICAL: All npm/npx commands MUST run inside Docker** - Use `docker compose exec app npm run <command>` instead of running npm directly. The ONLY exceptions are production scripts (`npm run db:*:prod`) which use shell scripts that handle their own Docker orchestration.
+1. **🔒 CRITICAL - Admin Actions Security** (Updated 1 Nov 2025): ALL admin server actions in `/src/server/adminActions.ts` and `/src/server/serviceAdminActions.ts` now validate BOTH authentication (`session?.user?.id`) AND role (`role === "ADMIN"`). Never skip these checks when creating new admin functions. The middleware also correctly protects `/dashboard/admin/*` routes.
+
+2. **Always check authentication** before performing server actions that modify data
+
+3. **Use transactions** for multi-model operations (e.g., creating appointment + updating voucher status)
+
+4. **Validate input** with Zod schemas before database operations
+
+5. **Handle errors gracefully** with user-friendly messages, never expose stack traces
+
+6. **Consider role-based access** - not all users can access all data
+
+7. **Image uploads require rate limiting checks** - enforce limits via `/src/lib/rate-limiter.ts`
+
+8. **ServiceHistory.images is an array** - handle multiple image URLs correctly
+
+9. **Promotions can be global or targeted** - check both `isGlobal` and `UserPromotion` table
+
+10. **Appointment status transitions** follow a strict lifecycle - validate state changes
+
+11. **Session data is always fresh** - no need to manually refetch user data after updates
+
+12. **Service Management** (New 1 Nov 2025): Use `/src/server/serviceAdminActions.ts` for all service CRUD operations from admin dashboard. The module includes smart delete (soft if has history, hard if unused) and automatic cache revalidation.
+
+13. **⚠️ CRITICAL: All npm/npx commands MUST run inside Docker** - Use `docker compose exec app npm run <command>` instead of running npm directly. The ONLY exceptions are production scripts (`npm run db:*:prod`) which use shell scripts that handle their own Docker orchestration.

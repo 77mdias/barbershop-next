@@ -2,6 +2,64 @@
 
 Lista organizada de tarefas, bugs e melhorias pendentes.
 
+## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
+
+### 🔒 Sprint 3 - Correções Críticas de Segurança Admin ✅ **100% CONCLUÍDO** (1 Nov 2025)
+
+- [x] **#020** - Sprint 3: Correções Críticas de Segurança no Dashboard Admin 🔒 ✅ **CONCLUÍDO**
+  - **Descrição**: Correção de vulnerabilidades CRÍTICAS no dashboard administrativo
+  - **Severidade**: 🔴 CRÍTICA - Escalação de privilégios e vazamento de dados
+  - **Componentes**: adminActions.ts (6 funções), middleware.ts
+  - **Estimativa**: 4-6 horas (100% concluído)
+  - **Assignee**: Claude Code
+  - **Status**: Sistema completamente seguro e protegido
+  - **Problemas Críticos Corrigidos**:
+    - ✅ Adicionada autenticação em getUsersForAdmin()
+    - ✅ Adicionada autenticação em getBarbersForAdmin()
+    - ✅ Adicionada autenticação em getReportsData()
+    - ✅ Adicionada autenticação em updateUserRole() - MAIS CRÍTICO
+    - ✅ Adicionada autenticação em getUserById()
+    - ✅ Adicionada autenticação em deleteUser()
+    - ✅ Corrigido middleware para proteger /dashboard/admin/*
+    - ✅ Removida verificação de SUPER_ADMIN inexistente
+  - **Impacto**:
+    - ANTES: Qualquer pessoa podia listar usuários, ver dados financeiros e promover-se a ADMIN
+    - DEPOIS: Apenas usuários autenticados com role ADMIN podem acessar
+  - **Arquivos modificados**:
+    - `/src/server/adminActions.ts` - Todas as 6 funções agora validam auth/role ✅
+    - `/src/middleware.ts` - Proteção corrigida para /dashboard/admin/* ✅
+  - **Commit**: `🔒 fix(security): Adicionar autenticação e autorização em funções admin`
+
+### ✨ Sprint 4 - CRUD de Serviços para Admin ✅ **100% CONCLUÍDO** (1 Nov 2025)
+
+- [x] **#021** - Sprint 4: Sistema Completo de Gestão de Serviços 🛠️ ✅ **CONCLUÍDO**
+  - **Descrição**: Implementação completa de CRUD de serviços para administradores
+  - **Componentes**: serviceAdminActions.ts, página /dashboard/admin/services
+  - **Estimativa**: 2-3 horas (100% concluído)
+  - **Assignee**: Claude Code
+  - **Status**: Sistema completo com validações de segurança
+  - **Server Actions Implementadas**:
+    - ✅ createService() - Criar serviços com validação Zod
+    - ✅ updateService() - Editar serviços com prevenção de duplicatas
+    - ✅ deleteService() - Smart delete (soft se tem uso, hard se não)
+    - ✅ toggleServiceStatus() - Ativar/desativar rapidamente
+    - ✅ getServicesForAdmin() - Listar com filtros e paginação
+    - ✅ getServiceByIdForAdmin() - Ver detalhes completos
+  - **Página Admin Criada**:
+    - ✅ Dashboard com 5 cards de estatísticas
+    - ✅ Tabela responsiva com informações completas
+    - ✅ Botões de ação (criar, editar, toggle, deletar)
+    - ✅ Badges de status e popularidade
+  - **Segurança**:
+    - 🔒 Todas as 6 funções validam autenticação + role ADMIN
+    - 🔒 Validação de input com Zod schemas
+    - 🔒 Prevenção de nomes duplicados (case-insensitive)
+    - 🔒 Soft delete inteligente quando serviço tem histórico
+  - **Arquivos criados**:
+    - `/src/server/serviceAdminActions.ts` - 6 server actions com segurança ✅
+    - `/src/app/dashboard/admin/services/page.tsx` - Página de gestão ✅
+  - **Commit**: `✨ feat(admin): Implementar CRUD completo de serviços`
+
 ## 🔥 Alta Prioridade - Semana 4 (28 Oct - 3 Nov 2025)
 
 ### 🎉 Sprint 1 - Sistema de Notificações ✅ **100% CONCLUÍDO** (27 Oct 2025)
@@ -109,8 +167,85 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/app/page.tsx` - Passa userImage para Header component ✅
     - `/src/app/dashboard/admin/users/[id]/page.tsx` - UserAvatar integration ✅
 
-### Issues Críticos da Semana Atual
+### 📋 Próximas Tarefas Planejadas - Dashboard Admin
 
+- [ ] **#022** - Componentes Client para Forms de Serviços 🎨 **PLANEJADO**
+  - **Descrição**: Criar componentes client-side para criar e editar serviços
+  - **Componentes**: ServiceForm, ServiceFormDialog, DeleteConfirmDialog
+  - **Estimativa**: 2-3 horas
+  - **Assignee**: A definir
+  - **Status**: Planejado
+  - **Tarefas**:
+    - [ ] Criar ServiceForm com validação client-side
+    - [ ] Criar página /dashboard/admin/services/new
+    - [ ] Criar página /dashboard/admin/services/[id]/edit
+    - [ ] Adicionar handlers aos botões toggle/delete
+    - [ ] Implementar modal de confirmação de exclusão
+    - [ ] Adicionar loading states nos botões
+  - **Dependências**: Sprint 4 concluído ✅
+
+- [ ] **#023** - CRUD de Promoções para Admin 🎁 **PLANEJADO**
+  - **Descrição**: Implementar sistema completo de gestão de promoções/vouchers
+  - **Componentes**: promotionAdminActions.ts, página /dashboard/admin/promotions
+  - **Estimativa**: 3-4 horas
+  - **Assignee**: A definir
+  - **Status**: Planejado
+  - **Tarefas**:
+    - [ ] Criar promotionAdminActions.ts (CRUD completo)
+    - [ ] Criar página /dashboard/admin/promotions
+    - [ ] Implementar forms de criação/edição
+    - [ ] Adicionar filtros por tipo/status
+    - [ ] Suporte a promoções globais vs específicas
+    - [ ] Vincular promoções a serviços (M:M)
+  - **Dependências**: Sprint 4 concluído ✅
+
+- [ ] **#024** - Soft Delete e Edição de Usuários 👥 **PLANEJADO**
+  - **Descrição**: Implementar soft delete real e edição completa de usuários
+  - **Componentes**: Schema Prisma (isActive), updateUser action, form handlers
+  - **Estimativa**: 1-2 horas
+  - **Assignee**: A definir
+  - **Status**: Planejado
+  - **Tarefas**:
+    - [ ] Adicionar campo isActive ao model User (Prisma)
+    - [ ] Criar e rodar migration
+    - [ ] Implementar deleteUser() com soft delete real
+    - [ ] Criar updateUser() server action
+    - [ ] Adicionar form handler em users/[id]/page.tsx
+    - [ ] Conectar botões de salvar/inativar
+  - **Dependências**: Requer migration no banco
+
+- [ ] **#025** - Filtros e Busca Funcionais 🔍 **PLANEJADO**
+  - **Descrição**: Implementar filtros e busca real nas páginas admin
+  - **Componentes**: SearchInput, FilterDropdown, Pagination
+  - **Estimativa**: 2-3 horas
+  - **Assignee**: A definir
+  - **Status**: Planejado
+  - **Páginas afetadas**:
+    - [ ] /dashboard/admin/users - Busca por nome/email, filtro por role/status
+    - [ ] /dashboard/admin/barbers - Busca, filtro por performance
+    - [ ] /dashboard/admin/services - Busca, filtro por status
+    - [ ] /dashboard/admin/reports - Filtros de período
+  - **Tarefas**:
+    - [ ] Converter páginas para usar client components com state
+    - [ ] Implementar debounced search
+    - [ ] Adicionar paginação real (backend + frontend)
+    - [ ] Criar componentes reutilizáveis de filtro
+
+- [ ] **#026** - Correção de Dados Mockados 📊 **PLANEJADO**
+  - **Descrição**: Substituir dados mockados/hardcoded por queries reais
+  - **Componentes**: dashboardActions.ts, reports/page.tsx
+  - **Estimativa**: 2-3 horas
+  - **Assignee**: A definir
+  - **Status**: Planejado
+  - **Tarefas**:
+    - [ ] Calcular receita real baseada em serviceHistory.finalPrice
+    - [ ] Calcular top barbeiros com queries reais
+    - [ ] Remover Math.random() e valores hardcoded
+    - [ ] Implementar queries para crescimento mensal
+    - [ ] Calcular métricas de horários movimentados
+    - [ ] Adicionar campo paymentMethod ao schema (se necessário)
+
+### Issues Críticos da Semana Atual
 
 - [ ] **#015** - Sistema de busca básico para reviews e usuários
 
