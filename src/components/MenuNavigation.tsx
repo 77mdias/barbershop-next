@@ -121,7 +121,7 @@ const MenuNavigation = () => {
   return (
     <>
       {/* Desktop - Menu */}
-      <NavigationMenu className="hidden md:block">
+      <NavigationMenu className="hidden rounded-md md:block">
         <NavigationMenuItem className="list-none">
           <NavigationMenuTrigger className="flex items-center">
             <Menu size={24} className="text-foreground/80" />
