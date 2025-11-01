@@ -87,6 +87,17 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             <Mail className="mr-2 h-4 w-4" />
             {isOAuthLoading === "google" ? "Conectando..." : "Google"}
           </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleOAuthSignIn("discord")}
+            disabled={isOAuthLoading === "discord"}
+            className="w-full border-gray-600 bg-[var(--card-product)] text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))] "
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            {isOAuthLoading === "discord" ? "Conectando..." : "Discord"}
+          </Button>
         </div>
       </div>
 

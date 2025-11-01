@@ -284,13 +284,6 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ### Melhorias Técnicas
 
-- [ ] **#007** - Testes automatizados
-
-  - **Descrição**: Setup de testing suite
-  - **Tools**: Jest, Testing Library, Playwright
-  - **Estimativa**: 4 dias
-  - **Assignee**: -
-
 - [ ] **#008** - Performance optimization
   - **Descrição**: Bundle analysis e lazy loading
   - **Focus**: Core Web Vitals
