@@ -76,7 +76,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             <Github className="mr-2 h-4 w-4" />
             {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
           </Button>
-
+          {/*
           <Button
             type="button"
             variant="outline"
@@ -87,7 +87,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             <Mail className="mr-2 h-4 w-4" />
             {isOAuthLoading === "google" ? "Conectando..." : "Google"}
           </Button>
-
+          */}
           <Button
             type="button"
             variant="outline"
