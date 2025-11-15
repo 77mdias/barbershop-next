@@ -911,15 +911,78 @@ docker compose exec app npx prisma generate
 
 ## Documentation References
 
-Comprehensive documentation exists in `/docs/`:
-- `/docs/database/GUIA-DESENVOLVIMENTO.md` - Database development best practices
-- `/docs/database/EXEMPLOS-PRATICOS.md` - Practical database examples
-- `/docs/review-system.md` - Review system documentation
-- `/docs/upload-system.md` - Upload system documentation
-- `/docs/dashboard-admin.md` - Admin dashboard
-- `/docs/dashboard-barber.md` - Barber dashboard
-- `/docs/development/ROADMAP.md` - Project roadmap
-- `/docs/docker/GUIA-MULTI-STAGE.md` - Docker multi-stage build guide
+**📚 Main Documentation Index**: `/docs/README.md` - Complete navigation guide
+
+Comprehensive documentation organized by category in `/docs/`:
+
+### 🏗️ Architecture
+- `/docs/architecture/` - System architecture and patterns
+  - `server-actions.md` - Server Actions pattern
+  - `database-model.md` - Database model documentation
+  - `prisma-queries.md` - Prisma query examples
+  - `relationships.md` - Entity relationships guide
+  - `business-rules.md` - Business logic rules
+
+### ⚡ Features
+- `/docs/features/` - Feature-specific documentation
+  - `appointment-system.md` - Appointment booking system
+  - `chat-system.md` - Real-time chat (1:1)
+  - `notification-system.md` - Notification system
+  - `review-system.md` - Review and ratings system
+  - `upload-system.md` - File upload (local + Cloudinary)
+  - `vouchers-promotions.md` - Vouchers and promotions
+  - `theme-system.md` - Dark/light mode theming
+  - `dashboard-admin.md` - Admin dashboard
+  - `dashboard-barber.md` - Barber dashboard
+
+### 🗄️ Database
+- `/docs/database/` - Database and Prisma ORM
+  - `GUIA-DESENVOLVIMENTO.md` - Development best practices
+  - `EXEMPLOS-PRATICOS.md` - Practical examples
+  - `SCRIPTS.md` - Useful database scripts
+
+### 🐳 Docker
+- `/docs/docker/` - Docker and containerization
+  - `GUIA-MULTI-STAGE.md` - Multi-stage build guide
+  - `PRODUCTION.md` - Production deployment
+  - `COMANDOS-RAPIDOS.md` - Quick commands
+
+### 🚀 Deployment
+- `/docs/deployment/` - Production deployment guides
+  - `production-storage.md` - Storage strategies
+  - `vercel-optimizations.md` - Vercel-specific optimizations
+  - `email-setup.md` - Email configuration
+
+### 🧪 Testing
+- `/docs/testing/` - Testing documentation
+  - `overview.md` - Testing overview (55 tests, 100% passing)
+  - `test-flows.md` - Main test flows
+  - `loading-states.md` - Loading state tests
+
+### 📋 Tasks
+- `/docs/tasks/` - Task management
+  - `TASKS.md` - Complete task list and history
+  - `completed/` - Finished tasks documentation
+  - `in-progress/` - Current tasks tracking
+
+### 🛠️ Development
+- `/docs/development/` - Development guides
+  - `README.md` - Development overview
+  - `ROADMAP.md` - Project roadmap
+  - `CHANGELOG.md` - Version history
+
+### 📖 Guides
+- `/docs/guides/` - Practical guides and tutorials
+  - `features-overview.md` - All features overview
+  - `demo-sales.md` - Demo and sales guide
+  - `documentation.md` - Documentation writing guide
+  - `decisions.md` - Architectural decisions (ADRs)
+
+### 📚 Study
+- `/docs/study/` - Learning materials
+  - `01-prisma-conceitos-fundamentais.md` - Prisma fundamentals
+  - `02-docker-conceitos-fundamentais.md` - Docker fundamentals
+  - And 9 more educational guides...
 
 ---
 
