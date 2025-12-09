@@ -9,6 +9,10 @@ module.exports = {
 	theme: {
 		extend: {
 			colors: {
+				'surface-1': 'hsl(var(--surface-1))',
+				'surface-2': 'hsl(var(--surface-2))',
+				'surface-card': 'hsl(var(--surface-card))',
+				'surface-emphasis': 'hsl(var(--surface-emphasis))',
 				primary: {
 					'50': '#f0fdfa',
 					'100': '#ccfbf1',
@@ -53,6 +57,9 @@ module.exports = {
 				},
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				'fg-muted': 'hsl(var(--fg-muted))',
+				'fg-subtle': 'hsl(var(--fg-subtle))',
+				'on-accent': 'hsl(var(--on-accent))',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
@@ -83,6 +90,16 @@ module.exports = {
 					DEFAULT: 'hsl(var(--warning))',
 					foreground: 'hsl(var(--warning-foreground))'
 				},
+				'badge-surface': 'hsl(var(--badge-surface))',
+				'badge-fg': 'hsl(var(--badge-fg))',
+				'badge-success-fg': 'hsl(var(--badge-success-fg))',
+				'badge-danger-fg': 'hsl(var(--badge-danger-fg))',
+				'state-open-surface': 'hsl(var(--state-open-surface))',
+				'state-open-fg': 'hsl(var(--state-open-fg))',
+				'state-warning-surface': 'hsl(var(--state-warning-surface))',
+				'state-warning-fg': 'hsl(var(--state-warning-fg))',
+				'state-closed-surface': 'hsl(var(--state-closed-surface))',
+				'state-closed-fg': 'hsl(var(--state-closed-fg))',
 				'soft-blue': 'hsl(var(--soft-blue))',
 				'soft-purple': 'hsl(var(--soft-purple))',
 				'soft-green': 'hsl(var(--soft-green))',
@@ -95,6 +112,9 @@ module.exports = {
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
 				}
+			},
+			boxShadow: {
+				soft: 'var(--shadow-soft)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

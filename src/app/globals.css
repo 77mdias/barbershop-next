@@ -14,8 +14,14 @@
 
     /* Cores neutras suaves */
     --text: 220 13% 18%;
+    --surface-1: 0 0% 100%;
+    --surface-2: 210 20% 98%;
+    --surface-card: 0 0% 100%;
+    --surface-emphasis: 220 14% 94%;
     --muted: 220 14% 96%;
     --muted-foreground: 220 8.9% 46.1%;
+    --fg-muted: 220 8.9% 46.1%;
+    --fg-subtle: 220 7% 60%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 264 83% 67%;
@@ -36,6 +42,7 @@
     --secondary-foreground: 220 13% 18%;
     --accent: 142 71% 45%;           /* Verde menta suave */
     --accent-foreground: 0 0% 100%;
+    --on-accent: 0 0% 100%;
     --color-text: 220 14% 96%;       /* branco */
     
     /* Estados e feedback */
@@ -46,6 +53,17 @@
     --destructive: 0 72% 51%;        /* Vermelho suave */
     --destructive-foreground: 0 0% 100%;
 
+    --badge-surface: 0 0% 100% / 0.82;
+    --badge-fg: 220 13% 18%;
+    --badge-success-fg: 142 71% 35%;
+    --badge-danger-fg: 0 72% 40%;
+    --state-open-surface: 142 44% 92%;
+    --state-open-fg: 142 71% 35%;
+    --state-warning-surface: 38 100% 95%;
+    --state-warning-fg: 25 95% 35%;
+    --state-closed-surface: 0 85% 96%;
+    --state-closed-fg: 0 72% 40%;
+
     --glass-border: 220 13% 91% / 0.3; /* Borda translúcida */
     --glass-border-dark: 220 15% 16% / 0.3; /* Borda translúcida no dark */
     --glass-bg: 220 14% 96% / 0.3;
@@ -54,6 +72,7 @@
     --shadow-card: 0 4px 4px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     --shadow: white 0px 0px 4px;
     --shadow-foreground: black 0px 0px 12px;
+    --shadow-soft: 0px 18px 40px -24px rgba(15, 15, 15, 0.25);
 
     /* Cores complementares suaves */
     --soft-blue: 213 94% 68%;        /* Azul céu */
@@ -95,7 +114,13 @@
 
     /* Neutros escuros suaves */
     --muted: 220 15% 12%;
+    --surface-1: 220 18% 7%;
+    --surface-2: 220 16% 9%;
+    --surface-card: 220 16% 12%;
+    --surface-emphasis: 220 15% 16%;
     --muted-foreground: 220 8% 56%;
+    --fg-muted: 220 10% 68%;
+    --fg-subtle: 220 12% 52%;
     --border: 220 15% 16%;
     --input: 220 15% 16%;
     --ring: 264 83% 67%;
@@ -109,6 +134,7 @@
     --secondary-foreground: 220 14% 96%;
     --accent: 142 71% 45%;
     --accent-foreground: 220 15% 6%;
+    --on-accent: 220 15% 6%;
     --color-text: 220 15% 6%; /* black */
     
     /* Estados no modo escuro */
@@ -118,6 +144,17 @@
     --warning-foreground: 220 15% 6%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 220 14% 96%;
+
+    --badge-surface: 220 16% 24% / 0.82;
+    --badge-fg: 220 14% 92%;
+    --badge-success-fg: 142 71% 55%;
+    --badge-danger-fg: 0 72% 60%;
+    --state-open-surface: 142 45% 22%;
+    --state-open-fg: 142 71% 62%;
+    --state-warning-surface: 38 90% 28%;
+    --state-warning-fg: 38 95% 70%;
+    --state-closed-surface: 0 72% 22%;
+    --state-closed-fg: 0 82% 74%;
 
     --glass-border: 220 15% 16% / 0.3;
 

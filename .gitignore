@@ -89,3 +89,6 @@ next-env.d.ts
 
 # Cache do devcontainer
 .devcontainer-cache/
+
+#MCPs
+.mcp**
