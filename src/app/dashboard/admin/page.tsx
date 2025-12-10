@@ -2,13 +2,14 @@ import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getAdminMetrics } from "@/server/dashboardActions";
+import { getServicesForAdmin } from "@/server/serviceAdminActions";
 import Link from "next/link";
 import {
   Users,
@@ -23,6 +24,10 @@ import {
   DollarSign,
   Database,
   AlertTriangle,
+  Scissors,
+  Plus,
+  Edit,
+  Power,
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
@@ -40,6 +45,13 @@ export default async function AdminDashboardPage() {
   // Buscar métricas administrativas
   const metricsResult = await getAdminMetrics();
   const metrics = metricsResult.success ? metricsResult.data : null;
+
+  // Buscar serviços para a aba Serviços
+  const servicesResult = await getServicesForAdmin({ limit: 10 });
+  const services = servicesResult.success ? servicesResult.data : [];
+  const totalServices = services.length;
+  const activeServices = services.filter((s: any) => s.active).length;
+  const inactiveServices = services.filter((s: any) => !s.active).length;
 
   return (
     <div className="container mt-20 sm:mt-16 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
@@ -167,22 +179,26 @@ export default async function AdminDashboardPage() {
 
             {/* Tabs de Gestão */}
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
-                <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1">
+                <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                   <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Visão Geral</span>
                   <span className="sm:hidden">Visão</span>
                 </TabsTrigger>
-                <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Usuários</span>
                 </TabsTrigger>
-                <TabsTrigger value="reviews" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="reviews" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                   <Star className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Avaliações</span>
                   <span className="sm:hidden">Reviews</span>
                 </TabsTrigger>
-                <TabsTrigger value="system" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="services" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                  <Scissors className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>Serviços</span>
+                </TabsTrigger>
+                <TabsTrigger value="system" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                   <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Sistema</span>
                 </TabsTrigger>
@@ -357,6 +373,155 @@ export default async function AdminDashboardPage() {
                           {metrics.pendingReviews}
                         </p>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Serviços */}
+              <TabsContent value="services" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {/* Card: Total de Serviços */}
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Total de Serviços
+                      </CardTitle>
+                      <Scissors className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
+                        {totalServices}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        cadastrados na plataforma
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card: Serviços Ativos */}
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Serviços Ativos
+                      </CardTitle>
+                      <Power className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-400">
+                        {activeServices}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        disponíveis para agendamento
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card: Serviços Inativos */}
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Serviços Inativos
+                      </CardTitle>
+                      <Power className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-muted-foreground">
+                        {inactiveServices}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        temporariamente desativados
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card: Ações Rápidas */}
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Gerenciamento
+                      </CardTitle>
+                      <Settings className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button
+                        asChild
+                        className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+                        size="sm"
+                      >
+                        <Link href="/dashboard/admin/services">
+                          <Scissors className="w-4 h-4 mr-2" />
+                          Ver Todos
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="w-full"
+                        size="sm"
+                      >
+                        <Link href="/dashboard/admin/services/new">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Novo Serviço
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Lista de Serviços Recentes */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Serviços Recentes</CardTitle>
+                    <CardDescription>
+                      Últimos serviços cadastrados ou atualizados
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {services.slice(0, 5).map((service: any) => (
+                        <div
+                          key={service.id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700 rounded-full flex items-center justify-center">
+                              <Scissors className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{service.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {service.duration} min • R$ {Number(service.price).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={service.active ? "default" : "secondary"}
+                              className={service.active ? "bg-green-500 dark:bg-green-600" : ""}
+                            >
+                              {service.active ? "Ativo" : "Inativo"}
+                            </Badge>
+                            <Button asChild variant="ghost" size="sm">
+                              <Link href={`/dashboard/admin/services/${service.id}/edit`}>
+                                <Edit className="w-4 h-4" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {services.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Scissors className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                          <p>Nenhum serviço cadastrado ainda</p>
+                          <Button asChild variant="outline" className="mt-4" size="sm">
+                            <Link href="/dashboard/admin/services/new">
+                              Criar primeiro serviço
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

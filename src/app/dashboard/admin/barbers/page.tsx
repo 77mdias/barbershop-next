@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -21,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getBarbersForAdmin } from "@/server/adminActions";
 import Link from "next/link";
 import {
@@ -29,7 +27,6 @@ import {
   Search,
   Filter,
   Edit,
-  Trash2,
   Plus,
   ArrowLeft,
   Star,

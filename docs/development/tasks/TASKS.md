@@ -169,19 +169,43 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 
 ### 📋 Próximas Tarefas Planejadas - Dashboard Admin
 
-- [ ] **#022** - Componentes Client para Forms de Serviços 🎨 **PLANEJADO**
-  - **Descrição**: Criar componentes client-side para criar e editar serviços
-  - **Componentes**: ServiceForm, ServiceFormDialog, DeleteConfirmDialog
-  - **Estimativa**: 2-3 horas
-  - **Assignee**: A definir
-  - **Status**: Planejado
-  - **Tarefas**:
-    - [ ] Criar ServiceForm com validação client-side
-    - [ ] Criar página /dashboard/admin/services/new
-    - [ ] Criar página /dashboard/admin/services/[id]/edit
-    - [ ] Adicionar handlers aos botões toggle/delete
-    - [ ] Implementar modal de confirmação de exclusão
-    - [ ] Adicionar loading states nos botões
+- [x] **#022** - Componentes Client para Forms de Serviços 🎨 ✅ **CONCLUÍDO** (10 Dez 2025)
+  - **Descrição**: Implementação completa de componentes client-side para CRUD de serviços
+  - **Componentes**: ServiceForm, ServiceFormDialog, DeleteConfirmDialog, ServiceTableActions
+  - **Estimativa**: 2-3 horas (100% concluído em ~3 horas)
+  - **Assignee**: Claude Code
+  - **Status**: Sistema completo com testes unitários
+  - **Componentes Implementados**:
+    - ✅ ServiceForm - Formulário completo com react-hook-form + Zod validation
+    - ✅ ServiceFormDialog - Wrapper de dialog reutilizável
+    - ✅ DeleteConfirmDialog - Confirmação com aviso de soft/hard delete
+    - ✅ ServiceTableActions - Botões de ação na tabela (edit, toggle, delete)
+  - **Páginas Criadas**:
+    - ✅ /dashboard/admin/services/new - Criação de novos serviços
+    - ✅ /dashboard/admin/services/[id]/edit - Edição com estatísticas do serviço
+  - **Features**:
+    - 🎯 Validação client-side com Zod schemas
+    - 🔄 Loading states em todos os botões e formulários
+    - 🎨 Design responsivo (desktop + mobile)
+    - ⚡ Toast notifications para feedback
+    - 🔒 Integração com server actions existentes
+    - 📊 Cards de estatísticas na página de edição
+    - 🚀 Auto-refresh após mutations (router.refresh)
+  - **Testes Implementados**:
+    - ✅ ServiceForm.test.tsx - 10 testes (100% passando)
+    - ✅ DeleteConfirmDialog.test.tsx - 12 testes (100% passando)
+    - 📈 Total: 22 novos testes adicionados ao suite
+  - **Arquivos criados**:
+    - `/src/components/ServiceForm.tsx` - Formulário principal ✅
+    - `/src/components/ServiceFormDialog.tsx` - Dialog wrapper ✅
+    - `/src/components/DeleteConfirmDialog.tsx` - Confirmação de exclusão ✅
+    - `/src/components/ServiceTableActions.tsx` - Ações da tabela ✅
+    - `/src/app/dashboard/admin/services/new/page.tsx` - Página de criação ✅
+    - `/src/app/dashboard/admin/services/[id]/edit/page.tsx` - Página de edição ✅
+    - `/src/__tests__/ServiceForm.test.tsx` - Testes unitários ✅
+    - `/src/__tests__/DeleteConfirmDialog.test.tsx` - Testes unitários ✅
+  - **Arquivos modificados**:
+    - `/src/app/dashboard/admin/services/page.tsx` - Integração com ServiceTableActions ✅
   - **Dependências**: Sprint 4 concluído ✅
 
 - [ ] **#023** - CRUD de Promoções para Admin 🎁 **PLANEJADO**

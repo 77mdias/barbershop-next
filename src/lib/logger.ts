@@ -44,20 +44,20 @@ class Logger {
     switch (entry.level) {
       case 'debug':
         if (this.isDevelopment) {
-          // eslint-disable-next-line no-console
+           
           console.debug(message, entry.data || '');
         }
         break;
       case 'info':
-        // eslint-disable-next-line no-console
+         
         console.info(message, entry.data || '');
         break;
       case 'warn':
-        // eslint-disable-next-line no-console
+         
         console.warn(message, entry.data || '');
         break;
       case 'error':
-        // eslint-disable-next-line no-console
+         
         console.error(message, entry.data || '');
         break;
     }

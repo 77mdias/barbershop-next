@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -21,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getUsersForAdmin } from "@/server/adminActions";
 import Link from "next/link";
 import {
@@ -32,10 +30,10 @@ import {
   Trash2,
   Plus,
   ArrowLeft,
-  Shield,
   UserCog,
   Calendar,
   Mail,
+  Shield,
 } from "lucide-react";
 
 export default async function AdminUsersPage() {

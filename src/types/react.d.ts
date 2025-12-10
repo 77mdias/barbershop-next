@@ -1,7 +1,4 @@
-/// <reference types="react" />
-/// <reference types="react-dom" />
-
-import * as React from "react";
+import type * as React from "react";
 
 declare global {
   namespace JSX {
@@ -13,10 +10,10 @@ declare global {
       render(): React.ReactNode;
     }
     interface ElementAttributesProperty {
-      props: {};
+      props: object;
     }
     interface ElementChildrenAttribute {
-      children: {};
+      children: object;
     }
   }
 }

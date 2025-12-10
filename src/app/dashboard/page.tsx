@@ -14,7 +14,6 @@ import {
   Calendar,
   Clock,
   Star,
-  Plus,
   User,
   Scissors,
   Heart,

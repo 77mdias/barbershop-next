@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -20,14 +19,13 @@ import {
   Scissors,
   ArrowLeft,
   Plus,
-  Edit,
-  Trash2,
-  Power,
   Clock,
   DollarSign,
-  Calendar,
   TrendingUp,
+  Power,
+  Calendar,
 } from "lucide-react";
+import ServiceTableActions from "@/components/ServiceTableActions";
 
 export default async function AdminServicesPage() {
   const session = await getServerSession(authOptions);
@@ -202,90 +200,74 @@ export default async function AdminServicesPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    services.map((service: any) => (
-                      <TableRow key={service.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
-                              <Scissors className="w-5 h-5 text-white" />
+                    services.map((service: any) => {
+                      // Converter Decimal para number para Client Component
+                      const serializedService = {
+                        id: service.id,
+                        name: service.name,
+                        active: service.active,
+                        _count: service._count,
+                      };
+
+                      return (
+                        <TableRow key={service.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
+                                <Scissors className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{service.name}</p>
+                                {service.description && (
+                                  <p className="text-sm text-gray-600 truncate max-w-xs">
+                                    {service.description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">{service.name}</p>
-                              {service.description && (
-                                <p className="text-sm text-gray-600 truncate max-w-xs">
-                                  {service.description}
-                                </p>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-400" />
+                              <span>{service.duration} min</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium">
+                                R$ {Number(service.price).toFixed(2)}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-gray-400" />
+                              <span>{service._count?.appointments || 0}</span>
+                              {(service._count?.appointments || 0) > 10 && (
+                                <Badge variant="outline" className="text-xs">
+                                  <TrendingUp className="w-3 h-3 mr-1" />
+                                  Popular
+                                </Badge>
                               )}
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <span>{service.duration} min</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium">
-                              R$ {Number(service.price).toFixed(2)}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>{service._count?.appointments || 0}</span>
-                            {(service._count?.appointments || 0) > 10 && (
-                              <Badge variant="outline" className="text-xs">
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                Popular
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={service.active ? "default" : "secondary"}
-                            className={
-                              service.active ? "bg-green-500" : "bg-gray-400"
-                            }
-                          >
-                            {service.active ? "Ativo" : "Inativo"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button asChild variant="outline" size="sm">
-                              <Link
-                                href={`/dashboard/admin/services/${service.id}/edit`}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Link>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={service.active ? "default" : "secondary"}
                               className={
-                                service.active
-                                  ? "text-orange-600 hover:bg-orange-50"
-                                  : "text-green-600 hover:bg-green-50"
+                                service.active ? "bg-green-500" : "bg-gray-400"
                               }
                             >
-                              <Power className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                              {service.active ? "Ativo" : "Inativo"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <ServiceTableActions service={serializedService} />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

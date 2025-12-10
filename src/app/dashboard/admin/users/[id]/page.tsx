@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -24,7 +23,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getUserById } from "@/server/adminActions";
 import Link from "next/link";
 import {

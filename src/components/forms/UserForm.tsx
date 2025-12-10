@@ -67,7 +67,7 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
   toast.error("Erro ao processar solicitação");
       }
     } catch (_error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       toast.error("Erro inesperado ao processar solicitação");
     } finally {
       setIsLoading(false);
