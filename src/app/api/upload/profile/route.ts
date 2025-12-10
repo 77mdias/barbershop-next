@@ -99,21 +99,32 @@ export async function POST(request: NextRequest) {
     // 6. Success Response
     console.log(`✅ Profile upload successful: ${uploadResult.url}`);
     
+    const uploadedFile = uploadResult.files?.[0];
+
+    const responseFile: Record<string, unknown> = {
+      url: uploadResult.url ?? uploadedFile?.url ?? "",
+      filename: uploadResult.filename ?? uploadedFile?.filename ?? file.name,
+    };
+
+    if (uploadedFile?.size !== undefined) {
+      responseFile.size = uploadedFile.size;
+    } else {
+      responseFile.size = file.size;
+    }
+
+    if (uploadedFile?.metadata) {
+      responseFile.metadata = uploadedFile.metadata;
+    }
+
+    if (uploadedFile?.base64) {
+      responseFile.base64 = uploadedFile.base64;
+    }
+
     const response = {
       success: true,
-      file: {
-        url: uploadResult.url,
-        filename: uploadResult.filename,
-        size: uploadResult.size,
-        metadata: uploadResult.metadata
-      },
+      file: responseFile,
       message: 'Foto de perfil atualizada com sucesso'
     };
-    
-    // Add base64 if available (production)
-    if (uploadResult.base64) {
-      (response.file as any).base64 = uploadResult.base64;
-    }
     
     return NextResponse.json(response, {
       headers: createRateLimitHeaders({

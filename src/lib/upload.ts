@@ -36,7 +36,9 @@ export function validateFileClient(file: File): {
     };
   }
 
-  if (!UPLOAD_CONFIG_CLIENT.allowedTypes.includes(file.type)) {
+  if (!UPLOAD_CONFIG_CLIENT.allowedTypes.includes(
+    file.type as (typeof UPLOAD_CONFIG_CLIENT.allowedTypes)[number]
+  )) {
     return {
       valid: false,
       error: `File type not allowed. Allowed types: ${UPLOAD_CONFIG_CLIENT.allowedTypes.join(', ')}`

@@ -10,9 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  getAllNotifications,
-  getUnreadNotifications,
-  getReadNotifications,
+  getNotifications,
   getUnreadCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
@@ -30,8 +28,8 @@ interface Notification {
   title: string;
   message: string;
   read: boolean;
-  createdAt: Date;
-  relatedId?: string;
+  createdAt: Date | string;
+  relatedId?: string | null;
   metadata?: any;
 }
 
@@ -57,24 +55,29 @@ export default function NotificationsPage() {
     else setIsLoadingMore(true);
 
     try {
-      let result;
-      switch (tabFilter) {
-        case "unread":
-          result = await getUnreadNotifications(pageNum, 10);
-          break;
-        case "read":
-          result = await getReadNotifications(pageNum, 10);
-          break;
-        default:
-          result = await getAllNotifications(pageNum, 10);
+      const filters: Record<string, unknown> = {
+        page: pageNum,
+        limit: 10,
+      };
+
+      if (tabFilter === "unread") {
+        filters.read = false;
+      } else if (tabFilter === "read") {
+        filters.read = true;
       }
 
-      if (result.success && result.data) {
-        const newNotifications = result.data;
+      const result = await getNotifications(filters);
+
+      if (result.success) {
+        const newNotifications = Array.isArray(result.data) ? result.data : [];
         setNotifications(prev => 
           append ? [...prev, ...newNotifications] : newNotifications
         );
-        setHasMore(newNotifications.length === 10);
+        if (result.pagination) {
+          setHasMore(result.pagination.page < result.pagination.totalPages);
+        } else {
+          setHasMore(newNotifications.length === 10);
+        }
       }
 
       // Carregar contadores
@@ -91,16 +94,21 @@ export default function NotificationsPage() {
   // Função para carregar contadores
   const loadCounts = async () => {
     try {
-      const [allResult, unreadResult, readResult] = await Promise.all([
-        getAllNotifications(1, 1000),
-        getUnreadNotifications(1, 1000),
-        getReadNotifications(1, 1000)
+      const [allResult, unreadCountResult] = await Promise.all([
+        getNotifications({ page: 1, limit: 1 }),
+        getUnreadCount(),
       ]);
 
+      const totalAll = allResult.success ? allResult.pagination?.total ?? 0 : 0;
+      const unreadTotal = unreadCountResult.success
+        ? unreadCountResult.data?.count ?? 0
+        : 0;
+      const readTotal = Math.max(0, totalAll - unreadTotal);
+
       setCounts({
-        all: allResult.success ? (allResult.data?.length || 0) : 0,
-        unread: unreadResult.success ? (unreadResult.data?.length || 0) : 0,
-        read: readResult.success ? (readResult.data?.length || 0) : 0,
+        all: totalAll,
+        unread: unreadTotal,
+        read: readTotal,
       });
     } catch (error) {
       console.error("Erro ao carregar contadores:", error);
@@ -126,7 +134,7 @@ export default function NotificationsPage() {
   // Marcar notificação como lida
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.read) {
-      const result = await markNotificationAsRead(notification.id);
+      const result = await markNotificationAsRead({ notificationId: notification.id });
       if (result.success) {
         setNotifications(prev => 
           prev.map(n => 
@@ -154,7 +162,7 @@ export default function NotificationsPage() {
 
   // Marcar notificação individual como lida
   const handleMarkAsRead = async (notificationId: string) => {
-    const result = await markNotificationAsRead(notificationId);
+    const result = await markNotificationAsRead({ notificationId });
     if (result.success) {
       setNotifications(prev => 
         prev.map(n => 
@@ -170,7 +178,7 @@ export default function NotificationsPage() {
 
   // Deletar notificação
   const handleDeleteNotification = async (notificationId: string) => {
-    const result = await deleteNotification(notificationId);
+    const result = await deleteNotification({ notificationId });
     if (result.success) {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       await loadCounts();

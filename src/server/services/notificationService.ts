@@ -37,7 +37,7 @@ export class NotificationService {
    */
   static async getUserNotifications(
     userId: string,
-    filters: NotificationFiltersInput = {}
+    filters: Partial<NotificationFiltersInput> = {}
   ) {
     const { read, type, page = 1, limit = 20 } = filters;
 

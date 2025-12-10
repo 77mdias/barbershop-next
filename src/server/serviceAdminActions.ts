@@ -79,7 +79,7 @@ export async function createService(data: CreateServiceInput) {
     if (error instanceof ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((issue) => issue.message).join(", "),
       };
     }
 
@@ -168,7 +168,7 @@ export async function updateService(serviceId: string, data: UpdateServiceInput)
     if (error instanceof ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((issue) => issue.message).join(", "),
       };
     }
 

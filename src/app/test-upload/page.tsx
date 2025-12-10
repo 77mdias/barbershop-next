@@ -13,12 +13,14 @@
 import React, { useState } from 'react';
 import { ProfileUpload, ReviewUpload } from '@/components/upload';
 import { getUploadSystemInfo } from '@/lib/upload';
+import { ENVIRONMENT } from '@/lib/upload/config';
 
 export default function TestUploadPage() {
   const [profileUrl, setProfileUrl] = useState<string>('');
   const [reviewUrls, setReviewUrls] = useState<string[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [systemInfo] = useState(() => getUploadSystemInfo());
+  const environmentDetails = ENVIRONMENT;
   
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -63,10 +65,10 @@ export default function TestUploadPage() {
             <div>
               <h3 className="font-medium text-gray-900">Environment</h3>
               <div className="text-sm text-gray-600 space-y-1">
-                <p>• Production: {systemInfo.environment.isProduction ? '✅' : '❌'}</p>
-                <p>• Vercel: {systemInfo.environment.isVercel ? '✅' : '❌'}</p>
-                <p>• Read-only FS: {systemInfo.environment.isReadOnlyFS ? '✅' : '❌'}</p>
-                <p>• Development: {systemInfo.environment.isDevelopment ? '✅' : '❌'}</p>
+                <p>• Production: {environmentDetails.isProduction ? '✅' : '❌'}</p>
+                <p>• Vercel: {environmentDetails.isVercel ? '✅' : '❌'}</p>
+                <p>• Read-only FS: {environmentDetails.isReadOnlyFS ? '✅' : '❌'}</p>
+                <p>• Development: {environmentDetails.isDevelopment ? '✅' : '❌'}</p>
               </div>
             </div>
             <div>

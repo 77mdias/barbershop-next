@@ -113,7 +113,7 @@ export async function getRecentNotifications(limit = 5) {
 /**
  * Server Action para marcar notificação como lida
  */
-export async function markNotificationAsRead(data: MarkAsReadInput) {
+export async function markNotificationAsRead(data: MarkAsReadInput | string) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -124,7 +124,10 @@ export async function markNotificationAsRead(data: MarkAsReadInput) {
       };
     }
 
-    const validated = MarkAsReadSchema.parse(data);
+    const notificationId =
+      typeof data === "string" ? data : data.notificationId;
+
+    const validated = MarkAsReadSchema.parse({ notificationId });
 
     // Verificar se a notificação pertence ao usuário
     const notification = await NotificationService.findById(

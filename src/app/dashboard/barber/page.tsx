@@ -41,6 +41,23 @@ export default async function BarberDashboardPage() {
   const metricsResult = await getBarberMetrics(session.user.id);
   const metrics = metricsResult.success ? metricsResult.data : null;
 
+  const ratingDistribution = [5, 4, 3, 2, 1].map((score) => {
+    const entry = metrics?.ratingDistribution?.find(
+      (item) => item.rating === score
+    );
+    const rawPercentage = entry?.percentage ?? 0;
+    const normalizedPercentage = Math.max(
+      0,
+      Math.min(100, Math.round(rawPercentage))
+    );
+
+    return {
+      rating: score,
+      percentage: normalizedPercentage,
+      count: entry?.count ?? 0,
+    };
+  });
+
   return (
     <div className="container mt-12 mb-16 mx-auto py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -233,6 +250,33 @@ export default async function BarberDashboardPage() {
             {/* Lista de Reviews do Barbeiro */}
             <Card>
               <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-6 h-6" />
+                  Distribuição de Notas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {ratingDistribution.map((distribution) => (
+                    <div
+                      key={`summary-${distribution.rating}`}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span className="flex items-center gap-1 font-medium">
+                        {distribution.rating}
+                        <Star className="w-4 h-4 text-yellow-500" />
+                      </span>
+                      <span className="text-muted-foreground">
+                        {distribution.count} reviews · {distribution.percentage}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <MessageSquare className="w-6 h-6" />
@@ -315,17 +359,22 @@ export default async function BarberDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((star) => (
-                      <div key={star} className="flex items-center gap-2">
-                        <span className="text-sm w-4">{star}</span>
+                    {ratingDistribution.map((distribution) => (
+                      <div
+                        key={distribution.rating}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="text-sm w-4">{distribution.rating}</span>
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-yellow-400 h-2 rounded-full"
-                            style={{ width: `${Math.random() * 100}%` }}
+                            style={{ width: `${distribution.percentage}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-600 w-8">--</span>
+                        <span className="text-sm text-gray-600 w-10 text-right">
+                          {distribution.percentage}%
+                        </span>
                       </div>
                     ))}
                   </div>

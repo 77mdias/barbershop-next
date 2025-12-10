@@ -88,8 +88,8 @@ export class ProductionStorageManager {
     
     try {
       // Validar tamanho
-      if (buffer.length > UPLOAD_CONFIG.maxFileSize) {
-        throw new Error(`File too large. Maximum ${UPLOAD_CONFIG.maxFileSize / 1024 / 1024}MB`);
+      if (buffer.length > UPLOAD_CONFIG.MAX_FILE_SIZE) {
+        throw new Error(`File too large. Maximum ${UPLOAD_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB`);
       }
       
       // Gerar nome único

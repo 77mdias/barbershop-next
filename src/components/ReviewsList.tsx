@@ -112,11 +112,11 @@ export function ReviewsList({
         setReviews(result.data.reviews);
         setTotalPages(result.data.pagination.totalPages);
       } else {
-        toast.error("Erro ao carregar avaliações");
+        showToast.error("Erro ao carregar avaliações");
       }
     } catch (error) {
       console.error("Erro ao carregar avaliações:", error);
-      toast.error("Erro inesperado ao carregar avaliações");
+      showToast.error("Erro inesperado", "Erro inesperado ao carregar avaliações");
     } finally {
       setLoading(false);
     }

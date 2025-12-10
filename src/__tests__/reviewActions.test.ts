@@ -75,7 +75,20 @@ import { revalidatePath } from "next/cache";
 
 // Type mocks
 const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
-const mockDb = db as jest.Mocked<typeof db>;
+
+type MockDb = {
+  serviceHistory: {
+    findFirst: jest.Mock;
+    findMany: jest.Mock;
+    findUnique: jest.Mock;
+    update: jest.Mock;
+    aggregate: jest.Mock;
+    groupBy: jest.Mock;
+    count: jest.Mock;
+  };
+};
+
+const mockDb = db as unknown as MockDb;
 const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
 
 describe("reviewActions", () => {
@@ -313,6 +326,8 @@ describe("reviewActions", () => {
       const partialUpdate = {
         id: "service-history-123",
         rating: 5,
+        images: [],
+        feedback: undefined,
       };
 
       const existingReview = {

@@ -75,11 +75,37 @@ export default function FriendRequestsPage() {
       ]);
 
       if (receivedRes.success && receivedRes.data) {
-        setReceivedRequests(receivedRes.data);
+        const receiverInfo = {
+          id: user.id,
+          name: user.name ?? "",
+          nickname: (user as any).nickname ?? null,
+          image: user.image ?? null,
+          role: (user as any).role ?? "CLIENT",
+        };
+
+        setReceivedRequests(
+          receivedRes.data.map((request: any) => ({
+            ...request,
+            receiver: request.receiver ?? receiverInfo,
+          }))
+        );
       }
 
       if (sentRes.success && sentRes.data) {
-        setSentRequests(sentRes.data);
+        const senderInfo = {
+          id: user.id,
+          name: user.name ?? "",
+          nickname: (user as any).nickname ?? null,
+          image: user.image ?? null,
+          role: (user as any).role ?? "CLIENT",
+        };
+
+        setSentRequests(
+          sentRes.data.map((request: any) => ({
+            ...request,
+            sender: request.sender ?? senderInfo,
+          }))
+        );
       }
     } catch (error) {
       console.error("Erro ao carregar solicitações:", error);

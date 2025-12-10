@@ -150,7 +150,7 @@ export async function DELETE(request: NextRequest) {
     
     // 3. Delete File - TODO: Implement delete server action
     console.log(`⚠️ Delete functionality temporarily disabled: ${filename}`);
-    const deleteResult = { success: true }; // Temporary placeholder
+    const deleteResult: { success: boolean; error?: string } = { success: true }; // Temporary placeholder
     
     if (!deleteResult.success) {
       console.log(`❌ Delete failed: ${deleteResult.error}`);

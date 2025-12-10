@@ -41,7 +41,7 @@ export const CreateNotificationSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   message: z.string().min(1, "Mensagem é obrigatória"),
   relatedId: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 // Type exports

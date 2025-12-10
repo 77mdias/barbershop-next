@@ -261,7 +261,7 @@ export class FriendshipService {
   /**
    * Lista amigos do usuário
    */
-  static async getFriends(userId: string, filters: FriendshipFiltersInput = {}) {
+  static async getFriends(userId: string, filters: Partial<FriendshipFiltersInput> = {}) {
     const { search, status = "ACCEPTED", page = 1, limit = 20 } = filters;
 
     const where: Prisma.FriendshipWhereInput = {

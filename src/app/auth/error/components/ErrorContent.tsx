@@ -285,7 +285,7 @@ export default function ErrorContent() {
         : [];
     }
 
-    const details = [];
+    const details: string[] = [];
 
     // Adicionar contexto sobre o que foi tentado
     if (userInfo.attemptedProvider) {

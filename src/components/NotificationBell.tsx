@@ -19,8 +19,8 @@ interface Notification {
   title: string;
   message: string;
   read: boolean;
-  createdAt: Date;
-  relatedId?: string;
+  createdAt: Date | string;
+  relatedId?: string | null;
   metadata?: any;
 }
 
@@ -40,11 +40,25 @@ export function NotificationBell() {
       ]);
 
       if (notificationsResult.success) {
-        setNotifications(notificationsResult.data || []);
+        const items = Array.isArray(notificationsResult.data)
+          ? notificationsResult.data
+          : [];
+        setNotifications(
+          items.map((notification) => ({
+            ...notification,
+            relatedId: notification.relatedId ?? null,
+          })) as Notification[],
+        );
       }
 
       if (countResult.success) {
-        setUnreadCount(countResult.data || 0);
+        const rawCount = countResult.data;
+        const normalizedCount =
+          typeof rawCount === "number"
+            ? rawCount
+            : rawCount?.count ?? 0;
+
+        setUnreadCount(normalizedCount);
       }
     } catch (error) {
       console.error("Erro ao carregar notificações:", error);

@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ChatBell } from "@/components/ChatBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 import MenuNavigation from "./MenuNavigation";
 import styles from "@/app/scss/components/CourseCard.module.scss";
@@ -25,9 +26,9 @@ const Header = () => {
   };
 
   return (
-    <header className="glass-card fixed left-0 right-0 top-0 z-50 ">
+    <header className="fixed left-0 right-0 top-0 z-50 h-[65px] border-b border-border bg-background/60 backdrop-blur-md px-4">
       {/* Desktop Layout */}
-      <div className="container mx-auto hidden md:grid grid-cols-3 h-16 items-center px-4">
+      <div className="container mx-auto hidden md:grid grid-cols-3 h-full items-center">
         {/* Logo - Coluna 1 */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center">
@@ -50,43 +51,31 @@ const Header = () => {
         <nav className="flex items-center lg:space-x-8 lg:text-md md:space-x-2 md:text-sm justify-center">
           <Link
             href="/"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+            className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
           >
             Início
-            <span
-              className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-            ></span>
           </Link>
           <Link
             href="/gallery"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+            className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
           >
             Galeria
-            <span
-              className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-            ></span>
           </Link>
           <Link
             href="/community"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+            className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
           >
             Comunidade
-            <span
-              className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-            ></span>
           </Link>
           <Link
             href="/scheduling"
-            className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+            className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
           >
             Agendamento
-            <span
-              className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-            ></span>
           </Link>
           <Link
               href="/reviews"
-              className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+              className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Avaliações
@@ -95,12 +84,9 @@ const Header = () => {
             {user?.role === "ADMIN" && (
               <a
                 href="/dashboard"
-                className={`${styles.linkText} group relative text-[var(--text)] transition-colors duration-200 `}
+                className="text-[14px] font-normal text-muted-foreground hover:text-foreground transition-colors"
               >
                 Dashboard
-                <span
-                  className={`${styles.bgGradient} absolute -bottom-1 left-0 h-0.5 w-0 transition-all duration-300 group-hover:w-full`}
-                ></span>
               </a>
             )}
           </ClientOnlyAuth>
@@ -108,6 +94,8 @@ const Header = () => {
 
         {/* Botões de Ação - Coluna 3 (Direita) */}
         <div className="flex items-center justify-end space-x-4">
+          <ThemeToggle />
+          
           {/* Chat e Notificações - só aparecem para usuários autenticados */}
           <ClientOnlyAuth>
             {isAuthenticated && (
@@ -145,6 +133,8 @@ const Header = () => {
 
         {/* Botões de Ação Mobile */}
         <div className="flex items-center space-x-2">
+          <ThemeToggle />
+          
           {/* Chat e Notificações Mobile - só aparecem para usuários autenticados */}
           <ClientOnlyAuth>
             {isAuthenticated && (

@@ -127,7 +127,7 @@ export function SalonCard({
           alt={name}
           fill
           className="object-cover"
-          onError={(e) => {
+          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
             // Fallback para imagem padrão
             e.currentTarget.src = "/images/salon-placeholder.jpg";
           }}

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,9 +60,8 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
 
   // Buscar dados do usuário
   const userResult = await getUserById(params.id);
-  const user = userResult.success ? userResult.data : null;
 
-  if (!user) {
+  if (!userResult.success || !userResult.data) {
     return (
       <div className="container mt-12 mb-16 mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto">
@@ -82,6 +82,8 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
       </div>
     );
   }
+
+  const user = userResult.data;
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -111,11 +113,19 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
 
   // Calcular estatísticas
   const totalAppointments = user.appointments?.length || 0;
-  const appointmentsWithReviews = user.appointments?.filter(apt => apt.serviceHistory?.rating) || [];
-  const averageRating = appointmentsWithReviews.length > 0 
-    ? appointmentsWithReviews.reduce((acc, apt) => acc + (apt.serviceHistory?.rating || 0), 0) / appointmentsWithReviews.length
+  const appointmentsWithReviews = (user.appointments || []).filter(
+    (apt) => apt.serviceHistory?.rating,
+  );
+  const averageRating = appointmentsWithReviews.length > 0
+    ? appointmentsWithReviews.reduce(
+        (acc, apt) => acc + (apt.serviceHistory?.rating || 0),
+        0,
+      ) / appointmentsWithReviews.length
     : 0;
-  const totalSpent = appointmentsWithReviews.reduce((acc, apt) => acc + (apt.serviceHistory?.finalPrice || 25), 0);
+  const totalSpent = appointmentsWithReviews.reduce((acc, apt) => {
+    const price = apt.serviceHistory?.finalPrice;
+    return acc + (typeof price === "number" ? price : Number(price ?? 25));
+  }, 0);
 
   return (
     <div className="container mt-8 sm:mt-12 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
@@ -293,7 +303,13 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
                               )}
                             </TableCell>
                             <TableCell>
-                              R$ {(appointment.serviceHistory?.finalPrice || 25).toFixed(2)}
+                              {(() => {
+                                const priceValue = appointment.serviceHistory?.finalPrice;
+                                const price = typeof priceValue === "number"
+                                  ? priceValue
+                                  : Number(priceValue ?? 25);
+                                return `R$ ${price.toFixed(2)}`;
+                              })()}
                             </TableCell>
                           </TableRow>
                         ))}

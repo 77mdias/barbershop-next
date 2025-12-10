@@ -41,23 +41,25 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-card px-4 py-2 text-foreground text-sm font-medium transition-colors hover:bg-[#E7517B] hover:text-white focus:bg-[#E7517B] focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=open]:text-accent-foreground data-[state=open]:bg-[#E7517B] data-[state=open]:hover:bg-[#E7517B] data-[state=open]:focus:bg-[#E7517B]",
+  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-card px-4 py-2 text-foreground text-sm font-medium transition-colors  hover:text-white focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=open]:text-accent-foreground   ",
 );
 
 const NavigationMenuTrigger = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger> & { showChevron?: boolean }
+>(({ className, children, showChevron = true, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
     className={cn(navigationMenuTriggerStyle(), "group", className)}
     {...props}
   >
     {children}{" "}
-    <ChevronDown
-      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
-      aria-hidden="true"
-    />
+    {showChevron && (
+      <ChevronDown
+        className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
+        aria-hidden="true"
+      />
+    )}
   </NavigationMenuPrimitive.Trigger>
 ));
 NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName;

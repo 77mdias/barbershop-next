@@ -47,7 +47,25 @@ import { db } from "@/lib/prisma";
 
 // Type mocks
 const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
-const mockDb = db as jest.Mocked<typeof db>;
+
+type MockDb = {
+  serviceHistory: {
+    aggregate: jest.Mock;
+    count: jest.Mock;
+    findMany: jest.Mock;
+    groupBy: jest.Mock;
+  };
+  user: {
+    count: jest.Mock;
+    groupBy: jest.Mock;
+    findMany: jest.Mock;
+  };
+  appointment: {
+    count: jest.Mock;
+  };
+};
+
+const mockDb = db as unknown as MockDb;
 
 describe("dashboardActions", () => {
   // Common test data
@@ -441,6 +459,10 @@ describe("dashboardActions", () => {
       const result = await getAdminMetrics();
 
       expect(result.success).toBe(true);
+      expect(result.data).toBeDefined();
+      if (!result.data) {
+        throw new Error("Expected admin metrics data");
+      }
       expect(result.data.clientsCount).toBe(50);
       expect(result.data.barbersCount).toBe(0);
       expect(result.data.adminsCount).toBe(0);
@@ -466,6 +488,10 @@ describe("dashboardActions", () => {
       const result = await getAdminMetrics();
 
       expect(result.success).toBe(true);
+      expect(result.data).toBeDefined();
+      if (!result.data) {
+        throw new Error("Expected admin metrics data");
+      }
       expect(result.data.globalAverage).toBe(0);
       expect(result.data.totalReviews).toBe(0);
     });

@@ -275,7 +275,7 @@ export async function createUser(data: UserFormInputType) {
     }
 
     // Hash da senha se fornecida
-    let hashedPassword = undefined;
+    let hashedPassword: string | null = null;
     if (validatedData.password) {
       hashedPassword = await bcrypt.hash(validatedData.password, 12);
     }

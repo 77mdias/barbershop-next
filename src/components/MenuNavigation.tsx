@@ -6,6 +6,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { UserAvatar } from "@/components/UserAvatar";
 
 
 import React from "react";
@@ -30,8 +31,14 @@ const MenuNavigation = () => {
         {/* Desktop - Menu */}
         <NavigationMenu className="hidden md:block">
           <NavigationMenuItem className="list-none">
-            <NavigationMenuTrigger>
-              <Menu size={24} className="text-foreground/80" />
+            <NavigationMenuTrigger showChevron={false} className="bg-transparent p-0 hover:bg-transparent focus:bg-transparent ">
+              <UserAvatar 
+                src={user.image} 
+                name={user.name} 
+                email={user.email}
+                size="md"
+                className="cursor-pointer transition-transform hover:scale-105"
+              />
             </NavigationMenuTrigger>
             <NavigationMenuContent className="flex">
               <ul className="grid w-[200px] list-none gap-4">
@@ -69,8 +76,13 @@ const MenuNavigation = () => {
         {/* Mobile - Ícone de Usuário */}
         <NavigationMenu className="md:hidden ">
           <NavigationMenuItem className="list-none">
-            <NavigationMenuTrigger className="flex items-center text-black justify-center rounded-full border transition-all duration-300 hover:from-[#D13F6A] hover:to-[#7A3DD8]">
-              <User size={16} className="text-white"/>
+            <NavigationMenuTrigger showChevron={false} className="flex items-center justify-center rounded-full border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
+              <UserAvatar 
+                src={user.image} 
+                name={user.name} 
+                email={user.email}
+                size="sm"
+              />
             </NavigationMenuTrigger>
             <NavigationMenuContent className="flex">
               <ul className="grid w-[200px] list-none gap-4">

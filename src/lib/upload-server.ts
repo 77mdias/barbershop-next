@@ -110,6 +110,7 @@ export async function uploadMultipleFiles(
 }
 
 export async function validateFile(file: File): Promise<any> {
+  await loadServerModules();
   return await validateUploadFile(file, 'profile');
 }
 
@@ -120,8 +121,8 @@ export function getUploadSystemInfo(): any {
     storageStrategy: "filesystem",
     features: ["File validation", "Image processing", "Rate limiting"],
     config: {
-      maxFileSize: UPLOAD_CONFIG.maxFileSize,
-      allowedTypes: UPLOAD_CONFIG.allowedTypes
+      maxFileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
+      allowedTypes: UPLOAD_CONFIG.ALLOWED_MIME_TYPES
     }
   };
 }

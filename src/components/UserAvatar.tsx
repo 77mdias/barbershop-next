@@ -52,7 +52,7 @@ export function UserAvatar({
 
   return (
     <div className={cn(
-      "relative inline-block rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500",
+      "relative inline-block rounded-full overflow-hidden ",
       sizeClasses[size],
       className
     )}>

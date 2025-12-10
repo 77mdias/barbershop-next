@@ -223,7 +223,7 @@ export async function createResponsiveSizes(
   fileBuffer: Buffer,
   sizes: Array<{ width: number; height?: number; suffix: string }>
 ): Promise<Array<{ buffer: Buffer; suffix: string; metadata: sharp.Metadata }>> {
-  const results = [];
+  const results: Array<{ buffer: Buffer; suffix: string; metadata: sharp.Metadata }> = [];
   
   for (const size of sizes) {
     try {
@@ -259,9 +259,7 @@ export async function removeExifData(fileBuffer: Buffer): Promise<Buffer> {
     const cleanBuffer = await sharp(fileBuffer)
       .jpeg({ 
         quality: 85,
-        progressive: true,
-        // Remove all metadata including EXIF
-        keepExif: false
+        progressive: true
       })
       .toBuffer();
       

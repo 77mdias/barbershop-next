@@ -230,16 +230,20 @@ export async function getReportsData() {
       : 0;
 
     // Receita (simulada baseada nos preços dos serviços)
-    const totalRevenue = Number(allReviews.reduce((acc, review) => acc + (review.finalPrice || 25), 0));
+    const totalRevenue = allReviews.reduce((acc, review) => {
+      const finalPrice = review.finalPrice;
+      const numericPrice = typeof finalPrice === "number" ? finalPrice : Number(finalPrice ?? 25);
+      return acc + numericPrice;
+    }, 0);
     
     // Receita mensal (estimativa)
     const monthlyRevenue = Number(totalRevenue * 0.3); // Aproximadamente 30% da receita total no mês atual
 
     // Top barbeiros
     const barbeirosData = await getBarbersForAdmin();
-    const topBarbers = barbeirosData.success 
+    const topBarbers = barbeirosData.success && Array.isArray(barbeirosData.data)
       ? barbeirosData.data
-          .filter(b => b.totalReviews > 0)
+          .filter((b) => b.totalReviews > 0)
           .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
           .slice(0, 10)
       : [];
@@ -359,7 +363,7 @@ export async function getUserById(userId: string) {
             serviceHistory: {
               select: {
                 rating: true,
-                comment: true,
+                feedback: true,
                 finalPrice: true,
               },
             },
