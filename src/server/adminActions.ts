@@ -241,12 +241,14 @@ export async function getReportsData() {
 
     // Top barbeiros
     const barbeirosData = await getBarbersForAdmin();
-    const topBarbers = barbeirosData.success && Array.isArray(barbeirosData.data)
-      ? barbeirosData.data
-          .filter((b) => b.totalReviews > 0)
-          .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
-          .slice(0, 10)
+    const barbersList = barbeirosData.success && Array.isArray(barbeirosData.data)
+      ? (barbeirosData.data as Array<{ id: string; name: string; totalReviews: number; averageRating?: number | null }>)
       : [];
+
+    const topBarbers = barbersList
+      .filter((b) => b.totalReviews > 0)
+      .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+      .slice(0, 10);
 
     const reportsData: ReportsData = {
       totalRevenue,

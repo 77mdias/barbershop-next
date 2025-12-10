@@ -82,6 +82,9 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
   }
 
   const user = userResult.data;
+  const userImage = "image" in user
+    ? (user as { image?: string | null }).image ?? null
+    : null;
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -330,7 +333,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
             <Card>
               <CardContent className="p-6 text-center">
                 <UserAvatar
-                  src={user.image}
+                  src={userImage ?? undefined}
                   name={user.name}
                   email={user.email}
                   size="xl"

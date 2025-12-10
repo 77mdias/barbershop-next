@@ -9,10 +9,11 @@ import { FriendshipService } from "@/server/services/friendshipService";
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -32,7 +33,7 @@ export async function PATCH(
     }
 
     // Verificar permissão
-    const friendRequest = await FriendshipService.findRequestById(params.id);
+    const friendRequest = await FriendshipService.findRequestById(id);
 
     if (!friendRequest) {
       return NextResponse.json(
@@ -50,9 +51,9 @@ export async function PATCH(
 
     let result;
     if (action === "accept") {
-      result = await FriendshipService.acceptFriendRequest(params.id);
+      result = await FriendshipService.acceptFriendRequest(id);
     } else {
-      result = await FriendshipService.rejectFriendRequest(params.id);
+      result = await FriendshipService.rejectFriendRequest(id);
     }
 
     return NextResponse.json({
@@ -82,10 +83,11 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -94,7 +96,7 @@ export async function DELETE(
       );
     }
 
-    await FriendshipService.cancelFriendRequest(params.id, session.user.id);
+    await FriendshipService.cancelFriendRequest(id, session.user.id);
 
     return NextResponse.json({
       success: true,

@@ -9,10 +9,11 @@ import { FriendshipService } from "@/server/services/friendshipService";
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -21,7 +22,7 @@ export async function DELETE(
       );
     }
 
-    await FriendshipService.removeFriend(session.user.id, params.id);
+    await FriendshipService.removeFriend(session.user.id, id);
 
     return NextResponse.json({
       success: true,

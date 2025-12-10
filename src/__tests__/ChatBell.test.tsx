@@ -34,27 +34,48 @@ describe("ChatBell", () => {
   const mockConversations = [
     {
       id: "conv-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
       lastMessageAt: new Date(),
       participants: [
         {
+          id: "part-1",
+          createdAt: new Date(),
+          userId: "user-1",
+          conversationId: "conv-1",
+          lastReadAt: null,
           user: {
             id: "user-1",
             name: "João Silva",
             image: "/avatar1.jpg",
+            nickname: null,
+            email: "joao@example.com",
           },
         },
         {
+          id: "part-2",
+          createdAt: new Date(),
+          userId: "current-user",
+          conversationId: "conv-1",
+          lastReadAt: null,
           user: {
             id: "current-user",
             name: "Current User",
             image: "/avatar2.jpg",
+            nickname: null,
+            email: "current@example.com",
           },
         },
       ],
       messages: [
         {
+          id: "msg-1",
           content: "Oi, tudo bem?",
           createdAt: new Date(),
+          updatedAt: new Date(),
+          senderId: "user-1",
+          conversationId: "conv-1",
+          isRead: false,
         },
       ],
       _count: {
@@ -63,27 +84,48 @@ describe("ChatBell", () => {
     },
     {
       id: "conv-2",
+      createdAt: new Date(),
+      updatedAt: new Date(),
       lastMessageAt: new Date(),
       participants: [
         {
+          id: "part-3",
+          createdAt: new Date(),
+          userId: "user-2",
+          conversationId: "conv-2",
+          lastReadAt: null,
           user: {
             id: "user-2",
             name: "Maria Santos",
             image: "/avatar3.jpg",
+            nickname: null,
+            email: "maria@example.com",
           },
         },
         {
+          id: "part-4",
+          createdAt: new Date(),
+          userId: "current-user",
+          conversationId: "conv-2",
+          lastReadAt: null,
           user: {
             id: "current-user",
             name: "Current User",
             image: "/avatar2.jpg",
+            nickname: null,
+            email: "current@example.com",
           },
         },
       ],
       messages: [
         {
+          id: "msg-2",
           content: "Vamos marcar?",
           createdAt: new Date(),
+          updatedAt: new Date(),
+          senderId: "user-2",
+          conversationId: "conv-2",
+          isRead: true,
         },
       ],
       _count: {
@@ -97,6 +139,12 @@ describe("ChatBell", () => {
     mockGetUserConversations.mockResolvedValue({
       success: true,
       data: mockConversations,
+      pagination: {
+        page: 1,
+        limit: 5,
+        total: mockConversations.length,
+        totalPages: Math.ceil(mockConversations.length / 5) || 1,
+      },
     });
     mockGetUnreadCount.mockResolvedValue({
       success: true,
@@ -185,6 +233,7 @@ describe("ChatBell", () => {
     mockGetUserConversations.mockResolvedValue({
       success: true,
       data: [],
+      pagination: { page: 1, limit: 5, total: 0, totalPages: 0 },
     });
     mockGetUnreadCount.mockResolvedValue({
       success: true,
@@ -260,6 +309,7 @@ describe("ChatBell", () => {
     mockGetUserConversations.mockResolvedValue({
       success: true,
       data: [],
+      pagination: { page: 1, limit: 5, total: 0, totalPages: 0 },
     });
     mockGetUnreadCount.mockResolvedValue({
       success: true,

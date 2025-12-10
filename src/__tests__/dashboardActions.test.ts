@@ -268,7 +268,7 @@ describe("dashboardActions", () => {
       const result = await getDashboardMetrics(userId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Usuário não autenticado");
+      expect((result as { error?: string }).error).toBe("Usuário não autenticado");
     });
 
     test("deve rejeitar se userId diferente e não ADMIN", async () => {
@@ -280,7 +280,7 @@ describe("dashboardActions", () => {
       const result = await getDashboardMetrics(userId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Não autorizado");
+      expect((result as { error?: string }).error).toBe("Não autorizado");
     });
 
     test("deve permitir ADMIN acessar dados de outros usuários", async () => {
@@ -312,7 +312,7 @@ describe("dashboardActions", () => {
       const result = await getDashboardMetrics(userId);
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Erro interno do servidor");
+      expect((result as { error?: string }).error).toBe("Erro interno do servidor");
     });
   });
 
@@ -398,8 +398,8 @@ describe("dashboardActions", () => {
         paidServices: 127,
       });
 
-      expect(result.data.ratingDistribution).toHaveLength(3);
-      expect(result.data.topBarbers).toHaveLength(2);
+      expect(result.data!.ratingDistribution).toHaveLength(3);
+      expect(result.data!.topBarbers).toHaveLength(2);
     });
 
     test("deve rejeitar se não autenticado", async () => {

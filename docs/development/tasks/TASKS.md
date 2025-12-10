@@ -208,19 +208,20 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/app/dashboard/admin/services/page.tsx` - Integração com ServiceTableActions ✅
   - **Dependências**: Sprint 4 concluído ✅
 
-- [ ] **#023** - CRUD de Promoções para Admin 🎁 **PLANEJADO**
+- [ ] **#023** - CRUD de Promoções para Admin 🎁 **EM ANDAMENTO**
   - **Descrição**: Implementar sistema completo de gestão de promoções/vouchers
   - **Componentes**: promotionAdminActions.ts, página /dashboard/admin/promotions
   - **Estimativa**: 3-4 horas
-  - **Assignee**: A definir
-  - **Status**: Planejado
+  - **Assignee**: GitHub Copilot
+  - **Status**: Em andamento (backend + páginas entregues, filtros avançados e testes pendentes)
   - **Tarefas**:
-    - [ ] Criar promotionAdminActions.ts (CRUD completo)
-    - [ ] Criar página /dashboard/admin/promotions
-    - [ ] Implementar forms de criação/edição
-    - [ ] Adicionar filtros por tipo/status
-    - [ ] Suporte a promoções globais vs específicas
-    - [ ] Vincular promoções a serviços (M:M)
+    - [x] Criar promotionAdminActions.ts (CRUD completo)
+    - [x] Criar página /dashboard/admin/promotions
+    - [x] Implementar forms de criação/edição
+    - [x] Adicionar filtros por tipo/status
+    - [x] Suporte a promoções globais vs específicas
+    - [x] Vincular promoções a serviços (M:M)
+    - [x] Adicionar testes de PromotionForm e promotionAdminActions
   - **Dependências**: Sprint 4 concluído ✅
 
 - [ ] **#024** - Soft Delete e Edição de Usuários 👥 **PLANEJADO**

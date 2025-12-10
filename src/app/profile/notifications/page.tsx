@@ -383,7 +383,7 @@ export default function NotificationsPage() {
                           </h3>
                           <div className="flex items-center gap-2 ml-2">
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {getRelativeTime(notification.createdAt)}
+                              {getRelativeTime(new Date(notification.createdAt))}
                             </span>
                             
                             {/* Menu de ações */}

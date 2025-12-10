@@ -213,7 +213,7 @@ export function NotificationBell() {
                             {notification.title}
                           </p>
                           <span className="text-xs text-muted-foreground ml-2">
-                            {getRelativeTime(notification.createdAt)}
+                            {getRelativeTime(new Date(notification.createdAt))}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

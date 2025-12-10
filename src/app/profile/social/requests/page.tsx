@@ -68,6 +68,10 @@ export default function FriendRequestsPage() {
 
   const loadData = async () => {
     setIsLoadingData(true);
+    if (!user) {
+      setIsLoadingData(false);
+      return;
+    }
     try {
       const [receivedRes, sentRes] = await Promise.all([
         getReceivedRequests(),

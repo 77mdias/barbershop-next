@@ -126,6 +126,9 @@ declare module "lucide-react" {
   export const MoreHorizontal: Icon;
   export const MoreVertical: Icon;
   export const Circle: Icon;
+  export const Tag: Icon;
+  export const Percent: Icon;
+  export const Globe2: Icon;
 }
 
 declare module "@aws-sdk/client-s3";

@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
+import { TextEncoder, TextDecoder } from "util";
 
 // Mock Next.js router
 jest.mock("next/navigation", () => ({
@@ -79,3 +80,13 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Polyfill encoding APIs used by Next internals
+if (!global.TextEncoder) {
+  global.TextEncoder = TextEncoder;
+}
+
+if (!global.TextDecoder) {
+  // @ts-expect-error -- TextDecoder existe via util em ambiente de teste Node
+  global.TextDecoder = TextDecoder;
+}

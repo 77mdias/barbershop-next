@@ -43,6 +43,8 @@ describe("NotificationBell", () => {
       read: false,
       createdAt: new Date(),
       relatedId: "user-1",
+      userId: "current-user",
+      metadata: {},
     },
     {
       id: "2",
@@ -52,6 +54,8 @@ describe("NotificationBell", () => {
       read: true,
       createdAt: new Date(),
       relatedId: "user-2",
+      userId: "current-user",
+      metadata: {},
     },
   ];
 
@@ -63,7 +67,7 @@ describe("NotificationBell", () => {
     });
     mockGetUnreadCount.mockResolvedValue({
       success: true,
-      data: 1,
+      data: { count: 1 },
     });
     mockMarkNotificationAsRead.mockResolvedValue({ success: true });
     mockMarkAllNotificationsAsRead.mockResolvedValue({ success: true });
@@ -93,7 +97,7 @@ describe("NotificationBell", () => {
   test("does not display badge when there are no unread notifications", async () => {
     mockGetUnreadCount.mockResolvedValue({
       success: true,
-      data: 0,
+      data: { count: 0 },
     });
 
     render(<NotificationBell />);
@@ -110,7 +114,7 @@ describe("NotificationBell", () => {
   test("shows 9+ when unread count is more than 9", async () => {
     mockGetUnreadCount.mockResolvedValue({
       success: true,
-      data: 15,
+      data: { count: 15 },
     });
 
     render(<NotificationBell />);
@@ -147,7 +151,7 @@ describe("NotificationBell", () => {
     });
     mockGetUnreadCount.mockResolvedValue({
       success: true,
-      data: 0,
+      data: { count: 0 },
     });
 
     render(<NotificationBell />);
@@ -231,7 +235,7 @@ describe("NotificationBell", () => {
   test("hides mark all as read button when no unread notifications", async () => {
     mockGetUnreadCount.mockResolvedValue({
       success: true,
-      data: 0,
+      data: { count: 0 },
     });
 
     render(<NotificationBell />);
@@ -259,6 +263,9 @@ describe("NotificationBell", () => {
         message: "Test",
         read: false,
         createdAt: new Date(),
+        relatedId: null,
+        userId: "current-user",
+        metadata: {},
       },
       {
         id: "2",
@@ -267,6 +274,9 @@ describe("NotificationBell", () => {
         message: "Test",
         read: false,
         createdAt: new Date(),
+        relatedId: null,
+        userId: "current-user",
+        metadata: {},
       },
       {
         id: "3",
@@ -275,6 +285,9 @@ describe("NotificationBell", () => {
         message: "Test",
         read: false,
         createdAt: new Date(),
+        relatedId: null,
+        userId: "current-user",
+        metadata: {},
       },
       {
         id: "4",
@@ -283,6 +296,9 @@ describe("NotificationBell", () => {
         message: "Test",
         read: false,
         createdAt: new Date(),
+        relatedId: null,
+        userId: "current-user",
+        metadata: {},
       },
     ];
 

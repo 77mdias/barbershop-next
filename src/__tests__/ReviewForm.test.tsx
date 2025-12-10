@@ -36,6 +36,7 @@ describe("ReviewForm", () => {
     mockCreateReview.mockResolvedValue({
       success: true,
       message: "Review created successfully",
+      data: {},
     });
   });
 
