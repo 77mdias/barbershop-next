@@ -72,9 +72,10 @@ export const authOptions: NextAuthOptions = {
             dbUrl: process.env.DATABASE_URL?.substring(0, 20) + "...",
           });
 
-          const user = await db.user.findUnique({
+          const user = await db.user.findFirst({
             where: {
               email: credentials.email,
+              deletedAt: null,
             },
           });
 
@@ -110,10 +111,7 @@ export const authOptions: NextAuthOptions = {
 
           // Verificar senha
           const passwordStartTime = Date.now();
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
           const passwordTime = Date.now() - passwordStartTime;
 
           logger.auth.debug("🔑 Password validation completed", {
@@ -233,9 +231,7 @@ export const authOptions: NextAuthOptions = {
   // Configuração melhorada de cookies para produção
   cookies: {
     sessionToken: {
-      name: isProd
-        ? `__Secure-next-auth.session-token`
-        : `next-auth.session-token`,
+      name: isProd ? `__Secure-next-auth.session-token` : `next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -244,9 +240,7 @@ export const authOptions: NextAuthOptions = {
       },
     },
     callbackUrl: {
-      name: isProd
-        ? `__Secure-next-auth.callback-url`
-        : `next-auth.callback-url`,
+      name: isProd ? `__Secure-next-auth.callback-url` : `next-auth.callback-url`,
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -309,8 +303,8 @@ export const authOptions: NextAuthOptions = {
         // Sempre buscar dados atuais do usuário se temos um ID
         if (token.id) {
           try {
-            const freshUser = await db.user.findUnique({
-              where: { id: token.id as string },
+            const freshUser = await db.user.findFirst({
+              where: { id: token.id as string, deletedAt: null },
               select: {
                 id: true,
                 name: true,
@@ -322,22 +316,27 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            if (freshUser) {
-              // Atualizar token com dados frescos SEMPRE
-              token.name = freshUser.name;
-              token.nickname = freshUser.nickname;
-              token.email = freshUser.email;
-              token.phone = freshUser.phone;
-              token.image = freshUser.image;
-              token.role = freshUser.role;
-
-              logger.auth.info("🔄 Session data refreshed from database", {
-                userId: freshUser.id,
-                hasNewImage: !!freshUser.image,
-                trigger,
-                timestamp: new Date().toISOString(),
+            if (!freshUser) {
+              logger.auth.warn("⚠️ User not found or deleted during session refresh", {
+                userId: token.id,
               });
+              return null;
             }
+
+            // Atualizar token com dados frescos SEMPRE
+            token.name = freshUser.name;
+            token.nickname = freshUser.nickname;
+            token.email = freshUser.email;
+            token.phone = freshUser.phone;
+            token.image = freshUser.image;
+            token.role = freshUser.role;
+
+            logger.auth.info("🔄 Session data refreshed from database", {
+              userId: freshUser.id,
+              hasNewImage: !!freshUser.image,
+              trigger,
+              timestamp: new Date().toISOString(),
+            });
           } catch (error) {
             logger.auth.error("❌ Error refreshing user data", {
               userId: token.id,
@@ -399,9 +398,7 @@ export const authOptions: NextAuthOptions = {
         const callbackUrl = urlObj.searchParams.get("callbackUrl");
 
         if (callbackUrl) {
-          const finalUrl = callbackUrl.startsWith("/")
-            ? `${baseUrl}${callbackUrl}`
-            : callbackUrl;
+          const finalUrl = callbackUrl.startsWith("/") ? `${baseUrl}${callbackUrl}` : callbackUrl;
 
           // Verificar se a URL final é segura
           if (finalUrl.startsWith(baseUrl)) {

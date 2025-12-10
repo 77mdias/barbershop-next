@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
       where: {
         role: "BARBER",
         isActive: true,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -66,17 +67,12 @@ export async function GET(request: NextRequest) {
 
         // Adicionar informação de disponibilidade
         const barbersWithAvailability = barbers.map((barber) => {
-          const barberAppointments = appointments.filter(
-            (app) => app.barberId === barber.id
-          );
+          const barberAppointments = appointments.filter((app) => app.barberId === barber.id);
 
           // Calcular slots ocupados (simplificado)
           const occupiedSlots = barberAppointments.length;
           const maxSlotsPerDay = 16; // 8 horas * 2 slots por hora
-          const availabilityPercentage = Math.max(
-            0,
-            ((maxSlotsPerDay - occupiedSlots) / maxSlotsPerDay) * 100
-          );
+          const availabilityPercentage = Math.max(0, ((maxSlotsPerDay - occupiedSlots) / maxSlotsPerDay) * 100);
 
           return {
             ...barber,
@@ -95,9 +91,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(barbers);
   } catch (error) {
     console.error("Erro ao buscar barbeiros:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

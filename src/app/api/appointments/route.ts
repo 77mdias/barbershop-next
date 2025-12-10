@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
-import { 
-  CreateAppointmentSchema, 
+import {
+  CreateAppointmentSchema,
   AppointmentFiltersSchema,
-  type CreateAppointmentInput 
+  type CreateAppointmentInput,
 } from "@/schemas/appointmentSchemas";
 
 /**
@@ -15,12 +15,9 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -86,7 +83,7 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: {
-          date: 'desc',
+          date: "desc",
         },
         skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
@@ -103,13 +100,9 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / filters.limit),
       },
     });
-
   } catch (error) {
     console.error("Erro ao buscar agendamentos:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
 
@@ -120,12 +113,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -137,26 +127,21 @@ export async function POST(request: NextRequest) {
     });
 
     if (!service) {
-      return NextResponse.json(
-        { error: "Serviço não encontrado ou inativo" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Serviço não encontrado ou inativo" }, { status: 404 });
     }
 
     // Verificar se o barbeiro existe e é ativo
-    const barber = await db.user.findUnique({
-      where: { 
+    const barber = await db.user.findFirst({
+      where: {
         id: data.barberId,
         role: "BARBER",
         isActive: true,
+        deletedAt: null,
       },
     });
 
     if (!barber) {
-      return NextResponse.json(
-        { error: "Barbeiro não encontrado ou inativo" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Barbeiro não encontrado ou inativo" }, { status: 404 });
     }
 
     // Verificar disponibilidade do horário
@@ -171,10 +156,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (conflictingAppointment) {
-      return NextResponse.json(
-        { error: "Horário já ocupado" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Horário já ocupado" }, { status: 409 });
     }
 
     // Verificar voucher se fornecido
@@ -188,19 +170,13 @@ export async function POST(request: NextRequest) {
       });
 
       if (!voucher) {
-        return NextResponse.json(
-          { error: "Voucher inválido" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Voucher inválido" }, { status: 400 });
       }
 
       // Verificar se o voucher é válido para a data
       const now = new Date();
       if (voucher.validUntil && voucher.validUntil < now) {
-        return NextResponse.json(
-          { error: "Voucher expirado" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Voucher expirado" }, { status: 400 });
       }
     }
 
@@ -234,20 +210,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(appointment, { status: 201 });
-
   } catch (error) {
     console.error("Erro ao criar agendamento:", error);
-    
+
     if (error instanceof Error && error.name === "ZodError") {
-      return NextResponse.json(
-        { error: "Dados inválidos", details: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dados inválidos", details: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

@@ -16,6 +16,11 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+// Mock Next.js cache utilities
+jest.mock("next/cache", () => ({
+  revalidatePath: jest.fn(),
+}));
+
 // Mock next-auth
 jest.mock("next-auth/react", () => ({
   useSession: () => ({
@@ -54,7 +59,6 @@ jest.mock("sonner", () => ({
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: any) => {
-     
     return React.createElement("img", props);
   },
 }));
@@ -66,10 +70,11 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-// Setup matchMedia mock
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+// Setup matchMedia mock (safe for node + jsdom)
+const matchMediaTarget = typeof window !== "undefined" ? window : (globalThis as unknown as Record<string, unknown>);
+
+if (!matchMediaTarget.matchMedia) {
+  matchMediaTarget.matchMedia = jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -78,8 +83,8 @@ Object.defineProperty(window, "matchMedia", {
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
-  })),
-});
+  }));
+}
 
 // Polyfill encoding APIs used by Next internals
 if (!global.TextEncoder) {

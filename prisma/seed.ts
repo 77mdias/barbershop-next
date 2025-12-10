@@ -170,11 +170,7 @@ async function main() {
       isGlobal: true,
       active: true,
       servicePromotions: {
-        create: [
-          { serviceId: corte.id },
-          { serviceId: barba.id },
-          { serviceId: combo.id },
-        ],
+        create: [{ serviceId: corte.id }, { serviceId: barba.id }, { serviceId: combo.id }],
       },
     },
   });
@@ -246,6 +242,19 @@ async function main() {
       role: "CLIENT",
       phone: "11911111111",
       isActive: true,
+    },
+  });
+
+  const _softDeletedUser = await prisma.user.create({
+    data: {
+      name: "Cliente Removido",
+      email: "removed@barbershop.com",
+      password: clientPassword,
+      role: "CLIENT",
+      phone: "11900000000",
+      isActive: false,
+      deletedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      deletedById: admin.id,
     },
   });
 

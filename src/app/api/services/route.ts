@@ -12,23 +12,13 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const filters = ServiceFiltersSchema.parse({
-      active: searchParams.get("active")
-        ? searchParams.get("active") === "true"
-        : undefined,
+      active: searchParams.get("active") ? searchParams.get("active") === "true" : undefined,
       search: searchParams.get("search") || undefined,
-      minPrice: searchParams.get("minPrice")
-        ? parseFloat(searchParams.get("minPrice")!)
-        : undefined,
-      maxPrice: searchParams.get("maxPrice")
-        ? parseFloat(searchParams.get("maxPrice")!)
-        : undefined,
-      maxDuration: searchParams.get("maxDuration")
-        ? parseInt(searchParams.get("maxDuration")!)
-        : undefined,
+      minPrice: searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined,
+      maxPrice: searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined,
+      maxDuration: searchParams.get("maxDuration") ? parseInt(searchParams.get("maxDuration")!) : undefined,
       page: searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1,
-      limit: searchParams.get("limit")
-        ? parseInt(searchParams.get("limit")!)
-        : 10,
+      limit: searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : 10,
     });
 
     const where: any = {};
@@ -70,10 +60,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
 
@@ -86,22 +73,19 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
     }
 
     // Verificar se é admin
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
+    const user = await db.user.findFirst({
+      where: { id: session.user.id, deletedAt: null },
       select: { role: true },
     });
 
     if (user?.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Acesso negado. Apenas administradores podem criar serviços" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -117,10 +101,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingService) {
-      return NextResponse.json(
-        { error: "Já existe um serviço com este nome" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Já existe um serviço com este nome" }, { status: 409 });
     }
 
     const service = await db.service.create({
@@ -132,15 +113,9 @@ export async function POST(request: NextRequest) {
     console.error("Erro ao criar serviço:", error);
 
     if (error instanceof Error && error.name === "ZodError") {
-      return NextResponse.json(
-        { error: "Dados inválidos", details: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dados inválidos", details: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

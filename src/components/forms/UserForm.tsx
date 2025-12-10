@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserFormInput, UserFormInputType } from "@/schemas/userSchemas";
 import { createUser, updateUser } from "@/server/userActions";
+import { useRouter } from "next/navigation";
 
 const USER_ROLES = ["ADMIN", "CLIENT", "BARBER"] as const;
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface UserFormProps {
 export default function UserForm({ initialData, onSuccess }: UserFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isEdit = !!initialData?.id;
+  const router = useRouter();
 
   const {
     register,
@@ -37,7 +39,8 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
       email: initialData?.email || "",
       password: "",
       role: initialData?.role || "CLIENT",
-      isActive: initialData?.isActive ?? false,
+      isActive: initialData?.isActive ?? true,
+      phone: initialData?.phone || "",
     },
   });
 
@@ -46,10 +49,10 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
 
   async function onSubmit(data: UserFormInputType) {
     setIsLoading(true);
-    
+
     try {
       let result;
-      
+
       if (isEdit) {
         if (!initialData?.id) {
           toast.error("ID do usuário não encontrado para edição");
@@ -62,12 +65,12 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
 
       if (result.success) {
         toast.success(isEdit ? "Usuário atualizado com sucesso!" : "Usuário criado com sucesso!");
-  onSuccess?.();
+        onSuccess?.();
+        router.refresh();
       } else {
-  toast.error("Erro ao processar solicitação");
+        toast.error(result.error || "Erro ao processar solicitação");
       }
     } catch (_error) {
-       
       toast.error("Erro inesperado ao processar solicitação");
     } finally {
       setIsLoading(false);
@@ -79,48 +82,30 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nome *</Label>
-          <Input
-            id="name"
-            {...register("name")}
-            placeholder="Nome completo do usuário"
-            disabled={isLoading}
-          />
-          {errors.name && (
-            <p className="text-sm text-red-500">{errors.name.message}</p>
-          )}
+          <Input id="name" {...register("name")} placeholder="Nome completo do usuário" disabled={isLoading} />
+          {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="nickname">Apelido *</Label>
-          <Input
-            id="nickname"
-            {...register("nickname")}
-            placeholder="Apelido do usuário"
-            disabled={isLoading}
-          />
-          {errors.nickname && (
-            <p className="text-sm text-red-500">{errors.nickname.message}</p>
-          )}
+          <Input id="nickname" {...register("nickname")} placeholder="Apelido do usuário" disabled={isLoading} />
+          {errors.nickname && <p className="text-sm text-red-500">{errors.nickname.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register("email")}
-            placeholder="email@exemplo.com"
-            disabled={isLoading}
-          />
-          {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
-          )}
+          <Input id="email" type="email" {...register("email")} placeholder="email@exemplo.com" disabled={isLoading} />
+          {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">
-            {isEdit ? "Nova Senha (opcional)" : "Senha *"}
-          </Label>
+          <Label htmlFor="phone">Telefone</Label>
+          <Input id="phone" {...register("phone")} placeholder="11999999999" disabled={isLoading} />
+          {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">{isEdit ? "Nova Senha (opcional)" : "Senha *"}</Label>
           <Input
             id="password"
             type="password"
@@ -128,16 +113,14 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
             placeholder={isEdit ? "Deixe em branco para manter atual" : "Mínimo 6 caracteres"}
             disabled={isLoading}
           />
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="role">Função</Label>
           <Select
             value={watchedRole}
-            onValueChange={(value: string) => setValue("role", value as typeof USER_ROLES[number])}
+            onValueChange={(value: string) => setValue("role", value as (typeof USER_ROLES)[number])}
             disabled={isLoading}
           >
             <SelectTrigger>
@@ -145,13 +128,13 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
             </SelectTrigger>
             <SelectContent>
               {USER_ROLES.map((role) => (
-                <SelectItem key={role} value={role}>{role}</SelectItem>
+                <SelectItem key={role} value={role}>
+                  {role}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.role && (
-            <p className="text-sm text-red-500">{errors.role.message}</p>
-          )}
+          {errors.role && <p className="text-sm text-red-500">{errors.role.message}</p>}
         </div>
 
         <div className="flex items-center space-x-2">
@@ -166,12 +149,8 @@ export default function UserForm({ initialData, onSuccess }: UserFormProps) {
       </div>
 
       <div className="flex p-4">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="min-w-[120px]"
-        >
-          {isLoading ? "Salvando..." : (isEdit ? "Atualizar" : "Criar")}
+        <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+          {isLoading ? "Salvando..." : isEdit ? "Atualizar" : "Criar"}
         </Button>
       </div>
     </form>

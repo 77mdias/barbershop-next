@@ -4,17 +4,17 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id                       String           @id @default(cuid())
+  id                       String                    @id @default(cuid())
   nickname                 String?
   image                    String?
   name                     String
-  role                     UserRole         @default(CLIENT)
-  email                    String           @unique
+  role                     UserRole                  @default(CLIENT)
+  email                    String                    @unique
   emailVerified            DateTime?
   emailVerificationExpires DateTime?
   emailVerificationToken   String?
@@ -22,23 +22,33 @@ model User {
   password                 String?
   resetPasswordExpires     DateTime?
   resetPasswordToken       String?
-  inviteCode               String?          @unique // Código único para convites
-  isActive                 Boolean          @default(true)
-  createdAt                DateTime         @default(now())
-  updatedAt                DateTime         @updatedAt
-  servicesProvided         Appointment[]    @relation("BarberAppointments")
+  inviteCode               String?                   @unique // Código único para convites
+  isActive                 Boolean                   @default(true)
+  deletedAt                DateTime?
+  deletedById              String?
+  updatedById              String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  servicesProvided         Appointment[]             @relation("BarberAppointments")
   appointments             Appointment[]
   serviceHistory           ServiceHistory[]
   promotions               UserPromotion[]
   vouchers                 Voucher[]
   accounts                 account[]
-  friendshipsInitiated     Friendship[]     @relation("UserFriendships")
-  friendshipsReceived      Friendship[]     @relation("FriendFriendships")
-  friendRequestsSent       FriendRequest[]             @relation("RequestSender")
-  friendRequestsReceived   FriendRequest[]             @relation("RequestReceiver")
+  friendshipsInitiated     Friendship[]              @relation("UserFriendships")
+  friendshipsReceived      Friendship[]              @relation("FriendFriendships")
+  friendRequestsSent       FriendRequest[]           @relation("RequestSender")
+  friendRequestsReceived   FriendRequest[]           @relation("RequestReceiver")
   notifications            Notification[]
   conversationParticipants ConversationParticipant[]
   messages                 Message[]
+  deletedBy                User?                     @relation("UserDeletionActor", fields: [deletedById], references: [id], onDelete: SetNull)
+  updatedBy                User?                     @relation("UserUpdateActor", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedUsers             User[]                    @relation("UserDeletionActor")
+  updatedUsers             User[]                    @relation("UserUpdateActor")
+
+  @@index([deletedAt])
+  @@index([role, deletedAt])
 }
 
 model account {

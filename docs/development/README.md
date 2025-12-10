@@ -40,6 +40,7 @@ Esta pasta contém toda a documentação relacionada ao processo de desenvolvime
 1. Marcar task como "Em andamento" no `TASKS.md`
 2. Implementar funcionalidade
 3. Testar e documentar
+   - Em ambiente dockerizado, execute os testes dentro do container `app` (ex.: `./scripts/docker-manager.sh shell dev` e `npm test`, ou `docker compose -f docker-compose.yml exec app npm test -- <suite>`). Evite rodar Jest diretamente no host para manter paridade de ambiente.
 
 ### 3. Release
 1. Atualizar `CHANGELOG.md`

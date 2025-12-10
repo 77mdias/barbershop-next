@@ -11,15 +11,12 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       logger.api.warn("Email not provided in user info request");
-      return NextResponse.json(
-        { error: "Email é obrigatório" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email é obrigatório" }, { status: 400 });
     }
 
     // Buscar usuário com suas contas OAuth
-    const user = await db.user.findUnique({
-      where: { email },
+    const user = await db.user.findFirst({
+      where: { email, deletedAt: null },
       include: {
         accounts: {
           select: {
@@ -31,27 +28,20 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       logger.api.warn("User not found", { email });
-      return NextResponse.json(
-        { error: "Usuário não encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
     logger.api.debug("User found", {
       email,
       hasPassword: !!user.password,
-      oauthProviders: user.accounts.map(
-        (acc: { provider: string }) => acc.provider
-      ),
+      oauthProviders: user.accounts.map((acc: { provider: string }) => acc.provider),
     });
 
     // Determinar se o usuário tem senha
     const hasPassword = !!user.password;
 
     // Obter provedores OAuth
-    const oauthProviders = user.accounts.map(
-      (account: { provider: string }) => account.provider
-    );
+    const oauthProviders = user.accounts.map((account: { provider: string }) => account.provider);
 
     return NextResponse.json({
       hasPassword,
@@ -60,9 +50,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.api.error("Error fetching user information", { error });
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

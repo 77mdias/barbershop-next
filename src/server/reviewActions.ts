@@ -4,10 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
-import {
-  serializeReviewsResult,
-  serializeServiceHistory,
-} from "@/lib/serializers";
+import { serializeReviewsResult, serializeServiceHistory } from "@/lib/serializers";
 import {
   createReviewSchema,
   updateReviewSchema,
@@ -31,18 +28,12 @@ export async function createReview(input: CreateReviewInput) {
     }
 
     // Debug: log dos dados recebidos
-    console.log(
-      "🔍 Dados recebidos no createReview:",
-      JSON.stringify(input, null, 2)
-    );
+    console.log("🔍 Dados recebidos no createReview:", JSON.stringify(input, null, 2));
 
     // Validar entrada
     try {
       const validatedInput = createReviewSchema.parse(input);
-      console.log(
-        "✅ Dados validados:",
-        JSON.stringify(validatedInput, null, 2)
-      );
+      console.log("✅ Dados validados:", JSON.stringify(validatedInput, null, 2));
     } catch (validationError: any) {
       console.error("❌ Erro de validação:", validationError);
       return {
@@ -83,7 +74,7 @@ export async function createReview(input: CreateReviewInput) {
       feedback: validatedInput.feedback || null,
       updatedAt: new Date(),
     };
-    
+
     // Adicionar imagens se fornecidas
     if (validatedInput.images && validatedInput.images.length > 0) {
       console.log("💾 Saving images to database:", validatedInput.images);
@@ -93,7 +84,7 @@ export async function createReview(input: CreateReviewInput) {
     } else {
       console.log("📝 No images to save");
     }
-    
+
     const updatedServiceHistory = await db.serviceHistory.update({
       where: { id: validatedInput.serviceHistoryId },
       data: updateData as any,
@@ -149,13 +140,13 @@ export async function updateReview(input: UpdateReviewInput) {
 
     // Validar input
     const validatedInput = updateReviewSchema.parse(input);
-    
+
     console.log("📝 Updating review:", {
       id: validatedInput.id,
       rating: validatedInput.rating,
       feedback: validatedInput.feedback,
       images: validatedInput.images,
-      imagesCount: validatedInput.images?.length || 0
+      imagesCount: validatedInput.images?.length || 0,
     });
 
     // Verificar se a avaliação existe e autorização do usuário
@@ -569,11 +560,7 @@ export async function getBarberMetrics(barberId: string) {
       return { success: false, error: "Não autorizado" };
     }
 
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const now = new Date();
 
     // 1. Métricas de Reviews
@@ -668,8 +655,7 @@ export async function getBarberMetrics(barberId: string) {
         totalClients: uniqueClients.length || 0,
 
         // Métricas do mês
-        monthlyAverageRating:
-          Number(monthlyReviews._avg.rating?.toFixed(1)) || 0,
+        monthlyAverageRating: Number(monthlyReviews._avg.rating?.toFixed(1)) || 0,
         monthlyReviews: monthlyReviews._count.rating || 0,
         monthlyClients: monthlyClients.length || 0,
         monthlyRevenue: Number(revenueData._sum.finalPrice) || 0,
@@ -684,9 +670,7 @@ export async function getBarberMetrics(barberId: string) {
           count: item._count.rating || 0,
           percentage:
             reviewsMetrics._count.rating > 0
-              ? Math.round(
-                  (item._count.rating / reviewsMetrics._count.rating) * 100
-                )
+              ? Math.round((item._count.rating / reviewsMetrics._count.rating) * 100)
               : 0,
         })),
 
@@ -726,11 +710,7 @@ export async function getDashboardMetrics(userId: string) {
     }
 
     const userRole = session.user.role;
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     if (userRole === UserRole.CLIENT) {
       // Métricas para cliente
@@ -770,7 +750,7 @@ export async function getDashboardMetrics(userId: string) {
         _avg: { rating: true },
       });
 
-      const totalUsers = await db.user.count();
+      const totalUsers = await db.user.count({ where: { deletedAt: null } });
 
       const monthlyActivity = await db.serviceHistory.count({
         where: { createdAt: { gte: startOfMonth } },

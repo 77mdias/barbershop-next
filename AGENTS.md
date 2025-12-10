@@ -75,6 +75,7 @@ scripts/                    # Scripts de utilidade (Docker, DB, etc.)
 -   `npm test`: Executa todos os testes.
 -   `npm run test:watch`: Executa os testes em modo de observação.
 -   `npm run test:coverage`: Gera um relatório de cobertura de testes.
+-   **Via Docker (preferencial)**: quando o ambiente estiver containerizado, execute os testes dentro do container `app` (ex.: `./scripts/docker-manager.sh shell dev` seguido de `npm test`, ou `docker compose -f docker-compose.yml exec app npm test -- <suite>`). Evite rodar Jest diretamente na máquina host.
 
 #### Code Formatting & Linting
 

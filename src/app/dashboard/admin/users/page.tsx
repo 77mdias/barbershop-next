@@ -5,36 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getUsersForAdmin } from "@/server/adminActions";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getUsers } from "@/server/userActions";
 import Link from "next/link";
-import {
-  Users,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  Plus,
-  ArrowLeft,
-  UserCog,
-  Calendar,
-  Mail,
-  Shield,
-} from "lucide-react";
+import { Users, Search, Filter, Trash2, Plus, ArrowLeft, Calendar, Mail } from "lucide-react";
+import { UserTableActions } from "@/components/UserTableActions";
 
 export default async function AdminUsersPage() {
   const session = await getServerSession(authOptions);
@@ -48,9 +24,20 @@ export default async function AdminUsersPage() {
     redirect("/dashboard");
   }
 
-  // Buscar lista de usuários
-  const usersResult = await getUsersForAdmin();
-  const users = usersResult.success ? usersResult.data : [];
+  // Buscar lista de usuários com removidos para restaurar
+  const usersResult = await getUsers({
+    status: "ALL",
+    includeDeleted: true,
+    limit: 50,
+    page: 1,
+  });
+  const users = usersResult.success ? usersResult.data.users : [];
+  const totalUsers = usersResult.success ? usersResult.data.pagination.total : users.length;
+  const activeUsers = users.filter((u) => !u.deletedAt);
+  const removedUsers = users.filter((u) => u.deletedAt);
+  const clientsCount = activeUsers.filter((u) => u.role === "CLIENT").length;
+  const barbersCount = activeUsers.filter((u) => u.role === "BARBER").length;
+  const adminsCount = activeUsers.filter((u) => u.role === "ADMIN").length;
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -76,6 +63,30 @@ export default async function AdminUsersPage() {
       default:
         return "❓";
     }
+  };
+
+  const renderStatusBadge = (user: (typeof users)[number]) => {
+    if (user.deletedAt) {
+      return (
+        <Badge variant="destructive" className="bg-red-500">
+          Removido
+        </Badge>
+      );
+    }
+
+    if (!user.isActive) {
+      return (
+        <Badge variant="outline" className="border-orange-300 text-orange-700">
+          Inativo
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge variant="default" className="bg-green-500">
+        Ativo
+      </Badge>
+    );
   };
 
   return (
@@ -125,10 +136,7 @@ export default async function AdminUsersPage() {
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Buscar por nome ou email..."
-                    className="pl-10"
-                  />
+                  <Input placeholder="Buscar por nome ou email..." className="pl-10" />
                 </div>
               </div>
               <Select defaultValue="all">
@@ -165,8 +173,9 @@ export default async function AdminUsersPage() {
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total</p>
-                  <p className="text-2xl font-bold">{users.length}</p>
+                  <p className="text-sm text-gray-600">Total (inclui removidos)</p>
+                  <p className="text-2xl font-bold">{totalUsers}</p>
+                  <p className="text-xs text-gray-500">Admins ativos: {adminsCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -178,10 +187,8 @@ export default async function AdminUsersPage() {
                   <span className="text-lg">👤</span>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Clientes</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.role === "CLIENT").length}
-                  </p>
+                  <p className="text-sm text-gray-600">Clientes ativos</p>
+                  <p className="text-2xl font-bold">{clientsCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -193,10 +200,8 @@ export default async function AdminUsersPage() {
                   <span className="text-lg">✂️</span>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Barbeiros</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.role === "BARBER").length}
-                  </p>
+                  <p className="text-sm text-gray-600">Barbeiros ativos</p>
+                  <p className="text-2xl font-bold">{barbersCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -205,13 +210,11 @@ export default async function AdminUsersPage() {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-red-100 rounded-lg">
-                  <Shield className="w-5 h-5 text-red-600" />
+                  <Trash2 className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Admins</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.role === "ADMIN").length}
-                  </p>
+                  <p className="text-sm text-gray-600">Removidos</p>
+                  <p className="text-2xl font-bold">{removedUsers.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -252,9 +255,7 @@ export default async function AdminUsersPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-medium">
-                                {user.name?.charAt(0).toUpperCase() || "?"}
-                              </span>
+                              <span className="text-sm font-medium">{user.name?.charAt(0).toUpperCase() || "?"}</span>
                             </div>
                             <div>
                               <p className="font-medium">{user.name || "Sem nome"}</p>
@@ -279,26 +280,9 @@ export default async function AdminUsersPage() {
                             {new Date(user.createdAt).toLocaleDateString("pt-BR")}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="default" className="bg-green-500">
-                            Ativo
-                          </Badge>
-                        </TableCell>
+                        <TableCell>{renderStatusBadge(user)}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button asChild variant="outline" size="sm">
-                              <Link href={`/dashboard/admin/users/${user.id}`}>
-                                <Edit className="w-4 h-4" />
-                              </Link>
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <UserTableActions user={user} />
                         </TableCell>
                       </TableRow>
                     ))
@@ -311,7 +295,7 @@ export default async function AdminUsersPage() {
             {users.length > 0 && (
               <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-gray-600">
-                  Mostrando {users.length} usuários
+                  Mostrando {users.length} de {totalUsers} usuários
                 </p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" disabled>

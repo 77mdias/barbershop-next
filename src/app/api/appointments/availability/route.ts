@@ -13,10 +13,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Usuário não autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -32,10 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!service) {
-      return NextResponse.json(
-        { error: "Serviço não encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Serviço não encontrado" }, { status: 404 });
     }
 
     // Buscar barbeiros disponíveis (se não especificado)
@@ -47,6 +41,7 @@ export async function GET(request: NextRequest) {
         where: {
           role: "BARBER",
           isActive: true,
+          deletedAt: null,
         },
         select: { id: true },
       });
@@ -94,37 +89,27 @@ export async function GET(request: NextRequest) {
 
     // Para cada barbeiro
     for (const barberId of barberIds) {
-      const barber = await db.user.findUnique({
-        where: { id: barberId },
+      const barber = await db.user.findFirst({
+        where: { id: barberId, deletedAt: null },
         select: { name: true },
       });
 
       if (!barber) continue;
 
       // Buscar agendamentos deste barbeiro no dia
-      const barberAppointments = existingAppointments.filter(
-        (app) => app.barberId === barberId
-      );
+      const barberAppointments = existingAppointments.filter((app) => app.barberId === barberId);
 
       // Gerar slots de horário
       for (let hour = workingHours.start; hour < workingHours.end; hour++) {
-        for (
-          let minute = 0;
-          minute < 60;
-          minute += workingHours.intervalMinutes
-        ) {
-          const slotTime = `${hour.toString().padStart(2, "0")}:${minute
-            .toString()
-            .padStart(2, "0")}`;
+        for (let minute = 0; minute < 60; minute += workingHours.intervalMinutes) {
+          const slotTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
 
           // Criar data/hora completa para verificação
           const slotDateTime = new Date(queryData.date);
           slotDateTime.setHours(hour, minute, 0, 0);
 
           // Verificar se não passa do horário limite (considerando duração do serviço)
-          const slotEndTime = new Date(
-            slotDateTime.getTime() + service.duration * 60 * 1000
-          );
+          const slotEndTime = new Date(slotDateTime.getTime() + service.duration * 60 * 1000);
           const workingEndTime = new Date(queryData.date);
           workingEndTime.setHours(workingHours.end, 0, 0, 0);
 
@@ -135,14 +120,9 @@ export async function GET(request: NextRequest) {
           // Verificar se há conflito com agendamentos existentes
           const hasConflict = barberAppointments.some((appointment) => {
             const appointmentStart = new Date(appointment.date);
-            const appointmentEnd = new Date(
-              appointmentStart.getTime() +
-                appointment.service.duration * 60 * 1000
-            );
+            const appointmentEnd = new Date(appointmentStart.getTime() + appointment.service.duration * 60 * 1000);
 
-            return (
-              slotDateTime < appointmentEnd && slotEndTime > appointmentStart
-            );
+            return slotDateTime < appointmentEnd && slotEndTime > appointmentStart;
           });
 
           // Verificar se não é no passado
@@ -160,13 +140,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Agrupar por horário
-    const groupedSlots = availableSlots.reduce((acc, slot) => {
-      if (!acc[slot.time]) {
-        acc[slot.time] = [];
-      }
-      acc[slot.time].push(slot);
-      return acc;
-    }, {} as Record<string, typeof availableSlots>);
+    const groupedSlots = availableSlots.reduce(
+      (acc, slot) => {
+        if (!acc[slot.time]) {
+          acc[slot.time] = [];
+        }
+        acc[slot.time].push(slot);
+        return acc;
+      },
+      {} as Record<string, typeof availableSlots>,
+    );
 
     // Converter para formato final
     const availableTimes = Object.entries(groupedSlots)
@@ -192,9 +175,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Erro ao buscar disponibilidade:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

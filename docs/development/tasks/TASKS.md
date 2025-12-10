@@ -224,19 +224,20 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - [x] Adicionar testes de PromotionForm e promotionAdminActions ✅
   - **Dependências**: Sprint 4 concluído ✅
 
-- [ ] **#024** - Soft Delete e Edição de Usuários 👥 **PLANEJADO**
+- [x] **#024** - Soft Delete e Edição de Usuários 👥 **CONCLUÍDO**
   - **Descrição**: Implementar soft delete real e edição completa de usuários
-  - **Componentes**: Schema Prisma (isActive), updateUser action, form handlers
+  - **Componentes**: Schema Prisma (soft delete), updateUser/restore actions, UI admin integrada
   - **Estimativa**: 1-2 horas
   - **Assignee**: A definir
-  - **Status**: Planejado
+  - **Status**: Entregue (flows de edição/soft-delete/restauração completos; E2E/filtros avançados seguem em #025)
   - **Tarefas**:
-    - [ ] Adicionar campo isActive ao model User (Prisma)
-    - [ ] Criar e rodar migration
-    - [ ] Implementar deleteUser() com soft delete real
-    - [ ] Criar updateUser() server action
-    - [ ] Adicionar form handler em users/[id]/page.tsx
-    - [ ] Conectar botões de salvar/inativar
+    - [x] Adicionar campos de soft delete (`deletedAt/deletedById/updatedById`) ao model User
+    - [x] Criar migration e atualizar seed com usuário removido de exemplo (`20251204120000_user_soft_delete`)
+    - [x] Implementar `deleteUser()/softDeleteUser` com restore
+    - [x] Criar/fortalecer `updateUser()` server action (validação + audit)
+    - [x] Adicionar form handler em `users/[id]/page.tsx` + `UserTableActions`
+    - [x] Conectar botões de salvar/inativar/restaurar na UI admin
+    - [ ] Cobrir cenários E2E e filtros avançados (segue em #025)
   - **Dependências**: Requer migration no banco
 
 - [ ] **#025** - Filtros e Busca Funcionais 🔍 **PLANEJADO**

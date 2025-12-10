@@ -21,7 +21,7 @@ export async function updateProfile(data: UpdateProfileInput) {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -45,6 +45,7 @@ export async function updateProfile(data: UpdateProfileInput) {
       const existingUser = await db.user.findFirst({
         where: {
           email: validatedData.email,
+          deletedAt: null,
           NOT: { id: validatedData.id },
         },
       });
@@ -55,6 +56,18 @@ export async function updateProfile(data: UpdateProfileInput) {
           error: "Este email já está sendo usado por outro usuário",
         };
       }
+    }
+
+    const currentUser = await db.user.findFirst({
+      where: { id: validatedData.id, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!currentUser) {
+      return {
+        success: false,
+        error: "Usuário não encontrado ou removido",
+      };
     }
 
     // Atualizar usuário no banco de dados
@@ -88,10 +101,9 @@ export async function updateProfile(data: UpdateProfileInput) {
       data: updatedUser,
       message: "Perfil atualizado com sucesso",
     };
-
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
-    
+
     // Tratar erros de validação do Zod
     if (error instanceof z.ZodError) {
       return {
@@ -113,7 +125,7 @@ export async function updateProfile(data: UpdateProfileInput) {
 export async function getCurrentProfile() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -121,8 +133,8 @@ export async function getCurrentProfile() {
       };
     }
 
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
+    const user = await db.user.findFirst({
+      where: { id: session.user.id, deletedAt: null },
       select: {
         id: true,
         name: true,
@@ -132,6 +144,7 @@ export async function getCurrentProfile() {
         image: true,
         role: true,
         isActive: true,
+        deletedAt: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -155,7 +168,6 @@ export async function getCurrentProfile() {
       success: true,
       data: user,
     };
-
   } catch (error) {
     console.error("Erro ao buscar perfil:", error);
     return {
@@ -171,20 +183,32 @@ export async function getCurrentProfile() {
 export async function updateProfileImage(imageUrl: string) {
   try {
     console.log("🖼️ updateProfileImage called with URL:", imageUrl);
-    
+
     const session = await getServerSession(authOptions);
-    
+
     console.log("📋 Session info:", {
       hasSession: !!session,
       userId: session?.user?.id,
-      userEmail: session?.user?.email
+      userEmail: session?.user?.email,
     });
-    
+
     if (!session?.user?.id) {
       console.log("❌ No authenticated user session");
       return {
         success: false,
         error: "Usuário não autenticado",
+      };
+    }
+
+    const currentUser = await db.user.findFirst({
+      where: { id: session.user.id, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!currentUser) {
+      return {
+        success: false,
+        error: "Usuário removido ou não encontrado",
       };
     }
 
@@ -213,7 +237,6 @@ export async function updateProfileImage(imageUrl: string) {
       data: updatedUser,
       message: "Foto de perfil atualizada com sucesso",
     };
-
   } catch (error) {
     console.error("💥 Erro ao atualizar imagem de perfil:", error);
     return {
@@ -226,14 +249,10 @@ export async function updateProfileImage(imageUrl: string) {
 /**
  * Server Action para alterar senha do usuário
  */
-export async function changePassword(data: {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}) {
+export async function changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -242,8 +261,8 @@ export async function changePassword(data: {
     }
 
     // Buscar o usuário atual com a senha
-    const currentUser = await db.user.findUnique({
-      where: { id: session.user.id },
+    const currentUser = await db.user.findFirst({
+      where: { id: session.user.id, deletedAt: null },
       select: {
         id: true,
         password: true,
@@ -267,10 +286,7 @@ export async function changePassword(data: {
 
     // Verificar senha atual
     const bcrypt = await import("bcryptjs");
-    const isCurrentPasswordValid = await bcrypt.compare(
-      data.currentPassword,
-      currentUser.password
-    );
+    const isCurrentPasswordValid = await bcrypt.compare(data.currentPassword, currentUser.password);
 
     if (!isCurrentPasswordValid) {
       return {
@@ -280,10 +296,7 @@ export async function changePassword(data: {
     }
 
     // Verificar se a nova senha é diferente da atual
-    const isSamePassword = await bcrypt.compare(
-      data.newPassword,
-      currentUser.password
-    );
+    const isSamePassword = await bcrypt.compare(data.newPassword, currentUser.password);
 
     if (isSamePassword) {
       return {
@@ -308,7 +321,6 @@ export async function changePassword(data: {
       success: true,
       message: "Senha alterada com sucesso",
     };
-
   } catch (error) {
     console.error("Erro ao alterar senha:", error);
     return {

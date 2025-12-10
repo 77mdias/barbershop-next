@@ -1,6 +1,7 @@
 import { db } from "@/lib/prisma";
 import { UserRole, Prisma } from "@prisma/client";
 import type { UserFiltersInput } from "@/schemas/userSchemas";
+import { logger } from "@/lib/logger";
 
 export interface UserWithStats {
   id: string;
@@ -9,6 +10,9 @@ export interface UserWithStats {
   image: string | null;
   role: UserRole;
   isActive: boolean;
+  deletedAt: Date | null;
+  deletedById: string | null;
+  updatedById: string | null;
   createdAt: Date;
   updatedAt: Date;
   _count?: {
@@ -17,24 +21,56 @@ export interface UserWithStats {
   };
 }
 
+const DEFAULT_LIMIT = 20;
+
+export function buildUserWhere(filters: Partial<UserFiltersInput> = {}, includeDeleted = false): Prisma.UserWhereInput {
+  const where: Prisma.UserWhereInput = {};
+
+  if (filters.role) where.role = filters.role;
+  if (filters.search) {
+    where.OR = [
+      { name: { contains: filters.search, mode: "insensitive" } },
+      { email: { contains: filters.search, mode: "insensitive" } },
+    ];
+  }
+
+  const status = filters.status || "ACTIVE";
+  const shouldIncludeDeleted = includeDeleted || status === "DELETED" || status === "ALL";
+
+  if (!shouldIncludeDeleted) {
+    where.deletedAt = null;
+  }
+
+  switch (status) {
+    case "ACTIVE":
+      where.isActive = true;
+      where.deletedAt = null;
+      break;
+    case "INACTIVE":
+      where.isActive = false;
+      where.deletedAt = null;
+      break;
+    case "DELETED":
+      where.deletedAt = { not: null };
+      break;
+    case "ALL":
+    default:
+      break;
+  }
+
+  return where;
+}
+
 export class UserService {
   /**
    * Buscar usuários com filtros
    */
   static async findMany(filters: Partial<UserFiltersInput> = {}) {
-    const where: Prisma.UserWhereInput = {};
-
-    if (filters.role) where.role = filters.role;
-    if (filters.isActive !== undefined) where.isActive = filters.isActive;
-    if (filters.search) {
-      where.OR = [
-        { name: { contains: filters.search, mode: "insensitive" } },
-        { email: { contains: filters.search, mode: "insensitive" } },
-      ];
-    }
+    const includeDeleted = filters.includeDeleted ?? false;
+    const where = buildUserWhere(filters, includeDeleted);
 
     const page = filters.page || 1;
-    const limit = filters.limit || 20;
+    const limit = filters.limit || DEFAULT_LIMIT;
 
     const [users, total] = await Promise.all([
       db.user.findMany({
@@ -46,6 +82,9 @@ export class UserService {
           image: true,
           role: true,
           isActive: true,
+          deletedAt: true,
+          deletedById: true,
+          updatedById: true,
           createdAt: true,
           updatedAt: true,
           _count: {
@@ -55,7 +94,7 @@ export class UserService {
             },
           },
         },
-        orderBy: [{ isActive: "desc" }, { name: "asc" }],
+        orderBy: [{ deletedAt: "asc" }, { isActive: "desc" }, { name: "asc" }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -76,9 +115,12 @@ export class UserService {
   /**
    * Buscar usuário por ID
    */
-  static async findById(id: string): Promise<UserWithStats | null> {
-    return await db.user.findUnique({
-      where: { id },
+  static async findById(id: string, options: { includeDeleted?: boolean } = {}): Promise<UserWithStats | null> {
+    const where = buildUserWhere({ status: options.includeDeleted ? "ALL" : undefined }, options.includeDeleted);
+    where.id = id;
+
+    return await db.user.findFirst({
+      where,
       select: {
         id: true,
         name: true,
@@ -86,6 +128,9 @@ export class UserService {
         image: true,
         role: true,
         isActive: true,
+        deletedAt: true,
+        deletedById: true,
+        updatedById: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -104,7 +149,7 @@ export class UserService {
   static async findBarbers(): Promise<UserWithStats[]> {
     const result = await this.findMany({
       role: "BARBER",
-      isActive: true,
+      status: "ACTIVE",
       limit: 100,
       page: 1,
     });
@@ -115,11 +160,12 @@ export class UserService {
    * Verificar se usuário é barbeiro ativo
    */
   static async isActiveBarber(id: string): Promise<boolean> {
-    const user = await db.user.findUnique({
+    const user = await db.user.findFirst({
       where: {
         id,
         role: "BARBER",
         isActive: true,
+        deletedAt: null,
       },
       select: { id: true },
     });
@@ -130,11 +176,12 @@ export class UserService {
    * Buscar barbeiro por ID com detalhes
    */
   static async findBarberById(id: string) {
-    return await db.user.findUnique({
+    return await db.user.findFirst({
       where: {
         id,
         role: "BARBER",
         isActive: true,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -143,6 +190,7 @@ export class UserService {
         image: true,
         role: true,
         isActive: true,
+        deletedAt: true,
         createdAt: true,
         _count: {
           select: {
@@ -161,9 +209,9 @@ export class UserService {
    * Buscar estatísticas do usuário/barbeiro
    */
   static async getUserStats(userId: string) {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
+    const user = await db.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { role: true, isActive: true },
     });
 
     if (!user) {
@@ -282,10 +330,7 @@ export class UserService {
       }),
     ]);
 
-    const completionRate =
-      totalAppointments > 0
-        ? (completedAppointments / totalAppointments) * 100
-        : 0;
+    const completionRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
 
     return {
       totalAppointments,
@@ -294,9 +339,7 @@ export class UserService {
       weekAppointments,
       monthAppointments,
       completionRate: Math.round(completionRate * 100) / 100,
-      averageRating: averageRating._avg.rating
-        ? Math.round(averageRating._avg.rating * 100) / 100
-        : null,
+      averageRating: averageRating._avg.rating ? Math.round(averageRating._avg.rating * 100) / 100 : null,
       upcomingAppointments,
     };
   }
@@ -305,75 +348,70 @@ export class UserService {
    * Estatísticas específicas do cliente
    */
   static async getClientStats(userId: string) {
-    const [
-      totalAppointments,
-      completedAppointments,
-      upcomingAppointments,
-      favoriteServices,
-      spentTotal,
-    ] = await Promise.all([
-      // Total de agendamentos
-      db.appointment.count({
-        where: { userId },
-      }),
+    const [totalAppointments, completedAppointments, upcomingAppointments, favoriteServices, spentTotal] =
+      await Promise.all([
+        // Total de agendamentos
+        db.appointment.count({
+          where: { userId },
+        }),
 
-      // Agendamentos completados
-      db.appointment.count({
-        where: { userId, status: "COMPLETED" },
-      }),
+        // Agendamentos completados
+        db.appointment.count({
+          where: { userId, status: "COMPLETED" },
+        }),
 
-      // Próximos agendamentos
-      db.appointment.findMany({
-        where: {
-          userId,
-          date: { gte: new Date() },
-          status: {
-            in: ["SCHEDULED", "CONFIRMED"],
-          },
-        },
-        include: {
-          barber: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
+        // Próximos agendamentos
+        db.appointment.findMany({
+          where: {
+            userId,
+            date: { gte: new Date() },
+            status: {
+              in: ["SCHEDULED", "CONFIRMED"],
             },
           },
-          service: {
-            select: {
-              id: true,
-              name: true,
-              duration: true,
-              price: true,
+          include: {
+            barber: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+            service: {
+              select: {
+                id: true,
+                name: true,
+                duration: true,
+                price: true,
+              },
             },
           },
-        },
-        orderBy: { date: "asc" },
-        take: 3,
-      }),
+          orderBy: { date: "asc" },
+          take: 3,
+        }),
 
-      // Serviços mais utilizados
-      db.appointment.groupBy({
-        by: ["serviceId"],
-        where: {
-          userId,
-          status: "COMPLETED",
-        },
-        _count: true,
-        orderBy: {
-          _count: {
-            serviceId: "desc",
+        // Serviços mais utilizados
+        db.appointment.groupBy({
+          by: ["serviceId"],
+          where: {
+            userId,
+            status: "COMPLETED",
           },
-        },
-        take: 3,
-      }),
+          _count: true,
+          orderBy: {
+            _count: {
+              serviceId: "desc",
+            },
+          },
+          take: 3,
+        }),
 
-      // Total gasto
-      db.serviceHistory.aggregate({
-        where: { userId },
-        _sum: { finalPrice: true },
-      }),
-    ]);
+        // Total gasto
+        db.serviceHistory.aggregate({
+          where: { userId },
+          _sum: { finalPrice: true },
+        }),
+      ]);
 
     // Buscar detalhes dos serviços favoritos
     const favoriteServicesDetails = await Promise.all(
@@ -390,7 +428,7 @@ export class UserService {
           service,
           count: item._count,
         };
-      })
+      }),
     );
 
     return {
@@ -403,13 +441,94 @@ export class UserService {
   }
 
   /**
+   * Soft delete de usuário (marca como deletado e inativo)
+   */
+  static async softDeleteUser(id: string, actorId: string) {
+    const existing = await db.user.findFirst({
+      where: { id, deletedAt: null },
+      select: { id: true, email: true, role: true },
+    });
+
+    if (!existing) {
+      return null;
+    }
+
+    const user = await db.user.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        deletedById: actorId,
+        isActive: false,
+        resetPasswordExpires: null,
+        resetPasswordToken: null,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        deletedAt: true,
+        deletedById: true,
+        updatedById: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    logger.info("User soft deleted", { userId: id, actorId });
+    return user;
+  }
+
+  /**
+   * Restaurar usuário previamente deletado
+   */
+  static async restoreUser(id: string, actorId: string) {
+    const existing = await db.user.findFirst({
+      where: { id, deletedAt: { not: null } },
+      select: { id: true, email: true },
+    });
+
+    if (!existing) {
+      return null;
+    }
+
+    const user = await db.user.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        deletedById: null,
+        isActive: true,
+        updatedById: actorId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        deletedAt: true,
+        deletedById: true,
+        updatedById: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    logger.info("User restored", { userId: id, actorId });
+    return user;
+  }
+
+  /**
    * Verificar disponibilidade do barbeiro para uma data/hora
    */
   static async isBarberAvailable(
     barberId: string,
     date: Date,
     duration: number,
-    excludeAppointmentId?: string
+    excludeAppointmentId?: string,
   ): Promise<boolean> {
     const endTime = new Date(date.getTime() + duration * 60000);
 
@@ -443,9 +562,7 @@ export class UserService {
 
     // Verificar sobreposição real
     for (const appointment of conflictingAppointments) {
-      const appointmentEnd = new Date(
-        appointment.date.getTime() + appointment.service.duration * 60000
-      );
+      const appointmentEnd = new Date(appointment.date.getTime() + appointment.service.duration * 60000);
 
       if (
         (date >= appointment.date && date < appointmentEnd) ||
@@ -462,11 +579,7 @@ export class UserService {
   /**
    * Buscar horários livres do barbeiro para um dia
    */
-  static async getBarberAvailableSlots(
-    barberId: string,
-    date: Date,
-    serviceDuration: number
-  ) {
+  static async getBarberAvailableSlots(barberId: string, date: Date, serviceDuration: number) {
     // Horário de funcionamento: 8h às 18h
     const workStart = new Date(date);
     workStart.setHours(8, 0, 0, 0);
@@ -497,17 +610,12 @@ export class UserService {
     // eslint-disable-next-line prefer-const
     let currentTime = new Date(workStart);
 
-    while (
-      currentTime.getTime() + serviceDuration * 60000 <=
-      workEnd.getTime()
-    ) {
+    while (currentTime.getTime() + serviceDuration * 60000 <= workEnd.getTime()) {
       const slotEnd = new Date(currentTime.getTime() + serviceDuration * 60000);
 
       // Verificar se este slot não conflita com agendamentos
       const hasConflict = appointments.some((appointment) => {
-        const appointmentEnd = new Date(
-          appointment.date.getTime() + appointment.service.duration * 60000
-        );
+        const appointmentEnd = new Date(appointment.date.getTime() + appointment.service.duration * 60000);
 
         return (
           (currentTime >= appointment.date && currentTime < appointmentEnd) ||

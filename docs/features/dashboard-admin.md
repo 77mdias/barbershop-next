@@ -458,12 +458,13 @@ export async function createPromotion(data: {
   - Suporte a promoções globais vs específicas
   - Vincular promoções a serviços (M:M)
 
-- [ ] **#024** - Soft Delete e Edição de Usuários
-  - Adicionar campo `isActive` ao schema Prisma
-  - Migration para novo campo
-  - Implementar `deleteUser()` com soft delete real
-  - Criar `updateUser()` server action
-  - Form handler em users/[id]/page.tsx
+- [x] **#024** - Soft Delete e Edição de Usuários
+  - Adicionar colunas de soft delete (`deletedAt/deletedById/updatedById`) no Prisma ✅
+  - Migration criada (`20251204120000_user_soft_delete`) ✅
+  - `deleteUser()`/`softDeleteUser` + restore implementados ✅
+  - `updateUser()` server action com validação e audit ✅
+  - Form handler em `users/[id]/page.tsx` + ações de tabela ✅
+  - Doc: `docs/architecture/user-soft-delete.md` ✅
 
 ### 🟡 Prioridade MÉDIA - UX e Refinamentos
 

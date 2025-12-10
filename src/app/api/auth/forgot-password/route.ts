@@ -11,10 +11,7 @@ export async function POST(request: NextRequest) {
     logger.api.info("Password reset requested", { email });
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email é obrigatório" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email é obrigatório" }, { status: 400 });
     }
 
     logger.api.debug("Testing database connection");
@@ -30,18 +27,17 @@ export async function POST(request: NextRequest) {
 
     // Verificar se o usuário existe
     logger.api.debug("Searching for user in database", { email });
-    const user = await db.user.findUnique({
-      where: { email: email.toLowerCase() },
+    const user = await db.user.findFirst({
+      where: { email: email.toLowerCase(), deletedAt: null },
     });
 
     if (!user) {
       // Por segurança, não revelar se o email existe ou não
       return NextResponse.json(
         {
-          message:
-            "Se o email existir, você receberá um link para redefinir sua senha",
+          message: "Se o email existir, você receberá um link para redefinir sua senha",
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -63,24 +59,17 @@ export async function POST(request: NextRequest) {
 
     if (!emailResult.success) {
       logger.api.error("Error sending reset email", { email, error: emailResult.error });
-      return NextResponse.json(
-        { error: "Erro ao enviar email de redefinição" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Erro ao enviar email de redefinição" }, { status: 500 });
     }
 
     return NextResponse.json(
       {
-        message:
-          "Se o email existir, você receberá um link para redefinir sua senha",
+        message: "Se o email existir, você receberá um link para redefinir sua senha",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     logger.api.error("Error processing password reset request", { error });
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

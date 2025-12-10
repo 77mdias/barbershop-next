@@ -8,44 +8,26 @@ const promotionTypeEnum = z.enum([
   "LOYALTY_BONUS",
 ]);
 
+const toDateOrUndefined = (val: unknown) => {
+  if (val === "" || val === null || val === undefined) return undefined;
+  const parsed = val instanceof Date ? val : typeof val === "string" ? new Date(val) : undefined;
+  if (!parsed) return undefined;
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
 const basePromotionSchema = {
-  name: z
-    .string()
-    .min(3, "Nome deve ter pelo menos 3 caracteres")
-    .max(120, "Nome deve ter no máximo 120 caracteres"),
-  description: z
-    .string()
-    .max(500, "Descrição deve ter no máximo 500 caracteres")
-    .optional(),
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(120, "Nome deve ter no máximo 120 caracteres"),
+  description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
   type: promotionTypeEnum,
-  value: z
-    .number()
-    .positive("Valor deve ser maior que zero"),
-  validFrom: z.preprocess(
-    (val) => {
-      if (val === "" || val === null || val === undefined) return undefined;
-      return typeof val === "string" ? new Date(val) : val;
-    },
-    z.date(),
-  ),
-  validUntil: z
-    .preprocess(
-      (val) => {
-        if (val === "" || val === null || val === undefined) return undefined;
-        return typeof val === "string" ? new Date(val) : val;
-      },
-      z.date().optional(),
-    ),
+  value: z.number().positive("Valor deve ser maior que zero"),
+  validFrom: z.preprocess(toDateOrUndefined, z.date()),
+  validUntil: z.preprocess(toDateOrUndefined, z.date().optional()),
   isGlobal: z.boolean().default(false),
-  minFrequency: z
-    .preprocess((val) => {
-      if (val === "" || val === null || val === undefined) return undefined;
-      if (typeof val === "number" && Number.isNaN(val)) return undefined;
-      return val;
-    }, z.number()
-      .int("Frequência mínima deve ser um número inteiro")
-      .positive("Frequência mínima deve ser positiva")
-      .optional()),
+  minFrequency: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    if (typeof val === "number" && Number.isNaN(val)) return undefined;
+    return val;
+  }, z.number().int("Frequência mínima deve ser um número inteiro").positive("Frequência mínima deve ser positiva").optional()),
   active: z.boolean().default(true),
   serviceIds: z.array(z.string()).optional(),
   userIds: z.array(z.string()).optional(),

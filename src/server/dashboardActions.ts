@@ -19,11 +19,7 @@ export async function getBarberMetrics(barberId: string) {
       return { success: false, error: "Não autorizado" };
     }
 
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     // 1. Métricas de Reviews
     const reviewsMetrics = await db.serviceHistory.aggregate({
@@ -119,8 +115,7 @@ export async function getBarberMetrics(barberId: string) {
         totalClients: uniqueClients.length || 0,
 
         // Métricas do mês
-        monthlyAverageRating:
-          Number(monthlyReviews._avg.rating?.toFixed(1)) || 0,
+        monthlyAverageRating: Number(monthlyReviews._avg.rating?.toFixed(1)) || 0,
         monthlyReviews: monthlyReviews._count.rating || 0,
         monthlyClients: monthlyClients.length || 0,
         monthlyRevenue: Number(revenueData._sum.finalPrice) || 0,
@@ -133,10 +128,7 @@ export async function getBarberMetrics(barberId: string) {
         ratingDistribution: ratingDistribution.map((item) => ({
           rating: item.rating || 0,
           count: item._count.rating || 0,
-          percentage:
-            totalReviews > 0
-              ? Math.round((item._count.rating / totalReviews) * 100)
-              : 0,
+          percentage: totalReviews > 0 ? Math.round((item._count.rating / totalReviews) * 100) : 0,
         })),
 
         // Metas do mês (podem ser configuráveis futuramente)
@@ -144,29 +136,17 @@ export async function getBarberMetrics(barberId: string) {
           averageRating: {
             target: 4.5,
             current: Number(monthlyReviews._avg.rating?.toFixed(1)) || 0,
-            percentage: Math.min(
-              Math.round(
-                ((Number(monthlyReviews._avg.rating?.toFixed(1)) || 0) / 4.5) *
-                  100
-              ),
-              100
-            ),
+            percentage: Math.min(Math.round(((Number(monthlyReviews._avg.rating?.toFixed(1)) || 0) / 4.5) * 100), 100),
           },
           monthlyReviews: {
             target: 20,
             current: monthlyReviews._count.rating || 0,
-            percentage: Math.min(
-              Math.round(((monthlyReviews._count.rating || 0) / 20) * 100),
-              100
-            ),
+            percentage: Math.min(Math.round(((monthlyReviews._count.rating || 0) / 20) * 100), 100),
           },
           monthlyClients: {
             target: 100,
             current: monthlyClients.length || 0,
-            percentage: Math.min(
-              Math.round(((monthlyClients.length || 0) / 100) * 100),
-              100
-            ),
+            percentage: Math.min(Math.round(((monthlyClients.length || 0) / 100) * 100), 100),
           },
         },
       },
@@ -193,11 +173,7 @@ export async function getDashboardMetrics(userId: string) {
     }
 
     const userRole = session.user.role;
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     if (userRole === "CLIENT") {
       // Métricas para cliente
@@ -237,7 +213,7 @@ export async function getDashboardMetrics(userId: string) {
         _avg: { rating: true },
       });
 
-      const totalUsers = await db.user.count();
+      const totalUsers = await db.user.count({ where: { deletedAt: null } });
 
       const monthlyActivity = await db.serviceHistory.count({
         where: { createdAt: { gte: startOfMonth } },
@@ -275,25 +251,22 @@ export async function getAdminMetrics() {
       return { success: false, error: "Não autorizado" };
     }
 
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
     // 1. Contadores de usuários por role
     const userCounts = await db.user.groupBy({
+      where: { deletedAt: null },
       by: ["role"],
       _count: { id: true },
     });
 
-    const totalUsers = await db.user.count();
-    const clientsCount = userCounts.find(u => u.role === "CLIENT")?._count.id || 0;
-    const barbersCount = userCounts.find(u => u.role === "BARBER")?._count.id || 0;
-    const adminsCount = userCounts.find(u => u.role === "ADMIN")?._count.id || 0;
+    const totalUsers = await db.user.count({ where: { deletedAt: null } });
+    const clientsCount = userCounts.find((u) => u.role === "CLIENT")?._count.id || 0;
+    const barbersCount = userCounts.find((u) => u.role === "BARBER")?._count.id || 0;
+    const adminsCount = userCounts.find((u) => u.role === "ADMIN")?._count.id || 0;
 
     // 2. Métricas de avaliações globais
     const reviewsMetrics = await db.serviceHistory.aggregate({
@@ -355,6 +328,7 @@ export async function getAdminMetrics() {
     const newUsersThisMonth = await db.user.count({
       where: {
         createdAt: { gte: startOfMonth },
+        deletedAt: null,
       },
     });
 
@@ -364,6 +338,7 @@ export async function getAdminMetrics() {
 
     const activeUsers = await db.user.count({
       where: {
+        deletedAt: null,
         OR: [
           { updatedAt: { gte: thirtyDaysAgo } },
           {
@@ -388,6 +363,7 @@ export async function getAdminMetrics() {
     const activeBarbersCount = await db.user.count({
       where: {
         role: "BARBER",
+        deletedAt: null,
         // Por enquanto, todos os barbeiros são considerados ativos
       },
     });
@@ -396,6 +372,7 @@ export async function getAdminMetrics() {
     const topBarbers = await db.user.findMany({
       where: {
         role: "BARBER",
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -413,7 +390,7 @@ export async function getAdminMetrics() {
     }));
 
     // 13. Receita estimada - mocada temporariamente
-    const revenueData = { _sum: { finalPrice: 15420.50 } }; // R$ 15.420,50
+    const revenueData = { _sum: { finalPrice: 15420.5 } }; // R$ 15.420,50
     const monthlyRevenueData = { _sum: { finalPrice: 3890.75 } }; // R$ 3.890,75 este mês
     const paidServices = 127; // 127 serviços pagos
 

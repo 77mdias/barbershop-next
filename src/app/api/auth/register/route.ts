@@ -33,9 +33,7 @@ function validatePassword(password: string): {
 
   // Pelo menos um caractere especial
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    errors.push(
-      "A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;':\",./<>?)"
-    );
+    errors.push("A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;':\",./<>?)");
   }
 
   return {
@@ -49,10 +47,7 @@ export async function POST(request: NextRequest) {
     const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { message: "Nome, email, senha e CPF são obrigatórios" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Nome, email, senha e CPF são obrigatórios" }, { status: 400 });
     }
 
     // Validação de senha robusta
@@ -63,12 +58,12 @@ export async function POST(request: NextRequest) {
           message: "Senha não atende aos requisitos de segurança",
           details: passwordValidation.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Verificar se o usuário já existe
-    const existingUser = await db.user.findUnique({
+    const existingUser = await db.user.findFirst({
       where: {
         email: email.toLowerCase(),
       },
@@ -78,23 +73,25 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
+      if (existingUser.deletedAt) {
+        return NextResponse.json(
+          { message: "Este email pertence a uma conta removida. Restaure-a ou use outro email." },
+          { status: 409 },
+        );
+      }
+
       // Se já existe com conta OAuth, informar ao usuário
       if (existingUser.accounts && existingUser.accounts.length > 0) {
-        const providers = existingUser.accounts
-          .map((acc: { provider: string }) => acc.provider)
-          .join(", ");
+        const providers = existingUser.accounts.map((acc: { provider: string }) => acc.provider).join(", ");
         return NextResponse.json(
           {
             message: `Este email já está cadastrado via ${providers}. Use o botão "${providers}" para fazer login.`,
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
 
-      return NextResponse.json(
-        { message: "Usuário já existe com este email" },
-        { status: 409 }
-      );
+      return NextResponse.json({ message: "Usuário já existe com este email" }, { status: 409 });
     }
 
     // Hash da senha
@@ -132,23 +129,16 @@ export async function POST(request: NextRequest) {
     if (!emailResult.success) {
       // Se falhar ao enviar email, deletar o usuário criado
       await db.user.delete({ where: { id: user.id } });
-      return NextResponse.json(
-        { message: "Erro ao enviar email de verificação. Tente novamente." },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: "Erro ao enviar email de verificação. Tente novamente." }, { status: 500 });
     }
 
     return NextResponse.json({
-      message:
-        "Usuário criado com sucesso. Verifique seu email para ativar sua conta.",
+      message: "Usuário criado com sucesso. Verifique seu email para ativar sua conta.",
       user,
       emailSent: true,
     });
   } catch (error) {
     logger.api.error("Error creating user", { error });
-    return NextResponse.json(
-      { message: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Erro interno do servidor" }, { status: 500 });
   }
 }
