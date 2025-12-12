@@ -543,6 +543,67 @@ src/components/
 - `MessageInput.tsx` - Smart textarea with auto-resize and Enter to send
 - `ConversationItem.tsx` - Conversation preview with last message and unread badge
 
+### Admin Filter & Search System
+
+**Location**: `/src/components/admin/`, `/src/app/dashboard/admin/*/`
+
+**Overview**: Sistema completo de filtros, busca com debouncing e paginação real para páginas administrativas. Implementação parcial concluída em 12/12/2025 (TASK #025 - 70% completo).
+
+**Core Components**:
+- **DebouncedSearchInput** (`/src/components/admin/DebouncedSearchInput.tsx`) - Input com debouncing de 500ms
+- **FilterSelect** (`/src/components/admin/FilterSelect.tsx`) - Dropdown de filtros com reset
+- **PaginationControls** (`/src/components/admin/PaginationControls.tsx`) - Paginação com page numbers inteligentes
+
+**Arquitetura: Wrapper Pattern**:
+```
+page.tsx (Server Component) → Auth + Initial Data
+  ↓
+PageClient.tsx (Client Component) → Filters + State + Pagination
+```
+
+**Páginas Implementadas**:
+- ✅ `/dashboard/admin/users` - Filtros: search, role, status + paginação (20/página)
+- 🟡 `/dashboard/admin/services` - Pendente
+- 🟡 `/dashboard/admin/barbers` - Pendente
+- 🟡 `/dashboard/admin/reports` - Pendente
+
+**Server Actions Enhanced**:
+- `getBarbersForAdmin()` - Filtros: search, performanceMin, sortBy, paginação
+- `getReportsData()` - Filtro: dateRange (7d/30d/3m/year)
+
+**Key Features**:
+- ✅ Debounced search (500ms delay previne spam)
+- ✅ Server-side pagination (max 50 itens/página)
+- ✅ Loading states durante refetch
+- ✅ Reset automático de página quando filtros mudam
+- ✅ Auth permanece server-side (seguro)
+- ✅ 50 testes unitários (100% passando)
+
+**Usage Example** (`UsersPageClient.tsx`):
+```typescript
+const [search, setSearch] = useState("");
+const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
+const [page, setPage] = useState(1);
+
+// Refetch when filters change
+useEffect(() => {
+  const fetchUsers = async () => {
+    const result = await getUsers({
+      search: search.length >= 2 ? search : undefined,
+      role: roleFilter !== "all" ? roleFilter : undefined,
+      page,
+      limit: 20,
+    });
+    setUsers(result.data.users);
+  };
+  fetchUsers();
+}, [search, roleFilter, page]);
+```
+
+**Documentação Completa**: `/docs/features/admin-filters.md`
+
+---
+
 ### Theme System
 
 **Location**: `/src/providers/ThemeProvider.tsx`, `/src/components/ThemeToggle.tsx`

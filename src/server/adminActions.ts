@@ -85,8 +85,21 @@ export async function getUsersForAdmin() {
 
 /**
  * Buscar todos os barbeiros com suas métricas
+ *
+ * @param filters - Filtros de busca, performance, ordenação e paginação
+ * @param filters.search - Buscar por nome ou email
+ * @param filters.performanceMin - Rating mínimo (1-5)
+ * @param filters.sortBy - Ordenar por: "name" | "rating" | "appointments"
+ * @param filters.page - Página atual (default: 1)
+ * @param filters.limit - Itens por página (default: 20, max: 50)
  */
-export async function getBarbersForAdmin() {
+export async function getBarbersForAdmin(filters?: {
+  search?: string;
+  performanceMin?: number;
+  sortBy?: "name" | "rating" | "appointments";
+  page?: number;
+  limit?: number;
+}) {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions);
@@ -95,6 +108,7 @@ export async function getBarbersForAdmin() {
         success: false,
         error: "Não autenticado",
         data: [],
+        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
       };
     }
 
@@ -104,14 +118,31 @@ export async function getBarbersForAdmin() {
         success: false,
         error: "Acesso negado: apenas administradores",
         data: [],
+        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
       };
     }
 
+    // Parâmetros de paginação
+    const page = Math.max(1, filters?.page || 1);
+    const limit = Math.min(50, Math.max(1, filters?.limit || 20));
+    const skip = (page - 1) * limit;
+
+    // Construir filtros de busca
+    const whereClause: any = {
+      role: "BARBER",
+      deletedAt: null,
+    };
+
+    if (filters?.search) {
+      whereClause.OR = [
+        { name: { contains: filters.search, mode: "insensitive" } },
+        { email: { contains: filters.search, mode: "insensitive" } },
+      ];
+    }
+
+    // Buscar barbeiros (sem paginação inicial para aplicar filtro de rating)
     const barbeiros = await db.user.findMany({
-      where: {
-        role: "BARBER",
-        deletedAt: null,
-      },
+      where: whereClause,
       select: {
         id: true,
         name: true,
@@ -129,13 +160,10 @@ export async function getBarbersForAdmin() {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     });
 
-    // Processar dados dos barbeiros
-    const barbersWithMetrics: Barber[] = barbeiros.map((barber) => {
+    // Processar dados dos barbeiros com métricas
+    let barbersWithMetrics: Barber[] = barbeiros.map((barber) => {
       const allRatings = barber.appointments
         .map((apt) => apt.serviceHistory?.rating)
         .filter((rating): rating is number => rating !== null && rating !== undefined);
@@ -155,9 +183,45 @@ export async function getBarbersForAdmin() {
       };
     });
 
+    // Aplicar filtro de performance mínima
+    if (filters?.performanceMin !== undefined && filters.performanceMin > 0) {
+      barbersWithMetrics = barbersWithMetrics.filter(
+        (b) => b.averageRating !== null && b.averageRating >= filters.performanceMin!
+      );
+    }
+
+    // Ordenar
+    const sortBy = filters?.sortBy || "name";
+    barbersWithMetrics.sort((a, b) => {
+      switch (sortBy) {
+        case "rating":
+          // Barbeiros sem rating vão para o final
+          if (a.averageRating === null && b.averageRating === null) return 0;
+          if (a.averageRating === null) return 1;
+          if (b.averageRating === null) return -1;
+          return b.averageRating - a.averageRating; // Decrescente
+        case "appointments":
+          return b.totalAppointments - a.totalAppointments; // Decrescente
+        case "name":
+        default:
+          return (a.name || "").localeCompare(b.name || "");
+      }
+    });
+
+    // Calcular paginação
+    const total = barbersWithMetrics.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginatedData = barbersWithMetrics.slice(skip, skip + limit);
+
     return {
       success: true,
-      data: barbersWithMetrics,
+      data: paginatedData,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     };
   } catch (error) {
     console.error("Erro ao buscar barbeiros:", error);
@@ -165,14 +229,17 @@ export async function getBarbersForAdmin() {
       success: false,
       error: "Erro ao buscar barbeiros",
       data: [],
+      pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
     };
   }
 }
 
 /**
  * Buscar dados para relatórios
+ *
+ * @param dateRange - Período do relatório: "7d" | "30d" | "3m" | "year" (default: "30d")
  */
-export async function getReportsData() {
+export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions);
@@ -193,26 +260,58 @@ export async function getReportsData() {
       };
     }
 
-    // Dados básicos
+    // Calcular data de início baseado no range
+    const now = new Date();
+    let startDate: Date;
+
+    switch (dateRange || "30d") {
+      case "7d":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "3m":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        break;
+      case "year":
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    // Dados básicos (não filtrados por data)
     const totalClients = await db.user.count({
       where: { role: "CLIENT", deletedAt: null },
     });
 
     const totalAppointments = await db.appointment.count();
 
-    // Agendamentos deste mês
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const monthlyAppointments = await db.appointment.count({
+    // Agendamentos no período selecionado
+    const periodAppointments = await db.appointment.count({
       where: {
         createdAt: {
-          gte: startOfMonth,
+          gte: startDate,
         },
       },
     });
 
-    // Dados de reviews
+    // Dados de reviews no período selecionado
+    const periodReviews = await db.serviceHistory.findMany({
+      where: {
+        rating: { not: null },
+        createdAt: {
+          gte: startDate,
+        },
+      },
+      select: {
+        rating: true,
+        finalPrice: true,
+      },
+    });
+
+    // Dados de reviews totais (para comparação)
     const allReviews = await db.serviceHistory.findMany({
       where: {
         rating: { not: null },
@@ -224,20 +323,31 @@ export async function getReportsData() {
     });
 
     const totalReviews = allReviews.length;
+    const periodReviewsCount = periodReviews.length;
+
     const averageRating =
       totalReviews > 0
         ? Number((allReviews.reduce((acc, review) => acc + (review.rating || 0), 0) / totalReviews).toFixed(1))
         : 0;
 
-    // Receita (simulada baseada nos preços dos serviços)
+    const periodAverageRating =
+      periodReviewsCount > 0
+        ? Number((periodReviews.reduce((acc, review) => acc + (review.rating || 0), 0) / periodReviewsCount).toFixed(1))
+        : 0;
+
+    // Receita total
     const totalRevenue = allReviews.reduce((acc, review) => {
       const finalPrice = review.finalPrice;
       const numericPrice = typeof finalPrice === "number" ? finalPrice : Number(finalPrice ?? 25);
       return acc + numericPrice;
     }, 0);
 
-    // Receita mensal (estimativa)
-    const monthlyRevenue = Number(totalRevenue * 0.3); // Aproximadamente 30% da receita total no mês atual
+    // Receita do período selecionado
+    const periodRevenue = periodReviews.reduce((acc, review) => {
+      const finalPrice = review.finalPrice;
+      const numericPrice = typeof finalPrice === "number" ? finalPrice : Number(finalPrice ?? 25);
+      return acc + numericPrice;
+    }, 0);
 
     // Top barbeiros
     const barbeirosData = await getBarbersForAdmin();
@@ -258,10 +368,10 @@ export async function getReportsData() {
 
     const reportsData: ReportsData = {
       totalRevenue,
-      monthlyRevenue,
+      monthlyRevenue: periodRevenue, // Receita do período selecionado
       totalClients,
       totalAppointments,
-      monthlyAppointments,
+      monthlyAppointments: periodAppointments, // Agendamentos do período
       averageRating,
       totalReviews,
       topBarbers: topBarbers.map((b) => ({
