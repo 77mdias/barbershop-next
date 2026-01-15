@@ -124,6 +124,7 @@ async function main() {
       serviceId: corte.id,
       completedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 dias atrás
       finalPrice: 50.0,
+      paymentMethod: "CARD",
       rating: 5,
       feedback: "Excelente corte!",
     },
@@ -135,6 +136,7 @@ async function main() {
       serviceId: corte.id,
       completedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 dias atrás
       finalPrice: 50.0,
+      paymentMethod: "PIX",
       rating: 4,
       feedback: "Muito bom!",
     },

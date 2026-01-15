@@ -12,10 +12,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Usuário não autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Usuário não autenticado" }, { status: 401 });
     }
 
     console.log("🔧 Criando dados de teste para avaliações...");
@@ -58,8 +55,7 @@ export async function POST(request: NextRequest) {
         data: [
           {
             name: "Corte de Cabelo Clássico",
-            description:
-              "Corte de cabelo tradicional com acabamento profissional",
+            description: "Corte de cabelo tradicional com acabamento profissional",
             price: 25.0,
             duration: 30,
             active: true,
@@ -130,6 +126,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         serviceId: service.id,
         finalPrice: service.price,
+        paymentMethod: "CARD",
         completedAt: new Date(Date.now() - 23 * 60 * 60 * 1000), // Ontem à tarde
         rating: null, // Ainda não avaliado
         feedback: null,
@@ -164,7 +161,7 @@ export async function POST(request: NextRequest) {
         error: "Erro interno do servidor",
         details: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

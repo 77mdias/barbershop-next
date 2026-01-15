@@ -1,11 +1,20 @@
 "use server";
 
+import { PaymentMethod, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 import { UserService } from "./services/userService";
 import { logger } from "@/lib/logger";
+
+const toNumber = (value: Prisma.Decimal | number | null | undefined) => (value ? Number(value) : 0);
+
+const busyHourBuckets = [
+  { label: "Manhã (8h-12h)", start: 8, end: 12 },
+  { label: "Tarde (12h-18h)", start: 12, end: 18 },
+  { label: "Noite (18h-22h)", start: 18, end: 22 },
+];
 
 // Tipos para os dados retornados
 interface User {
@@ -29,6 +38,33 @@ interface BarberMetrics {
   topPerformer: string | null;
 }
 
+type MonthlyGrowthEntry = {
+  month: string;
+  revenue: number;
+  services: number;
+  progress: number;
+  growthRate: number;
+};
+
+type PaymentBreakdown = {
+  method: PaymentMethod;
+  count: number;
+  percentage: number;
+};
+
+type BusyHourMetric = {
+  label: string;
+  range: string;
+  count: number;
+  percentage: number;
+};
+
+type PeriodComparison = {
+  revenueChangePercent: number;
+  appointmentsChangePercent: number;
+  newClients: number;
+};
+
 interface ReportsData {
   totalRevenue: number;
   monthlyRevenue: number;
@@ -42,7 +78,158 @@ interface ReportsData {
     name: string | null;
     totalReviews: number;
     averageRating: number;
+    totalRevenue: number;
   }>;
+  monthlyGrowth: MonthlyGrowthEntry[];
+  paymentMethods: PaymentBreakdown[];
+  busyHours: BusyHourMetric[];
+  periodComparison: PeriodComparison;
+  todayRevenue: number;
+  weekRevenue: number;
+  averageTicket: number;
+  averageDurationMinutes: number;
+  returnRate: number;
+}
+
+function calculateBusyHours(appointments: Array<{ date: Date }>): BusyHourMetric[] {
+  const counts = busyHourBuckets.map(() => 0);
+
+  appointments.forEach(({ date }) => {
+    const hour = date.getHours();
+    const index = busyHourBuckets.findIndex((bucket) => hour >= bucket.start && hour < bucket.end);
+    if (index >= 0) {
+      counts[index] += 1;
+    }
+  });
+
+  const total = counts.reduce((acc, current) => acc + current, 0);
+
+  return busyHourBuckets.map((bucket, index) => ({
+    label: bucket.label,
+    range: `${bucket.start}h-${bucket.end}h`,
+    count: counts[index],
+    percentage: total > 0 ? Math.round((counts[index] / total) * 100) : 0,
+  }));
+}
+
+async function getTopBarbersByRevenue(startDate?: Date) {
+  const histories = await db.serviceHistory.findMany({
+    where: {
+      ...(startDate ? { completedAt: { gte: startDate } } : {}),
+      appointments: { some: { barberId: { not: null } } },
+    },
+    select: {
+      finalPrice: true,
+      rating: true,
+      appointments: {
+        select: { barberId: true },
+      },
+    },
+  });
+
+  const stats = new Map<string, { revenue: number; ratingSum: number; reviews: number }>();
+
+  histories.forEach((history) => {
+    const barberId = history.appointments[0]?.barberId;
+    if (!barberId) return;
+
+    const current = stats.get(barberId) || { revenue: 0, ratingSum: 0, reviews: 0 };
+
+    current.revenue += toNumber(history.finalPrice);
+    if (typeof history.rating === "number") {
+      current.ratingSum += history.rating;
+      current.reviews += 1;
+    }
+
+    stats.set(barberId, current);
+  });
+
+  if (stats.size === 0) {
+    return [];
+  }
+
+  const barbers = await db.user.findMany({
+    where: {
+      id: { in: Array.from(stats.keys()) },
+      role: "BARBER",
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return barbers
+    .map((barber) => {
+      const data = stats.get(barber.id);
+      const averageRating = data && data.reviews > 0 ? Number((data.ratingSum / data.reviews).toFixed(1)) : 0;
+
+      return {
+        id: barber.id,
+        name: barber.name || "Sem nome",
+        totalReviews: data?.reviews ?? 0,
+        averageRating,
+        totalRevenue: Number((data?.revenue ?? 0).toFixed(2)),
+      };
+    })
+    .filter((barber) => barber.totalRevenue > 0 || barber.totalReviews > 0)
+    .sort((a, b) => {
+      if (b.totalRevenue === a.totalRevenue) {
+        return b.averageRating - a.averageRating;
+      }
+      return b.totalRevenue - a.totalRevenue;
+    });
+}
+
+async function buildMonthlyGrowth(now: Date): Promise<MonthlyGrowthEntry[]> {
+  const referenceStart = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  const histories = await db.serviceHistory.findMany({
+    where: { completedAt: { gte: referenceStart } },
+    select: { completedAt: true, finalPrice: true },
+  });
+
+  const months = Array.from({ length: 4 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (3 - index), 1);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+    return {
+      key,
+      label: date.toLocaleString("pt-BR", { month: "short" }),
+    };
+  });
+
+  const aggregated = new Map<string, { revenue: number; services: number }>();
+
+  histories.forEach((history) => {
+    const key = `${history.completedAt.getFullYear()}-${history.completedAt.getMonth()}`;
+    const current = aggregated.get(key) || { revenue: 0, services: 0 };
+
+    current.revenue += toNumber(history.finalPrice);
+    current.services += 1;
+
+    aggregated.set(key, current);
+  });
+
+  const maxRevenue = Math.max(...months.map((month) => aggregated.get(month.key)?.revenue ?? 0), 0);
+
+  return months.map((month, index) => {
+    const data = aggregated.get(month.key) || { revenue: 0, services: 0 };
+    const prevKey = index > 0 ? months[index - 1].key : null;
+    const prevRevenue = prevKey ? (aggregated.get(prevKey)?.revenue ?? 0) : 0;
+    const growthRate =
+      prevRevenue > 0 ? ((data.revenue - prevRevenue) / prevRevenue) * 100 : data.revenue > 0 ? 100 : 0;
+
+    const progress = maxRevenue > 0 ? Math.round((data.revenue / maxRevenue) * 100) : 0;
+
+    return {
+      month: month.label.charAt(0).toUpperCase() + month.label.slice(1),
+      revenue: Number(data.revenue.toFixed(2)),
+      services: data.services,
+      progress,
+      growthRate: Number(growthRate.toFixed(1)),
+    };
+  });
 }
 
 /**
@@ -322,108 +509,191 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     }
 
+    const periodLength = now.getTime() - startDate.getTime();
+    const previousPeriodStart = new Date(startDate.getTime() - periodLength);
+
     // Dados básicos (não filtrados por data)
     const totalClients = await db.user.count({
       where: { role: "CLIENT", deletedAt: null },
     });
 
-    const totalAppointments = await db.appointment.count();
+    const totalAppointments = await db.appointment.count({
+      where: { status: { notIn: ["CANCELLED", "NO_SHOW"] } },
+    });
 
-    // Agendamentos no período selecionado
-    const periodAppointments = await db.appointment.count({
+    // Agendamentos no período selecionado (com dados de duração)
+    const periodAppointments = await db.appointment.findMany({
       where: {
-        createdAt: {
-          gte: startDate,
+        date: { gte: startDate },
+        status: { notIn: ["CANCELLED", "NO_SHOW"] },
+      },
+      select: {
+        date: true,
+        service: {
+          select: { duration: true },
         },
       },
     });
 
-    // Dados de reviews no período selecionado
-    const periodReviews = await db.serviceHistory.findMany({
+    const monthlyAppointments = periodAppointments.length;
+
+    const previousAppointments = await db.appointment.count({
       where: {
-        rating: { not: null },
-        createdAt: {
-          gte: startDate,
-        },
-      },
-      select: {
-        rating: true,
-        finalPrice: true,
+        date: { gte: previousPeriodStart, lt: startDate },
+        status: { notIn: ["CANCELLED", "NO_SHOW"] },
       },
     });
 
-    // Dados de reviews totais (para comparação)
-    const allReviews = await db.serviceHistory.findMany({
+    // Métricas de reviews e receita
+    const ratingsAggregate = await db.serviceHistory.aggregate({
+      where: { rating: { not: null } },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const totalRevenueData = await db.serviceHistory.aggregate({
+      _sum: { finalPrice: true },
+    });
+
+    const periodRevenueData = await db.serviceHistory.aggregate({
+      where: { completedAt: { gte: startDate } },
+      _sum: { finalPrice: true },
+      _count: { id: true },
+    });
+
+    const previousRevenueData = await db.serviceHistory.aggregate({
       where: {
+        completedAt: { gte: previousPeriodStart, lt: startDate },
+      },
+      _sum: { finalPrice: true },
+    });
+
+    const periodRatings = await db.serviceHistory.aggregate({
+      where: {
+        completedAt: { gte: startDate },
         rating: { not: null },
       },
-      select: {
-        rating: true,
-        finalPrice: true,
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const lastSevenDays = new Date();
+    lastSevenDays.setDate(lastSevenDays.getDate() - 7);
+
+    const todayRevenueData = await db.serviceHistory.aggregate({
+      where: { completedAt: { gte: startOfToday } },
+      _sum: { finalPrice: true },
+    });
+
+    const weekRevenueData = await db.serviceHistory.aggregate({
+      where: { completedAt: { gte: lastSevenDays } },
+      _sum: { finalPrice: true },
+    });
+
+    const newClientsInPeriod = await db.user.count({
+      where: {
+        role: "CLIENT",
+        deletedAt: null,
+        createdAt: { gte: startDate },
       },
     });
 
-    const totalReviews = allReviews.length;
-    const periodReviewsCount = periodReviews.length;
+    // Métodos de pagamento no período
+    const paymentBreakdownGroup = await db.serviceHistory.groupBy({
+      by: ["paymentMethod"],
+      where: {
+        completedAt: { gte: startDate },
+      },
+      _count: { _all: true },
+    });
+    const totalPayments = paymentBreakdownGroup.reduce((acc, item) => acc + item._count._all, 0);
+    const paymentMethods: PaymentBreakdown[] = paymentBreakdownGroup.map((item) => ({
+      method: item.paymentMethod,
+      count: item._count._all,
+      percentage: totalPayments > 0 ? Math.round((item._count._all / totalPayments) * 100) : 0,
+    }));
 
-    const averageRating =
-      totalReviews > 0
-        ? Number((allReviews.reduce((acc, review) => acc + (review.rating || 0), 0) / totalReviews).toFixed(1))
+    // Duração média dos atendimentos
+    const averageDurationMinutes = (() => {
+      const durations = periodAppointments
+        .map((appointment) => appointment.service?.duration)
+        .filter((duration): duration is number => typeof duration === "number");
+
+      if (!durations.length) {
+        return 0;
+      }
+
+      const total = durations.reduce((acc, duration) => acc + duration, 0);
+      return Math.round(total / durations.length);
+    })();
+
+    // Taxa de retorno de clientes
+    const returnRateGroup = await db.appointment.groupBy({
+      by: ["userId"],
+      where: {
+        date: { gte: startDate },
+        status: { notIn: ["CANCELLED", "NO_SHOW"] },
+      },
+      _count: { _all: true },
+    });
+
+    const returningClients = returnRateGroup.filter((entry) => entry._count._all > 1).length;
+    const returnRate = returnRateGroup.length > 0 ? Math.round((returningClients / returnRateGroup.length) * 100) : 0;
+
+    const busyHours = calculateBusyHours(periodAppointments);
+
+    const monthlyGrowth = await buildMonthlyGrowth(now);
+
+    const periodRevenue = toNumber(periodRevenueData._sum.finalPrice);
+    const previousRevenue = toNumber(previousRevenueData._sum.finalPrice);
+    const revenueChangePercent =
+      previousRevenue > 0 ? ((periodRevenue - previousRevenue) / previousRevenue) * 100 : periodRevenue > 0 ? 100 : 0;
+
+    const appointmentsChangePercent =
+      previousAppointments > 0
+        ? ((monthlyAppointments - previousAppointments) / previousAppointments) * 100
+        : monthlyAppointments > 0
+          ? 100
+          : 0;
+
+    const averageTicket =
+      (periodRevenueData._count?.id || 0) > 0
+        ? Number((periodRevenue / (periodRevenueData._count?.id || 1)).toFixed(2))
         : 0;
 
-    const periodAverageRating =
-      periodReviewsCount > 0
-        ? Number((periodReviews.reduce((acc, review) => acc + (review.rating || 0), 0) / periodReviewsCount).toFixed(1))
-        : 0;
-
-    // Receita total
-    const totalRevenue = allReviews.reduce((acc, review) => {
-      const finalPrice = review.finalPrice;
-      const numericPrice = typeof finalPrice === "number" ? finalPrice : Number(finalPrice ?? 25);
-      return acc + numericPrice;
-    }, 0);
-
-    // Receita do período selecionado
-    const periodRevenue = periodReviews.reduce((acc, review) => {
-      const finalPrice = review.finalPrice;
-      const numericPrice = typeof finalPrice === "number" ? finalPrice : Number(finalPrice ?? 25);
-      return acc + numericPrice;
-    }, 0);
-
-    // Top barbeiros
-    const barbeirosData = await getBarbersForAdmin({
-      sortBy: "rating",
-      limit: 50,
-    });
-    const barbersList =
-      barbeirosData.success && Array.isArray(barbeirosData.data)
-        ? (barbeirosData.data as Array<{
-            id: string;
-            name: string;
-            totalReviews: number;
-            averageRating?: number | null;
-          }>)
-        : [];
-
-    const topBarbers = barbersList
-      .filter((b) => b.totalReviews > 0)
-      .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
-      .slice(0, 10);
+    const topBarbers = (await getTopBarbersByRevenue(startDate)).slice(0, 10);
 
     const reportsData: ReportsData = {
-      totalRevenue,
-      monthlyRevenue: periodRevenue, // Receita do período selecionado
+      totalRevenue: toNumber(totalRevenueData._sum.finalPrice),
+      monthlyRevenue: periodRevenue,
       totalClients,
       totalAppointments,
-      monthlyAppointments: periodAppointments, // Agendamentos do período
-      averageRating,
-      totalReviews,
-      topBarbers: topBarbers.map((b) => ({
-        id: b.id,
-        name: b.name,
-        totalReviews: b.totalReviews,
-        averageRating: b.averageRating || 0,
+      monthlyAppointments,
+      averageRating: Number((periodRatings._avg.rating ?? ratingsAggregate._avg.rating ?? 0).toFixed(1)),
+      totalReviews: periodRatings._count.rating || ratingsAggregate._count.rating || 0,
+      topBarbers: topBarbers.map((barber) => ({
+        id: barber.id,
+        name: barber.name,
+        totalReviews: barber.totalReviews,
+        averageRating: barber.averageRating,
+        totalRevenue: barber.totalRevenue,
       })),
+      monthlyGrowth,
+      paymentMethods,
+      busyHours,
+      periodComparison: {
+        revenueChangePercent: Number(revenueChangePercent.toFixed(1)),
+        appointmentsChangePercent: Number(appointmentsChangePercent.toFixed(1)),
+        newClients: newClientsInPeriod,
+      },
+      todayRevenue: toNumber(todayRevenueData._sum.finalPrice),
+      weekRevenue: toNumber(weekRevenueData._sum.finalPrice),
+      averageTicket,
+      averageDurationMinutes,
+      returnRate,
     };
 
     return {

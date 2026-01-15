@@ -294,19 +294,25 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
   - **Documentação**: `/docs/features/admin-filters.md` - Guia completo ✅
   - **Próximos Passos**: Monitorar UX e habilitar Playwright quando o stack permitir
 
-- [ ] **#026** - Correção de Dados Mockados 📊 **PLANEJADO**
-  - **Descrição**: Substituir dados mockados/hardcoded por queries reais
-  - **Componentes**: dashboardActions.ts, reports/page.tsx
-  - **Estimativa**: 2-3 horas
-  - **Assignee**: A definir
-  - **Status**: Planejado
+- [x] **#026** - Correção de Dados Mockados 📊 **CONCLUÍDO** (15 Jan 2026)
+  - **Descrição**: Substituir dados mockados/hardcoded por queries reais para dashboards e relatórios administrativos
+  - **Componentes**: dashboardActions.ts, adminActions/getReportsData, ReportsPageClient
+  - **Estimativa**: 2-3 horas (entregue)
+  - **Assignee**: Codex
+  - **Status**: Dados reais alimentando dashboards e relatórios
+  - **Entregas**:
+    - ✅ Receita total/mensal calculada por `serviceHistory.finalPrice`
+    - ✅ Top barbeiros por receita/nota a partir de consultas Prisma (sem Math.random)
+    - ✅ Crescimento mensal e horários movimentados calculados por período selecionado
+    - ✅ Distribuição de métodos de pagamento (novo campo `paymentMethod` no schema/seed)
+    - ✅ UI de relatórios sem valores hardcoded, com KPIs dinâmicas e comparativos de período
   - **Tarefas**:
-    - [ ] Calcular receita real baseada em serviceHistory.finalPrice
-    - [ ] Calcular top barbeiros com queries reais
-    - [ ] Remover Math.random() e valores hardcoded
-    - [ ] Implementar queries para crescimento mensal
-    - [ ] Calcular métricas de horários movimentados
-    - [ ] Adicionar campo paymentMethod ao schema (se necessário)
+    - [x] Calcular receita real baseada em serviceHistory.finalPrice
+    - [x] Calcular top barbeiros com queries reais
+    - [x] Remover Math.random() e valores hardcoded
+    - [x] Implementar queries para crescimento mensal
+    - [x] Calcular métricas de horários movimentados
+    - [x] Adicionar campo paymentMethod ao schema (se necessário)
 
 ### Issues Críticos da Semana Atual
 

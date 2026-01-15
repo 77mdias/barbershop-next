@@ -2,6 +2,20 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Analytics v1.8.2] - 2026-01-15 📊
+
+### 🔧 Dados Reais em Dashboards (TASK #026)
+- Receitas total/mensal e serviços pagos calculados diretamente de `serviceHistory.finalPrice`, removendo mocks e valores fixos.
+- Ranking de barbeiros por receita/avaliação usando consultas Prisma filtradas por período.
+- `getReportsData` ampliado com crescimento mensal, horários movimentados, ticket médio e distribuição de pagamentos.
+
+### 🎨 UI de Relatórios
+- `ReportsPageClient` consome métricas reais (sem hardcoded), mostra KPIs comparativas, métodos de pagamento e busy hours dinâmicos.
+- Efeito de busca otimizado para evitar refetch desnecessário e exibir estados vazios quando não há dados no período.
+
+### 🗄️ Schema
+- Adicionado campo `paymentMethod` ao model `ServiceHistory` + seed/rota de teste atualizados (executar `prisma generate`/`npm run db:push` conforme ambiente).
+
 ## [Maintenance v1.8.1] - 2026-01-11 🛠️
 
 ### ✅ Filtros & Busca QA (TASK #025)

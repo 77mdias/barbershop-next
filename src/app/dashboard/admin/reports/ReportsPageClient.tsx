@@ -13,11 +13,35 @@ import { Activity, BarChart3, DollarSign, Download, FileText, Star, TrendingUp, 
 
 type DateRange = "7d" | "30d" | "3m" | "year";
 
+type PaymentMethod = "CARD" | "CASH" | "PIX" | "OTHER";
+
+type PaymentBreakdown = {
+  method: PaymentMethod;
+  count: number;
+  percentage: number;
+};
+
+type BusyHourMetric = {
+  label: string;
+  range: string;
+  count: number;
+  percentage: number;
+};
+
+type MonthlyGrowthEntry = {
+  month: string;
+  revenue: number;
+  services: number;
+  progress: number;
+  growthRate: number;
+};
+
 type ReportBarber = {
   id: string;
   name: string | null;
   totalReviews: number;
   averageRating: number;
+  totalRevenue: number;
 };
 
 type ReportsData = {
@@ -29,7 +53,38 @@ type ReportsData = {
   averageRating: number;
   totalReviews: number;
   topBarbers: ReportBarber[];
+  monthlyGrowth: MonthlyGrowthEntry[];
+  paymentMethods: PaymentBreakdown[];
+  busyHours: BusyHourMetric[];
+  periodComparison: {
+    revenueChangePercent: number;
+    appointmentsChangePercent: number;
+    newClients: number;
+  };
+  todayRevenue: number;
+  weekRevenue: number;
+  averageTicket: number;
+  averageDurationMinutes: number;
+  returnRate: number;
 };
+
+const paymentLabels: Record<PaymentMethod, string> = {
+  CARD: "Cartão",
+  CASH: "Dinheiro",
+  PIX: "PIX",
+  OTHER: "Outro",
+};
+
+const formatDelta = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return "Sem histórico";
+  }
+
+  const prefix = value >= 0 ? "+" : "-";
+  return `${prefix}${Math.abs(value).toFixed(1)}% vs período anterior`;
+};
+
+const formatCurrency = (value: number) => `R$ ${Number(value || 0).toFixed(2)}`;
 
 interface ReportsPageClientProps {
   initialReports: ReportsData | null;
@@ -42,7 +97,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (dateRange === initialDateRange && reports) {
+    if (dateRange === initialDateRange && initialReports) {
       return;
     }
 
@@ -61,7 +116,16 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
     };
 
     fetchReports();
-  }, [dateRange, initialDateRange, reports]);
+  }, [dateRange, initialDateRange, initialReports]);
+
+  const revenueDelta = reports ? formatDelta(reports.periodComparison.revenueChangePercent) : "";
+  const appointmentsDelta = reports ? formatDelta(reports.periodComparison.appointmentsChangePercent) : "";
+  const satisfactionRate = reports ? Math.min(100, Math.round((reports.averageRating / 5) * 100)) : 0;
+  const averageDurationProgress = reports ? Math.min(100, Math.round((reports.averageDurationMinutes / 90) * 100)) : 0;
+  const returnRate = reports?.returnRate ?? 0;
+  const commissionValue = reports ? reports.monthlyRevenue * 0.15 : 0;
+  const operationalCosts = reports ? reports.monthlyAppointments * 5 : 0;
+  const netRevenue = reports ? reports.monthlyRevenue - commissionValue - operationalCosts : 0;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -111,11 +175,12 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold text-green-600">R$ {Number(reports.totalRevenue || 0).toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-green-600">{formatCurrency(reports.totalRevenue)}</p>
                   <div className="flex items-center gap-1">
                     <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-600">+12.5% vs período anterior</span>
+                    <span className="text-sm text-green-600">{revenueDelta}</span>
                   </div>
+                  <p className="text-sm text-gray-600">Período selecionado: {formatCurrency(reports.monthlyRevenue)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -132,7 +197,9 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   <p className="text-3xl font-bold text-blue-600">{reports.totalClients || 0}</p>
                   <div className="flex items-center gap-1">
                     <TrendingUp className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm text-blue-600">+8 novos neste período</span>
+                    <span className="text-sm text-blue-600">
+                      +{reports.periodComparison.newClients} novos neste período
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -167,8 +234,9 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   <p className="text-3xl font-bold text-orange-600">{reports.totalAppointments || 0}</p>
                   <div className="flex items-center gap-1">
                     <TrendingUp className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm text-orange-600">Período: {reports.monthlyAppointments || 0}</span>
+                    <span className="text-sm text-orange-600">{appointmentsDelta}</span>
                   </div>
+                  <p className="text-sm text-gray-600">Período: {reports.monthlyAppointments || 0}</p>
                 </div>
               </CardContent>
             </Card>
@@ -209,21 +277,23 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {["Janeiro", "Fevereiro", "Março", "Outubro"].map((month, index) => {
-                        const progress = [75, 85, 92, 100][index];
-                        const color = month === "Outubro" ? "bg-green-500" : "bg-blue-500";
-                        return (
-                          <div className="flex items-center justify-between" key={month}>
-                            <span className="text-sm">{month}</span>
-                            <div className="flex items-center gap-2">
-                              <div className="w-32 bg-gray-200 rounded-full h-2">
-                                <div className={`${color} h-2 rounded-full`} style={{ width: `${progress}%` }} />
-                              </div>
-                              <span className="text-sm font-medium">{progress}%</span>
+                      {reports.monthlyGrowth.length === 0 && (
+                        <p className="text-sm text-gray-600">Sem histórico recente.</p>
+                      )}
+                      {reports.monthlyGrowth.map((entry) => (
+                        <div className="flex items-center justify-between" key={entry.month}>
+                          <span className="text-sm">{entry.month}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-32 bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: `${entry.progress}%` }} />
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-medium block">{formatCurrency(entry.revenue)}</span>
+                              <span className="text-xs text-gray-500">{entry.services} serviços</span>
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -245,13 +315,11 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                             </Badge>
                             <div>
                               <p className="font-medium">{barber.name}</p>
-                              <p className="text-sm text-gray-600">{barber.totalReviews} clientes</p>
+                              <p className="text-sm text-gray-600">{barber.totalReviews} avaliações</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-green-600">
-                              R$ {Number((barber.averageRating || 0) * 25 * (barber.totalReviews || 0)).toFixed(2)}
-                            </p>
+                            <p className="font-bold text-green-600">{formatCurrency(barber.totalRevenue)}</p>
                             <p className="text-sm text-gray-600">⭐ {barber.averageRating}</p>
                           </div>
                         </div>
@@ -272,22 +340,24 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span>Hoje</span>
-                        <span className="font-bold">R$ 485,00</span>
+                        <span className="font-bold">{formatCurrency(reports.todayRevenue)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Esta Semana</span>
-                        <span className="font-bold">R$ 2.340,00</span>
+                        <span className="font-bold">{formatCurrency(reports.weekRevenue)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Este Período</span>
-                        <span className="font-bold">R$ {Number(reports.monthlyRevenue || 0).toFixed(2)}</span>
+                        <span className="font-bold">{formatCurrency(reports.monthlyRevenue)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Ticket Médio</span>
+                        <span className="font-bold">{formatCurrency(reports.averageTicket)}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between">
                         <span className="font-medium">Total Acumulado</span>
-                        <span className="font-bold text-green-600">
-                          R$ {Number(reports.totalRevenue || 0).toFixed(2)}
-                        </span>
+                        <span className="font-bold text-green-600">{formatCurrency(reports.totalRevenue)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -300,27 +370,21 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span>Receita Bruta</span>
-                        <span className="font-bold text-green-600">
-                          R$ {Number(reports.totalRevenue || 0).toFixed(2)}
-                        </span>
+                        <span>Receita Bruta (período)</span>
+                        <span className="font-bold text-green-600">{formatCurrency(reports.monthlyRevenue)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Comissões (-15%)</span>
-                        <span className="font-bold text-red-600">
-                          -R$ {Number((reports.totalRevenue || 0) * 0.15).toFixed(2)}
-                        </span>
+                        <span className="font-bold text-red-600">-{formatCurrency(commissionValue)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Custos Operacionais</span>
-                        <span className="font-bold text-red-600">-R$ 1.200,00</span>
+                        <span className="font-bold text-red-600">-{formatCurrency(operationalCosts)}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between">
                         <span className="font-medium">Lucro Líquido</span>
-                        <span className="font-bold text-blue-600">
-                          R$ {Number((reports.totalRevenue || 0) * 0.85 - 1200).toFixed(2)}
-                        </span>
+                        <span className="font-bold text-blue-600">{formatCurrency(netRevenue)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -332,33 +396,23 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span>💳 Cartão</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: "65%" }} />
+                      {reports.paymentMethods.length === 0 && (
+                        <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>
+                      )}
+                      {reports.paymentMethods.map((method) => (
+                        <div className="flex items-center justify-between" key={method.method}>
+                          <span>{paymentLabels[method.method]}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-purple-500 h-2 rounded-full"
+                                style={{ width: `${method.percentage}%` }}
+                              />
+                            </div>
+                            <span className="text-sm">{method.percentage}%</span>
                           </div>
-                          <span className="text-sm">65%</span>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>💰 Dinheiro</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div className="bg-green-500 h-2 rounded-full" style={{ width: "25%" }} />
-                          </div>
-                          <span className="text-sm">25%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>📱 PIX</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div className="bg-purple-500 h-2 rounded-full" style={{ width: "10%" }} />
-                          </div>
-                          <span className="text-sm">10%</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -376,28 +430,31 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm">Taxa de Satisfação Geral</span>
-                          <span className="text-sm font-medium">94%</span>
+                          <span className="text-sm font-medium">{satisfactionRate}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: "94%" }} />
+                          <div className="bg-green-500 h-2 rounded-full" style={{ width: `${satisfactionRate}%` }} />
                         </div>
                       </div>
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm">Tempo Médio de Atendimento</span>
-                          <span className="text-sm font-medium">45 min</span>
+                          <span className="text-sm font-medium">{reports.averageDurationMinutes || 0} min</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-blue-500 h-2 rounded-full" style={{ width: "75%" }} />
+                          <div
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{ width: `${averageDurationProgress}%` }}
+                          />
                         </div>
                       </div>
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm">Taxa de Retorno</span>
-                          <span className="text-sm font-medium">78%</span>
+                          <span className="text-sm font-medium">{returnRate}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "78%" }} />
+                          <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${returnRate}%` }} />
                         </div>
                       </div>
                     </div>
@@ -410,33 +467,20 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span>🌅 Manhã (8h-12h)</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "60%" }} />
+                      {reports.busyHours.length === 0 && (
+                        <p className="text-sm text-gray-600">Sem agendamentos neste período.</p>
+                      )}
+                      {reports.busyHours.map((slot) => (
+                        <div className="flex items-center justify-between" key={slot.range}>
+                          <span>{slot.label}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${slot.percentage}%` }} />
+                            </div>
+                            <span className="text-sm">{slot.percentage}%</span>
                           </div>
-                          <span className="text-sm">60%</span>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>☀️ Tarde (12h-18h)</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-green-500 h-2 rounded-full" style={{ width: "85%" }} />
-                          </div>
-                          <span className="text-sm">85%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>🌙 Noite (18h-22h)</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: "45%" }} />
-                          </div>
-                          <span className="text-sm">45%</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
