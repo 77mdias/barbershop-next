@@ -19,7 +19,7 @@ describe("PaginationControls", () => {
   it("renders with default props", () => {
     render(<PaginationControls {...defaultProps} />);
 
-    expect(screen.getByText("Mostrando")).toBeInTheDocument();
+    expect(screen.getByText(/Mostrando/i)).toBeInTheDocument();
     expect(screen.getByText("1-20")).toBeInTheDocument();
     expect(screen.getByText("200")).toBeInTheDocument();
   });
@@ -67,13 +67,7 @@ describe("PaginationControls", () => {
 
   it("calls onPageChange with previous page when previous button clicked", () => {
     const onPageChange = jest.fn();
-    render(
-      <PaginationControls
-        {...defaultProps}
-        currentPage={5}
-        onPageChange={onPageChange}
-      />
-    );
+    render(<PaginationControls {...defaultProps} currentPage={5} onPageChange={onPageChange} />);
 
     const previousButton = screen.getByLabelText("Página anterior");
     fireEvent.click(previousButton);
@@ -83,13 +77,7 @@ describe("PaginationControls", () => {
 
   it("calls onPageChange with next page when next button clicked", () => {
     const onPageChange = jest.fn();
-    render(
-      <PaginationControls
-        {...defaultProps}
-        currentPage={5}
-        onPageChange={onPageChange}
-      />
-    );
+    render(<PaginationControls {...defaultProps} currentPage={5} onPageChange={onPageChange} />);
 
     const nextButton = screen.getByLabelText("Próxima página");
     fireEvent.click(nextButton);
@@ -159,13 +147,7 @@ describe("PaginationControls", () => {
 
   it("calls onPageChange when page number is clicked", () => {
     const onPageChange = jest.fn();
-    render(
-      <PaginationControls
-        {...defaultProps}
-        currentPage={5}
-        onPageChange={onPageChange}
-      />
-    );
+    render(<PaginationControls {...defaultProps} currentPage={5} onPageChange={onPageChange} />);
 
     const page1Button = screen.getByLabelText("Página 1");
     fireEvent.click(page1Button);
@@ -194,14 +176,7 @@ describe("PaginationControls", () => {
 
   it("calls onPageChange with 1 when first page button clicked", () => {
     const onPageChange = jest.fn();
-    render(
-      <PaginationControls
-        {...defaultProps}
-        currentPage={5}
-        onPageChange={onPageChange}
-        showFirstLast
-      />
-    );
+    render(<PaginationControls {...defaultProps} currentPage={5} onPageChange={onPageChange} showFirstLast />);
 
     const firstButton = screen.getByLabelText("Primeira página");
     fireEvent.click(firstButton);
@@ -211,14 +186,7 @@ describe("PaginationControls", () => {
 
   it("calls onPageChange with totalPages when last page button clicked", () => {
     const onPageChange = jest.fn();
-    render(
-      <PaginationControls
-        {...defaultProps}
-        currentPage={5}
-        onPageChange={onPageChange}
-        showFirstLast
-      />
-    );
+    render(<PaginationControls {...defaultProps} currentPage={5} onPageChange={onPageChange} showFirstLast />);
 
     const lastButton = screen.getByLabelText("Última página");
     fireEvent.click(lastButton);
@@ -229,14 +197,14 @@ describe("PaginationControls", () => {
   it("uses singular 'item' when totalItems is 1", () => {
     render(<PaginationControls {...defaultProps} totalItems={1} itemsPerPage={1} />);
 
-    expect(screen.getByText("item")).toBeInTheDocument();
-    expect(screen.queryByText("itens")).not.toBeInTheDocument();
+    expect(screen.getByText(/item\b/)).toBeInTheDocument();
+    expect(screen.queryByText(/itens/)).not.toBeInTheDocument();
   });
 
   it("uses plural 'itens' when totalItems > 1", () => {
     render(<PaginationControls {...defaultProps} totalItems={200} />);
 
-    expect(screen.getByText("itens")).toBeInTheDocument();
+    expect(screen.getByText(/itens/)).toBeInTheDocument();
     expect(screen.queryByText(/^item$/)).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@ Este documento detalha a estrutura, permissões e funcionalidades do painel admi
 
 ## 📋 Visão Geral
 
-**Status**: ✅ **PARCIALMENTE IMPLEMENTADO** (Atualizado: 1 Nov 2025)
+**Status**: ✅ **IMPLEMENTADO** (Atualizado: 11 Jan 2026)
 **Rota**: `/dashboard/admin` (rota dedicada)
 **Acesso**: Apenas usuários com `role: ADMIN` 🔒 **SEGURO**
 
@@ -37,19 +37,22 @@ O dashboard do admin é um painel de controle centralizado que permite gerenciar
   - ✅ `/src/server/adminActions.ts` - 6 funções com validação completa
   - ✅ `/src/middleware.ts` - Proteção de rota corrigida
 
-#### 0.1 **Gestão de Serviços** 🛠️ **IMPLEMENTADO** (1 Nov 2025)
+#### 0.1 **Gestão de Serviços** 🛠️ **IMPLEMENTADO** (11 Jan 2026)
 - **CRUD Completo**: Criar, editar, deletar e listar serviços
 - **Smart Delete**: Soft delete se serviço tem histórico, hard delete se não tem
 - **Toggle Status**: Ativar/desativar serviços rapidamente
 - **Estatísticas**: Cards com métricas (total, ativos, inativos, agendamentos, preço médio)
 - **Validações**: Zod schemas, prevenção de duplicatas, role ADMIN
-- **Arquivos Criados**:
+- **Filtros e Busca**: Busca debounced, filtro de status e paginação server-side via `ServicesPageClient` + componentes base (DebouncedSearchInput, FilterSelect, PaginationControls).
+- **Arquivos Criados/Atualizados**:
   - ✅ `/src/server/serviceAdminActions.ts` - 6 server actions seguras
-  - ✅ `/src/app/dashboard/admin/services/page.tsx` - Página de gestão
-- **Pendente**:
-  - ⏳ Forms client-side para criar/editar serviços
-  - ⏳ Handlers dos botões toggle/delete
-  - ⏳ Filtros e busca funcionais
+  - ✅ `/src/app/dashboard/admin/services/page.tsx` e `ServicesPageClient.tsx` - Página de gestão com wrapper client
+  - ✅ `/src/components/ServiceForm.tsx` + dialogs de confirmação para criação/edição
+
+#### 0.2 **Filtros e Busca Admin (TASK #025)** 🔍
+- Busca debounced de 500ms com botão de limpar e loading controlado nas páginas Users, Services, Barbers e Reports.
+- Filtros de role/status/performance/dateRange via FilterSelect, com paginação server-side e métricas agregadas retornadas pelas server actions.
+- Wrapper pattern com `UsersPageClient`, `ServicesPageClient`, `BarbersPageClient` e `ReportsPageClient` mantendo estado reativo e refresh.
 
 ### ✅ Implementadas - Parcialmente Funcionais
 

@@ -41,6 +41,13 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] **Design Responsivo** - Funcional em desktop e mobile
 - [x] **Security** - Validação de participantes, sanitização, rate limiting
 
+#### 🔍 Admin Filters & Search (2025-12-12)
+
+- [x] Filtros e busca reais para Users, Services, Barbers e Reports (debounce + paginação)
+- [x] Métricas agregadas server-side (ativos, médias, totais) para cards e tops
+- [x] Wrapper pattern com clients reativos e estados de loading/empty
+- [x] Testes de integração RTL para as 4 páginas
+
 #### Sistema de Profile Management Completo (2025-10-22) 🎉
 
 - [x] **Profile Settings Redesign** - Interface moderna e minimalista com upload de fotos
@@ -373,10 +380,10 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [ ] Testing automation
 - [ ] Monitoring setup
 
-## 📊 Métricas de Progresso (Atualizado - 28 Oct 2025)
+## 📊 Métricas de Progresso (Atualizado - 12 Dec 2025)
 
-- **Componentes**: 26/28 concluídos (93%) 📈 ↗️
-- **Páginas**: 11/12 concluídas (92%) 📈 ↗️
+- **Componentes**: 28/28 concluídos (100%) 🟢
+- **Páginas**: 12/12 concluídas (100%) 🟢
 - **Features Principais**: 11/11 concluídas (100%) 🎯 ✅
 - **Dashboards**: 3/3 concluídos (100%) 🛡️ ✅ (Cliente, Barbeiro, Admin)
 - **Sistema Social**: 100% 👥 ✅ (Amizades, solicitações, convites)
@@ -384,6 +391,7 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - **Sistema de Chat**: 100% 💬 ✅ (1:1, real-time polling, read status)
 - **Integração de Dados**: 100% ⚡ ✅ (Todos sistemas com dados reais)
 - **Documentação**: 100% ✅ (guias completos e atualizados)
+- **Admin Filters & Search**: 100% ✅ (Users/Services/Barbers/Reports com debouncing + métricas)
 
 ### 🏆 Marcos Importantes
 
@@ -396,7 +404,7 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - ✅ **Dashboard Administrativo**: 100% - **MARCO CONCLUÍDO** 🛡️
 - ✅ **Sistema Social Completo**: 100% - **MARCO CONCLUÍDO** 👥
 - ✅ **Sistema de Chat Real-Time**: 100% - **MARCO CONCLUÍDO** 💬
-- 📝 **Testing Suite**: 15% - Próximo foco
+- 📝 **Testing Suite**: 20% - +4 testes de integração para filtros admin
 
 ## 💡 Ideias Futuras
 

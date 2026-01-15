@@ -94,6 +94,6 @@ Esta pasta contém toda a documentação relacionada ao processo de desenvolvime
 
 ---
 
-**Última atualização**: 11 de outubro de 2025  
+**Última atualização**: 11 de janeiro de 2026  
 **Responsável**: Development Team  
-**Próxima revisão**: 18 de outubro de 2025
+**Próxima revisão**: 18 de janeiro de 2026

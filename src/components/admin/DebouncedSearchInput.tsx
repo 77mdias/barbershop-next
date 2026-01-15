@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export interface DebouncedSearchInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
+export interface DebouncedSearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   value: string;
   onChange: (value: string) => void;
   delay?: number;
@@ -60,6 +59,12 @@ export function DebouncedSearchInput({
   React.useEffect(() => {
     if (!onDebouncedChange) return;
 
+    // Não disparar buscas para valor vazio
+    if (value.length === 0) {
+      setInternalLoading(false);
+      return;
+    }
+
     // Não fazer busca para strings muito curtas
     if (value.length > 0 && value.length < 2) {
       setInternalLoading(false);
@@ -101,9 +106,7 @@ export function DebouncedSearchInput({
       />
 
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-        {isLoading && (
-          <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-        )}
+        {isLoading && <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />}
 
         {showClearButton && value.length > 0 && !isLoading && (
           <button

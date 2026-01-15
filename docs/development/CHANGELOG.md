@@ -2,6 +2,45 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Maintenance v1.8.1] - 2026-01-11 🛠️
+
+### ✅ Filtros & Busca QA (TASK #025)
+- Alinhados os três assets de busca (DebouncedSearchInput, testes e documentação) para bloquear chamadas com strings vazias/1 caracter e garantir debouncing controlado.
+- Testes do DebouncedSearchInput agora utilizam helper controlado, cobrindo cancelamento de debounce e botão de limpar sem falsos positivos.
+
+### 🔧 Infra & DX
+- Corrigida a configuração do Next.js movendo `outputFileTracingExcludes` para a raiz de `next.config.mjs`, eliminando o aviso de experimental duplicado.
+- Validado o fluxo Docker Compose com `npm run dev` como entrypoint: containers sobem corretamente e o app responde no ambiente dev.
+
+### 🧪 Testes
+- Suite completa (`npm test`) executada no container `app`: 23 test suites, 266 testes passando (logs de console conhecidos de act/hydration mantidos para visibilidade).
+
+## [Admin Filters v1.8] - 2025-12-12 🔍
+
+### ✨ Filtros e Busca Admin 100% Concluídos (#025)
+- **Services Page**: wrapper client (`ServicesPageClient.tsx`) com busca debounced, filtro de status, paginação server-side e cards com contagem ativa/inativa.
+- **Barbers Page**: client reativo (`BarbersPageClient.tsx`) com filtro de performance mínima, ordenação (name/rating/appointments) e métricas agregadas retornadas pelo backend.
+- **Reports Page**: client reativo (`ReportsPageClient.tsx`) com filtro de período (7d/30d/3m/year) e KPIs atualizados em tempo real.
+- **Users Page**: search debounced real no `UsersPageClient` para reduzir chamadas e manter UX consistente.
+
+### 🔧 Backend & Métricas
+- `getServicesForAdmin()` agora retorna contagens de ativos/inativos para cards.
+- `getBarbersForAdmin()` inclui métricas agregadas (média geral, ativos, total de reviews, top performer) e suporta ordenação por rating para relatórios.
+- `getReportsData()` utiliza ranking por rating (sortBy=rating) para Top Barbers.
+
+### 🧪 Testes
+- Novos testes de integração com RTL/Jest:
+  - `AdminUsersPageClient.test.tsx`
+  - `AdminServicesPageClient.test.tsx`
+  - `AdminBarbersPageClient.test.tsx`
+  - `AdminReportsPageClient.test.tsx`
+- Cobertura de flows de filtro/busca/paginação em todas as páginas admin.
+
+### 📚 Documentação
+- `/docs/features/admin-filters.md` atualizado para status 100% e novo checklist.
+- `/docs/development/tasks/TASKS.md` marcado como concluído para #025 com artefatos listados.
+- `/docs/development/ROADMAP.md` adicionou marco "Admin Filters & Search" e métricas atualizadas.
+
 ## [Sprint 3 v1.7] - 2025-10-30 🧪
 
 ### 🎉 **Sistema de Testes Automatizados Completo Implementado**

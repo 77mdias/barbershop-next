@@ -103,10 +103,10 @@ docker compose exec app npm run lint:check            # Check linting only
 docker compose exec app npm run type-check            # Check types only
 ```
 
-**Test Statistics**:
-- ✅ **55 tests** implemented across 6 test suites
-- ✅ **100% passing** (LoadingSpinner, Skeleton, ReviewForm, NotificationBell, ChatBell, MessageBubble)
-- 📚 Full testing documentation available in `/TESTING.md`
+**Test Statistics (resumo)**:
+- Flows de filtros/busca admin cobertos em `src/__tests__/Admin*PageClient.test.tsx` (Jest + RTL).
+- Consulte `/docs/development/CHANGELOG.md` para contagem/estado mais recente da suíte (v1.8 Admin Filters).
+- Documentação detalhada de testes em `/docs/TESTING.md`.
 
 ### Test Credentials
 After running `docker compose exec app npm run db:seed`:

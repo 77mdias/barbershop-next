@@ -357,26 +357,27 @@ export async function getServicesForAdmin(filters?: {
       };
     }
 
-    const page = filters?.page || 1;
-    const limit = filters?.limit || 20;
+    const page = Math.max(1, filters?.page || 1);
+    const limit = Math.min(50, Math.max(1, filters?.limit || 20));
     const skip = (page - 1) * limit;
 
     // Construir filtros
-    const where: any = {};
-
-    if (filters?.active !== undefined) {
-      where.active = filters.active;
-    }
+    const baseWhere: Record<string, unknown> = {};
 
     if (filters?.search) {
-      where.OR = [
+      baseWhere.OR = [
         { name: { contains: filters.search, mode: "insensitive" } },
         { description: { contains: filters.search, mode: "insensitive" } },
       ];
     }
 
+    const where: Record<string, unknown> = {
+      ...baseWhere,
+      ...(filters?.active !== undefined ? { active: filters.active } : {}),
+    };
+
     // Buscar serviços e contagem total
-    const [services, total] = await Promise.all([
+    const [services, total, activeCount, inactiveCount] = await Promise.all([
       db.service.findMany({
         where,
         include: {
@@ -392,6 +393,8 @@ export async function getServicesForAdmin(filters?: {
         take: limit,
       }),
       db.service.count({ where }),
+      db.service.count({ where: { ...baseWhere, active: true } }),
+      db.service.count({ where: { ...baseWhere, active: false } }),
     ]);
 
     return {
@@ -402,6 +405,10 @@ export async function getServicesForAdmin(filters?: {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
+      },
+      stats: {
+        activeCount,
+        inactiveCount,
       },
     };
   } catch (error) {

@@ -1,13 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -109,25 +103,17 @@ export function FilterSelect({
 
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
-            {icon}
-          </div>
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">{icon}</div>
         )}
 
         <Select value={value} onValueChange={onChange} disabled={disabled}>
-          <SelectTrigger className={cn(icon && "pl-10")}>
+          <SelectTrigger className={cn(icon && "pl-10")} aria-disabled={disabled ? "true" : undefined}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
             {options.map((option) => (
-              <SelectItem
-                key={option.value}
-                value={option.value}
-                disabled={option.disabled}
-              >
-                {option.icon && (
-                  <span className="mr-2 inline-flex">{option.icon}</span>
-                )}
+              <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
+                {option.icon && <span className="mr-2 inline-flex">{option.icon}</span>}
                 {option.label}
               </SelectItem>
             ))}

@@ -1,10 +1,26 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { DebouncedSearchInput } from "@/components/admin/DebouncedSearchInput";
+import { DebouncedSearchInput, type DebouncedSearchInputProps } from "@/components/admin/DebouncedSearchInput";
 
 // Mock setTimeout/clearTimeout for faster tests
 jest.useFakeTimers();
+
+type ControlledProps = Omit<DebouncedSearchInputProps, "value" | "onChange"> & {
+  initialValue?: string;
+  onChangeSpy?: (value: string) => void;
+};
+
+function ControlledDebouncedSearchInput({ initialValue = "", onChangeSpy, ...props }: ControlledProps) {
+  const [value, setValue] = React.useState(initialValue);
+
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    onChangeSpy?.(newValue);
+  };
+
+  return <DebouncedSearchInput value={value} onChange={handleChange} {...props} />;
+}
 
 describe("DebouncedSearchInput", () => {
   afterEach(() => {
@@ -21,13 +37,7 @@ describe("DebouncedSearchInput", () => {
 
   it("renders with custom placeholder", () => {
     const onChange = jest.fn();
-    render(
-      <DebouncedSearchInput
-        value=""
-        onChange={onChange}
-        placeholder="Buscar usuários..."
-      />
-    );
+    render(<DebouncedSearchInput value="" onChange={onChange} placeholder="Buscar usuários..." />);
 
     expect(screen.getByPlaceholderText("Buscar usuários...")).toBeInTheDocument();
   });
@@ -46,14 +56,7 @@ describe("DebouncedSearchInput", () => {
     const onChange = jest.fn();
     const onDebouncedChange = jest.fn();
 
-    render(
-      <DebouncedSearchInput
-        value=""
-        onChange={onChange}
-        onDebouncedChange={onDebouncedChange}
-        delay={500}
-      />
-    );
+    render(<ControlledDebouncedSearchInput onChangeSpy={onChange} onDebouncedChange={onDebouncedChange} delay={500} />);
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "test" } });
@@ -62,11 +65,13 @@ describe("DebouncedSearchInput", () => {
     expect(onDebouncedChange).not.toHaveBeenCalled();
 
     // Avança o timer
-    jest.advanceTimersByTime(500);
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
 
     // Agora deve ter sido chamado
     await waitFor(() => {
-      expect(onDebouncedChange).toHaveBeenCalledWith("test");
+      expect(onDebouncedChange).toHaveBeenLastCalledWith("test");
     });
   });
 
@@ -74,14 +79,7 @@ describe("DebouncedSearchInput", () => {
     const onChange = jest.fn();
     const onDebouncedChange = jest.fn();
 
-    const { rerender } = render(
-      <DebouncedSearchInput
-        value=""
-        onChange={onChange}
-        onDebouncedChange={onDebouncedChange}
-        delay={500}
-      />
-    );
+    render(<ControlledDebouncedSearchInput onChangeSpy={onChange} onDebouncedChange={onDebouncedChange} delay={500} />);
 
     const input = screen.getByRole("textbox");
 
@@ -97,29 +95,28 @@ describe("DebouncedSearchInput", () => {
     fireEvent.change(input, { target: { value: "tes" } });
 
     // Completa o delay
-    jest.advanceTimersByTime(500);
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
 
-    // Deve ter sido chamado apenas uma vez com o último valor
     await waitFor(() => {
       expect(onDebouncedChange).toHaveBeenCalledTimes(1);
-      expect(onDebouncedChange).toHaveBeenCalledWith("tes");
+      expect(onDebouncedChange).toHaveBeenLastCalledWith("tes");
     });
   });
 
   it("shows clear button when value is not empty", () => {
-    const onChange = jest.fn();
-    const { rerender } = render(
-      <DebouncedSearchInput value="" onChange={onChange} />
-    );
+    render(<ControlledDebouncedSearchInput />);
 
     // Não deve ter botão de limpar
     expect(screen.queryByLabelText("Limpar busca")).not.toBeInTheDocument();
 
     // Atualiza com valor
-    rerender(<DebouncedSearchInput value="test" onChange={onChange} />);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "test" } });
 
     // Deve ter botão de limpar
-    expect(screen.getByLabelText("Limpar busca")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Limpar busca/i)).toBeInTheDocument();
   });
 
   it("clears input when clear button is clicked", () => {
@@ -127,14 +124,19 @@ describe("DebouncedSearchInput", () => {
     const onDebouncedChange = jest.fn();
 
     render(
-      <DebouncedSearchInput
-        value="test"
-        onChange={onChange}
+      <ControlledDebouncedSearchInput
+        initialValue="test"
+        onChangeSpy={onChange}
         onDebouncedChange={onDebouncedChange}
-      />
+        delay={300}
+      />,
     );
 
-    const clearButton = screen.getByLabelText("Limpar busca");
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    const clearButton = screen.getByLabelText(/Limpar busca/i);
     fireEvent.click(clearButton);
 
     expect(onChange).toHaveBeenCalledWith("");
@@ -143,26 +145,14 @@ describe("DebouncedSearchInput", () => {
 
   it("hides clear button when showClearButton is false", () => {
     const onChange = jest.fn();
-    render(
-      <DebouncedSearchInput
-        value="test"
-        onChange={onChange}
-        showClearButton={false}
-      />
-    );
+    render(<DebouncedSearchInput value="test" onChange={onChange} showClearButton={false} />);
 
     expect(screen.queryByLabelText("Limpar busca")).not.toBeInTheDocument();
   });
 
   it("shows loading spinner when isSearching is true", () => {
     const onChange = jest.fn();
-    render(
-      <DebouncedSearchInput
-        value="test"
-        onChange={onChange}
-        isSearching={true}
-      />
-    );
+    render(<DebouncedSearchInput value="test" onChange={onChange} isSearching={true} />);
 
     // Procura pelo spinner (Loader2 com classe animate-spin)
     const spinner = document.querySelector(".animate-spin");
@@ -173,19 +163,14 @@ describe("DebouncedSearchInput", () => {
     const onChange = jest.fn();
     const onDebouncedChange = jest.fn();
 
-    render(
-      <DebouncedSearchInput
-        value=""
-        onChange={onChange}
-        onDebouncedChange={onDebouncedChange}
-        delay={500}
-      />
-    );
+    render(<ControlledDebouncedSearchInput onChangeSpy={onChange} onDebouncedChange={onDebouncedChange} delay={500} />);
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "a" } });
 
-    jest.advanceTimersByTime(500);
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
 
     expect(onDebouncedChange).not.toHaveBeenCalled();
   });
@@ -195,12 +180,7 @@ describe("DebouncedSearchInput", () => {
     const onDebouncedChange = jest.fn();
 
     const { unmount } = render(
-      <DebouncedSearchInput
-        value=""
-        onChange={onChange}
-        onDebouncedChange={onDebouncedChange}
-        delay={500}
-      />
+      <ControlledDebouncedSearchInput onChangeSpy={onChange} onDebouncedChange={onDebouncedChange} delay={500} />,
     );
 
     const input = screen.getByRole("textbox");
@@ -210,7 +190,9 @@ describe("DebouncedSearchInput", () => {
     unmount();
 
     // Avança o timer
-    jest.advanceTimersByTime(500);
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
 
     // Não deve ter sido chamado
     expect(onDebouncedChange).not.toHaveBeenCalled();

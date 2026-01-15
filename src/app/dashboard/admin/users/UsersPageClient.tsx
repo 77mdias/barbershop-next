@@ -4,14 +4,7 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DebouncedSearchInput } from "@/components/admin/DebouncedSearchInput";
 import { FilterSelect } from "@/components/admin/FilterSelect";
 import { PaginationControls } from "@/components/admin/PaginationControls";
@@ -45,6 +38,7 @@ interface UsersPageClientProps {
 export function UsersPageClient({ initialUsers, initialPagination }: UsersPageClientProps) {
   // Filters state
   const [search, setSearch] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState<"all" | UserRole>("all");
   const [statusFilter, setStatusFilter] = React.useState<UserStatus>("ALL");
   const [page, setPage] = React.useState(1);
@@ -61,7 +55,7 @@ export function UsersPageClient({ initialUsers, initialPagination }: UsersPageCl
 
       try {
         const result = await getUsers({
-          search: search.length >= 2 ? search : undefined,
+          search: debouncedSearch.length >= 2 ? debouncedSearch : undefined,
           role: roleFilter !== "all" ? roleFilter : undefined,
           status: statusFilter,
           includeDeleted: true,
@@ -82,14 +76,14 @@ export function UsersPageClient({ initialUsers, initialPagination }: UsersPageCl
 
     // Debounce aplicado no componente DebouncedSearchInput
     fetchUsers();
-  }, [search, roleFilter, statusFilter, page]);
+  }, [debouncedSearch, roleFilter, statusFilter, page]);
 
   // Reset page when filters change
   React.useEffect(() => {
     if (page !== 1) {
       setPage(1);
     }
-  }, [roleFilter, statusFilter]); // Not including 'page' to avoid loop
+  }, [roleFilter, statusFilter, debouncedSearch]); // Not including 'page' to avoid loop
 
   // Calculate statistics
   const activeUsers = users.filter((u) => !u.deletedAt);
@@ -165,6 +159,7 @@ export function UsersPageClient({ initialUsers, initialPagination }: UsersPageCl
               <DebouncedSearchInput
                 value={search}
                 onChange={setSearch}
+                onDebouncedChange={setDebouncedSearch}
                 placeholder="Buscar por nome ou email..."
                 delay={500}
               />
@@ -296,15 +291,11 @@ export function UsersPageClient({ initialUsers, initialPagination }: UsersPageCl
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium">
-                              {user.name?.charAt(0).toUpperCase() || "?"}
-                            </span>
+                            <span className="text-sm font-medium">{user.name?.charAt(0).toUpperCase() || "?"}</span>
                           </div>
                           <div>
                             <p className="font-medium">{user.name || "Sem nome"}</p>
-                            <p className="text-sm text-gray-600">
-                              ID: {user.id.slice(0, 8)}...
-                            </p>
+                            <p className="text-sm text-gray-600">ID: {user.id.slice(0, 8)}...</p>
                           </div>
                         </div>
                       </TableCell>

@@ -22,6 +22,13 @@ interface Barber extends User {
   totalAppointments: number;
 }
 
+interface BarberMetrics {
+  averageRating: number;
+  activeCount: number;
+  totalReviews: number;
+  topPerformer: string | null;
+}
+
 interface ReportsData {
   totalRevenue: number;
   monthlyRevenue: number;
@@ -92,6 +99,8 @@ export async function getUsersForAdmin() {
  * @param filters.sortBy - Ordenar por: "name" | "rating" | "appointments"
  * @param filters.page - Página atual (default: 1)
  * @param filters.limit - Itens por página (default: 20, max: 50)
+ *
+ * @returns Lista paginada de barbeiros com métricas agregadas
  */
 export async function getBarbersForAdmin(filters?: {
   search?: string;
@@ -186,7 +195,7 @@ export async function getBarbersForAdmin(filters?: {
     // Aplicar filtro de performance mínima
     if (filters?.performanceMin !== undefined && filters.performanceMin > 0) {
       barbersWithMetrics = barbersWithMetrics.filter(
-        (b) => b.averageRating !== null && b.averageRating >= filters.performanceMin!
+        (b) => b.averageRating !== null && b.averageRating >= filters.performanceMin!,
       );
     }
 
@@ -213,6 +222,26 @@ export async function getBarbersForAdmin(filters?: {
     const totalPages = Math.ceil(total / limit);
     const paginatedData = barbersWithMetrics.slice(skip, skip + limit);
 
+    const ratedBarbers = barbersWithMetrics.filter((b) => b.averageRating !== null);
+
+    const averageRating =
+      ratedBarbers.length > 0
+        ? Number(
+            (ratedBarbers.reduce((acc, barber) => acc + (barber.averageRating || 0), 0) / ratedBarbers.length).toFixed(
+              2,
+            ),
+          )
+        : 0;
+
+    const activeCount = barbersWithMetrics.filter((b) => b.totalAppointments > 0).length;
+
+    const topPerformer = barbersWithMetrics.reduce<Barber | null>((best, current) => {
+      if (!best) return current;
+      if (current.averageRating === null) return best;
+      if (best.averageRating === null) return current;
+      return current.averageRating > best.averageRating ? current : best;
+    }, null);
+
     return {
       success: true,
       data: paginatedData,
@@ -222,6 +251,12 @@ export async function getBarbersForAdmin(filters?: {
         total,
         totalPages,
       },
+      metrics: {
+        averageRating,
+        activeCount,
+        totalReviews: barbersWithMetrics.reduce((acc, b) => acc + (b.totalReviews || 0), 0),
+        topPerformer: topPerformer?.name || null,
+      } satisfies BarberMetrics,
     };
   } catch (error) {
     console.error("Erro ao buscar barbeiros:", error);
@@ -230,6 +265,12 @@ export async function getBarbersForAdmin(filters?: {
       error: "Erro ao buscar barbeiros",
       data: [],
       pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+      metrics: {
+        averageRating: 0,
+        activeCount: 0,
+        totalReviews: 0,
+        topPerformer: null,
+      },
     };
   }
 }
@@ -350,7 +391,10 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
     }, 0);
 
     // Top barbeiros
-    const barbeirosData = await getBarbersForAdmin();
+    const barbeirosData = await getBarbersForAdmin({
+      sortBy: "rating",
+      limit: 50,
+    });
     const barbersList =
       barbeirosData.success && Array.isArray(barbeirosData.data)
         ? (barbeirosData.data as Array<{
