@@ -1,8 +1,87 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
+
+const toNumber = (value: Prisma.Decimal | number | null | undefined) => (value ? Number(value) : 0);
+
+async function buildTopBarberRanking(startDate?: Date) {
+  const histories = await db.serviceHistory.findMany({
+    where: {
+      ...(startDate ? { completedAt: { gte: startDate } } : {}),
+      appointments: { some: { barberId: { not: null } } },
+    },
+    select: {
+      finalPrice: true,
+      rating: true,
+      appointments: {
+        select: { barberId: true },
+      },
+    },
+  });
+
+  const stats = new Map<string, { revenue: number; ratingSum: number; reviews: number; services: number }>();
+
+  histories.forEach((history) => {
+    const barberId = history.appointments[0]?.barberId;
+    if (!barberId) return;
+
+    const current = stats.get(barberId) || {
+      revenue: 0,
+      ratingSum: 0,
+      reviews: 0,
+      services: 0,
+    };
+
+    current.revenue += toNumber(history.finalPrice);
+    if (typeof history.rating === "number") {
+      current.ratingSum += history.rating;
+      current.reviews += 1;
+    }
+    current.services += 1;
+
+    stats.set(barberId, current);
+  });
+
+  if (stats.size === 0) {
+    return [];
+  }
+
+  const barbers = await db.user.findMany({
+    where: {
+      id: { in: Array.from(stats.keys()) },
+      role: "BARBER",
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return barbers
+    .map((barber) => {
+      const data = stats.get(barber.id);
+      const averageRating = data && data.reviews > 0 ? Number((data.ratingSum / data.reviews).toFixed(1)) : 0;
+
+      return {
+        id: barber.id,
+        name: barber.name || "Sem nome",
+        totalReviews: data?.reviews ?? 0,
+        averageRating,
+        totalRevenue: Number((data?.revenue ?? 0).toFixed(2)),
+      };
+    })
+    .filter((barber) => barber.totalReviews > 0)
+    .sort((a, b) => {
+      if (b.averageRating === a.averageRating) {
+        return b.totalReviews - a.totalReviews;
+      }
+      return b.averageRating - a.averageRating;
+    });
+}
 
 /**
  * Obter métricas completas do barbeiro para dashboard
@@ -281,7 +360,7 @@ export async function getAdminMetrics() {
     const monthlyReviews = await db.serviceHistory.count({
       where: {
         rating: { not: null },
-        updatedAt: { gte: startOfMonth },
+        completedAt: { gte: startOfMonth },
       },
     });
 
@@ -289,7 +368,7 @@ export async function getAdminMetrics() {
     const todayReviews = await db.serviceHistory.count({
       where: {
         rating: { not: null },
-        updatedAt: { gte: startOfToday },
+        completedAt: { gte: startOfToday },
       },
     });
 
@@ -313,14 +392,15 @@ export async function getAdminMetrics() {
     // 7. Atividade mensal
     const monthlyActivity = await db.serviceHistory.count({
       where: {
-        createdAt: { gte: startOfMonth },
+        completedAt: { gte: startOfMonth },
       },
     });
 
     // 8. Agendamentos do mês
     const monthlyAppointments = await db.appointment.count({
       where: {
-        createdAt: { gte: startOfMonth },
+        date: { gte: startOfMonth },
+        status: { notIn: ["CANCELLED", "NO_SHOW"] },
       },
     });
 
@@ -344,14 +424,14 @@ export async function getAdminMetrics() {
           {
             serviceHistory: {
               some: {
-                createdAt: { gte: thirtyDaysAgo },
+                completedAt: { gte: thirtyDaysAgo },
               },
             },
           },
           {
             appointments: {
               some: {
-                createdAt: { gte: thirtyDaysAgo },
+                date: { gte: thirtyDaysAgo },
               },
             },
           },
@@ -359,40 +439,34 @@ export async function getAdminMetrics() {
       },
     });
 
-    // 11. Barbeiros ativos (com reviews nos últimos 30 dias) - simplificado
+    // 11. Barbeiros ativos (com agendamentos nos últimos 30 dias)
     const activeBarbersCount = await db.user.count({
       where: {
         role: "BARBER",
         deletedAt: null,
-        // Por enquanto, todos os barbeiros são considerados ativos
+        servicesProvided: {
+          some: {
+            date: { gte: thirtyDaysAgo },
+            status: { notIn: ["CANCELLED", "NO_SHOW"] },
+          },
+        },
       },
     });
 
-    // 12. Top barbeiros por avaliação - temporariamente mockado
-    const topBarbers = await db.user.findMany({
+    // 12. Top barbeiros por avaliação (dados reais do período)
+    const topBarbers = (await buildTopBarberRanking(startOfMonth)).slice(0, 5);
+
+    // 13. Receita real
+    const revenueData = await db.serviceHistory.aggregate({
+      _sum: { finalPrice: true },
+    });
+    const monthlyRevenueData = await db.serviceHistory.aggregate({
       where: {
-        role: "BARBER",
-        deletedAt: null,
+        completedAt: { gte: startOfMonth },
       },
-      select: {
-        id: true,
-        name: true,
-      },
-      take: 5,
+      _sum: { finalPrice: true },
     });
-
-    // Processar top barbeiros - dados mocados por agora
-    const processedTopBarbers = topBarbers.map((barber, index) => ({
-      id: barber.id,
-      name: barber.name || "Sem nome",
-      totalReviews: Math.floor(Math.random() * 20) + 5, // 5-25 reviews
-      averageRating: Number((4.0 + Math.random() * 1.0).toFixed(1)), // 4.0-5.0
-    }));
-
-    // 13. Receita estimada - mocada temporariamente
-    const revenueData = { _sum: { finalPrice: 15420.5 } }; // R$ 15.420,50
-    const monthlyRevenueData = { _sum: { finalPrice: 3890.75 } }; // R$ 3.890,75 este mês
-    const paidServices = 127; // 127 serviços pagos
+    const paidServices = await db.serviceHistory.count();
 
     // 14. Reviews pendentes (sem rating)
     const pendingReviews = await db.serviceHistory.count({
@@ -427,12 +501,12 @@ export async function getAdminMetrics() {
         monthlyAppointments,
 
         // Financeiro
-        totalRevenue: revenueData._sum.finalPrice || 0,
-        monthlyRevenue: monthlyRevenueData._sum.finalPrice || 0,
+        totalRevenue: toNumber(revenueData._sum.finalPrice),
+        monthlyRevenue: toNumber(monthlyRevenueData._sum.finalPrice),
         paidServices,
 
         // Top performers
-        topBarbers: processedTopBarbers,
+        topBarbers,
       },
     };
   } catch (error) {

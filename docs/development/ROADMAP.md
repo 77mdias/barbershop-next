@@ -48,6 +48,12 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] Wrapper pattern com clients reativos e estados de loading/empty
 - [x] Testes de integração RTL para as 4 páginas
 
+#### 📊 Correção de Dados Mockados (2026-01-15)
+
+- [x] Dados reais para receita, top barbeiros e KPIs no dashboard admin
+- [x] Relatórios com crescimento mensal, distribuição de pagamento e horários movimentados por período
+- [x] Remoção de valores hardcoded e Math.random em métricas
+
 #### Sistema de Profile Management Completo (2025-10-22) 🎉
 
 - [x] **Profile Settings Redesign** - Interface moderna e minimalista com upload de fotos

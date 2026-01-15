@@ -37,11 +37,7 @@ jest.mock("@/lib/prisma", () => ({
 }));
 
 // Now import after mocks
-import {
-  getBarberMetrics,
-  getDashboardMetrics,
-  getAdminMetrics,
-} from "@/server/dashboardActions";
+import { getBarberMetrics, getDashboardMetrics, getAdminMetrics } from "@/server/dashboardActions";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/prisma";
 
@@ -151,9 +147,7 @@ describe("dashboardActions", () => {
         .mockResolvedValueOnce({ _avg: { rating: 4.0 }, _count: { rating: 2 } } as any)
         .mockResolvedValueOnce({ _sum: { finalPrice: 100 }, _count: 5 } as any);
       mockDb.serviceHistory.count.mockResolvedValue(0);
-      mockDb.serviceHistory.findMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+      mockDb.serviceHistory.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
       mockDb.serviceHistory.groupBy.mockResolvedValue([]);
 
       const result = await getBarberMetrics("other-barber-456");
@@ -208,7 +202,7 @@ describe("dashboardActions", () => {
             userId,
             rating: { not: null },
           },
-        })
+        }),
       );
     });
 
@@ -224,9 +218,7 @@ describe("dashboardActions", () => {
         .mockResolvedValueOnce({ _avg: { rating: 4.8 }, _count: { rating: 15 } } as any)
         .mockResolvedValueOnce({ _sum: { finalPrice: 1500 }, _count: 30 } as any);
       mockDb.serviceHistory.count.mockResolvedValue(10);
-      mockDb.serviceHistory.findMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+      mockDb.serviceHistory.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
       mockDb.serviceHistory.groupBy.mockResolvedValue([]);
 
       const result = await getDashboardMetrics(userId);
@@ -317,6 +309,11 @@ describe("dashboardActions", () => {
   });
 
   describe("getAdminMetrics", () => {
+    beforeEach(() => {
+      mockDb.serviceHistory.findMany.mockResolvedValue([]);
+      mockDb.user.findMany.mockResolvedValue([]);
+    });
+
     test("deve retornar métricas administrativas completas", async () => {
       mockGetServerSession.mockResolvedValue({
         ...mockSession,
@@ -338,10 +335,13 @@ describe("dashboardActions", () => {
         .mockResolvedValueOnce(10); // activeBarbersCount
 
       // Mock serviceHistory aggregate
-      mockDb.serviceHistory.aggregate.mockResolvedValue({
-        _count: { rating: 500 },
-        _avg: { rating: 4.6 },
-      } as any);
+      mockDb.serviceHistory.aggregate
+        .mockResolvedValueOnce({
+          _count: { rating: 500 },
+          _avg: { rating: 4.6 },
+        } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 15420.5 } } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 3890.75 } } as any);
 
       // Mock serviceHistory counts
       mockDb.serviceHistory.count
@@ -349,6 +349,7 @@ describe("dashboardActions", () => {
         .mockResolvedValueOnce(20) // todayReviews
         .mockResolvedValueOnce(200) // fiveStarReviews
         .mockResolvedValueOnce(300) // monthlyActivity
+        .mockResolvedValueOnce(127) // paidServices
         .mockResolvedValueOnce(50); // pendingReviews
 
       // Mock appointment count
@@ -362,6 +363,10 @@ describe("dashboardActions", () => {
       ] as any);
 
       // Mock top barbers
+      mockDb.serviceHistory.findMany.mockResolvedValue([
+        { finalPrice: 200, rating: 5, appointments: [{ barberId: "barber-1" }] },
+        { finalPrice: 150, rating: 4, appointments: [{ barberId: "barber-2" }] },
+      ] as any);
       mockDb.user.findMany.mockResolvedValue([
         { id: "barber-1", name: "João Barbeiro" },
         { id: "barber-2", name: "Maria Cabelereira" },
@@ -393,7 +398,7 @@ describe("dashboardActions", () => {
         monthlyAppointments: 180,
 
         // Financeiro (mocked values)
-        totalRevenue: 15420.50,
+        totalRevenue: 15420.5,
         monthlyRevenue: 3890.75,
         paidServices: 127,
       });
@@ -442,9 +447,7 @@ describe("dashboardActions", () => {
       } as any);
 
       // Mock com apenas CLIENT role (sem BARBER/ADMIN)
-      mockDb.user.groupBy.mockResolvedValue([
-        { role: UserRole.CLIENT, _count: { id: 50 } },
-      ] as any);
+      mockDb.user.groupBy.mockResolvedValue([{ role: UserRole.CLIENT, _count: { id: 50 } }] as any);
 
       mockDb.user.count.mockResolvedValue(50);
       mockDb.serviceHistory.aggregate.mockResolvedValue({

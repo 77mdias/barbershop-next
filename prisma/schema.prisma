@@ -111,6 +111,7 @@ model ServiceHistory {
   completedAt  DateTime      @default(now())
   notes        String?
   finalPrice   Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod @default(CASH)
   rating       Int?
   feedback     String?
   images       String[]      @default([]) // Array de URLs das imagens
@@ -318,4 +319,11 @@ enum NotificationType {
   FRIEND_REQUEST_ACCEPTED
   FRIEND_REQUEST_REJECTED
   FRIEND_INVITE_USED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  PIX
+  OTHER
 }
