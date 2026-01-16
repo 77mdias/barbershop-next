@@ -1,73 +1,58 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { UserAvatar } from "@/components/UserAvatar"
-import { cn } from "@/lib/utils"
-import styles from "@/app/components.module.scss"
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/UserAvatar";
+import { cn } from "@/lib/utils";
+import styles from "@/app/components.module.scss";
 
 interface HeaderProps {
-  userName?: string
-  userImage?: string
-  onFilterClick?: () => void
-  className?: string
+  userName?: string;
+  userImage?: string;
+  onFilterClick?: () => void;
+  className?: string;
 }
 
 /**
  * Componente Header da aplicação
- * 
+ *
  * Exibe saudação personalizada, avatar do usuário e botão de filtro
  * baseado no design da imagem de referência
  */
-export function Header({
-  userName = "User",
-  userImage,
-  onFilterClick,
-  className
-}: HeaderProps) {
-  const router = useRouter()
-  
+export function Header({ userName = "User", userImage, onFilterClick, className }: HeaderProps) {
+  const router = useRouter();
+
   const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return "Good morning!"
-    if (hour < 18) return "Good afternoon!"
-    return "Good evening!"
-  }
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia!";
+    if (hour < 18) return "Boa tarde!";
+    return "Boa noite!";
+  };
 
   const handleAvatarClick = () => {
     /* TODO: Implement avatar click functionality */
     /* REDIRECIONAR PARA O PERFIL */
-    router.push('/profile');
-  }
+    router.push("/profile");
+  };
 
   return (
-    <header className={cn(
-      "flex gap-4 align-center justify-between items-center w-full p-4 sm:p-6 text-foreground",
-      styles.header,
-      className
-    )}>
+    <header
+      className={cn(
+        "flex gap-4 align-center justify-between items-center w-full p-4 sm:p-6 text-foreground",
+        styles.header,
+        className,
+      )}
+    >
       {/* Seção esquerda - Saudação e Avatar */}
       <div className="flex items-center gap-3">
         <div className={styles.avatar} onClick={handleAvatarClick}>
-          <UserAvatar
-            src={userImage}
-            name={userName}
-            size="lg"
-            className="h-10 w-10 sm:h-12 sm:w-12"
-          />
+          <UserAvatar src={userImage} name={userName} size="lg" className="h-10 w-10 sm:h-12 sm:w-12" />
         </div>
-        
+
         <div className="flex flex-col">
-          <span className="text-xs sm:text-sm text-muted-foreground">
-            Hello {userName}
-          </span>
-          <span className={cn(
-            "text-base sm:text-lg font-semibold",
-            styles.header__greeting
-          )}>
-            {getGreeting()}
-          </span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Olá {userName}</span>
+          <span className={cn("text-base sm:text-lg font-semibold", styles.header__greeting)}>{getGreeting()}</span>
         </div>
       </div>
 
@@ -78,12 +63,7 @@ export function Header({
         onClick={onFilterClick}
         className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:scale-105"
       >
-        <svg
-          className="h-4 w-4 sm:h-5 sm:w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -93,5 +73,5 @@ export function Header({
         </svg>
       </Button>
     </header>
-  )
+  );
 }

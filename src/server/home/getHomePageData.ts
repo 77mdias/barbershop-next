@@ -23,12 +23,7 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   minimumFractionDigits: 2,
 });
 
-const fallbackServiceIcons: PopularServiceIcon[] = [
-  "scissors",
-  "beard",
-  "sparkles",
-  "razor",
-];
+const fallbackServiceIcons: PopularServiceIcon[] = ["scissors", "beard", "sparkles", "razor"];
 
 const fallbackServices: PopularServiceCard[] = [
   {
@@ -77,7 +72,7 @@ const fallbackPromotions: PromotionCard[] = [
     title: "Boas-vindas 20% OFF",
     description: "Use no primeiro agendamento em qualquer serviço.",
     code: "BEMVINDO20",
-    expiresLabel: "Válido até 30/12",
+    expiresLabel: "",
     href: "/promotions",
   },
   {
@@ -108,44 +103,44 @@ const fallbackSalons: SalonCard[] = [
     name: "Barbearia Centro",
     rating: 4.9,
     ratingLabel: "4.9 (120)",
-    address: "Av. Paulista, 123 - Bela Vista",
+    address: "Exemplo: Av. Paulista, 123 - Bela Vista",
     distanceLabel: "1,2 km",
     status: "OPEN",
     imageUrl: "/images/salon1.svg",
-    href: "/salons",
+    href: "/salons/fallback-salon-1",
   },
   {
     id: "fallback-salon-2",
     name: "Viking Cuts",
     rating: 4.7,
     ratingLabel: "4.7 (98)",
-    address: "R. Augusta, 845 - Consolação",
+    address: "Exemplo: R. Augusta, 845 - Consolação",
     distanceLabel: "2,0 km",
     status: "CLOSING_SOON",
     imageUrl: "/images/salon2.svg",
-    href: "/salons",
+    href: "/salons/fallback-salon-2",
   },
   {
     id: "fallback-salon-3",
     name: "Gentleman's Lounge",
     rating: 4.8,
     ratingLabel: "4.8 (76)",
-    address: "Al. Santos, 500 - Jardins",
+    address: "Exemplo: Al. Santos, 500 - Jardins",
     distanceLabel: "2,4 km",
     status: "OPEN",
     imageUrl: "/images/salon1.svg",
-    href: "/salons",
+    href: "/salons/fallback-salon-3",
   },
   {
     id: "fallback-salon-4",
     name: "Old School Barber",
     rating: 4.5,
     ratingLabel: "4.5 (54)",
-    address: "R. Frei Caneca, 100",
+    address: "Exemplo: R. Frei Caneca, 100",
     distanceLabel: "3,1 km",
     status: "CLOSED",
     imageUrl: "/images/salon2.svg",
-    href: "/salons",
+    href: "/salons/fallback-salon-4",
   },
 ];
 
@@ -194,8 +189,7 @@ const fallbackReviews: ReviewCard[] = [
 
 const fallbackBookingCta: BookingCtaContent = {
   title: "Pronto para renovar seu visual?",
-  description:
-    "Agende em poucos cliques e acompanhe o status do seu atendimento em tempo real.",
+  description: "Agende em poucos cliques e acompanhe o status do seu atendimento em tempo real.",
   primaryLabel: "Agendar Agora",
   primaryHref: "/scheduling",
   secondaryLabel: "Criar Conta",
@@ -207,8 +201,7 @@ const fallbackFooter: HomePageData["footer"] = {
   brand: {
     name: "BARBER",
     highlight: "KINGS",
-    description:
-      "Cortes, barbas e experiências sob medida para quem valoriza estilo e conforto.",
+    description: "Cortes, barbas e experiências sob medida para quem valoriza estilo e conforto.",
   },
   columns: [
     {
@@ -268,8 +261,21 @@ function formatExpiresLabel(expiresAt: Date | null | undefined): string | null {
   return `Válido até ${format(expiresAt, "dd/MM", { locale: ptBR })}`;
 }
 
+function buildFallbackExpiresLabel(): string {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const target = new Date(currentYear, 11, 30); // 30/12 do ano corrente
+  if (target < now) {
+    target.setFullYear(currentYear + 1);
+  }
+  return `Válido até ${format(target, "dd/MM", { locale: ptBR })}`;
+}
+
 function buildPromotionCode(name: string, id: string): string {
-  const fallback = id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
+  const fallback = id
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 8)
+    .toUpperCase();
   if (!name) return fallback || "PROMO";
   const sanitized = name
     .normalize("NFD")
@@ -384,7 +390,9 @@ async function loadSalons(): Promise<SalonCard[]> {
 
     if (!appointments.length) return [];
 
-    const grouped = appointments.reduce<Map<string, { name: string; image: string | null; nickname: string | null; ratings: number[] }>>((map, appointment) => {
+    const grouped = appointments.reduce<
+      Map<string, { name: string; image: string | null; nickname: string | null; ratings: number[] }>
+    >((map, appointment) => {
       if (!appointment.barber) return map;
       const barberId = appointment.barber.id;
       const current = map.get(barberId) ?? {
@@ -402,7 +410,9 @@ async function loadSalons(): Promise<SalonCard[]> {
     }, new Map());
 
     const salons = Array.from(grouped.entries()).map<SalonCard>(([id, value], index) => {
-      const ratingMedia = value.ratings.length ? value.ratings.reduce((acc, current) => acc + current, 0) / value.ratings.length : null;
+      const ratingMedia = value.ratings.length
+        ? value.ratings.reduce((acc, current) => acc + current, 0) / value.ratings.length
+        : null;
       const formattedRating = ratingMedia ? `${ratingMedia.toFixed(1)} (${value.ratings.length})` : "Sem avaliações";
       const baseDistance = (index + 1) * 0.8;
       const status: SalonCard["status"] = ratingMedia ? (ratingMedia >= 4.5 ? "OPEN" : "CLOSING_SOON") : "OPEN";
@@ -411,7 +421,7 @@ async function loadSalons(): Promise<SalonCard[]> {
         name: value.name,
         rating: ratingMedia ? Number(ratingMedia.toFixed(1)) : null,
         ratingLabel: formattedRating,
-        address: value.nickname ?? "Endereço em atualização",
+        address: value.nickname ?? "Exemplo: endereço será exibido aqui",
         distanceLabel: `${baseDistance.toFixed(1)} km`,
         status,
         imageUrl: value.image ?? (index % 2 === 0 ? "/images/salon1.svg" : "/images/salon2.svg"),
@@ -482,6 +492,12 @@ export const getHomePageData = cache(async (): Promise<HomePageData> => {
     loadReviews(),
   ]);
 
+  // preencher labels de expiração fallback de forma dinâmica para evitar datas passadas
+  const normalizedFallbackPromos = fallbackPromotions.map((promo) => ({
+    ...promo,
+    expiresLabel: promo.expiresLabel === "" ? buildFallbackExpiresLabel() : promo.expiresLabel,
+  }));
+
   return {
     hero: {
       title: "Encontre seu estilo.",
@@ -500,7 +516,7 @@ export const getHomePageData = cache(async (): Promise<HomePageData> => {
       title: "Ofertas Disponíveis",
       ctaLabel: "Ver todas",
       ctaHref: "/promotions",
-      items: promotions.length ? promotions : fallbackPromotions,
+      items: promotions.length ? promotions : normalizedFallbackPromos,
     },
     salons: {
       title: "Salões Próximos",
