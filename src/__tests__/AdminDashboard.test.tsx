@@ -16,6 +16,13 @@ jest.mock("@/lib/auth", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
+  useRouter: () => ({
+    refresh: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  usePathname: () => "/dashboard/admin",
 }));
 
 jest.mock("@/server/dashboardActions", () => ({
@@ -79,7 +86,7 @@ describe("AdminDashboardPage", () => {
       monthlyAppointments: 280,
 
       // Financeiro
-      totalRevenue: 15420.50,
+      totalRevenue: 15420.5,
       monthlyRevenue: 3890.75,
       paidServices: 127,
 
