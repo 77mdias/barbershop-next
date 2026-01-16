@@ -57,11 +57,19 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
   - `AdminReportsPageClient.test.tsx` cobre renderização das métricas de capacidade/no-show e estados de alerta (execução local não realizada; seguir recomendação de rodar Jest no container app).
 
 ### 5) Playbook de Exportação
+- **Status**: ✅ Entregue (2026-02) – Exportar com filtros ativos para PDF (financeiro), CSV (pagamentos) e Excel (clientes/cohort).
 - **Escopo**: Downloads de PDF/CSV/Excel na aba Exportar, respeitando filtros ativos.
 - **Critérios de aceite**:
-  - Gera arquivos com metadados de período e filtros.
-  - Exporta tabelas de receitas, cohort e pagamentos.
-  - Feedback de progresso/erro e retry.
+  - [x] Gera arquivos com metadados de período e filtros.
+  - [x] Exporta tabelas de receitas (monthly growth + KPIs), cohort/LTV e pagamentos.
+  - [x] Feedback de progresso/erro e retry com toasts (sonner) e estados de loading.
+- **Entregas**:
+  - PDF gerado via janela de impressão com KPIs financeiros, monthly growth e distribuição de pagamentos (período + serviço ativos).
+  - CSV de pagamentos com drill-down por método, serviços e barbeiros; nomes de arquivos incluem o filtro.
+  - Excel (xls) de clientes contendo cohort mensal e LTV por barbeiro para o filtro atual.
+  - Botões com loading/disable compartilhado e retry via toast action.
+- **Testes**:
+  - `AdminReportsPageClient.test.tsx` cobre exportação CSV com filtros ativos e feedback (jest/RTL).
 
 ### 6) UX de Loading/Erros
 - **Escopo**: Loading/skeletons nos blocos de growth/payment; snackbars para falhas de fetch.
@@ -93,4 +101,4 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
 - **Performance**: agregar consultas (groupBy) e paginar exportações; índices em campos de data/método.
 
 ## Status
-- 🚀 Itens 1, 3 e 4 entregues (SSE/real-time ativo; cohort/LTV com filtro de serviço; capacidade/no-show com alertas); itens 5, 6 e 7 permanecem pendentes.
+- 🚀 Itens 1, 3, 4 e 5 entregues (SSE/real-time ativo; cohort/LTV com filtro de serviço; capacidade/no-show com alertas; playbook de exportação completo); itens 6 e 7 permanecem pendentes.

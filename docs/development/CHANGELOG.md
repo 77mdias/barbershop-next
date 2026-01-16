@@ -30,6 +30,11 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - Aba Performance do `ReportsPageClient` exibe cards de capacidade geral, no-show/cancelamento e listas por barbeiro/serviço com badges de alerta.
 - `AdminReportsPageClient.test.tsx` cobre a renderização das métricas/alertas (execução local pendente; rodar Jest no container app).
 
+### 📄 Playbook de Exportação (TASK-REALTIME-ANALYTICS-UX #5)
+- Aba Exportar agora baixa PDF financeiro (print-to-PDF) com KPIs, monthly growth e distribuição de pagamentos, sempre com período/serviço ativos.
+- CSV de pagamentos inclui drill-down por serviços/barbeiros e metadados de filtro; Excel (xls) de cohort/LTV por barbeiro respeita o filtro ativo.
+- Botões de exportação compartilham estado de loading, usam toasts (sonner) para sucesso/erro e oferecem retry em caso de falha; teste de regressão em `AdminReportsPageClient.test.tsx`.
+
 ## [Analytics v1.8.2] - 2026-01-15 📊
 
 ### 🔧 Dados Reais em Dashboards (TASK #026)

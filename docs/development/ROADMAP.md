@@ -24,6 +24,13 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] Aba Performance exibe cards de capacidade, no-show/cancelamentos e listas por barbeiro/serviço com badges de alerta.
 - [x] Atualização em tempo real via SSE (refetch por `appointment:changed`/`analytics:updated`) e teste de UI em `AdminReportsPageClient.test.tsx`.
 
+#### 📄 Playbook de Exportação (2026-02)
+
+- [x] PDF financeiro (print-to-PDF) com KPIs, monthly growth e pagamentos de acordo com período/serviço.
+- [x] CSV de pagamentos com drill-down por serviço/barbeiro e metadados de filtro no nome do arquivo.
+- [x] Excel (xls) de cohort/LTV por barbeiro respeitando filtros.
+- [x] Feedback de progresso/erro via toasts + retry e loading compartilhado entre botões.
+
 #### 🚀 Sprint 2 - Notificações em Tempo Real (2026-02)
 
 - [x] SSE centralizado com autenticação e heartbeat (`/api/realtime`)

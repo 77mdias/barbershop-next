@@ -39,6 +39,17 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/docs/development/CHANGELOG.md`
     - `/docs/development/ROADMAP.md`
   - **Testes**: `AdminReportsPageClient.test.tsx` atualizado para cobrir capacidade/no-show (não executado localmente; seguir recomendação de rodar Jest no container app).
+- [x] **#030** - Playbook de Exportação (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Disponibilizar downloads de PDF/CSV/Excel na aba Exportar respeitando filtros ativos e com feedback de progresso/erro.
+  - **Componentes**: ReportsPageClient (Export tab e botão global de pagamentos), teste AdminReportsPageClient.
+  - **Status**: Concluído – PDF financeiro (print-to-PDF com filtros), CSV de pagamentos com drill-down e Excel de cohort/LTV; botões com loading compartilhado e retry via toast.
+  - **Arquivos modificados**:
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+    - `/docs/development/CHANGELOG.md`
+    - `/docs/development/ROADMAP.md`
+  - **Testes**: `AdminReportsPageClient.test.tsx` cobre exportação CSV com filtros ativos (não executado localmente; rodar Jest no container app).
 
 ## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
 

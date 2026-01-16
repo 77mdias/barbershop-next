@@ -16,15 +16,19 @@ import {
   DollarSign,
   Download,
   FileText,
+  Loader2,
   Star,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { useRealtime } from "@/hooks/useRealtime";
+import { toast } from "sonner";
 
 type DateRange = "7d" | "30d" | "3m" | "year";
 
 type PaymentMethod = "CARD" | "CASH" | "PIX" | "OTHER";
+
+type ExportKind = "payments-csv" | "customers-excel" | "financial-pdf";
 
 type PaymentBreakdown = {
   method: PaymentMethod;
@@ -220,6 +224,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<PaymentMethod | null>(
     initialReports?.paymentMethods?.[0]?.method ?? null,
   );
+  const [exporting, setExporting] = React.useState<ExportKind | null>(null);
   const { subscribe } = useRealtime();
 
   const fetchReports = React.useCallback(
@@ -360,54 +365,238 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
     (capacity?.byService?.length ?? 0) > 0 ||
     (capacitySummary?.totalAppointments ?? 0) > 0;
 
-  const handleExportPayments = React.useCallback(() => {
-    if (!hasPaymentData) {
-      return;
-    }
+  const buildMetadataRows = React.useCallback(
+    () => [
+      ["Período", dateRangeLabels[dateRange]],
+      ["Serviço", selectedServiceLabel],
+      ["Gerado em", new Date().toISOString()],
+    ],
+    [dateRange, selectedServiceLabel],
+  );
 
-    try {
-      const rows: string[][] = [
-        ["Relatório", "Receita por Método de Pagamento"],
-        ["Período", dateRangeLabels[dateRange]],
-        ["Serviço", selectedServiceLabel],
-        ["Gerado em", new Date().toISOString()],
-        [],
-        ["Método", "Receita (R$)", "Transações", "Ticket médio (R$)", "Share receita (%)", "Share volume (%)"],
-        ...paymentMethods.map((method) => [
-          paymentLabels[method.method],
-          method.revenue.toFixed(2),
-          method.count.toString(),
-          method.averageTicket.toFixed(2),
-          method.revenueShare.toFixed(1),
-          method.volumeShare.toString(),
-        ]),
-      ];
+  const downloadFile = React.useCallback((content: string, mime: string, filename: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, []);
 
-      paymentMethodDetails.forEach((detail) => {
-        rows.push([], [`Detalhamento - ${paymentLabels[detail.method]}`], ["Top Serviços", "Receita (R$)", "%"]);
-        detail.topServices.forEach((service) => {
-          rows.push([service.name || "Serviço sem nome", service.revenue.toFixed(2), service.percentage.toString()]);
+  const handleExport = React.useCallback(
+    async (kind: ExportKind) => {
+      if (!reports) {
+        toast.error("Nenhum dado para exportar", {
+          description: "Aplique um filtro válido ou aguarde o carregamento.",
         });
-        rows.push(["Top Barbeiros", "Receita (R$)", "%"]);
-        detail.topBarbers.forEach((barber) => {
-          rows.push([barber.name || "Sem nome", barber.revenue.toFixed(2), barber.percentage.toString()]);
-        });
-      });
+        return;
+      }
 
-      const csvContent = rows
-        .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-        .join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `pagamentos-${dateRange}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Erro ao exportar pagamentos:", error);
-    }
-  }, [dateRange, hasPaymentData, paymentMethods, paymentMethodDetails, selectedServiceLabel]);
+      setExporting(kind);
+
+      try {
+        const metadata = buildMetadataRows();
+
+        if (kind === "payments-csv") {
+          if (!hasPaymentData) {
+            throw new Error("Sem dados de pagamento para o filtro atual.");
+          }
+
+          const rows: string[][] = [
+            ["Relatório", "Receita por Método de Pagamento"],
+            ...metadata,
+            [],
+            ["Método", "Receita (R$)", "Transações", "Ticket médio (R$)", "Share receita (%)", "Share volume (%)"],
+            ...paymentMethods.map((method) => [
+              paymentLabels[method.method],
+              method.revenue.toFixed(2),
+              method.count.toString(),
+              method.averageTicket.toFixed(2),
+              method.revenueShare.toFixed(1),
+              method.volumeShare.toString(),
+            ]),
+          ];
+
+          paymentMethodDetails.forEach((detail) => {
+            rows.push([], [`Detalhamento - ${paymentLabels[detail.method]}`], ["Top Serviços", "Receita (R$)", "%"]);
+            detail.topServices.forEach((service) => {
+              rows.push([
+                service.name || "Serviço sem nome",
+                service.revenue.toFixed(2),
+                service.percentage.toString(),
+              ]);
+            });
+            rows.push(["Top Barbeiros", "Receita (R$)", "%"]);
+            detail.topBarbers.forEach((barber) => {
+              rows.push([barber.name || "Sem nome", barber.revenue.toFixed(2), barber.percentage.toString()]);
+            });
+          });
+
+          const csvContent = rows
+            .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+            .join("\n");
+          downloadFile(
+            csvContent,
+            "text/csv;charset=utf-8;",
+            `pagamentos-${dateRange}-${selectedService.toString()}.csv`,
+          );
+          toast.success("CSV de pagamentos gerado", {
+            description: `${dateRangeLabels[dateRange]} • ${selectedServiceLabel}`,
+          });
+        }
+
+        if (kind === "customers-excel") {
+          const rows: string[][] = [
+            ["Relatório", "Clientes e Cohort"],
+            ...metadata,
+            [],
+            ["Cohort Mensal"],
+            ["Mês", "Novos", "Recorrentes", "Retenção (%)"],
+            ...cohortData.map((bucket) => [
+              bucket.month,
+              bucket.newClients,
+              bucket.returningClients,
+              bucket.retentionRate,
+            ]),
+            [],
+            ["LTV por Barbeiro"],
+            ["Barbeiro", "Clientes Únicos", "Receita (R$)", "LTV (R$)"],
+            ...(ltvData?.byBarber?.length
+              ? ltvData.byBarber.map((barber) => [
+                  barber.barberName || "Sem nome",
+                  barber.uniqueClients,
+                  barber.revenue.toFixed(2),
+                  barber.ltv.toFixed(2),
+                ])
+              : [["Sem barbeiros no filtro", "0", "0", "0"]]),
+          ];
+
+          const excelContent = rows.map((row) => row.join(";")).join("\n");
+
+          downloadFile(
+            excelContent,
+            "application/vnd.ms-excel",
+            `clientes-${dateRange}-${selectedService.toString()}.xls`,
+          );
+          toast.success("Excel de clientes gerado", {
+            description: `${dateRangeLabels[dateRange]} • ${selectedServiceLabel}`,
+          });
+        }
+
+        if (kind === "financial-pdf") {
+          const popup = window.open("", "_blank", "width=900,height=650");
+          if (!popup) {
+            throw new Error("Pop-up bloqueado pelo navegador. Permita pop-ups para gerar o PDF.");
+          }
+
+          const metadataHtml = metadata
+            .map(([label, value]) => `<li><strong>${label}:</strong> ${String(value)}</li>`)
+            .join("");
+          const revenueRows = reports.monthlyGrowth
+            .map(
+              (entry) =>
+                `<tr><td>${entry.month}</td><td>${formatCurrency(entry.revenue)}</td><td>${entry.services}</td><td>${entry.growthRate.toFixed(1)}%</td></tr>`,
+            )
+            .join("");
+          const paymentRows = paymentMethods
+            .map(
+              (method) =>
+                `<tr><td>${paymentLabels[method.method]}</td><td>${formatCurrency(method.revenue)}</td><td>${method.count}</td><td>${method.revenueShare}%</td><td>${method.volumeShare}%</td></tr>`,
+            )
+            .join("");
+
+          const html = `
+            <!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <title>Relatório Financeiro</title>
+                <style>
+                  body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
+                  h1 { font-size: 20px; margin-bottom: 4px; }
+                  h2 { font-size: 16px; margin: 16px 0 8px; }
+                  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+                  th, td { border: 1px solid #e2e8f0; padding: 6px 8px; font-size: 12px; text-align: left; }
+                  th { background: #f8fafc; }
+                  ul { margin: 8px 0; padding-left: 18px; }
+                  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+                  .kpi { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 6px; }
+                  .kpi strong { display: block; margin-bottom: 4px; }
+                </style>
+              </head>
+              <body>
+                <h1>Relatório Financeiro • ${dateRangeLabels[dateRange]}</h1>
+                <ul>${metadataHtml}</ul>
+
+                <div class="kpi-grid">
+                  <div class="kpi"><strong>Receita do período</strong>${formatCurrency(reports.monthlyRevenue)}</div>
+                  <div class="kpi"><strong>Receita total</strong>${formatCurrency(reports.totalRevenue)}</div>
+                  <div class="kpi"><strong>Ticket médio</strong>${formatCurrency(reports.averageTicket)}</div>
+                  <div class="kpi"><strong>Retenção de clientes</strong>${returnRate}%</div>
+                  <div class="kpi"><strong>Tempo médio</strong>${reports.averageDurationMinutes} min</div>
+                </div>
+
+                <h2>Receita por mês</h2>
+                <table>
+                  <thead>
+                    <tr><th>Mês</th><th>Receita</th><th>Serviços</th><th>Crescimento</th></tr>
+                  </thead>
+                  <tbody>${revenueRows || "<tr><td colspan='4'>Sem histórico para o filtro.</td></tr>"}</tbody>
+                </table>
+
+                <h2>Pagamentos</h2>
+                <table>
+                  <thead>
+                    <tr><th>Método</th><th>Receita</th><th>Transações</th><th>Share Receita</th><th>Share Volume</th></tr>
+                  </thead>
+                  <tbody>${paymentRows || "<tr><td colspan='5'>Sem dados de pagamento.</td></tr>"}</tbody>
+                </table>
+
+                <p style="margin-top:16px; font-size:12px; color:#475569;">
+                  Relatório gerado em ${new Date().toLocaleString()} — filtros ativos: ${dateRangeLabels[dateRange]} • ${selectedServiceLabel}.
+                </p>
+              </body>
+            </html>
+          `;
+
+          popup.document.write(html);
+          popup.document.close();
+          popup.focus();
+          popup.print();
+          setTimeout(() => popup.close(), 300);
+
+          toast.success("PDF pronto para salvar", {
+            description: "Use o diálogo do navegador para salvar/baixar o PDF.",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao exportar relatórios:", error);
+        toast.error("Falha ao exportar", {
+          description: error instanceof Error ? error.message : "Tente novamente.",
+          action: {
+            label: "Tentar novamente",
+            onClick: () => handleExport(kind),
+          },
+        });
+      } finally {
+        setExporting(null);
+      }
+    },
+    [
+      buildMetadataRows,
+      cohortData,
+      dateRange,
+      downloadFile,
+      hasPaymentData,
+      paymentMethodDetails,
+      paymentMethods,
+      reports,
+      returnRate,
+      selectedService,
+      selectedServiceLabel,
+    ],
+  );
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -441,11 +630,15 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
 
           <Button
             className="w-full sm:w-auto"
-            onClick={handleExportPayments}
-            disabled={isLoading || !hasPaymentData}
+            onClick={() => handleExport("payments-csv")}
+            disabled={isLoading || !hasPaymentData || exporting !== null}
             variant={hasPaymentData ? "default" : "outline"}
           >
-            <Download className="w-4 h-4 mr-2" />
+            {exporting === "payments-csv" ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
             Exportar CSV
           </Button>
         </div>
@@ -1319,9 +1512,19 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-gray-600">Receitas, despesas e análise de custos</p>
-                    <Button className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
+                    <p className="text-sm text-gray-600">
+                      Receitas, custos e distribuição por período (inclui filtros ativos).
+                    </p>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleExport("financial-pdf")}
+                      disabled={exporting !== null || !reports}
+                    >
+                      {exporting === "financial-pdf" ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
                       Baixar PDF
                     </Button>
                   </CardContent>
@@ -1335,9 +1538,18 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-gray-600">Lista completa de clientes e histórico</p>
-                    <Button className="w-full" variant="outline">
-                      <Download className="w-4 h-4 mr-2" />
+                    <p className="text-sm text-gray-600">Cohort e LTV por barbeiro/serviço.</p>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => handleExport("customers-excel")}
+                      disabled={exporting !== null || !reports}
+                    >
+                      {exporting === "customers-excel" ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
                       Baixar Excel
                     </Button>
                   </CardContent>
@@ -1347,13 +1559,22 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Star className="w-5 h-5" />
-                      Relatório de Avaliações
+                      Pagamentos por Método
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-gray-600">Todas as avaliações e feedbacks</p>
-                    <Button className="w-full" variant="outline">
-                      <Download className="w-4 h-4 mr-2" />
+                    <p className="text-sm text-gray-600">Inclui metadados de período e filtros aplicados.</p>
+                    <Button
+                      className="w-full"
+                      variant={hasPaymentData ? "outline" : "ghost"}
+                      onClick={() => handleExport("payments-csv")}
+                      disabled={exporting !== null || !hasPaymentData}
+                    >
+                      {exporting === "payments-csv" ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
                       Baixar CSV
                     </Button>
                   </CardContent>

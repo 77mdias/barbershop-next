@@ -2,12 +2,14 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ReportsPageClient } from "@/app/dashboard/admin/reports/ReportsPageClient";
 import { getReportsData } from "@/server/adminActions";
+import { toast } from "sonner";
 
 jest.mock("@/server/adminActions", () => ({
   getReportsData: jest.fn(),
 }));
 
 const mockGetReportsData = getReportsData as jest.MockedFunction<typeof getReportsData>;
+const toastMock = toast as unknown as jest.Mocked<typeof toast>;
 
 describe("ReportsPageClient", () => {
   const initialReports = {
@@ -116,6 +118,10 @@ describe("ReportsPageClient", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (global.URL as any).createObjectURL = jest.fn(() => "blob:mock");
+    (global.URL as any).revokeObjectURL = jest.fn();
+    toastMock.success?.mockClear?.();
+    toastMock.error?.mockClear?.();
     mockGetReportsData.mockResolvedValue({
       success: true,
       data: initialReports,
@@ -212,5 +218,18 @@ describe("ReportsPageClient", () => {
     expect(screen.getAllByText(/No-show 5\.0%/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/12\/15 slots/i)).toBeInTheDocument();
     expect(screen.getByText("Capacidade por Serviço")).toBeInTheDocument();
+  });
+
+  it("exporta pagamentos em CSV com filtros ativos e feedback", async () => {
+    render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
+
+    fireEvent.click(screen.getByText("Exportar CSV"));
+
+    await waitFor(() => {
+      expect(toastMock.success).toHaveBeenCalledWith(
+        "CSV de pagamentos gerado",
+        expect.objectContaining({ description: expect.stringContaining("Últimos 30 dias") }),
+      );
+    });
   });
 });
