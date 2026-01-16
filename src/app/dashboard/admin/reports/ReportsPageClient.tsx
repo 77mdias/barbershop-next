@@ -9,7 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FilterSelect } from "@/components/admin/FilterSelect";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getReportsData } from "@/server/adminActions";
-import { Activity, BarChart3, DollarSign, Download, FileText, Star, TrendingUp, Users } from "lucide-react";
+import {
+  Activity,
+  AlertCircle,
+  BarChart3,
+  DollarSign,
+  Download,
+  FileText,
+  Star,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useRealtime } from "@/hooks/useRealtime";
 
 type DateRange = "7d" | "30d" | "3m" | "year";
@@ -61,6 +71,70 @@ type ReportBarber = {
   totalRevenue: number;
 };
 
+type CohortMonth = {
+  month: string;
+  newClients: number;
+  returningClients: number;
+  retentionRate: number;
+};
+
+type LtvByBarber = {
+  barberId: string;
+  barberName: string | null;
+  revenue: number;
+  uniqueClients: number;
+  ltv: number;
+};
+
+type LtvMetrics = {
+  totalRevenue: number;
+  uniqueClients: number;
+  globalLtv: number;
+  byBarber: LtvByBarber[];
+};
+
+type ServiceOption = {
+  id: string;
+  name: string;
+  active: boolean;
+};
+
+type CapacityThresholds = {
+  occupancy: number;
+  noShow: number;
+  cancel: number;
+};
+
+type CapacityItem = {
+  id: string;
+  name: string;
+  usedSlots: number;
+  availableSlots: number;
+  occupancyRate: number;
+  totalAppointments: number;
+  noShowRate: number;
+  cancelRate: number;
+  alerts: {
+    occupancy: boolean;
+    noShow: boolean;
+    cancel: boolean;
+  };
+};
+
+type CapacityMetrics = {
+  summary: {
+    slotsUsed: number;
+    slotsAvailable: number;
+    occupancyRate: number;
+    noShowRate: number;
+    cancelRate: number;
+    totalAppointments: number;
+  };
+  thresholds: CapacityThresholds;
+  byBarber: CapacityItem[];
+  byService: CapacityItem[];
+};
+
 type ReportsData = {
   totalRevenue: number;
   monthlyRevenue: number;
@@ -84,6 +158,10 @@ type ReportsData = {
   averageTicket: number;
   averageDurationMinutes: number;
   returnRate: number;
+  customerCohort: CohortMonth[];
+  ltv: LtvMetrics;
+  serviceOptions: ServiceOption[];
+  capacity: CapacityMetrics;
 };
 
 const paymentLabels: Record<PaymentMethod, string> = {
@@ -107,6 +185,12 @@ const dateRangeLabels: Record<DateRange, string> = {
   year: "Último ano",
 };
 
+const capacityThresholdFallback: CapacityThresholds = {
+  occupancy: 85,
+  noShow: 10,
+  cancel: 15,
+};
+
 const formatDelta = (value: number) => {
   if (!Number.isFinite(value)) {
     return "Sem histórico";
@@ -118,6 +202,8 @@ const formatDelta = (value: number) => {
 
 const formatCurrency = (value: number) => `R$ ${Number(value || 0).toFixed(2)}`;
 
+const formatPercent = (value: number) => `${Number(value || 0).toFixed(1)}%`;
+
 interface ReportsPageClientProps {
   initialReports: ReportsData | null;
   initialDateRange: DateRange;
@@ -125,10 +211,11 @@ interface ReportsPageClientProps {
 
 export function ReportsPageClient({ initialReports, initialDateRange }: ReportsPageClientProps) {
   const [dateRange, setDateRange] = React.useState<DateRange>(initialDateRange);
+  const [selectedService, setSelectedService] = React.useState<string>("all");
   const [reports, setReports] = React.useState<ReportsData | null>(initialReports);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [lastFetchedRange, setLastFetchedRange] = React.useState<DateRange | null>(
-    initialReports ? initialDateRange : null,
+  const [lastFetchedKey, setLastFetchedKey] = React.useState<string | null>(
+    initialReports ? `${initialDateRange}::all` : null,
   );
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<PaymentMethod | null>(
     initialReports?.paymentMethods?.[0]?.method ?? null,
@@ -137,18 +224,19 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
 
   const fetchReports = React.useCallback(
     async (force = false) => {
-      const nextRange = dateRange;
+      const serviceParam = selectedService === "all" ? undefined : selectedService;
+      const currentKey = `${dateRange}::${serviceParam ?? "all"}`;
 
-      if (!force && reports && lastFetchedRange === nextRange) {
+      if (!force && reports && lastFetchedKey === currentKey) {
         return;
       }
 
       setIsLoading(true);
       try {
-        const result = await getReportsData(nextRange);
+        const result = await getReportsData(dateRange, serviceParam);
         if (result.success) {
           setReports(result.data as ReportsData);
-          setLastFetchedRange(nextRange);
+          setLastFetchedKey(currentKey);
         }
       } catch (error) {
         console.error("Erro ao buscar relatórios:", error);
@@ -156,7 +244,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
         setIsLoading(false);
       }
     },
-    [dateRange, lastFetchedRange, reports],
+    [dateRange, lastFetchedKey, reports, selectedService],
   );
 
   React.useEffect(() => {
@@ -209,6 +297,26 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   const selectedPayment = paymentMethods.find((method) => method.method === selectedPaymentMethod) || null;
   const selectedPaymentDetails = paymentMethodDetails.find((detail) => detail.method === selectedPaymentMethod) || null;
 
+  const serviceOptions = React.useMemo(
+    () => [
+      { value: "all", label: "Todos os serviços" },
+      ...(reports?.serviceOptions?.map((service) => ({
+        value: service.id,
+        label: service.active ? service.name : `${service.name} (inativo)`,
+      })) ?? []),
+    ],
+    [reports?.serviceOptions],
+  );
+
+  React.useEffect(() => {
+    if (!serviceOptions.some((option) => option.value === selectedService)) {
+      setSelectedService("all");
+    }
+  }, [selectedService, serviceOptions]);
+
+  const selectedServiceLabel =
+    serviceOptions.find((option) => option.value === selectedService)?.label || "Todos os serviços";
+
   const donutGradient = React.useMemo(() => {
     if (!hasPaymentData) {
       return "conic-gradient(#e5e7eb 0% 100%)";
@@ -230,6 +338,28 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
     return `conic-gradient(${segments.join(", ")})`;
   }, [hasPaymentData, paymentMethods]);
 
+  const cohortData = reports?.customerCohort ?? [];
+  const ltvData = reports?.ltv;
+  const totalNewClients = cohortData.reduce((acc, bucket) => acc + bucket.newClients, 0);
+  const totalReturningClients = cohortData.reduce((acc, bucket) => acc + bucket.returningClients, 0);
+  const averageRetention =
+    cohortData.length > 0
+      ? Math.round(cohortData.reduce((acc, bucket) => acc + bucket.retentionRate, 0) / cohortData.length)
+      : 0;
+
+  const capacity = reports?.capacity;
+  const capacityThresholds = capacity?.thresholds ?? capacityThresholdFallback;
+  const capacitySummary = capacity?.summary;
+  const capacityAlerts = {
+    occupancy: (capacitySummary?.occupancyRate ?? 0) >= capacityThresholds.occupancy,
+    noShow: (capacitySummary?.noShowRate ?? 0) >= capacityThresholds.noShow,
+    cancel: (capacitySummary?.cancelRate ?? 0) >= capacityThresholds.cancel,
+  };
+  const hasCapacityData =
+    (capacity?.byBarber?.length ?? 0) > 0 ||
+    (capacity?.byService?.length ?? 0) > 0 ||
+    (capacitySummary?.totalAppointments ?? 0) > 0;
+
   const handleExportPayments = React.useCallback(() => {
     if (!hasPaymentData) {
       return;
@@ -239,6 +369,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
       const rows: string[][] = [
         ["Relatório", "Receita por Método de Pagamento"],
         ["Período", dateRangeLabels[dateRange]],
+        ["Serviço", selectedServiceLabel],
         ["Gerado em", new Date().toISOString()],
         [],
         ["Método", "Receita (R$)", "Transações", "Ticket médio (R$)", "Share receita (%)", "Share volume (%)"],
@@ -276,33 +407,51 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
     } catch (error) {
       console.error("Erro ao exportar pagamentos:", error);
     }
-  }, [dateRange, hasPaymentData, paymentMethods, paymentMethodDetails]);
+  }, [dateRange, hasPaymentData, paymentMethods, paymentMethodDetails, selectedServiceLabel]);
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <FilterSelect
-          value={dateRange}
-          onChange={(value) => setDateRange(value as DateRange)}
-          options={[
-            { value: "7d", label: "Últimos 7 dias" },
-            { value: "30d", label: "Últimos 30 dias" },
-            { value: "3m", label: "Últimos 3 meses" },
-            { value: "year", label: "Último ano" },
-          ]}
-          className="w-full sm:w-[200px]"
-          label="Período"
-        />
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:max-w-xl">
+            <FilterSelect
+              value={dateRange}
+              onChange={(value) => setDateRange(value as DateRange)}
+              options={[
+                { value: "7d", label: "Últimos 7 dias" },
+                { value: "30d", label: "Últimos 30 dias" },
+                { value: "3m", label: "Últimos 3 meses" },
+                { value: "year", label: "Último ano" },
+              ]}
+              className="w-full"
+              label="Período"
+            />
 
-        <Button
-          className="w-full sm:w-auto"
-          onClick={handleExportPayments}
-          disabled={isLoading || !hasPaymentData}
-          variant={hasPaymentData ? "default" : "outline"}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Exportar CSV
-        </Button>
+            <FilterSelect
+              value={selectedService}
+              onChange={setSelectedService}
+              options={serviceOptions}
+              className="w-full"
+              label="Serviço"
+              showReset
+              resetLabel="Todos"
+              disabled={serviceOptions.length <= 1 || isLoading}
+            />
+          </div>
+
+          <Button
+            className="w-full sm:w-auto"
+            onClick={handleExportPayments}
+            disabled={isLoading || !hasPaymentData}
+            variant={hasPaymentData ? "default" : "outline"}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
+          </Button>
+        </div>
+        <p className="text-xs text-gray-500">
+          Período e serviço alimentam KPIs, cohort mensal e LTV. Dados são atualizados automaticamente em tempo real.
+        </p>
       </div>
 
       {isLoading && (
@@ -399,7 +548,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
           </div>
 
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-10">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto sm:h-10">
               <TabsTrigger value="overview" className="flex items-center gap-2 text-xs sm:text-sm py-2 sm:py-0">
                 <BarChart3 className="w-4 h-4" />
                 <span className="hidden sm:inline">Visão Geral</span>
@@ -414,6 +563,11 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                 <TrendingUp className="w-4 h-4" />
                 <span className="hidden sm:inline">Performance</span>
                 <span className="sm:hidden">Perf.</span>
+              </TabsTrigger>
+              <TabsTrigger value="customers" className="flex items-center gap-2 text-xs sm:text-sm py-2 sm:py-0">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Clientes</span>
+                <span className="sm:hidden">Clientes</span>
               </TabsTrigger>
               <TabsTrigger value="export" className="flex items-center gap-2 text-xs sm:text-sm py-2 sm:py-0">
                 <FileText className="w-4 h-4" />
@@ -768,6 +922,114 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
             </TabsContent>
 
             <TabsContent value="performance" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-blue-500" />
+                      Capacidade Geral
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Ocupação baseada em slots de {capacitySummary?.slotsAvailable ?? 0} disponíveis no período.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!hasCapacityData && (
+                      <p className="text-sm text-gray-600">Sem dados de capacidade para este período.</p>
+                    )}
+                    {hasCapacityData && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Ocupação</span>
+                          <Badge variant={capacityAlerts.occupancy ? "destructive" : "secondary"}>
+                            {capacityAlerts.occupancy ? "Alerta" : "Saudável"}
+                          </Badge>
+                        </div>
+                        <p className="text-3xl font-bold text-blue-600">
+                          {formatPercent(capacitySummary?.occupancyRate ?? 0)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {capacitySummary?.slotsUsed ?? 0} / {capacitySummary?.slotsAvailable ?? 0} slots usados
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {capacitySummary?.totalAppointments ?? 0} agendamentos considerados
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-500" />
+                      No-show e Cancelamentos
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">Taxas no período selecionado</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!hasCapacityData && (
+                      <p className="text-sm text-gray-600">Nenhum agendamento para medir no-show/cancelamentos.</p>
+                    )}
+                    {hasCapacityData && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">No-show</span>
+                          <Badge variant={capacityAlerts.noShow ? "destructive" : "outline"}>
+                            {formatPercent(capacitySummary?.noShowRate ?? 0)}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Cancelamentos</span>
+                          <Badge variant={capacityAlerts.cancel ? "destructive" : "outline"}>
+                            {formatPercent(capacitySummary?.cancelRate ?? 0)}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Limites: no-show {capacityThresholds.noShow}% • cancelamentos {capacityThresholds.cancel}%
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-emerald-500" />
+                      Controles de Capacidade
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">Thresholds e indicadores rápidos</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Threshold de ocupação</span>
+                      <Badge variant="outline">{capacityThresholds.occupancy}%</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Threshold de no-show</span>
+                      <Badge variant="outline">{capacityThresholds.noShow}%</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Threshold de cancelamento</span>
+                      <Badge variant="outline">{capacityThresholds.cancel}%</Badge>
+                    </div>
+                    <Separator />
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={capacityAlerts.occupancy ? "destructive" : "secondary"}>
+                        Capacidade {capacityAlerts.occupancy ? "no limite" : "ok"}
+                      </Badge>
+                      <Badge variant={capacityAlerts.noShow ? "destructive" : "secondary"}>
+                        No-show {capacityAlerts.noShow ? "alto" : "controlado"}
+                      </Badge>
+                      <Badge variant={capacityAlerts.cancel ? "destructive" : "secondary"}>
+                        Cancelamentos {capacityAlerts.cancel ? "altos" : "controlados"}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -830,6 +1092,218 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                         </div>
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Capacidade por Barbeiro</CardTitle>
+                    <p className="text-sm text-gray-600">Ocupação e no-show por profissional</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!capacity?.byBarber?.length && (
+                      <p className="text-sm text-gray-600">Nenhum barbeiro com agendamentos no período.</p>
+                    )}
+                    {capacity?.byBarber?.slice(0, 5).map((barber) => (
+                      <div key={barber.id} className="space-y-1 border-b last:border-0 pb-3 last:pb-0">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{barber.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {barber.usedSlots}/{barber.availableSlots} slots • {barber.totalAppointments} agendamentos
+                            </p>
+                          </div>
+                          <Badge variant={barber.alerts.occupancy ? "destructive" : "outline"}>
+                            {formatPercent(barber.occupancyRate)}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={barber.alerts.noShow ? "destructive" : "secondary"}>
+                            No-show {formatPercent(barber.noShowRate)}
+                          </Badge>
+                          <Badge variant={barber.alerts.cancel ? "destructive" : "secondary"}>
+                            Cancel {formatPercent(barber.cancelRate)}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Capacidade por Serviço</CardTitle>
+                    <p className="text-sm text-gray-600">Participação de slots por serviço</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!capacity?.byService?.length && (
+                      <p className="text-sm text-gray-600">Nenhum serviço agendado no período.</p>
+                    )}
+                    {capacity?.byService?.slice(0, 5).map((service) => (
+                      <div key={service.id} className="space-y-1 border-b last:border-0 pb-3 last:pb-0">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {service.usedSlots}/{service.availableSlots} slots • {service.totalAppointments}{" "}
+                              agendamentos
+                            </p>
+                          </div>
+                          <Badge variant={service.alerts.occupancy ? "destructive" : "outline"}>
+                            {formatPercent(service.occupancyRate)}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={service.alerts.noShow ? "destructive" : "secondary"}>
+                            No-show {formatPercent(service.noShowRate)}
+                          </Badge>
+                          <Badge variant={service.alerts.cancel ? "destructive" : "secondary"}>
+                            Cancel {formatPercent(service.cancelRate)}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="customers" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="w-5 h-5" />
+                      LTV Global
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      {selectedServiceLabel} • {dateRangeLabels[dateRange]}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p className="text-3xl font-bold text-green-600">{formatCurrency(ltvData?.globalLtv || 0)}</p>
+                    <p className="text-sm text-gray-600">
+                      Clientes únicos: {ltvData?.uniqueClients ?? 0} | Receita:{" "}
+                      {formatCurrency(ltvData?.totalRevenue || 0)}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Retenção e Cohort</CardTitle>
+                    <p className="text-sm text-gray-600">Novos vs recorrentes no período selecionado</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span>Novos</span>
+                      <span className="font-semibold text-green-600">{totalNewClients}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Recorrentes</span>
+                      <span className="font-semibold text-blue-600">{totalReturningClients}</span>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-600">Retenção média</span>
+                        <span className="text-sm font-medium">{averageRetention}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-emerald-500 h-2 rounded-full"
+                          style={{ width: `${Math.min(averageRetention, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Receita por Cliente</CardTitle>
+                    <p className="text-sm text-gray-600">Cobertura do serviço filtrado</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Receita do período</span>
+                      <span className="text-lg font-bold text-indigo-600">
+                        {formatCurrency(ltvData?.totalRevenue || reports?.monthlyRevenue || 0)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Ticket médio (global)</span>
+                      <span className="text-lg font-bold">{formatCurrency(ltvData?.globalLtv || 0)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cohort Mensal (Novos x Recorrentes)</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      {selectedServiceLabel} • {dateRangeLabels[dateRange]}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {cohortData.length === 0 && (
+                      <p className="text-sm text-gray-600">Sem dados de clientes para o período/serviço selecionado.</p>
+                    )}
+                    {cohortData.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-4 text-xs font-medium text-gray-500">
+                          <span>Mês</span>
+                          <span>Novos</span>
+                          <span>Recorrentes</span>
+                          <span className="text-right">Retenção</span>
+                        </div>
+                        {cohortData.map((bucket) => (
+                          <div key={bucket.month} className="grid grid-cols-4 items-center text-sm">
+                            <span className="font-medium">{bucket.month}</span>
+                            <span className="font-semibold text-green-600">{bucket.newClients}</span>
+                            <span className="font-semibold text-blue-600">{bucket.returningClients}</span>
+                            <div className="flex items-center gap-2 justify-end">
+                              <div className="w-20 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="h-2 bg-emerald-500 rounded-full"
+                                  style={{ width: `${Math.min(bucket.retentionRate, 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-medium">{bucket.retentionRate}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>LTV por Barbeiro</CardTitle>
+                    <p className="text-sm text-gray-600">Top 5 barbeiros por receita/cliente</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!ltvData?.byBarber?.length && (
+                      <p className="text-sm text-gray-600">Sem dados de LTV por barbeiro para este filtro.</p>
+                    )}
+                    {ltvData?.byBarber?.slice(0, 5).map((barber) => (
+                      <div key={barber.barberId} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{barber.barberName || "Sem nome"}</p>
+                          <p className="text-xs text-gray-500">
+                            {barber.uniqueClients} clientes • {formatCurrency(barber.revenue)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-indigo-600">{formatCurrency(barber.ltv)}</p>
+                          <p className="text-xs text-gray-500">LTV médio</p>
+                        </div>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               </div>

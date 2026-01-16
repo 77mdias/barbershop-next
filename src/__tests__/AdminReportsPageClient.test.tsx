@@ -49,6 +49,69 @@ describe("ReportsPageClient", () => {
     averageTicket: 75,
     averageDurationMinutes: 45,
     returnRate: 60,
+    customerCohort: [{ month: "Jan 2026", newClients: 3, returningClients: 2, retentionRate: 40 }],
+    ltv: {
+      totalRevenue: 300,
+      uniqueClients: 5,
+      globalLtv: 60,
+      byBarber: [{ barberId: "1", barberName: "Carlos", revenue: 200, uniqueClients: 3, ltv: 66.67 }],
+    },
+    serviceOptions: [
+      { id: "svc1", name: "Corte", active: true },
+      { id: "svc2", name: "Barba", active: false },
+    ],
+    capacity: {
+      summary: {
+        slotsUsed: 24,
+        slotsAvailable: 30,
+        occupancyRate: 80,
+        noShowRate: 5,
+        cancelRate: 8,
+        totalAppointments: 20,
+      },
+      thresholds: {
+        occupancy: 85,
+        noShow: 10,
+        cancel: 15,
+      },
+      byBarber: [
+        {
+          id: "barb1",
+          name: "Carlos",
+          usedSlots: 12,
+          availableSlots: 15,
+          occupancyRate: 80,
+          totalAppointments: 10,
+          noShowRate: 5,
+          cancelRate: 5,
+          alerts: { occupancy: false, noShow: false, cancel: false },
+        },
+        {
+          id: "barb2",
+          name: "Ana",
+          usedSlots: 8,
+          availableSlots: 15,
+          occupancyRate: 53,
+          totalAppointments: 6,
+          noShowRate: 10,
+          cancelRate: 16,
+          alerts: { occupancy: false, noShow: true, cancel: true },
+        },
+      ],
+      byService: [
+        {
+          id: "svc1",
+          name: "Corte",
+          usedSlots: 14,
+          availableSlots: 30,
+          occupancyRate: 46,
+          totalAppointments: 12,
+          noShowRate: 4,
+          cancelRate: 8,
+          alerts: { occupancy: false, noShow: false, cancel: false },
+        },
+      ],
+    },
   };
 
   beforeEach(() => {
@@ -73,39 +136,57 @@ describe("ReportsPageClient", () => {
     expect(screen.getAllByText("Cartão").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/R\$ 180\.00/)[0]).toBeInTheDocument();
     expect(screen.getByText("Corte")).toBeInTheDocument();
+
+    const customersTab = screen.getByRole("button", { name: /Clientes/i });
+    fireEvent.click(customersTab);
+    expect(screen.getByText("LTV Global")).toBeInTheDocument();
+    expect(screen.getAllByText(/R\$ 60\.00/)[0]).toBeInTheDocument();
+    expect(screen.getByText(/Jan 2026/)).toBeInTheDocument();
   });
 
   it("refetches when date range changes", async () => {
     render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
 
-    const dateSelect = screen.getByRole("combobox");
+    const dateSelect = screen.getAllByRole("combobox")[0];
     fireEvent.click(dateSelect);
     fireEvent.click(screen.getByText("Últimos 7 dias"));
 
     await waitFor(() => {
-      expect(mockGetReportsData).toHaveBeenCalledWith("7d");
+      expect(mockGetReportsData).toHaveBeenCalledWith("7d", undefined);
     });
   });
 
   it("refetches when toggling back to the initial range", async () => {
     render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
 
-    const dateSelect = screen.getByRole("combobox");
+    const dateSelect = screen.getAllByRole("combobox")[0];
     fireEvent.click(dateSelect);
     fireEvent.click(screen.getByText("Últimos 7 dias"));
 
     await waitFor(() => {
-      expect(mockGetReportsData).toHaveBeenCalledWith("7d");
+      expect(mockGetReportsData).toHaveBeenCalledWith("7d", undefined);
     });
 
-    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getAllByRole("combobox")[0]);
     fireEvent.click(screen.getByText("Últimos 30 dias"));
 
     await waitFor(() => {
-      expect(mockGetReportsData).toHaveBeenCalledWith("30d");
+      expect(mockGetReportsData).toHaveBeenCalledWith("30d", undefined);
     });
 
     expect(mockGetReportsData).toHaveBeenCalledTimes(2);
+  });
+
+  it("refetches when service filter changes", async () => {
+    render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
+
+    const serviceSelect = screen.getAllByRole("combobox")[1];
+    fireEvent.click(serviceSelect);
+    fireEvent.click(screen.getByText("Corte"));
+
+    await waitFor(() => {
+      expect(mockGetReportsData).toHaveBeenCalledWith("30d", "svc1");
+    });
   });
 
   it("shows empty payment state when there is no breakdown", async () => {
@@ -119,5 +200,17 @@ describe("ReportsPageClient", () => {
     fireEvent.click(screen.getByText("Financeiro"));
 
     expect(await screen.findAllByText(/Sem dados de pagamento/i)).not.toHaveLength(0);
+  });
+
+  it("renders capacity and no-show metrics", async () => {
+    render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
+
+    fireEvent.click(screen.getByText("Performance"));
+
+    expect(await screen.findByText("Capacidade Geral")).toBeInTheDocument();
+    expect(screen.getByText(/24 \/ 30 slots usados/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/No-show 5\.0%/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/12\/15 slots/i)).toBeInTheDocument();
+    expect(screen.getByText("Capacidade por Serviço")).toBeInTheDocument();
   });
 });

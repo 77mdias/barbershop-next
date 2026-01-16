@@ -13,6 +13,32 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/__tests__/AdminReportsPageClient.test.tsx`
     - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
   - **Testes**: Cobertura adicionada em `AdminReportsPageClient.test.tsx`; `npm test -- AdminReportsPageClient.test.tsx` não executou localmente (jest ausente na instalação atual).
+- [x] **#028** - Cohort de Clientes + LTV (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Classificar clientes por mês (novos vs recorrentes) e calcular LTV global/por barbeiro com filtro de serviço.
+  - **Componentes**: adminActions.getReportsData, ReportsPageClient (aba Clientes), exportação CSV.
+  - **Status**: Concluído – cohort mensal com retenção, LTV filtrado por serviço e UI responsiva com filtros/empty states.
+  - **Arquivos modificados**:
+    - `/src/server/adminActions.ts`
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+    - `/docs/development/CHANGELOG.md`
+    - `/docs/development/ROADMAP.md`
+    - `/docs/features/admin-filters.md`
+    - `/CLAUDE.md`
+  - **Testes**: `npm test -- AdminReportsPageClient.test.tsx` tentou rodar, mas falhou por ausência de `jest`/deps no ambiente atual (node_modules vazio; instalação dependente de rede/Docker).
+- [x] **#029** - Capacidade e No-Show (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Calcular ocupação por barbeiro/serviço e taxas de no-show/cancelamento com alertas na aba Performance.
+  - **Componentes**: adminActions.getReportsData, ReportsPageClient (Performance), teste AdminReportsPageClient.
+  - **Status**: Concluído – thresholds configuráveis (ocupação/no-show/cancelamento) e métricas baseadas em slots de 30 min (9h-18h) com destaque visual de alertas.
+  - **Arquivos modificados**:
+    - `/src/server/adminActions.ts`
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+    - `/docs/development/CHANGELOG.md`
+    - `/docs/development/ROADMAP.md`
+  - **Testes**: `AdminReportsPageClient.test.tsx` atualizado para cobrir capacidade/no-show (não executado localmente; seguir recomendação de rodar Jest no container app).
 
 ## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
 

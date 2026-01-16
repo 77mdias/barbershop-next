@@ -20,6 +20,16 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - Exportação CSV continua incluindo período selecionado e drill-down por serviço/barbeiro; empty states mantidos quando não há dados no intervalo.
 - Adicionado teste de regressão em `AdminReportsPageClient.test.tsx` cobrindo troca de período ida e volta para evitar dados defasados.
 
+### 👥 Cohort de Clientes + LTV (TASK-REALTIME-ANALYTICS-UX #3)
+- `getReportsData(dateRange, serviceId?)` agora calcula cohort mensal (novos vs recorrentes) e LTV global/por barbeiro filtrados por serviço/período, com métricas de retorno e ticket médio ajustadas.
+- Aba “Clientes” no `ReportsPageClient` com filtros de período/serviço, cards de LTV/retention e tabela de cohort com estados vazios responsivos.
+- Exportação de pagamentos inclui metadados do serviço selecionado; `AdminReportsPageClient.test.tsx` cobre refetch por período e por serviço (execução local bloqueada por ausência de jest no ambiente atual).
+
+### 📈 Capacidade e No-Show (TASK-REALTIME-ANALYTICS-UX #4)
+- `getReportsData` calcula slots disponíveis por barbeiro/serviço (jornada 9h-18h, slots de 30min), taxas de no-show/cancelamento e alertas configuráveis.
+- Aba Performance do `ReportsPageClient` exibe cards de capacidade geral, no-show/cancelamento e listas por barbeiro/serviço com badges de alerta.
+- `AdminReportsPageClient.test.tsx` cobre a renderização das métricas/alertas (execução local pendente; rodar Jest no container app).
+
 ## [Analytics v1.8.2] - 2026-01-15 📊
 
 ### 🔧 Dados Reais em Dashboards (TASK #026)

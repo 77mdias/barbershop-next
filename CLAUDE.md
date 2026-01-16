@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A modern barbershop appointment booking system built with Next.js 15, TypeScript, Prisma ORM, and NextAuth.js. Features include appointment scheduling, service management, reviews with image uploads, user role-based dashboards, vouchers/promotions, social networking (friendships, notifications, real-time chat), and a comprehensive design system using Tailwind CSS + shadcn/ui.
 
+> **Siga AGENTS.md**: sem comandos destrutivos, sem novas libs sem aprovação, código tipado e documentação atualizada. Todo fluxo (dev, testes, installs) roda **sempre via containers** — nada de `npm` ou `jest` direto no host.
+
 ---
 
 ## Essential Commands
@@ -31,7 +33,7 @@ docker compose ps                 # List running containers
 docker compose exec app sh        # Access app container shell
 ```
 
-### Development
+### Development (sempre via containers)
 ```bash
 # All commands run inside the Docker container
 docker compose exec app npm run dev              # Start Next.js development server
@@ -39,6 +41,12 @@ docker compose exec app npm run lint:check       # Check linting issues
 docker compose exec app npm run lint:fix         # Auto-fix linting issues
 docker compose exec app npm run type-check       # Run TypeScript type checking
 docker compose exec app npm run validate         # Run both lint:check and type-check
+
+# Atalhos preferenciais (em conformidade com AGENTS.md)
+./scripts/docker-manager.sh up dev               # Sobe ambiente completo de dev
+./scripts/docker-manager.sh down dev             # Derruba ambiente
+./scripts/docker-manager.sh logs dev             # Logs
+./scripts/docker-manager.sh shell dev            # Shell interativo para rodar npm/jest dentro do container
 ```
 
 ### Build & Production
@@ -75,6 +83,11 @@ npm run db:seed:prod             # Seed production database
 ### Package Management
 ```bash
 # Install new dependencies (inside container)
+docker compose exec app npm install <package>         # Add dependency
+docker compose exec app npm install -D <package>      # Add dev dependency
+docker compose exec app npm uninstall <package>       # Remove dependency
+
+# Instalações (sempre dentro do container)
 docker compose exec app npm install <package>         # Add dependency
 docker compose exec app npm install -D <package>      # Add dev dependency
 docker compose exec app npm uninstall <package>       # Remove dependency
@@ -569,7 +582,7 @@ PageClient.tsx (Client Component) → Filters + State + Pagination
 
 **Server Actions Enhanced**:
 - `getBarbersForAdmin()` - Filtros: search, performanceMin, sortBy, paginação
-- `getReportsData()` - Filtro: dateRange (7d/30d/3m/year)
+- `getReportsData(dateRange, serviceId?)` - Filtros de período/serviço; retorna cohort mensal (novos vs recorrentes), LTV global/por barbeiro e distribuição de pagamentos.
 
 **Key Features**:
 - ✅ Debounced search (500ms delay previne spam)

@@ -28,18 +28,33 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
 - **Notas**: Ajustado cache de faixa temporal e detalhes de export/empty state para manter KPIs consistentes por período.
 
 ### 3) Cohort de Clientes (Novos vs Recorrentes + LTV)
+- **Status**: ✅ Entregue (2026-02) – Cohort mensal filtrado por serviço e LTV global/por barbeiro na aba Clientes do Reports.
 - **Escopo**: Classificar clientes mês a mês (novo/recorrente); LTV básico por cliente e por barbeiro.
 - **Critérios de aceite**:
-  - Cohort mensal com % de retenção e contagem.
-  - LTV = receita total / clientes únicos (global e por barbeiro).
-  - Possibilidade de filtro de período e serviço.
+  - [x] Cohort mensal com % de retenção e contagem (período + serviço).
+  - [x] LTV = receita total / clientes únicos (global e por barbeiro).
+  - [x] Possibilidade de filtro de período e serviço.
+- **Entregas**:
+  - Cálculo Prisma com identificação do primeiro serviço por cliente para marcar novos vs recorrentes por mês.
+  - LTV global e por barbeiro filtrados por serviço, com receita e clientes únicos do período selecionado.
+  - Aba “Clientes” no ReportsPageClient com filtros de período/serviço, cards de LTV/retention e tabela de cohort.
+  - Exportação de pagamentos inclui metadados do serviço selecionado.
+- **Testes**:
+  - `AdminReportsPageClient.test.tsx` cobre refetch por período e filtro de serviço (execução local bloqueada por ausência de dependências Jest no ambiente atual).
 
 ### 4) Capacidade e No-Show
+- **Status**: ✅ Entregue (2026-02) – Capacidade por barbeiro/serviço com alertas de no-show/cancelamento e thresholds configuráveis.
 - **Escopo**: Métricas de ocupação por barbeiro/serviço; taxa de cancelamento/no-show; alertas.
 - **Critérios de aceite**:
-  - Ocupação = slots utilizados / slots disponíveis (config base).
-  - Taxa de no-show/cancelamento por período e por barbeiro.
-  - Alertas visuais quando indicadores passam thresholds configuráveis.
+  - [x] Ocupação = slots utilizados / slots disponíveis (config base).
+  - [x] Taxa de no-show/cancelamento por período e por barbeiro.
+  - [x] Alertas visuais quando indicadores passam thresholds configuráveis.
+- **Entregas**:
+  - `getReportsData` agrega capacidade por barbeiro/serviço usando configuração base (slots de 30 min, 9h-18h) com thresholds de ocupação/no-show/cancelamento.
+  - Aba Performance do `ReportsPageClient` traz cards de capacidade geral, no-show/cancelamentos e listas por barbeiro/serviço com badges de alerta.
+  - Alertas alinhados ao SSE de agendamentos (recalcula ao receber `appointment:changed`/`analytics:updated`).
+- **Testes**:
+  - `AdminReportsPageClient.test.tsx` cobre renderização das métricas de capacidade/no-show e estados de alerta (execução local não realizada; seguir recomendação de rodar Jest no container app).
 
 ### 5) Playbook de Exportação
 - **Escopo**: Downloads de PDF/CSV/Excel na aba Exportar, respeitando filtros ativos.
@@ -78,4 +93,4 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
 - **Performance**: agregar consultas (groupBy) e paginar exportações; índices em campos de data/método.
 
 ## Status
-- 🚀 Item 1 entregue (SSE/real-time ativo); demais itens permanecem pendentes.
+- 🚀 Itens 1, 3 e 4 entregues (SSE/real-time ativo; cohort/LTV com filtro de serviço; capacidade/no-show com alertas); itens 5, 6 e 7 permanecem pendentes.

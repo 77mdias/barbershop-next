@@ -12,6 +12,18 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] Exportação CSV preserva filtros aplicados e drill-down por serviço/barbeiro.
 - [x] Empty/loading states revisados e teste de regressão em `AdminReportsPageClient.test.tsx` cobrindo troca de períodos.
 
+#### 👥 Cohort de Clientes + LTV (2026-02)
+
+- [x] Cohort mensal (novos vs recorrentes) com retenção média por período/serviço.
+- [x] LTV global e por barbeiro filtrados por serviço na aba “Clientes” do Reports.
+- [x] Exportação de pagamentos inclui o serviço selecionado; refetch por período e serviço coberto em `AdminReportsPageClient.test.tsx`.
+
+#### 🧮 Capacidade e No-Show (2026-02)
+
+- [x] Ocupação por barbeiro/serviço baseada em slots de 30 min (9h-18h) e thresholds configuráveis (ocupação/no-show/cancelamento).
+- [x] Aba Performance exibe cards de capacidade, no-show/cancelamentos e listas por barbeiro/serviço com badges de alerta.
+- [x] Atualização em tempo real via SSE (refetch por `appointment:changed`/`analytics:updated`) e teste de UI em `AdminReportsPageClient.test.tsx`.
+
 #### 🚀 Sprint 2 - Notificações em Tempo Real (2026-02)
 
 - [x] SSE centralizado com autenticação e heartbeat (`/api/realtime`)

@@ -154,11 +154,12 @@ Modificada para aceitar filtros de busca, performance e paginação.
 
 ### 2. getReportsData() (`/src/server/adminActions.ts`)
 
-Modificada para aceitar filtro de período de relatórios.
+Modificada para aceitar filtro de período e serviço em relatórios (incluindo cohort/LTV).
 
 **Parâmetros**:
 ```typescript
-dateRange?: "7d" | "30d" | "3m" | "year"  // Default: "30d"
+dateRange?: "7d" | "30d" | "3m" | "year";  // Default: "30d"
+serviceId?: string;                        // Filtro opcional por serviço
 ```
 
 **Cálculo de Período**:
@@ -168,8 +169,11 @@ dateRange?: "7d" | "30d" | "3m" | "year"  // Default: "30d"
 - `year`: Último ano
 
 **Dados Filtrados**:
-- `periodAppointments`: Agendamentos no período
-- `periodRevenue`: Receita no período
+- `periodAppointments`: Agendamentos no período (por serviço)
+- `periodRevenue`: Receita no período (por serviço)
+- `paymentMethods/paymentMethodDetails`: Distribuição por método considerando o serviço selecionado
+- `customerCohort`: Novos vs recorrentes com retenção mensal (período + serviço)
+- `ltv`: LTV global e por barbeiro, receita/clientes únicos do serviço no período
 - `periodReviews`: Reviews no período
 - `periodAverageRating`: Rating médio no período
 

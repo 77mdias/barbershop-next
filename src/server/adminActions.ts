@@ -1,6 +1,6 @@
 "use server";
 
-import { PaymentMethod, Prisma } from "@prisma/client";
+import { AppointmentStatus, PaymentMethod, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -10,11 +10,24 @@ import { logger } from "@/lib/logger";
 
 const toNumber = (value: Prisma.Decimal | number | null | undefined) => (value ? Number(value) : 0);
 
+type ReportDateRange = "7d" | "30d" | "3m" | "year";
+
 const busyHourBuckets = [
   { label: "Manhã (8h-12h)", start: 8, end: 12 },
   { label: "Tarde (12h-18h)", start: 12, end: 18 },
   { label: "Noite (18h-22h)", start: 18, end: 22 },
 ];
+
+const CAPACITY_CONFIG = {
+  workdayStartHour: 9,
+  workdayEndHour: 18,
+  slotMinutes: 30,
+  thresholds: {
+    occupancy: 85, // alerta quando ocupação >= 85%
+    noShow: 10, // alerta quando no-show >= 10%
+    cancel: 15, // alerta quando cancelamentos >= 15%
+  },
+};
 
 // Tipos para os dados retornados
 interface User {
@@ -68,6 +81,34 @@ type PaymentMethodDetails = {
   topBarbers: PaymentDrilldownEntry[];
 };
 
+type CohortMonth = {
+  month: string;
+  newClients: number;
+  returningClients: number;
+  retentionRate: number;
+};
+
+type LtvByBarber = {
+  barberId: string;
+  barberName: string | null;
+  revenue: number;
+  uniqueClients: number;
+  ltv: number;
+};
+
+type LtvMetrics = {
+  totalRevenue: number;
+  uniqueClients: number;
+  globalLtv: number;
+  byBarber: LtvByBarber[];
+};
+
+type ServiceOption = {
+  id: string;
+  name: string;
+  active: boolean;
+};
+
 type BusyHourMetric = {
   label: string;
   range: string;
@@ -79,6 +120,42 @@ type PeriodComparison = {
   revenueChangePercent: number;
   appointmentsChangePercent: number;
   newClients: number;
+};
+
+type CapacityThresholds = {
+  occupancy: number;
+  noShow: number;
+  cancel: number;
+};
+
+type CapacityItem = {
+  id: string;
+  name: string;
+  usedSlots: number;
+  availableSlots: number;
+  occupancyRate: number;
+  totalAppointments: number;
+  noShowRate: number;
+  cancelRate: number;
+  alerts: {
+    occupancy: boolean;
+    noShow: boolean;
+    cancel: boolean;
+  };
+};
+
+type CapacityMetrics = {
+  summary: {
+    slotsUsed: number;
+    slotsAvailable: number;
+    occupancyRate: number;
+    noShowRate: number;
+    cancelRate: number;
+    totalAppointments: number;
+  };
+  thresholds: CapacityThresholds;
+  byBarber: CapacityItem[];
+  byService: CapacityItem[];
 };
 
 interface ReportsData {
@@ -106,6 +183,10 @@ interface ReportsData {
   averageTicket: number;
   averageDurationMinutes: number;
   returnRate: number;
+  customerCohort: CohortMonth[];
+  ltv: LtvMetrics;
+  serviceOptions: ServiceOption[];
+  capacity: CapacityMetrics;
 }
 
 function calculateBusyHours(appointments: Array<{ date: Date }>): BusyHourMetric[] {
@@ -129,11 +210,12 @@ function calculateBusyHours(appointments: Array<{ date: Date }>): BusyHourMetric
   }));
 }
 
-async function getTopBarbersByRevenue(startDate?: Date) {
+async function getTopBarbersByRevenue(startDate?: Date, serviceId?: string) {
   const histories = await db.serviceHistory.findMany({
     where: {
       ...(startDate ? { completedAt: { gte: startDate } } : {}),
       appointments: { some: { barberId: { not: null } } },
+      ...(serviceId ? { serviceId } : {}),
     },
     select: {
       finalPrice: true,
@@ -199,10 +281,13 @@ async function getTopBarbersByRevenue(startDate?: Date) {
     });
 }
 
-async function buildMonthlyGrowth(now: Date): Promise<MonthlyGrowthEntry[]> {
+async function buildMonthlyGrowth(now: Date, serviceId?: string): Promise<MonthlyGrowthEntry[]> {
   const referenceStart = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   const histories = await db.serviceHistory.findMany({
-    where: { completedAt: { gte: referenceStart } },
+    where: {
+      completedAt: { gte: referenceStart },
+      ...(serviceId ? { serviceId } : {}),
+    },
     select: { completedAt: true, finalPrice: true },
   });
 
@@ -256,13 +341,17 @@ type PaymentAggregationBucket = {
   barbers: Map<string, { name: string | null; revenue: number }>;
 };
 
-async function buildPaymentMethodAnalytics(startDate: Date): Promise<{
+async function buildPaymentMethodAnalytics(
+  startDate: Date,
+  serviceId?: string,
+): Promise<{
   paymentMethods: PaymentBreakdown[];
   paymentMethodDetails: PaymentMethodDetails[];
 }> {
   const histories = await db.serviceHistory.findMany({
     where: {
       completedAt: { gte: startDate },
+      ...(serviceId ? { serviceId } : {}),
     },
     select: {
       finalPrice: true,
@@ -361,6 +450,318 @@ async function buildPaymentMethodAnalytics(startDate: Date): Promise<{
   });
 
   return { paymentMethods, paymentMethodDetails };
+}
+
+async function getServiceOptions(): Promise<ServiceOption[]> {
+  const services = await db.service.findMany({
+    select: { id: true, name: true, active: true },
+    orderBy: { name: "asc" },
+  });
+
+  return services.map((service) => ({
+    id: service.id,
+    name: service.name,
+    active: service.active,
+  }));
+}
+
+const getMonthKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}`;
+
+const formatMonthLabel = (date: Date) => {
+  const month = date.toLocaleString("pt-BR", { month: "short" });
+  const safeMonth = month ? month.charAt(0).toUpperCase() + month.slice(1) : "";
+  return `${safeMonth} ${date.getFullYear()}`;
+};
+
+async function buildCustomerCohort(startDate: Date, serviceId?: string): Promise<CohortMonth[]> {
+  const histories = await db.serviceHistory.findMany({
+    where: { completedAt: { gte: startDate }, ...(serviceId ? { serviceId } : {}) },
+    select: { userId: true, completedAt: true },
+  });
+
+  if (histories.length === 0) {
+    return [];
+  }
+
+  const userIds = Array.from(new Set(histories.map((history) => history.userId)));
+
+  const firstServices = await db.serviceHistory.groupBy({
+    by: ["userId"],
+    where: { userId: { in: userIds }, ...(serviceId ? { serviceId } : {}) },
+    _min: { completedAt: true },
+  });
+
+  const firstServiceByUser = new Map<string, Date | null>(
+    firstServices.map((entry) => [entry.userId, entry._min.completedAt]),
+  );
+
+  const monthBuckets = new Map<string, { newClients: Set<string>; returningClients: Set<string> }>();
+
+  histories.forEach((history) => {
+    const monthKey = getMonthKey(history.completedAt);
+    const bucket = monthBuckets.get(monthKey) ?? { newClients: new Set<string>(), returningClients: new Set<string>() };
+    const firstDate = firstServiceByUser.get(history.userId);
+    const firstMonthKey = firstDate ? getMonthKey(firstDate) : monthKey;
+
+    if (firstMonthKey === monthKey) {
+      bucket.newClients.add(history.userId);
+    } else {
+      bucket.returningClients.add(history.userId);
+    }
+
+    monthBuckets.set(monthKey, bucket);
+  });
+
+  const startMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const now = new Date();
+  const months: Date[] = [];
+  let cursor = startMonth;
+
+  while (cursor <= now) {
+    months.push(new Date(cursor));
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+  }
+
+  return months.map((monthDate) => {
+    const key = getMonthKey(monthDate);
+    const bucket = monthBuckets.get(key) ?? { newClients: new Set<string>(), returningClients: new Set<string>() };
+    const total = bucket.newClients.size + bucket.returningClients.size;
+    const retentionRate = total > 0 ? Math.round((bucket.returningClients.size / total) * 100) : 0;
+
+    return {
+      month: formatMonthLabel(monthDate),
+      newClients: bucket.newClients.size,
+      returningClients: bucket.returningClients.size,
+      retentionRate,
+    };
+  });
+}
+
+async function calculateLtvMetrics(startDate: Date, serviceId?: string): Promise<LtvMetrics> {
+  const histories = await db.serviceHistory.findMany({
+    where: { completedAt: { gte: startDate }, ...(serviceId ? { serviceId } : {}) },
+    select: {
+      userId: true,
+      finalPrice: true,
+      appointments: {
+        select: {
+          barberId: true,
+          barber: { select: { id: true, name: true } },
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (histories.length === 0) {
+    return {
+      totalRevenue: 0,
+      uniqueClients: 0,
+      globalLtv: 0,
+      byBarber: [],
+    };
+  }
+
+  const totalRevenue = histories.reduce((acc, history) => acc + toNumber(history.finalPrice), 0);
+  const uniqueClients = new Set(histories.map((history) => history.userId)).size;
+  const globalLtv = uniqueClients > 0 ? Number((totalRevenue / uniqueClients).toFixed(2)) : 0;
+
+  const barberStats = new Map<string, { name: string | null; revenue: number; clients: Set<string> }>();
+
+  histories.forEach((history) => {
+    const barberId = history.appointments[0]?.barberId;
+    if (!barberId) return;
+
+    const current = barberStats.get(barberId) ?? {
+      name: history.appointments[0]?.barber?.name || null,
+      revenue: 0,
+      clients: new Set<string>(),
+    };
+
+    current.revenue += toNumber(history.finalPrice);
+    current.clients.add(history.userId);
+
+    barberStats.set(barberId, current);
+  });
+
+  const byBarber = Array.from(barberStats.entries())
+    .map(([barberId, data]) => ({
+      barberId,
+      barberName: data.name,
+      revenue: Number(data.revenue.toFixed(2)),
+      uniqueClients: data.clients.size,
+      ltv: data.clients.size > 0 ? Number((data.revenue / data.clients.size).toFixed(2)) : 0,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  return {
+    totalRevenue: Number(totalRevenue.toFixed(2)),
+    uniqueClients,
+    globalLtv,
+    byBarber,
+  };
+}
+
+type AppointmentForCapacity = {
+  status: AppointmentStatus;
+  barberId: string;
+  serviceId: string;
+  service: { duration: number; name: string };
+  barber?: { name: string | null };
+};
+
+function buildCapacityMetrics({
+  appointments,
+  activeBarbers,
+  daysInRange,
+}: {
+  appointments: AppointmentForCapacity[];
+  activeBarbers: Array<{ id: string; name: string | null }>;
+  daysInRange: number;
+}): CapacityMetrics {
+  const slotMinutes = CAPACITY_CONFIG.slotMinutes;
+  const slotsPerDay = Math.max(
+    1,
+    Math.floor(((CAPACITY_CONFIG.workdayEndHour - CAPACITY_CONFIG.workdayStartHour) * 60) / slotMinutes),
+  );
+  const baseSlotsPerBarber = slotsPerDay * Math.max(1, daysInRange);
+
+  const barberPool =
+    activeBarbers.length > 0
+      ? activeBarbers
+      : Array.from(
+          new Map(
+            appointments.map((appointment) => [
+              appointment.barberId,
+              { id: appointment.barberId, name: appointment.barber?.name || "Barbeiro" },
+            ]),
+          ).values(),
+        );
+
+  type CapacityAccumulator = {
+    id: string;
+    name: string;
+    usedSlots: number;
+    availableSlots: number;
+    totalAppointments: number;
+    noShowCount: number;
+    cancelCount: number;
+  };
+
+  const makeAccumulator = (id: string, name: string, availableSlots: number): CapacityAccumulator => ({
+    id,
+    name,
+    availableSlots,
+    usedSlots: 0,
+    totalAppointments: 0,
+    noShowCount: 0,
+    cancelCount: 0,
+  });
+
+  const barberStats = new Map<string, CapacityAccumulator>();
+  barberPool.forEach((barber) => {
+    barberStats.set(barber.id, makeAccumulator(barber.id, barber.name || "Barbeiro", baseSlotsPerBarber));
+  });
+
+  const totalSlotsAvailable = baseSlotsPerBarber * Math.max(1, barberPool.length);
+
+  const serviceStats = new Map<string, CapacityAccumulator>();
+
+  let slotsUsed = 0;
+  let totalNoShow = 0;
+  let totalCancelled = 0;
+
+  appointments.forEach((appointment) => {
+    const slotsNeeded = Math.max(1, Math.ceil((appointment.service?.duration ?? slotMinutes) / slotMinutes));
+    const isUsed = ![AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW].includes(appointment.status);
+
+    const barberEntry =
+      barberStats.get(appointment.barberId) ??
+      makeAccumulator(appointment.barberId, appointment.barber?.name || "Barbeiro", baseSlotsPerBarber);
+
+    const serviceEntry =
+      serviceStats.get(appointment.serviceId) ??
+      makeAccumulator(appointment.serviceId, appointment.service?.name || "Serviço", totalSlotsAvailable);
+
+    barberEntry.totalAppointments += 1;
+    serviceEntry.totalAppointments += 1;
+
+    if (isUsed) {
+      barberEntry.usedSlots += slotsNeeded;
+      serviceEntry.usedSlots += slotsNeeded;
+      slotsUsed += slotsNeeded;
+    }
+
+    if (appointment.status === AppointmentStatus.NO_SHOW) {
+      barberEntry.noShowCount += 1;
+      serviceEntry.noShowCount += 1;
+      totalNoShow += 1;
+    }
+
+    if (appointment.status === AppointmentStatus.CANCELLED) {
+      barberEntry.cancelCount += 1;
+      serviceEntry.cancelCount += 1;
+      totalCancelled += 1;
+    }
+
+    barberStats.set(appointment.barberId, barberEntry);
+    serviceStats.set(appointment.serviceId, serviceEntry);
+  });
+
+  const thresholds = CAPACITY_CONFIG.thresholds;
+
+  const toCapacityItem = (entry: CapacityAccumulator): CapacityItem => {
+    const occupancyRate =
+      entry.availableSlots > 0 ? Math.min(100, Number(((entry.usedSlots / entry.availableSlots) * 100).toFixed(1))) : 0;
+    const noShowRate =
+      entry.totalAppointments > 0 ? Number(((entry.noShowCount / entry.totalAppointments) * 100).toFixed(1)) : 0;
+    const cancelRate =
+      entry.totalAppointments > 0 ? Number(((entry.cancelCount / entry.totalAppointments) * 100).toFixed(1)) : 0;
+
+    return {
+      id: entry.id,
+      name: entry.name,
+      usedSlots: entry.usedSlots,
+      availableSlots: entry.availableSlots,
+      occupancyRate,
+      totalAppointments: entry.totalAppointments,
+      noShowRate,
+      cancelRate,
+      alerts: {
+        occupancy: occupancyRate >= thresholds.occupancy,
+        noShow: noShowRate >= thresholds.noShow,
+        cancel: cancelRate >= thresholds.cancel,
+      },
+    };
+  };
+
+  const byBarber = Array.from(barberStats.values())
+    .map(toCapacityItem)
+    .sort((a, b) => b.occupancyRate - a.occupancyRate || b.totalAppointments - a.totalAppointments);
+
+  const byService = Array.from(serviceStats.values())
+    .map(toCapacityItem)
+    .sort((a, b) => b.usedSlots - a.usedSlots || b.totalAppointments - a.totalAppointments);
+
+  const slotsAvailable = Math.max(totalSlotsAvailable, baseSlotsPerBarber);
+  const occupancyRate = slotsAvailable > 0 ? Number(((slotsUsed / slotsAvailable) * 100).toFixed(1)) : 0;
+  const totalAppointments = appointments.length;
+  const noShowRate = totalAppointments > 0 ? Number(((totalNoShow / totalAppointments) * 100).toFixed(1)) : 0;
+  const cancelRate = totalAppointments > 0 ? Number(((totalCancelled / totalAppointments) * 100).toFixed(1)) : 0;
+
+  return {
+    summary: {
+      slotsUsed,
+      slotsAvailable,
+      occupancyRate,
+      noShowRate,
+      cancelRate,
+      totalAppointments,
+    },
+    thresholds,
+    byBarber,
+    byService,
+  };
 }
 
 /**
@@ -597,8 +998,9 @@ export async function getBarbersForAdmin(filters?: {
  * Buscar dados para relatórios
  *
  * @param dateRange - Período do relatório: "7d" | "30d" | "3m" | "year" (default: "30d")
+ * @param serviceId - Filtro opcional por serviço para métricas e coortes
  */
-export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
+export async function getReportsData(dateRange?: ReportDateRange, serviceId?: string) {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions);
@@ -640,23 +1042,52 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     }
 
+    const normalizedStart = new Date(startDate);
+    normalizedStart.setHours(0, 0, 0, 0);
+    const normalizedNow = new Date(now);
+    normalizedNow.setHours(0, 0, 0, 0);
+
+    const daysInRange = Math.max(
+      1,
+      Math.round((normalizedNow.getTime() - normalizedStart.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+    );
+
     const periodLength = now.getTime() - startDate.getTime();
     const previousPeriodStart = new Date(startDate.getTime() - periodLength);
 
-    // Dados básicos (não filtrados por data)
-    const totalClients = await db.user.count({
-      where: { role: "CLIENT", deletedAt: null },
+    const serviceOptions = await getServiceOptions();
+    const selectedServiceId = serviceId && serviceOptions.some((option) => option.id === serviceId) ? serviceId : null;
+
+    const appointmentBaseWhere = {
+      status: { notIn: ["CANCELLED", "NO_SHOW"] },
+      ...(selectedServiceId ? { serviceId: selectedServiceId } : {}),
+    };
+
+    const serviceHistoryBaseWhere = selectedServiceId ? { serviceId: selectedServiceId } : {};
+
+    const activeBarbers = await db.user.findMany({
+      where: { role: "BARBER", deletedAt: null, isActive: true },
+      select: { id: true, name: true },
     });
 
+    // Dados básicos (não filtrados por data)
+    const totalClients = (
+      await db.serviceHistory.findMany({
+        where: serviceHistoryBaseWhere,
+        distinct: ["userId"],
+        select: { userId: true },
+      })
+    ).length;
+
     const totalAppointments = await db.appointment.count({
-      where: { status: { notIn: ["CANCELLED", "NO_SHOW"] } },
+      where: appointmentBaseWhere,
     });
 
     // Agendamentos no período selecionado (com dados de duração)
     const periodAppointments = await db.appointment.findMany({
       where: {
+        ...appointmentBaseWhere,
         date: { gte: startDate },
-        status: { notIn: ["CANCELLED", "NO_SHOW"] },
       },
       select: {
         date: true,
@@ -666,34 +1097,50 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
       },
     });
 
+    const periodAppointmentsDetailed = await db.appointment.findMany({
+      where: {
+        ...(selectedServiceId ? { serviceId: selectedServiceId } : {}),
+        date: { gte: startDate },
+      },
+      select: {
+        status: true,
+        barberId: true,
+        serviceId: true,
+        service: { select: { duration: true, name: true } },
+        barber: { select: { name: true } },
+      },
+    });
+
     const monthlyAppointments = periodAppointments.length;
 
     const previousAppointments = await db.appointment.count({
       where: {
+        ...appointmentBaseWhere,
         date: { gte: previousPeriodStart, lt: startDate },
-        status: { notIn: ["CANCELLED", "NO_SHOW"] },
       },
     });
 
     // Métricas de reviews e receita
     const ratingsAggregate = await db.serviceHistory.aggregate({
-      where: { rating: { not: null } },
+      where: { ...serviceHistoryBaseWhere, rating: { not: null } },
       _avg: { rating: true },
       _count: { rating: true },
     });
 
     const totalRevenueData = await db.serviceHistory.aggregate({
+      where: serviceHistoryBaseWhere,
       _sum: { finalPrice: true },
     });
 
     const periodRevenueData = await db.serviceHistory.aggregate({
-      where: { completedAt: { gte: startDate } },
+      where: { ...serviceHistoryBaseWhere, completedAt: { gte: startDate } },
       _sum: { finalPrice: true },
       _count: { id: true },
     });
 
     const previousRevenueData = await db.serviceHistory.aggregate({
       where: {
+        ...serviceHistoryBaseWhere,
         completedAt: { gte: previousPeriodStart, lt: startDate },
       },
       _sum: { finalPrice: true },
@@ -701,6 +1148,7 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
 
     const periodRatings = await db.serviceHistory.aggregate({
       where: {
+        ...serviceHistoryBaseWhere,
         completedAt: { gte: startDate },
         rating: { not: null },
       },
@@ -715,24 +1163,20 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
     lastSevenDays.setDate(lastSevenDays.getDate() - 7);
 
     const todayRevenueData = await db.serviceHistory.aggregate({
-      where: { completedAt: { gte: startOfToday } },
+      where: { ...serviceHistoryBaseWhere, completedAt: { gte: startOfToday } },
       _sum: { finalPrice: true },
     });
 
     const weekRevenueData = await db.serviceHistory.aggregate({
-      where: { completedAt: { gte: lastSevenDays } },
+      where: { ...serviceHistoryBaseWhere, completedAt: { gte: lastSevenDays } },
       _sum: { finalPrice: true },
     });
 
-    const newClientsInPeriod = await db.user.count({
-      where: {
-        role: "CLIENT",
-        deletedAt: null,
-        createdAt: { gte: startDate },
-      },
-    });
+    const { paymentMethods, paymentMethodDetails } = await buildPaymentMethodAnalytics(startDate, selectedServiceId);
 
-    const { paymentMethods, paymentMethodDetails } = await buildPaymentMethodAnalytics(startDate);
+    const customerCohort = await buildCustomerCohort(startDate, selectedServiceId);
+    const newClientsInPeriod = customerCohort.reduce((acc, bucket) => acc + bucket.newClients, 0);
+    const ltv = await calculateLtvMetrics(startDate, selectedServiceId);
 
     // Duração média dos atendimentos
     const averageDurationMinutes = (() => {
@@ -753,7 +1197,7 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
       by: ["userId"],
       where: {
         date: { gte: startDate },
-        status: { notIn: ["CANCELLED", "NO_SHOW"] },
+        ...appointmentBaseWhere,
       },
       _count: { _all: true },
     });
@@ -763,7 +1207,13 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
 
     const busyHours = calculateBusyHours(periodAppointments);
 
-    const monthlyGrowth = await buildMonthlyGrowth(now);
+    const monthlyGrowth = await buildMonthlyGrowth(now, selectedServiceId);
+
+    const capacity = buildCapacityMetrics({
+      appointments: periodAppointmentsDetailed as AppointmentForCapacity[],
+      activeBarbers,
+      daysInRange,
+    });
 
     const periodRevenue = toNumber(periodRevenueData._sum.finalPrice);
     const previousRevenue = toNumber(previousRevenueData._sum.finalPrice);
@@ -782,7 +1232,7 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
         ? Number((periodRevenue / (periodRevenueData._count?.id || 1)).toFixed(2))
         : 0;
 
-    const topBarbers = (await getTopBarbersByRevenue(startDate)).slice(0, 10);
+    const topBarbers = (await getTopBarbersByRevenue(startDate, selectedServiceId)).slice(0, 10);
 
     const reportsData: ReportsData = {
       totalRevenue: toNumber(totalRevenueData._sum.finalPrice),
@@ -813,6 +1263,10 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
       averageTicket,
       averageDurationMinutes,
       returnRate,
+      customerCohort,
+      ltv,
+      capacity,
+      serviceOptions,
     };
 
     return {
