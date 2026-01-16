@@ -11,6 +11,7 @@ import {
   type MarkAsReadInput,
   type DeleteNotificationInput,
 } from "@/schemas/notificationSchemas";
+import { emitRealtimeEvent } from "@/lib/realtime";
 
 /**
  * Server Action para buscar notificações do usuário
@@ -26,14 +27,9 @@ export async function getNotifications(filters?: Partial<NotificationFiltersInpu
       };
     }
 
-    const validatedFilters = filters
-      ? NotificationFiltersSchema.parse(filters)
-      : { page: 1, limit: 20 };
+    const validatedFilters = filters ? NotificationFiltersSchema.parse(filters) : { page: 1, limit: 20 };
 
-    const result = await NotificationService.getUserNotifications(
-      session.user.id,
-      validatedFilters
-    );
+    const result = await NotificationService.getUserNotifications(session.user.id, validatedFilters);
 
     return {
       success: true,
@@ -92,10 +88,7 @@ export async function getRecentNotifications(limit = 5) {
       };
     }
 
-    const notifications = await NotificationService.getRecentNotifications(
-      session.user.id,
-      limit
-    );
+    const notifications = await NotificationService.getRecentNotifications(session.user.id, limit);
 
     return {
       success: true,
@@ -124,15 +117,12 @@ export async function markNotificationAsRead(data: MarkAsReadInput | string) {
       };
     }
 
-    const notificationId =
-      typeof data === "string" ? data : data.notificationId;
+    const notificationId = typeof data === "string" ? data : data.notificationId;
 
     const validated = MarkAsReadSchema.parse({ notificationId });
 
     // Verificar se a notificação pertence ao usuário
-    const notification = await NotificationService.findById(
-      validated.notificationId
-    );
+    const notification = await NotificationService.findById(validated.notificationId);
 
     if (!notification) {
       return {
@@ -149,6 +139,17 @@ export async function markNotificationAsRead(data: MarkAsReadInput | string) {
     }
 
     await NotificationService.markAsRead(validated.notificationId);
+
+    try {
+      const unreadCount = await NotificationService.getUnreadCount(session.user.id);
+      emitRealtimeEvent({
+        type: "notification:read",
+        payload: { notificationId: validated.notificationId, unreadCount },
+        target: { users: [session.user.id] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de leitura de notificação:", error);
+    }
 
     return {
       success: true,
@@ -177,6 +178,17 @@ export async function markAllNotificationsAsRead() {
     }
 
     await NotificationService.markAllAsRead(session.user.id);
+
+    try {
+      const unreadCount = await NotificationService.getUnreadCount(session.user.id);
+      emitRealtimeEvent({
+        type: "notification:read",
+        payload: { unreadCount },
+        target: { users: [session.user.id] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de marcar todas como lidas:", error);
+    }
 
     return {
       success: true,
@@ -207,9 +219,7 @@ export async function deleteNotification(data: DeleteNotificationInput) {
     const validated = DeleteNotificationSchema.parse(data);
 
     // Verificar se a notificação pertence ao usuário
-    const notification = await NotificationService.findById(
-      validated.notificationId
-    );
+    const notification = await NotificationService.findById(validated.notificationId);
 
     if (!notification) {
       return {
@@ -226,6 +236,23 @@ export async function deleteNotification(data: DeleteNotificationInput) {
     }
 
     await NotificationService.deleteNotification(validated.notificationId);
+
+    try {
+      const unreadCount = await NotificationService.getUnreadCount(session.user.id);
+      emitRealtimeEvent({
+        type: "notification:refresh",
+        payload: { reason: "deleted" },
+        target: { users: [session.user.id] },
+      });
+
+      emitRealtimeEvent({
+        type: "notification:read",
+        payload: { unreadCount },
+        target: { users: [session.user.id] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de deleção de notificação:", error);
+    }
 
     return {
       success: true,

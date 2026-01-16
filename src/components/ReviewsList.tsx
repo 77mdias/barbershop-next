@@ -1,33 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Star,
-  Edit,
-  Trash2,
-  Calendar,
-  User,
-  DollarSign,
-  Eye,
-  EyeOff,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import {
-  getReviews,
-  deleteReview,
-  getReviewStats,
-} from "@/server/reviewActions";
+import { Star, Edit, Trash2, Calendar, User, DollarSign, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { getReviews, deleteReview, getReviewStats } from "@/server/reviewActions";
 import { ReviewForm } from "@/components/ReviewForm";
 import { showToast } from "@/lib/toast-utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ReviewsListSkeleton } from "@/components/ui/review-skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useRealtime } from "@/hooks/useRealtime";
 
 interface Review {
   id: string;
@@ -92,11 +78,10 @@ export function ReviewsList({
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
-  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
+  const { subscribe } = useRealtime();
 
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getReviews({
@@ -120,9 +105,9 @@ export function ReviewsList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [barberId, currentPage, limit, serviceId, showAllReviews, userId]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!showStats) return;
 
     try {
@@ -133,12 +118,33 @@ export function ReviewsList({
     } catch (error) {
       console.error("Erro ao carregar estatísticas:", error);
     }
-  };
+  }, [barberId, serviceId, showStats]);
 
   useEffect(() => {
     loadReviews();
     loadStats();
-  }, [currentPage, userId, serviceId, barberId, showAllReviews]);
+  }, [loadReviews, loadStats]);
+
+  useEffect(() => {
+    const unsubscribe = subscribe({
+      events: ["review:updated", "analytics:updated"],
+      handler: (event) => {
+        if (
+          event.type === "review:updated" ||
+          (event.type === "analytics:updated" && event.payload.scope === "reviews")
+        ) {
+          loadReviews();
+          loadStats();
+        }
+      },
+      onFallback: () => {
+        loadReviews();
+        loadStats();
+      },
+    });
+
+    return unsubscribe;
+  }, [loadReviews, loadStats, subscribe]);
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!confirm("Tem certeza que deseja excluir esta avaliação?")) {
@@ -177,13 +183,7 @@ export function ReviewsList({
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={16}
-            className={
-              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
-            }
-          />
+          <Star key={star} size={16} className={star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"} />
         ))}
       </div>
     );
@@ -200,21 +200,13 @@ export function ReviewsList({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {Number(stats.averageRating).toFixed(1)}
-              </div>
-              <div className="flex justify-center mb-2">
-                {renderStars(Math.round(stats.averageRating))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Baseado em {stats.totalReviews} avaliações
-              </p>
+              <div className="text-3xl font-bold text-primary">{Number(stats.averageRating).toFixed(1)}</div>
+              <div className="flex justify-center mb-2">{renderStars(Math.round(stats.averageRating))}</div>
+              <p className="text-sm text-muted-foreground">Baseado em {stats.totalReviews} avaliações</p>
             </div>
 
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm">
-                Distribuição de Avaliações
-              </h4>
+              <h4 className="font-semibold text-sm">Distribuição de Avaliações</h4>
               {stats.ratingDistribution.map((item) => (
                 <div key={item.rating} className="flex items-center gap-2">
                   <span className="text-sm w-4">{item.rating}</span>
@@ -227,9 +219,7 @@ export function ReviewsList({
                       }}
                     />
                   </div>
-                  <span className="text-sm text-muted-foreground w-8">
-                    {item.count}
-                  </span>
+                  <span className="text-sm text-muted-foreground w-8">{item.count}</span>
                 </div>
               ))}
             </div>
@@ -242,11 +232,7 @@ export function ReviewsList({
   if (editingReview) {
     return (
       <div className="space-y-4">
-        <Button
-          variant="outline"
-          onClick={() => setEditingReview(null)}
-          className="mb-4"
-        >
+        <Button variant="outline" onClick={() => setEditingReview(null)} className="mb-4">
           ← Voltar para a lista
         </Button>
         <ReviewForm
@@ -285,12 +271,8 @@ export function ReviewsList({
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        {review.user.image && (
-                          <AvatarImage src={review.user.image} />
-                        )}
-                        <AvatarFallback>
-                          {review.user.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
+                        {review.user.image && <AvatarImage src={review.user.image} />}
+                        <AvatarFallback>{review.user.name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>
                         <h4 className="font-semibold">{review.user.name}</h4>
@@ -306,18 +288,10 @@ export function ReviewsList({
 
                     {showActions && (
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingReview(review)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => setEditingReview(review)}>
                           <Edit size={14} />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteReview(review.id)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteReview(review.id)}>
                           <Trash2 size={14} />
                         </Button>
                       </div>
@@ -335,30 +309,17 @@ export function ReviewsList({
                         <User size={14} />
                         {review.service.name}
                         <DollarSign size={14} />
-                        R${" "}
-                        {Number(
-                          review.finalPrice || review.service.price
-                        ).toFixed(2)}
+                        R$ {Number(review.finalPrice || review.service.price).toFixed(2)}
                       </div>
                     </div>
 
-                    {review.feedback && (
-                      <p className="text-muted-foreground leading-relaxed">
-                        {review.feedback}
-                      </p>
-                    )}
+                    {review.feedback && <p className="text-muted-foreground leading-relaxed">{review.feedback}</p>}
 
                     {review.images.length > 0 && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">
-                            Fotos ({review.images.length})
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleImageExpanded(review.id)}
-                          >
+                          <span className="text-sm font-medium">Fotos ({review.images.length})</span>
+                          <Button variant="ghost" size="sm" onClick={() => toggleImageExpanded(review.id)}>
                             {expandedImages[review.id] ? (
                               <>
                                 <EyeOff size={14} className="mr-1" />
@@ -375,16 +336,14 @@ export function ReviewsList({
 
                         {expandedImages[review.id] && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {review.images?.map(
-                              (imageUrl: string, index: number) => (
-                                <img
-                                  key={index}
-                                  src={imageUrl}
-                                  alt={`Foto ${index + 1}`}
-                                  className="w-full h-24 object-cover rounded-lg border"
-                                />
-                              )
-                            )}
+                            {review.images?.map((imageUrl: string, index: number) => (
+                              <img
+                                key={index}
+                                src={imageUrl}
+                                alt={`Foto ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border"
+                              />
+                            ))}
                           </div>
                         )}
                       </div>
@@ -415,9 +374,7 @@ export function ReviewsList({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                }
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
                 Próxima

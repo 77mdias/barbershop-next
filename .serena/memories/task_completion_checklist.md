@@ -1,0 +1,6 @@
+- Planning: review docs/development/tasks/TASKS.md and relevant task file; mark status appropriately per docs/development/README.md (move to in-progress if applicable).
+- Implementation: adhere to stack (Next14, TS, Prisma, Tailwind/shadcn); avoid new deps; keep code typed; ensure loading/empty/error states.
+- Testing: run relevant Jest suites (prefer inside docker app container) and `npm run validate` (lint+type-check) when possible; record results if not run.
+- Documentation: update docs/development/CHANGELOG.md, docs/development/ROADMAP.md (if roadmap impacted), docs/development/tasks/TASKS.md, and specific task doc under docs/development/tasks/ after completing work; update other docs under docs/development/ as needed.
+- Safety: no destructive git commands; don't revert user changes; respect environment settings; sanitize inputs and validate server-side.
+- Final handoff: summarize changes/files touched, note tests run/results or why not, suggest next steps if relevant.

@@ -29,6 +29,7 @@ import {
   Edit,
   Power,
 } from "lucide-react";
+import { RealtimeRefreshBridge } from "@/components/realtime/RealtimeRefreshBridge";
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -56,6 +57,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="container mt-20 sm:mt-16 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        <RealtimeRefreshBridge events={["appointment:changed", "review:updated", "analytics:updated"]} />
         {/* Header Administrativo */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -99,9 +101,7 @@ export default async function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-blue-600">
-                      {metrics.totalUsers}
-                    </p>
+                    <p className="text-3xl font-bold text-blue-600">{metrics.totalUsers}</p>
                     <div className="flex flex-col gap-1 text-sm text-gray-600">
                       <span>👥 Clientes: {metrics.clientsCount}</span>
                       <span>✂️ Barbeiros: {metrics.barbersCount}</span>
@@ -121,9 +121,7 @@ export default async function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-yellow-600">
-                      {metrics.totalReviews}
-                    </p>
+                    <p className="text-3xl font-bold text-yellow-600">{metrics.totalReviews}</p>
                     <div className="flex flex-col gap-1 text-sm text-gray-600">
                       <span>⭐ Média: {metrics.globalAverage}/5</span>
                       <span>📈 Este mês: {metrics.monthlyReviews}</span>
@@ -143,9 +141,7 @@ export default async function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-green-600">
-                      {metrics.monthlyActivity}
-                    </p>
+                    <p className="text-3xl font-bold text-green-600">{metrics.monthlyActivity}</p>
                     <div className="flex flex-col gap-1 text-sm text-gray-600">
                       <span>📅 Agendamentos: {metrics.monthlyAppointments}</span>
                       <span>⭐ Avaliações: {metrics.monthlyReviews}</span>
@@ -165,9 +161,7 @@ export default async function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-purple-600">
-                      R$ {(metrics.monthlyRevenue || 0).toFixed(2)}
-                    </p>
+                    <p className="text-3xl font-bold text-purple-600">R$ {(metrics.monthlyRevenue || 0).toFixed(2)}</p>
                     <div className="flex flex-col gap-1 text-sm text-gray-600">
                       <span>💰 Total acumulado: R$ {(metrics.totalRevenue || 0).toFixed(2)}</span>
                       <span>📊 Serviços pagos: {metrics.paidServices}</span>
@@ -180,25 +174,40 @@ export default async function AdminDashboardPage() {
             {/* Tabs de Gestão */}
             <Tabs defaultValue="overview" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1">
-                <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                <TabsTrigger
+                  value="overview"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                >
                   <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Visão Geral</span>
                   <span className="sm:hidden">Visão</span>
                 </TabsTrigger>
-                <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                <TabsTrigger
+                  value="users"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                >
                   <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Usuários</span>
                 </TabsTrigger>
-                <TabsTrigger value="reviews" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                <TabsTrigger
+                  value="reviews"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                >
                   <Star className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Avaliações</span>
                   <span className="sm:hidden">Reviews</span>
                 </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                <TabsTrigger
+                  value="services"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                >
                   <Scissors className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Serviços</span>
                 </TabsTrigger>
-                <TabsTrigger value="system" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                <TabsTrigger
+                  value="system"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                >
                   <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Sistema</span>
                 </TabsTrigger>
@@ -220,20 +229,19 @@ export default async function AdminDashboardPage() {
                         {metrics.topBarbers?.map((barber, index) => (
                           <div key={barber.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <Badge variant="outline" className="w-8 h-8 rounded-full flex items-center justify-center">
+                              <Badge
+                                variant="outline"
+                                className="w-8 h-8 rounded-full flex items-center justify-center"
+                              >
                                 {index + 1}
                               </Badge>
                               <div>
                                 <p className="font-medium">{barber.name}</p>
-                                <p className="text-sm text-gray-600">
-                                  {barber.totalReviews} avaliações
-                                </p>
+                                <p className="text-sm text-gray-600">{barber.totalReviews} avaliações</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-yellow-600">
-                                ⭐ {barber.averageRating}
-                              </p>
+                              <p className="font-bold text-yellow-600">⭐ {barber.averageRating}</p>
                             </div>
                           </div>
                         ))}
@@ -254,16 +262,14 @@ export default async function AdminDashboardPage() {
                         {metrics.ratingDistribution?.map((rating) => (
                           <div key={rating.rating} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">
-                                {rating.rating} ⭐
-                              </span>
+                              <span className="text-sm font-medium">{rating.rating} ⭐</span>
                             </div>
                             <div className="flex items-center gap-2 flex-1 ml-4">
                               <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div 
+                                <div
                                   className="bg-yellow-500 h-2 rounded-full"
-                                  style={{ 
-                                    width: `${(rating._count.rating / metrics.totalReviews * 100)}%` 
+                                  style={{
+                                    width: `${(rating._count.rating / metrics.totalReviews) * 100}%`,
                                   }}
                                 />
                               </div>
@@ -321,15 +327,11 @@ export default async function AdminDashboardPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">Usuários Ativos (30 dias)</p>
-                          <p className="text-2xl font-bold text-green-600">
-                            {metrics.activeUsers}
-                          </p>
+                          <p className="text-2xl font-bold text-green-600">{metrics.activeUsers}</p>
                         </div>
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">Novos Usuários (mês)</p>
-                          <p className="text-2xl font-bold text-blue-600">
-                            {metrics.newUsersThisMonth}
-                          </p>
+                          <p className="text-2xl font-bold text-blue-600">{metrics.newUsersThisMonth}</p>
                         </div>
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">Taxa de Conversão</p>
@@ -339,9 +341,7 @@ export default async function AdminDashboardPage() {
                         </div>
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">Barbeiros Ativos</p>
-                          <p className="text-2xl font-bold text-orange-600">
-                            {metrics.activeBarbersCount}
-                          </p>
+                          <p className="text-2xl font-bold text-orange-600">{metrics.activeBarbersCount}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -363,15 +363,11 @@ export default async function AdminDashboardPage() {
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600">Média Geral</p>
-                        <p className="text-2xl font-bold text-yellow-600">
-                          ⭐ {metrics.globalAverage}
-                        </p>
+                        <p className="text-2xl font-bold text-yellow-600">⭐ {metrics.globalAverage}</p>
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600">Reviews Pendentes</p>
-                        <p className="text-2xl font-bold text-orange-600">
-                          {metrics.pendingReviews}
-                        </p>
+                        <p className="text-2xl font-bold text-orange-600">{metrics.pendingReviews}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -384,63 +380,43 @@ export default async function AdminDashboardPage() {
                   {/* Card: Total de Serviços */}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Total de Serviços
-                      </CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Total de Serviços</CardTitle>
                       <Scissors className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
-                        {totalServices}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        cadastrados na plataforma
-                      </p>
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">{totalServices}</div>
+                      <p className="text-xs text-muted-foreground mt-1">cadastrados na plataforma</p>
                     </CardContent>
                   </Card>
 
                   {/* Card: Serviços Ativos */}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Serviços Ativos
-                      </CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Serviços Ativos</CardTitle>
                       <Power className="w-4 h-4 text-green-600 dark:text-green-400" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-green-700 dark:text-green-400">
-                        {activeServices}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        disponíveis para agendamento
-                      </p>
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-400">{activeServices}</div>
+                      <p className="text-xs text-muted-foreground mt-1">disponíveis para agendamento</p>
                     </CardContent>
                   </Card>
 
                   {/* Card: Serviços Inativos */}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Serviços Inativos
-                      </CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Serviços Inativos</CardTitle>
                       <Power className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-muted-foreground">
-                        {inactiveServices}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        temporariamente desativados
-                      </p>
+                      <div className="text-2xl font-bold text-muted-foreground">{inactiveServices}</div>
+                      <p className="text-xs text-muted-foreground mt-1">temporariamente desativados</p>
                     </CardContent>
                   </Card>
 
                   {/* Card: Ações Rápidas */}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Gerenciamento
-                      </CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Gerenciamento</CardTitle>
                       <Settings className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent className="space-y-2">
@@ -454,12 +430,7 @@ export default async function AdminDashboardPage() {
                           Ver Todos
                         </Link>
                       </Button>
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="w-full"
-                        size="sm"
-                      >
+                      <Button asChild variant="outline" className="w-full" size="sm">
                         <Link href="/dashboard/admin/services/new">
                           <Plus className="w-4 h-4 mr-2" />
                           Novo Serviço
@@ -473,9 +444,7 @@ export default async function AdminDashboardPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Serviços Recentes</CardTitle>
-                    <CardDescription>
-                      Últimos serviços cadastrados ou atualizados
-                    </CardDescription>
+                    <CardDescription>Últimos serviços cadastrados ou atualizados</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
@@ -516,9 +485,7 @@ export default async function AdminDashboardPage() {
                           <Scissors className="w-12 h-12 mx-auto mb-2 opacity-50" />
                           <p>Nenhum serviço cadastrado ainda</p>
                           <Button asChild variant="outline" className="mt-4" size="sm">
-                            <Link href="/dashboard/admin/services/new">
-                              Criar primeiro serviço
-                            </Link>
+                            <Link href="/dashboard/admin/services/new">Criar primeiro serviço</Link>
                           </Button>
                         </div>
                       )}

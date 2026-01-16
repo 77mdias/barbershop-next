@@ -3,7 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { 
+import {
   CreateAppointmentSchema,
   UpdateAppointmentSchema,
   AppointmentFiltersSchema,
@@ -16,6 +16,7 @@ import { AppointmentService } from "./services/appointmentService";
 import { ServiceService } from "./services/serviceService";
 import { UserService } from "./services/userService";
 import { serializeAppointment, serializeAppointmentsResult } from "@/lib/serializers";
+import { emitRealtimeEvent } from "@/lib/realtime";
 
 /**
  * Server Action para criar um novo agendamento
@@ -23,7 +24,7 @@ import { serializeAppointment, serializeAppointmentsResult } from "@/lib/seriali
 export async function createAppointment(data: CreateAppointmentInput) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -65,7 +66,7 @@ export async function createAppointment(data: CreateAppointmentInput) {
     const isAvailable = await AppointmentService.checkAvailability(
       validatedData.barberId,
       validatedData.date,
-      validatedData.serviceId
+      validatedData.serviceId,
     );
 
     if (!isAvailable) {
@@ -80,6 +81,31 @@ export async function createAppointment(data: CreateAppointmentInput) {
 
     revalidatePath("/scheduling");
     revalidatePath("/profile");
+
+    try {
+      emitRealtimeEvent({
+        type: "appointment:changed",
+        payload: {
+          appointmentId: appointment.id,
+          status: appointment.status,
+          date: appointment.date?.toISOString?.() ?? undefined,
+          barberId: appointment.barber?.id,
+          userId: session.user.id,
+        },
+        target: {
+          users: [session.user.id, validatedData.barberId].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "appointments", reason: "created" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de agendamento:", error);
+    }
 
     return {
       success: true,
@@ -100,7 +126,7 @@ export async function createAppointment(data: CreateAppointmentInput) {
 export async function getAppointments(filters: AppointmentFiltersInput) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -112,19 +138,13 @@ export async function getAppointments(filters: AppointmentFiltersInput) {
     const validatedFilters = AppointmentFiltersSchema.parse(filters);
 
     let result;
-    
+
     // Se for barbeiro, buscar agendamentos que ele executa
     if (session.user.role === "BARBER") {
-      result = await AppointmentService.findBarberAppointments(
-        session.user.id,
-        validatedFilters
-      );
+      result = await AppointmentService.findBarberAppointments(session.user.id, validatedFilters);
     } else {
       // Cliente vê apenas seus próprios agendamentos
-      result = await AppointmentService.findUserAppointments(
-        session.user.id,
-        validatedFilters
-      );
+      result = await AppointmentService.findUserAppointments(session.user.id, validatedFilters);
     }
 
     return {
@@ -146,7 +166,7 @@ export async function getAppointments(filters: AppointmentFiltersInput) {
 export async function getAppointmentById(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -164,8 +184,8 @@ export async function getAppointmentById(id: string) {
     }
 
     // Verificar se o usuário tem permissão para ver este agendamento
-    const hasPermission = 
-      appointment.user.id === session.user.id || 
+    const hasPermission =
+      appointment.user.id === session.user.id ||
       appointment.barber.id === session.user.id ||
       session.user.role === "ADMIN";
 
@@ -195,7 +215,7 @@ export async function getAppointmentById(id: string) {
 export async function updateAppointment(id: string, data: UpdateAppointmentInput) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -208,7 +228,7 @@ export async function updateAppointment(id: string, data: UpdateAppointmentInput
 
     // Buscar agendamento atual
     const existingAppointment = await AppointmentService.findById(id);
-    
+
     if (!existingAppointment) {
       return {
         success: false,
@@ -217,8 +237,8 @@ export async function updateAppointment(id: string, data: UpdateAppointmentInput
     }
 
     // Verificar permissões
-    const canUpdate = 
-      existingAppointment.user.id === session.user.id || 
+    const canUpdate =
+      existingAppointment.user.id === session.user.id ||
       existingAppointment.barber.id === session.user.id ||
       session.user.role === "ADMIN";
 
@@ -233,13 +253,13 @@ export async function updateAppointment(id: string, data: UpdateAppointmentInput
     if (validatedData.date || validatedData.barberId) {
       const newDate = validatedData.date || existingAppointment.date;
       const newBarberId = validatedData.barberId || existingAppointment.barber.id;
-      
+
       if (newBarberId) {
         const isAvailable = await AppointmentService.checkAvailability(
           newBarberId,
           newDate,
           existingAppointment.service.id,
-          id // excluir o agendamento atual da verificação
+          id, // excluir o agendamento atual da verificação
         );
 
         if (!isAvailable) {
@@ -255,6 +275,31 @@ export async function updateAppointment(id: string, data: UpdateAppointmentInput
 
     revalidatePath("/scheduling");
     revalidatePath("/profile");
+
+    try {
+      emitRealtimeEvent({
+        type: "appointment:changed",
+        payload: {
+          appointmentId: updatedAppointment.id,
+          status: updatedAppointment.status,
+          date: updatedAppointment.date?.toISOString?.() ?? undefined,
+          barberId: updatedAppointment.barber?.id,
+          userId: updatedAppointment.user.id,
+        },
+        target: {
+          users: [updatedAppointment.user.id, updatedAppointment.barber?.id].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "appointments", reason: "updated" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de atualização de agendamento:", error);
+    }
 
     return {
       success: true,
@@ -275,7 +320,7 @@ export async function updateAppointment(id: string, data: UpdateAppointmentInput
 export async function cancelAppointment(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -284,7 +329,7 @@ export async function cancelAppointment(id: string) {
     }
 
     const existingAppointment = await AppointmentService.findById(id);
-    
+
     if (!existingAppointment) {
       return {
         success: false,
@@ -293,8 +338,8 @@ export async function cancelAppointment(id: string) {
     }
 
     // Verificar permissões
-    const canCancel = 
-      existingAppointment.user.id === session.user.id || 
+    const canCancel =
+      existingAppointment.user.id === session.user.id ||
       existingAppointment.barber.id === session.user.id ||
       session.user.role === "ADMIN";
 
@@ -318,6 +363,31 @@ export async function cancelAppointment(id: string) {
     revalidatePath("/scheduling");
     revalidatePath("/profile");
 
+    try {
+      emitRealtimeEvent({
+        type: "appointment:changed",
+        payload: {
+          appointmentId: cancelledAppointment.id,
+          status: cancelledAppointment.status,
+          date: cancelledAppointment.date?.toISOString?.() ?? undefined,
+          barberId: cancelledAppointment.barber?.id,
+          userId: cancelledAppointment.user.id,
+        },
+        target: {
+          users: [cancelledAppointment.user.id, cancelledAppointment.barber?.id].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "appointments", reason: "cancelled" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de cancelamento de agendamento:", error);
+    }
+
     return {
       success: true,
       data: cancelledAppointment,
@@ -337,7 +407,7 @@ export async function cancelAppointment(id: string) {
 export async function confirmAppointment(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -346,7 +416,7 @@ export async function confirmAppointment(id: string) {
     }
 
     const existingAppointment = await AppointmentService.findById(id);
-    
+
     if (!existingAppointment) {
       return {
         success: false,
@@ -355,9 +425,7 @@ export async function confirmAppointment(id: string) {
     }
 
     // Apenas barbeiro pode confirmar
-    const canConfirm = 
-      existingAppointment.barber.id === session.user.id ||
-      session.user.role === "ADMIN";
+    const canConfirm = existingAppointment.barber.id === session.user.id || session.user.role === "ADMIN";
 
     if (!canConfirm) {
       return {
@@ -370,6 +438,31 @@ export async function confirmAppointment(id: string) {
 
     revalidatePath("/scheduling");
     revalidatePath("/profile");
+
+    try {
+      emitRealtimeEvent({
+        type: "appointment:changed",
+        payload: {
+          appointmentId: confirmedAppointment.id,
+          status: confirmedAppointment.status,
+          date: confirmedAppointment.date?.toISOString?.() ?? undefined,
+          barberId: confirmedAppointment.barber?.id,
+          userId: confirmedAppointment.user.id,
+        },
+        target: {
+          users: [confirmedAppointment.user.id, confirmedAppointment.barber?.id].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "appointments", reason: "confirmed" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de confirmação de agendamento:", error);
+    }
 
     return {
       success: true,
@@ -390,7 +483,7 @@ export async function confirmAppointment(id: string) {
 export async function completeAppointment(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return {
         success: false,
@@ -399,7 +492,7 @@ export async function completeAppointment(id: string) {
     }
 
     const existingAppointment = await AppointmentService.findById(id);
-    
+
     if (!existingAppointment) {
       return {
         success: false,
@@ -408,9 +501,7 @@ export async function completeAppointment(id: string) {
     }
 
     // Apenas barbeiro pode completar
-    const canComplete = 
-      existingAppointment.barber.id === session.user.id ||
-      session.user.role === "ADMIN";
+    const canComplete = existingAppointment.barber.id === session.user.id || session.user.role === "ADMIN";
 
     if (!canComplete) {
       return {
@@ -423,6 +514,31 @@ export async function completeAppointment(id: string) {
 
     revalidatePath("/scheduling");
     revalidatePath("/profile");
+
+    try {
+      emitRealtimeEvent({
+        type: "appointment:changed",
+        payload: {
+          appointmentId: completedAppointment.id,
+          status: completedAppointment.status,
+          date: completedAppointment.date?.toISOString?.() ?? undefined,
+          barberId: completedAppointment.barber?.id,
+          userId: completedAppointment.user.id,
+        },
+        target: {
+          users: [completedAppointment.user.id, completedAppointment.barber?.id].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "revenue", reason: "completed" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de conclusão de agendamento:", error);
+    }
 
     return {
       success: true,
@@ -440,18 +556,14 @@ export async function completeAppointment(id: string) {
 /**
  * Server Action para verificar disponibilidade
  */
-export async function checkAvailability(data: {
-  barberId: string;
-  date: Date;
-  serviceId: string;
-}) {
+export async function checkAvailability(data: { barberId: string; date: Date; serviceId: string }) {
   try {
     const validatedData = CheckAvailabilitySchema.parse(data);
-    
+
     const isAvailable = await AppointmentService.checkAvailability(
       validatedData.barberId!,
       validatedData.date,
-      validatedData.serviceId!
+      validatedData.serviceId!,
     );
 
     return {
@@ -470,17 +582,9 @@ export async function checkAvailability(data: {
 /**
  * Server Action para buscar horários disponíveis
  */
-export async function getAvailableSlots(data: {
-  barberId: string;
-  date: Date;
-  serviceDuration: number;
-}) {
+export async function getAvailableSlots(data: { barberId: string; date: Date; serviceDuration: number }) {
   try {
-    const slots = await UserService.getBarberAvailableSlots(
-      data.barberId,
-      data.date,
-      data.serviceDuration
-    );
+    const slots = await UserService.getBarberAvailableSlots(data.barberId, data.date, data.serviceDuration);
 
     return {
       success: true,

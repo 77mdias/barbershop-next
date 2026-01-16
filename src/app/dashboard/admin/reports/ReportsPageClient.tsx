@@ -10,6 +10,7 @@ import { FilterSelect } from "@/components/admin/FilterSelect";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getReportsData } from "@/server/adminActions";
 import { Activity, BarChart3, DollarSign, Download, FileText, Star, TrendingUp, Users } from "lucide-react";
+import { useRealtime } from "@/hooks/useRealtime";
 
 type DateRange = "7d" | "30d" | "3m" | "year";
 
@@ -18,7 +19,23 @@ type PaymentMethod = "CARD" | "CASH" | "PIX" | "OTHER";
 type PaymentBreakdown = {
   method: PaymentMethod;
   count: number;
+  revenue: number;
+  revenueShare: number;
+  volumeShare: number;
+  averageTicket: number;
+};
+
+type PaymentDrilldownEntry = {
+  id: string;
+  name: string | null;
+  revenue: number;
   percentage: number;
+};
+
+type PaymentMethodDetails = {
+  method: PaymentMethod;
+  topServices: PaymentDrilldownEntry[];
+  topBarbers: PaymentDrilldownEntry[];
 };
 
 type BusyHourMetric = {
@@ -55,6 +72,7 @@ type ReportsData = {
   topBarbers: ReportBarber[];
   monthlyGrowth: MonthlyGrowthEntry[];
   paymentMethods: PaymentBreakdown[];
+  paymentMethodDetails: PaymentMethodDetails[];
   busyHours: BusyHourMetric[];
   periodComparison: {
     revenueChangePercent: number;
@@ -73,6 +91,20 @@ const paymentLabels: Record<PaymentMethod, string> = {
   CASH: "Dinheiro",
   PIX: "PIX",
   OTHER: "Outro",
+};
+
+const paymentColors: Record<PaymentMethod, string> = {
+  CARD: "#10b981",
+  CASH: "#f59e0b",
+  PIX: "#6366f1",
+  OTHER: "#94a3b8",
+};
+
+const dateRangeLabels: Record<DateRange, string> = {
+  "7d": "Últimos 7 dias",
+  "30d": "Últimos 30 dias",
+  "3m": "Últimos 3 meses",
+  year: "Último ano",
 };
 
 const formatDelta = (value: number) => {
@@ -95,28 +127,72 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   const [dateRange, setDateRange] = React.useState<DateRange>(initialDateRange);
   const [reports, setReports] = React.useState<ReportsData | null>(initialReports);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [lastFetchedRange, setLastFetchedRange] = React.useState<DateRange | null>(
+    initialReports ? initialDateRange : null,
+  );
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<PaymentMethod | null>(
+    initialReports?.paymentMethods?.[0]?.method ?? null,
+  );
+  const { subscribe } = useRealtime();
 
-  React.useEffect(() => {
-    if (dateRange === initialDateRange && initialReports) {
-      return;
-    }
+  const fetchReports = React.useCallback(
+    async (force = false) => {
+      const nextRange = dateRange;
 
-    const fetchReports = async () => {
+      if (!force && reports && lastFetchedRange === nextRange) {
+        return;
+      }
+
       setIsLoading(true);
       try {
-        const result = await getReportsData(dateRange);
+        const result = await getReportsData(nextRange);
         if (result.success) {
           setReports(result.data as ReportsData);
+          setLastFetchedRange(nextRange);
         }
       } catch (error) {
         console.error("Erro ao buscar relatórios:", error);
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [dateRange, lastFetchedRange, reports],
+  );
 
+  React.useEffect(() => {
     fetchReports();
-  }, [dateRange, initialDateRange, initialReports]);
+  }, [fetchReports]);
+
+  React.useEffect(() => {
+    if (reports?.paymentMethods?.length) {
+      setSelectedPaymentMethod((current) => {
+        if (current && reports.paymentMethods.some((item) => item.method === current)) {
+          return current;
+        }
+        return reports.paymentMethods[0].method;
+      });
+    } else {
+      setSelectedPaymentMethod(null);
+    }
+  }, [reports]);
+
+  React.useEffect(() => {
+    const unsubscribe = subscribe({
+      events: ["appointment:changed", "review:updated", "analytics:updated"],
+      handler: (event) => {
+        if (
+          event.type === "analytics:updated" &&
+          !["revenue", "appointments", "reviews"].includes(event.payload.scope)
+        ) {
+          return;
+        }
+        fetchReports(true);
+      },
+      onFallback: () => fetchReports(true),
+    });
+
+    return unsubscribe;
+  }, [fetchReports, subscribe]);
 
   const revenueDelta = reports ? formatDelta(reports.periodComparison.revenueChangePercent) : "";
   const appointmentsDelta = reports ? formatDelta(reports.periodComparison.appointmentsChangePercent) : "";
@@ -126,6 +202,81 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   const commissionValue = reports ? reports.monthlyRevenue * 0.15 : 0;
   const operationalCosts = reports ? reports.monthlyAppointments * 5 : 0;
   const netRevenue = reports ? reports.monthlyRevenue - commissionValue - operationalCosts : 0;
+  const paymentMethods = reports?.paymentMethods ?? [];
+  const paymentMethodDetails = reports?.paymentMethodDetails ?? [];
+  const hasPaymentData = paymentMethods.length > 0;
+  const topPaymentMethod = hasPaymentData ? paymentMethods[0] : null;
+  const selectedPayment = paymentMethods.find((method) => method.method === selectedPaymentMethod) || null;
+  const selectedPaymentDetails = paymentMethodDetails.find((detail) => detail.method === selectedPaymentMethod) || null;
+
+  const donutGradient = React.useMemo(() => {
+    if (!hasPaymentData) {
+      return "conic-gradient(#e5e7eb 0% 100%)";
+    }
+
+    let current = 0;
+    const segments = paymentMethods.map((method) => {
+      const start = current;
+      const slice = Math.max(method.revenueShare, 0);
+      const end = Math.min(100, start + slice);
+      current = end;
+      return `${paymentColors[method.method]} ${start}% ${end}%`;
+    });
+
+    if (current < 100) {
+      segments.push(`#e5e7eb ${current}% 100%`);
+    }
+
+    return `conic-gradient(${segments.join(", ")})`;
+  }, [hasPaymentData, paymentMethods]);
+
+  const handleExportPayments = React.useCallback(() => {
+    if (!hasPaymentData) {
+      return;
+    }
+
+    try {
+      const rows: string[][] = [
+        ["Relatório", "Receita por Método de Pagamento"],
+        ["Período", dateRangeLabels[dateRange]],
+        ["Gerado em", new Date().toISOString()],
+        [],
+        ["Método", "Receita (R$)", "Transações", "Ticket médio (R$)", "Share receita (%)", "Share volume (%)"],
+        ...paymentMethods.map((method) => [
+          paymentLabels[method.method],
+          method.revenue.toFixed(2),
+          method.count.toString(),
+          method.averageTicket.toFixed(2),
+          method.revenueShare.toFixed(1),
+          method.volumeShare.toString(),
+        ]),
+      ];
+
+      paymentMethodDetails.forEach((detail) => {
+        rows.push([], [`Detalhamento - ${paymentLabels[detail.method]}`], ["Top Serviços", "Receita (R$)", "%"]);
+        detail.topServices.forEach((service) => {
+          rows.push([service.name || "Serviço sem nome", service.revenue.toFixed(2), service.percentage.toString()]);
+        });
+        rows.push(["Top Barbeiros", "Receita (R$)", "%"]);
+        detail.topBarbers.forEach((barber) => {
+          rows.push([barber.name || "Sem nome", barber.revenue.toFixed(2), barber.percentage.toString()]);
+        });
+      });
+
+      const csvContent = rows
+        .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pagamentos-${dateRange}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erro ao exportar pagamentos:", error);
+    }
+  }, [dateRange, hasPaymentData, paymentMethods, paymentMethodDetails]);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -143,9 +294,14 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
           label="Período"
         />
 
-        <Button className="w-full sm:w-auto">
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handleExportPayments}
+          disabled={isLoading || !hasPaymentData}
+          variant={hasPaymentData ? "default" : "outline"}
+        >
           <Download className="w-4 h-4 mr-2" />
-          Exportar
+          Exportar CSV
         </Button>
       </div>
 
@@ -392,28 +548,220 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Métodos de Pagamento</CardTitle>
+                    <CardTitle>Método em Destaque</CardTitle>
+                    <p className="text-sm text-gray-600">Maior receita no período selecionado</p>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {reports.paymentMethods.length === 0 && (
-                        <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>
-                      )}
-                      {reports.paymentMethods.map((method) => (
-                        <div className="flex items-center justify-between" key={method.method}>
-                          <span>{paymentLabels[method.method]}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-purple-500 h-2 rounded-full"
-                                style={{ width: `${method.percentage}%` }}
-                              />
-                            </div>
-                            <span className="text-sm">{method.percentage}%</span>
+                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>}
+                    {hasPaymentData && topPaymentMethod && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: paymentColors[topPaymentMethod.method] }}
+                            aria-hidden
+                          />
+                          <div>
+                            <p className="font-semibold">{paymentLabels[topPaymentMethod.method]}</p>
+                            <p className="text-xs text-gray-500">{topPaymentMethod.count} transações no período</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Receita</span>
+                          <span className="font-bold text-green-600">{formatCurrency(topPaymentMethod.revenue)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Ticket Médio</span>
+                          <span className="font-bold">{formatCurrency(topPaymentMethod.averageTicket)}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs text-gray-600">
+                            <span>Share de receita</span>
+                            <span>{topPaymentMethod.revenueShare}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="h-2"
+                              style={{
+                                width: `${topPaymentMethod.revenueShare}%`,
+                                backgroundColor: paymentColors[topPaymentMethod.method],
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs text-gray-600">
+                            <span>Share de volume</span>
+                            <span>{topPaymentMethod.volumeShare}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div className="h-2 bg-indigo-500" style={{ width: `${topPaymentMethod.volumeShare}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="w-5 h-5" />
+                      Receita por Método de Pagamento
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">Percentuais e valores absolutos por período</p>
+                  </CardHeader>
+                  <CardContent>
+                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>}
+                    {hasPaymentData && (
+                      <div className="space-y-6">
+                        <div className="flex flex-col xl:flex-row gap-6 items-center">
+                          <div className="flex-1 flex items-center justify-center">
+                            <div className="relative h-48 w-48">
+                              <div className="h-full w-full rounded-full" style={{ background: donutGradient }} />
+                              <div className="absolute inset-6 bg-white rounded-full flex flex-col items-center justify-center text-center">
+                                <p className="text-xs text-gray-500">Receita no período</p>
+                                <p className="text-lg font-bold">{formatCurrency(reports?.monthlyRevenue || 0)}</p>
+                                <p className="text-xs text-gray-500">{dateRangeLabels[dateRange]}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex-1 space-y-4 w-full">
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden flex">
+                              {paymentMethods.map((method) => (
+                                <div
+                                  key={`${method.method}-stack`}
+                                  className="h-3"
+                                  style={{
+                                    width: `${Math.max(method.revenueShare, 0)}%`,
+                                    backgroundColor: paymentColors[method.method],
+                                  }}
+                                  title={`${paymentLabels[method.method]} - ${method.revenueShare}% da receita`}
+                                />
+                              ))}
+                            </div>
+                            <div className="space-y-3">
+                              {paymentMethods.map((method) => (
+                                <div className="flex items-center justify-between gap-3" key={method.method}>
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className="h-3 w-3 rounded-full"
+                                      style={{ backgroundColor: paymentColors[method.method] }}
+                                      aria-hidden
+                                    />
+                                    <div>
+                                      <p className="font-medium">{paymentLabels[method.method]}</p>
+                                      <p className="text-xs text-gray-500">
+                                        {method.count} transações • {method.volumeShare}% do volume
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-semibold text-green-600">{formatCurrency(method.revenue)}</p>
+                                    <p className="text-xs text-gray-500">{method.revenueShare}% da receita</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="space-y-2">
+                    <CardTitle>Detalhamento por Método</CardTitle>
+                    <p className="text-sm text-gray-600">KPIs e drill-down por serviço/barbeiro</p>
+                    {hasPaymentData && (
+                      <div className="flex flex-wrap gap-2">
+                        {paymentMethods.map((method) => (
+                          <Button
+                            key={`selector-${method.method}`}
+                            size="sm"
+                            variant={selectedPaymentMethod === method.method ? "default" : "outline"}
+                            onClick={() => setSelectedPaymentMethod(method.method)}
+                          >
+                            {paymentLabels[method.method]}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento para exibir.</p>}
+                    {hasPaymentData && selectedPayment && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-xs text-gray-500">Receita</p>
+                            <p className="text-lg font-bold text-green-600">
+                              {formatCurrency(selectedPayment.revenue)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Ticket Médio</p>
+                            <p className="text-lg font-bold">{formatCurrency(selectedPayment.averageTicket)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Transações</p>
+                            <p className="text-lg font-bold">{selectedPayment.count}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Share receita / volume</p>
+                            <p className="text-lg font-bold">
+                              {selectedPayment.revenueShare}% / {selectedPayment.volumeShare}%
+                            </p>
+                          </div>
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-sm">Top serviços</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {selectedPaymentDetails?.topServices.length || 0} itens
+                              </Badge>
+                            </div>
+                            {(!selectedPaymentDetails || selectedPaymentDetails.topServices.length === 0) && (
+                              <p className="text-sm text-gray-600">Sem serviços neste método.</p>
+                            )}
+                            {selectedPaymentDetails?.topServices.map((service) => (
+                              <div key={service.id} className="flex items-center justify-between text-sm">
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{service.name}</span>
+                                  <span className="text-xs text-gray-500">{service.percentage}% da receita</span>
+                                </div>
+                                <span className="font-semibold text-green-600">{formatCurrency(service.revenue)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-sm">Top barbeiros</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {selectedPaymentDetails?.topBarbers.length || 0} itens
+                              </Badge>
+                            </div>
+                            {(!selectedPaymentDetails || selectedPaymentDetails.topBarbers.length === 0) && (
+                              <p className="text-sm text-gray-600">Sem barbeiros neste método.</p>
+                            )}
+                            {selectedPaymentDetails?.topBarbers.map((barber) => (
+                              <div key={barber.id} className="flex items-center justify-between text-sm">
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{barber.name || "Sem nome"}</span>
+                                  <span className="text-xs text-gray-500">{barber.percentage}% da receita</span>
+                                </div>
+                                <span className="font-semibold text-green-600">{formatCurrency(barber.revenue)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </div>

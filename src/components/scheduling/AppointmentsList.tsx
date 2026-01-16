@@ -1,26 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Scissors, 
-  DollarSign, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Scissors,
+  DollarSign,
   AlertCircle,
   CheckCircle2,
   XCircle,
   Filter,
-  Search
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { cancelAppointment } from "@/server/appointmentActions";
+import { cancelAppointment, getAppointments } from "@/server/appointmentActions";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/date-utils";
+import { useRealtime } from "@/hooks/useRealtime";
 
 // Tipo baseado na estrutura real retornada pelo getUserAppointments
 interface Appointment {
@@ -70,14 +71,14 @@ const statusConfig = {
     variant: "default" as const,
   },
   CONFIRMED: {
-    label: "Confirmado", 
+    label: "Confirmado",
     color: "bg-green-500",
     icon: CheckCircle2,
     variant: "default" as const,
   },
   COMPLETED: {
     label: "Concluído",
-    color: "bg-emerald-500", 
+    color: "bg-emerald-500",
     icon: CheckCircle2,
     variant: "secondary" as const,
   },
@@ -97,19 +98,35 @@ const statusConfig = {
 
 /**
  * Lista de agendamentos do usuário
- * 
+ *
  * Exibe cards com informações detalhadas dos agendamentos,
  * permite filtrar por status e cancelar agendamentos válidos.
  */
-export function AppointmentsList({
-  initialAppointments,
-  totalCount,
-  currentPage,
-  totalPages,
-}: AppointmentsListProps) {
+export function AppointmentsList({ initialAppointments, totalCount, currentPage, totalPages }: AppointmentsListProps) {
   const [appointments, setAppointments] = useState(initialAppointments);
   const [filter, setFilter] = useState<string>("ALL");
   const [loading, setLoading] = useState(false);
+  const { subscribe } = useRealtime();
+
+  const refreshAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getAppointments({
+        page: 1,
+        limit: 10,
+        status: filter === "ALL" ? undefined : (filter as any),
+      });
+
+      if (response.success) {
+        const data = response.data;
+        setAppointments(data?.appointments || []);
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar lista de agendamentos:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter]);
 
   const handleCancelAppointment = async (appointmentId: string) => {
     if (!confirm("Tem certeza que deseja cancelar este agendamento?")) {
@@ -119,17 +136,13 @@ export function AppointmentsList({
     try {
       setLoading(true);
       const result = await cancelAppointment(appointmentId);
-      
+
       if (result.success) {
         // Atualizar o status local
-        setAppointments(prev => 
-          prev.map(apt => 
-            apt.id === appointmentId 
-              ? { ...apt, status: "CANCELLED" }
-              : apt
-          )
+        setAppointments((prev) =>
+          prev.map((apt) => (apt.id === appointmentId ? { ...apt, status: "CANCELLED" } : apt)),
         );
-        
+
         toast.success("Agendamento cancelado com sucesso");
       } else {
         toast.error(result.error || "Erro ao cancelar agendamento");
@@ -142,7 +155,7 @@ export function AppointmentsList({
     }
   };
 
-  const filteredAppointments = appointments.filter(appointment => {
+  const filteredAppointments = appointments.filter((appointment) => {
     if (filter === "ALL") return true;
     return appointment.status === filter;
   });
@@ -151,36 +164,46 @@ export function AppointmentsList({
     if (appointment.status !== "SCHEDULED" && appointment.status !== "CONFIRMED") {
       return false;
     }
-    
+
     // Verificar se está dentro do prazo de cancelamento (2 horas)
     const appointmentDateTime = new Date(appointment.date);
     const now = new Date();
     const diffHours = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
+
     return diffHours >= 2;
   };
 
   // Calcular preço total considerando promoções
   const calculateTotalPrice = (appointment: Appointment) => {
     const basePrice = Number(appointment.service.price);
-    
+
     if (!appointment.appliedPromotion) {
       return basePrice;
     }
-    
+
     const promotionValue = Number(appointment.appliedPromotion.value);
-    
+
     switch (appointment.appliedPromotion.type) {
-      case 'DISCOUNT_PERCENTAGE':
+      case "DISCOUNT_PERCENTAGE":
         return basePrice * (1 - promotionValue / 100);
-      case 'DISCOUNT_FIXED':
+      case "DISCOUNT_FIXED":
         return Math.max(0, basePrice - promotionValue);
-      case 'FREE_SERVICE':
+      case "FREE_SERVICE":
         return 0;
       default:
         return basePrice;
     }
   };
+
+  useEffect(() => {
+    const unsubscribe = subscribe({
+      events: ["appointment:changed"],
+      handler: refreshAppointments,
+      onFallback: refreshAppointments,
+    });
+
+    return unsubscribe;
+  }, [refreshAppointments, subscribe]);
 
   if (appointments.length === 0) {
     return (
@@ -188,9 +211,7 @@ export function AppointmentsList({
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">Nenhum agendamento encontrado</h3>
-          <p className="text-muted-foreground mb-4">
-            Você ainda não possui agendamentos. Que tal fazer o primeiro?
-          </p>
+          <p className="text-muted-foreground mb-4">Você ainda não possui agendamentos. Que tal fazer o primeiro?</p>
           <Button asChild>
             <a href="/scheduling">Fazer Agendamento</a>
           </Button>
@@ -211,17 +232,13 @@ export function AppointmentsList({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant={filter === "ALL" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("ALL")}
-            >
+            <Button variant={filter === "ALL" ? "default" : "outline"} size="sm" onClick={() => setFilter("ALL")}>
               Todos ({appointments.length})
             </Button>
             {Object.entries(statusConfig).map(([status, config]) => {
-              const count = appointments.filter(a => a.status === status).length;
+              const count = appointments.filter((a) => a.status === status).length;
               if (count === 0) return null;
-              
+
               return (
                 <Button
                   key={status}
@@ -243,7 +260,7 @@ export function AppointmentsList({
           const config = statusConfig[appointment.status as keyof typeof statusConfig];
           const StatusIcon = config?.icon || Calendar;
           const totalPrice = calculateTotalPrice(appointment);
-          
+
           return (
             <Card key={appointment.id}>
               <CardContent className="p-6">
@@ -257,12 +274,10 @@ export function AppointmentsList({
                           <h3 className="font-semibold">{appointment.service.name}</h3>
                         </div>
                         {appointment.service.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {appointment.service.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{appointment.service.description}</p>
                         )}
                       </div>
-                      
+
                       <Badge variant={config?.variant || "default"} className="flex items-center gap-1">
                         <StatusIcon className="h-3 w-3" />
                         {config?.label || appointment.status}
@@ -273,11 +288,9 @@ export function AppointmentsList({
                       {/* Data e horário */}
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {formatDate(new Date(appointment.date), "dd/MM/yyyy")}
-                        </span>
+                        <span>{formatDate(new Date(appointment.date), "dd/MM/yyyy")}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span>
@@ -289,14 +302,9 @@ export function AppointmentsList({
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           {appointment.barber.image ? (
-                            <AvatarImage 
-                              src={appointment.barber.image}
-                              alt={appointment.barber.name}
-                            />
+                            <AvatarImage src={appointment.barber.image} alt={appointment.barber.name} />
                           ) : (
-                            <AvatarFallback>
-                              {appointment.barber.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
+                            <AvatarFallback>{appointment.barber.name.charAt(0).toUpperCase()}</AvatarFallback>
                           )}
                         </Avatar>
                         <span>{appointment.barber.name}</span>
@@ -307,22 +315,20 @@ export function AppointmentsList({
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">
-                          R$ {totalPrice.toFixed(2)}
-                        </span>
+                        <span className="font-medium">R$ {totalPrice.toFixed(2)}</span>
                         {appointment.appliedPromotion && (
                           <span className="text-muted-foreground line-through ml-1">
                             R$ {Number(appointment.service.price).toFixed(2)}
                           </span>
                         )}
                       </div>
-                      
+
                       {appointment.appliedPromotion && (
                         <Badge variant="secondary" className="text-xs">
                           {appointment.appliedPromotion.name}
                         </Badge>
                       )}
-                      
+
                       {appointment.voucher && (
                         <Badge variant="outline" className="text-xs">
                           Voucher: {appointment.voucher.code}
@@ -332,9 +338,7 @@ export function AppointmentsList({
 
                     {/* Notas */}
                     {appointment.notes && (
-                      <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
-                        {appointment.notes}
-                      </p>
+                      <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">{appointment.notes}</p>
                     )}
                   </div>
 

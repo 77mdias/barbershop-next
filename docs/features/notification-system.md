@@ -24,6 +24,13 @@ Sistema de Notificações
 └── 🗄️ Banco de Dados
     ├── Tabela notifications
     └── Seed com dados de exemplo
+
+## 📡 Real-time (Sprint 2)
+
+- SSE centralizado em `/api/realtime` com autenticação, heartbeat e filtro por usuário/role.
+- `RealtimeProvider` no cliente com reconexão exponencial, fallback para polling e BroadcastChannel para sincronizar múltiplas abas.
+- Eventos emitidos em `notification:*`, `review:updated`, `appointment:changed` e `analytics:updated` para manter dashboards e contadores alinhados.
+- NotificationBell exibe indicador de live status e recebe push imediato; dashboards (reviews/agendamentos/analytics admin) refazem fetch ao receber eventos.
 ```
 
 ---
@@ -403,9 +410,9 @@ const seedNotifications = [
 ## 🚀 Expansões Futuras (Roadmap)
 
 ### Sprint 2 - Notificações em Tempo Real
-- [ ] WebSocket/Server-Sent Events
-- [ ] Push automático sem refresh
-- [ ] Sincronização multi-tab
+- [x] WebSocket/Server-Sent Events (SSE entregue)
+- [x] Push automático sem refresh
+- [x] Sincronização multi-tab
 
 ### Sprint 3 - Notificações Push
 - [ ] Service Worker registration

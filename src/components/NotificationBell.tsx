@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, UserPlus, UserCheck, UserX, Gift } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getRecentNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead } from "@/server/notificationActions";
+import {
+  getRecentNotifications,
+  getUnreadCount,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/server/notificationActions";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useRealtime } from "@/hooks/useRealtime";
 
 interface Notification {
   id: string;
@@ -30,19 +36,15 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { subscribe, status } = useRealtime();
 
   // Carregar notificações
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
-      const [notificationsResult, countResult] = await Promise.all([
-        getRecentNotifications(5),
-        getUnreadCount()
-      ]);
+      const [notificationsResult, countResult] = await Promise.all([getRecentNotifications(5), getUnreadCount()]);
 
       if (notificationsResult.success) {
-        const items = Array.isArray(notificationsResult.data)
-          ? notificationsResult.data
-          : [];
+        const items = Array.isArray(notificationsResult.data) ? notificationsResult.data : [];
         setNotifications(
           items.map((notification) => ({
             ...notification,
@@ -53,36 +55,78 @@ export function NotificationBell() {
 
       if (countResult.success) {
         const rawCount = countResult.data;
-        const normalizedCount =
-          typeof rawCount === "number"
-            ? rawCount
-            : rawCount?.count ?? 0;
+        const normalizedCount = typeof rawCount === "number" ? rawCount : (rawCount?.count ?? 0);
 
         setUnreadCount(normalizedCount);
       }
     } catch (error) {
       console.error("Erro ao carregar notificações:", error);
     }
-  };
+  }, []);
 
-  // Auto-refresh a cada 30 segundos
+  // Load inicial
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [loadNotifications]);
+
+  // Real-time subscription
+  useEffect(() => {
+    const unsubscribe = subscribe({
+      events: ["notification:new", "notification:read", "notification:refresh"],
+      handler: (event) => {
+        if (event.type === "notification:new") {
+          const notification = event.payload.notification;
+          setNotifications((prev) =>
+            [
+              {
+                ...notification,
+                createdAt: new Date(notification.createdAt),
+                relatedId: notification.relatedId ?? null,
+                metadata: notification.metadata ?? null,
+              } as Notification,
+              ...prev,
+            ].slice(0, 5),
+          );
+
+          if (typeof event.payload.unreadCount === "number") {
+            setUnreadCount(event.payload.unreadCount);
+          } else {
+            setUnreadCount((prevCount) => prevCount + 1);
+          }
+        }
+
+        if (event.type === "notification:read") {
+          const unread = event.payload.unreadCount ?? 0;
+          setUnreadCount(unread);
+
+          if (event.payload.notificationId) {
+            setNotifications((prev) =>
+              prev.map((notification) =>
+                notification.id === event.payload.notificationId ? { ...notification, read: true } : notification,
+              ),
+            );
+          } else {
+            setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
+          }
+        }
+
+        if (event.type === "notification:refresh") {
+          loadNotifications();
+        }
+      },
+      onFallback: loadNotifications,
+    });
+
+    return unsubscribe;
+  }, [loadNotifications, subscribe]);
 
   // Marcar notificação como lida
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.read) {
       const result = await markNotificationAsRead(notification.id);
       if (result.success) {
-        setNotifications(prev => 
-          prev.map(n => 
-            n.id === notification.id ? { ...n, read: true } : n
-          )
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     }
 
@@ -107,9 +151,7 @@ export function NotificationBell() {
     try {
       const result = await markAllNotificationsAsRead();
       if (result.success) {
-        setNotifications(prev => 
-          prev.map(n => ({ ...n, read: true }))
-        );
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
       }
     } catch (error) {
@@ -137,21 +179,27 @@ export function NotificationBell() {
 
   // Formatação de tempo relativo
   const getRelativeTime = (date: Date) => {
-    return formatDistanceToNow(new Date(date), { 
-      addSuffix: true, 
-      locale: ptBR 
+    return formatDistanceToNow(new Date(date), {
+      addSuffix: true,
+      locale: ptBR,
     });
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="relative h-9 w-9 px-0 rounded-full"
-        >
+        <Button variant="ghost" size="sm" className="relative h-9 w-9 px-0 rounded-full">
           <Bell className="h-5 w-5" />
+          <span
+            aria-label={`Status: ${status}`}
+            className={`absolute -bottom-1 -left-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${
+              status === "connected"
+                ? "bg-emerald-500"
+                : status === "reconnecting"
+                  ? "bg-amber-500"
+                  : "bg-muted-foreground"
+            }`}
+          />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
@@ -186,9 +234,7 @@ export function NotificationBell() {
           {/* Lista de notificações */}
           <ScrollArea className="max-h-80">
             {notifications.length === 0 ? (
-              <div className="text-center py-6 text-sm text-muted-foreground">
-                Nenhuma notificação
-              </div>
+              <div className="text-center py-6 text-sm text-muted-foreground">Nenhuma notificação</div>
             ) : (
               <div className="space-y-2">
                 {notifications.map((notification) => (
@@ -197,28 +243,23 @@ export function NotificationBell() {
                     onClick={() => handleNotificationClick(notification)}
                     className={`
                       p-3 rounded-lg cursor-pointer transition-colors border
-                      ${notification.read 
-                        ? "bg-background hover:bg-muted/50 border-border" 
-                        : "bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-950/50 dark:hover:bg-blue-950/70 dark:border-blue-800"
+                      ${
+                        notification.read
+                          ? "bg-background hover:bg-muted/50 border-border"
+                          : "bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-950/50 dark:hover:bg-blue-950/70 dark:border-blue-800"
                       }
                     `}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {getNotificationIcon(notification.type)}
-                      </div>
+                      <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium truncate">
-                            {notification.title}
-                          </p>
+                          <p className="text-sm font-medium truncate">{notification.title}</p>
                           <span className="text-xs text-muted-foreground ml-2">
                             {getRelativeTime(new Date(notification.createdAt))}
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {notification.message}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{notification.message}</p>
                       </div>
                     </div>
                   </div>

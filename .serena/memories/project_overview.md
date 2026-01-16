@@ -1,0 +1,6 @@
+- Purpose: Barbershop scheduling/management app with dashboards, chat, notifications, analytics, reviews. Built with Next.js 14 App Router, TypeScript, Tailwind/shadcn UI, Prisma/Postgres.
+- Architecture: App Router pages in src/app; reusable components in src/components (ui shadcn, admin components, chat, etc.); server actions/services in src/server and src/server/services; validation in src/schemas; utilities/auth/prisma in src/lib; docs in docs/ (development, docker, features, database); prisma schema/migrations in prisma/.
+- Key features: dashboards per role (admin/barber/client), notification + chat systems, review/ratings, admin CRUD for services/promotions/users, analytics with real data, SSE realtime infra.
+- Instructions: Follow AGENTS.md (safety, stick to stack, no new libs without approval, update docs, use docker scripts). Use AIDEV anchor comments if leaving TODO/FIXME/REVIEW. Prefer server actions and Prisma client for backend.
+- Task management docs live in docs/development/tasks (TASKS.md and per-task files). Update ROADMAP/CHANGELOG/TASKS after changes per workflow in docs/development/README.md.
+- Testing preference: run Jest inside docker app container when containerized; avoid running Jest directly on host when possible.

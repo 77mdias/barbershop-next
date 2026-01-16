@@ -2,6 +2,18 @@
 
 Lista organizada de tarefas, bugs e melhorias pendentes.
 
+## 🔥 Alta Prioridade - Fev 2026
+
+- [x] **#027** - Receita por Método de Pagamento (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Garantir que relatórios admin reflitam corretamente o período selecionado para distribuição de pagamentos e exportação.
+  - **Componentes**: ReportsPageClient (analytics admin), CSV de exportação, teste AdminReportsPageClient.
+  - **Status**: Concluído – refetch por período (inclusive retorno ao inicial), empty states preservados e exportação mantém filtros ativos.
+  - **Arquivos modificados**:
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+  - **Testes**: Cobertura adicionada em `AdminReportsPageClient.test.tsx`; `npm test -- AdminReportsPageClient.test.tsx` não executou localmente (jest ausente na instalação atual).
+
 ## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
 
 ### 🔒 Sprint 3 - Correções Críticas de Segurança Admin ✅ **100% CONCLUÍDO** (1 Nov 2025)
@@ -96,20 +108,20 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/src/components/ui/scroll-area.tsx` - Componente shadcn/ui ✅
     - `/src/components/ui/dropdown-menu.tsx` - Componente shadcn/ui ✅
 
-### 🚀 Sprint 2 - Planejado: Notificações em Tempo Real (4-8 Nov 2025)
+### 🚀 Sprint 2 - Notificações em Tempo Real (4-8 Nov 2025)
 
-- [ ] **#019** - Sprint 2: Sistema de Notificações em Tempo Real 🚧 **EM PLANEJAMENTO**
-  - **Descrição**: Implementar WebSocket/Server-Sent Events para notificações push automáticas
-  - **Componentes**: WebSocket provider, Real-time updates, Multi-tab sync
+- [x] **#019** - Sprint 2: Sistema de Notificações em Tempo Real ✅ **CONCLUÍDO**
+  - **Descrição**: Implementação completa de SSE com fallback para polling, sincronização multi-aba e push automático de eventos para dashboards.
+  - **Componentes**: Provider SSE React, broker server-side, rota `/api/realtime`, integração em NotificationBell, ReviewsList, AppointmentsList, ReportsPageClient e bridges de refresh de dashboards.
   - **Estimativa**: 1 sprint (5 tarefas)
-  - **Assignee**: A definir
-  - **Status**: Planejado
-  - **Tarefas Sprint 2 Planejadas**:
-    - [ ] Configurar WebSocket ou Server-Sent Events
-    - [ ] Provider de real-time para React
-    - [ ] Auto-push de notificações sem refresh
-    - [ ] Sincronização multi-tab
-    - [ ] Otimizações de performance
+  - **Assignee**: Codex
+  - **Status**: Entregue
+  - **Tarefas Sprint 2 Entregues**:
+    - [x] Configurar Server-Sent Events autenticado com keep-alive e reconexão exponencial
+    - [x] Provider de real-time para React com fallback para polling e BroadcastChannel multi-aba
+    - [x] Auto-push de notificações sem refresh + contador sincronizado
+    - [x] Sincronização multi-tab e atualização de dashboards (reviews, agendamentos, receitas)
+    - [x] Indicadores de live status e métricas administrativas atualizadas ao vivo
   - **Dependências**: Sprint 1 concluído ✅
 
 ### Issues Críticos Concluídos - Recente ✅ **100% CONCLUÍDO**

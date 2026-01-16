@@ -6,6 +6,19 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 
 ### ✅ Concluído
 
+#### 📊 Receita por Método de Pagamento (2026-02)
+
+- [x] Refetch de relatórios ao alternar períodos (inclusive retorno ao range inicial) para manter percentuais/valores de pagamento consistentes.
+- [x] Exportação CSV preserva filtros aplicados e drill-down por serviço/barbeiro.
+- [x] Empty/loading states revisados e teste de regressão em `AdminReportsPageClient.test.tsx` cobrindo troca de períodos.
+
+#### 🚀 Sprint 2 - Notificações em Tempo Real (2026-02)
+
+- [x] SSE centralizado com autenticação e heartbeat (`/api/realtime`)
+- [x] Provider React com reconexão exponencial, fallback para polling e BroadcastChannel multi-aba
+- [x] Eventos push para notificações, reviews, agendamentos e métricas de receita/admin
+- [x] Indicadores de live status na UI (NotificationBell) e refresh automático de dashboards
+
 #### 🎉 Sprint 1 - Sistema de Notificações Completo (2025-10-27)
 
 - [x] **NotificationService** - Service layer completo com CRUD e filtros
@@ -104,12 +117,12 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 
 #### 🚀 Sprint 2 - Notificações em Tempo Real (4-8 Nov 2025)
 
-- [ ] **WebSocket/Server-Sent Events Implementation**
-  - [ ] Configurar infraestrutura de real-time (WebSocket ou SSE)
-  - [ ] Provider React para notificações em tempo real
-  - [ ] Auto-push de notificações sem refresh
-  - [ ] Sincronização multi-tab
-  - [ ] Otimizações de performance e memória
+- [x] **WebSocket/Server-Sent Events Implementation**
+  - [x] Configurar infraestrutura de real-time (SSE autenticado + heartbeat)
+  - [x] Provider React para notificações em tempo real com fallback para polling
+  - [x] Auto-push de notificações sem refresh (NotificationBell + contadores)
+  - [x] Sincronização multi-tab (BroadcastChannel + dedupe por eventId)
+  - [x] Otimizações de reconexão (exponencial) e indicadores de status
 
 #### 🔔 Sprint 3 - Push Notifications (11-15 Nov 2025)
 

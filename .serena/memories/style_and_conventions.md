@@ -1,0 +1,7 @@
+- Language/stack: TypeScript-first; avoid `any`; Next.js 14 App Router; server actions for backend; Prisma ORM only for DB access; Tailwind CSS + shadcn/ui components; utility-first styling.
+- Safety rules: No destructive commands (rm -rf, git reset --hard) without explicit approval; do not introduce new libraries without approval; follow AGENTS.md instructions.
+- Workflow: Work on branch off main; follow development flow (plan, mark task IN PROGRESS in docs/development/tasks/TASKS.md, implement, test, document, update changelog/tasks/roadmap). Keep documentation updated.
+- Comments: Use AIDEV anchors for TODO/FIXME/REVIEW when needed. Keep comments minimal and purposeful.
+- UX: Mobile-first, responsive; handle loading/empty/error states; include skeletons and toasts per task requirements.
+- Validation/security: Sanitize inputs, validate server-side (Zod schemas), follow whitelist for filters/date ranges when applicable.
+- Database: Migrations via Prisma; production migrations handled via migrator image/scripts; never run schema changes directly in production app.

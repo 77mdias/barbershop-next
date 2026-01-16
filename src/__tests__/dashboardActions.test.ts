@@ -312,6 +312,9 @@ describe("dashboardActions", () => {
     beforeEach(() => {
       mockDb.serviceHistory.findMany.mockResolvedValue([]);
       mockDb.user.findMany.mockResolvedValue([]);
+      mockDb.serviceHistory.aggregate.mockReset();
+      mockDb.serviceHistory.count.mockReset();
+      mockDb.appointment.count.mockReset();
     });
 
     test("deve retornar métricas administrativas completas", async () => {
@@ -450,10 +453,13 @@ describe("dashboardActions", () => {
       mockDb.user.groupBy.mockResolvedValue([{ role: UserRole.CLIENT, _count: { id: 50 } }] as any);
 
       mockDb.user.count.mockResolvedValue(50);
-      mockDb.serviceHistory.aggregate.mockResolvedValue({
-        _count: { rating: 0 },
-        _avg: { rating: null },
-      } as any);
+      mockDb.serviceHistory.aggregate
+        .mockResolvedValueOnce({
+          _count: { rating: 0 },
+          _avg: { rating: null },
+        } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 0 } } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 0 } } as any);
       mockDb.serviceHistory.count.mockResolvedValue(0);
       mockDb.appointment.count.mockResolvedValue(0);
       mockDb.serviceHistory.groupBy.mockResolvedValue([]);
@@ -479,10 +485,13 @@ describe("dashboardActions", () => {
 
       mockDb.user.groupBy.mockResolvedValue([]);
       mockDb.user.count.mockResolvedValue(0);
-      mockDb.serviceHistory.aggregate.mockResolvedValue({
-        _count: { rating: 0 },
-        _avg: { rating: null }, // No ratings yet
-      } as any);
+      mockDb.serviceHistory.aggregate
+        .mockResolvedValueOnce({
+          _count: { rating: 0 },
+          _avg: { rating: null }, // No ratings yet
+        } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 0 } } as any)
+        .mockResolvedValueOnce({ _sum: { finalPrice: 0 } } as any);
       mockDb.serviceHistory.count.mockResolvedValue(0);
       mockDb.appointment.count.mockResolvedValue(0);
       mockDb.serviceHistory.groupBy.mockResolvedValue([]);

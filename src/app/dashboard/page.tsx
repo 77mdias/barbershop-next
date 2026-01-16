@@ -10,15 +10,8 @@ import { ReviewsList } from "@/components/ReviewsList";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getDashboardMetrics } from "@/server/dashboardActions";
 import Link from "next/link";
-import {
-  Calendar,
-  Clock,
-  Star,
-  User,
-  Scissors,
-  Heart,
-  Eye,
-} from "lucide-react";
+import { Calendar, Clock, Star, User, Scissors, Heart, Eye } from "lucide-react";
+import { RealtimeRefreshBridge } from "@/components/realtime/RealtimeRefreshBridge";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -43,23 +36,17 @@ export default async function DashboardPage() {
   return (
     <div className="container mt-12 mb-16 mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
+        <RealtimeRefreshBridge events={["appointment:changed", "review:updated", "analytics:updated"]} />
         {/* Header com saudação */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">
-                Olá, {session.user.name?.split(" ")[0]} 👋
-              </h1>
+              <h1 className="text-3xl font-bold">Olá, {session.user.name?.split(" ")[0]} 👋</h1>
               <p className="text-gray-600">
-                {isBarber
-                  ? "Gerencie seus clientes e serviços"
-                  : "Gerencie seus agendamentos e avaliações"}
+                {isBarber ? "Gerencie seus clientes e serviços" : "Gerencie seus agendamentos e avaliações"}
               </p>
             </div>
-            <Badge
-              variant={isBarber ? "default" : "secondary"}
-              className="px-3 py-1"
-            >
+            <Badge variant={isBarber ? "default" : "secondary"} className="px-3 py-1">
               {isBarber ? "Barbeiro" : isAdmin ? "Administrador" : "Cliente"}
             </Badge>
           </div>
@@ -78,11 +65,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
-                  {isBarber
-                    ? "Próximos atendimentos"
-                    : "Seus próximos horários"}
-                </p>
+                <p className="text-sm text-gray-600">{isBarber ? "Próximos atendimentos" : "Seus próximos horários"}</p>
                 <Button asChild className="w-full">
                   <Link href="/scheduling/manage">
                     <Clock className="w-4 h-4 mr-2" />
@@ -104,9 +87,7 @@ export default async function DashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 <p className="text-sm text-gray-600">
-                  {isBarber
-                    ? "Reviews dos seus serviços"
-                    : "Suas avaliações de serviços"}
+                  {isBarber ? "Reviews dos seus serviços" : "Suas avaliações de serviços"}
                 </p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/reviews">
@@ -143,19 +124,13 @@ export default async function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                {isBarber ? (
-                  <Scissors className="w-5 h-5" />
-                ) : (
-                  <Heart className="w-5 h-5" />
-                )}
+                {isBarber ? <Scissors className="w-5 h-5" /> : <Heart className="w-5 h-5" />}
                 {isBarber ? "Portfólio" : "Galeria"}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
-                  {isBarber ? "Seus trabalhos" : "Trabalhos da barbearia"}
-                </p>
+                <p className="text-sm text-gray-600">{isBarber ? "Seus trabalhos" : "Trabalhos da barbearia"}</p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/gallery">
                     <Eye className="w-4 h-4 mr-2" />
@@ -181,14 +156,7 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Suspense
-              fallback={
-                <LoadingSpinner
-                  text="Carregando avaliações..."
-                  className="py-8"
-                />
-              }
-            >
+            <Suspense fallback={<LoadingSpinner text="Carregando avaliações..." className="py-8" />}>
               <ReviewsList
                 userId={isBarber ? undefined : session.user.id}
                 barberId={isBarber ? session.user.id : undefined}
@@ -217,15 +185,11 @@ export default async function DashboardPage() {
                       {isBarber
                         ? (metrics as any)?.monthlyClients || 0
                         : isAdmin
-                        ? (metrics as any)?.monthlyActivity || 0
-                        : (metrics as any)?.monthlyServices || 0}
+                          ? (metrics as any)?.monthlyActivity || 0
+                          : (metrics as any)?.monthlyServices || 0}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {isBarber
-                        ? "Clientes Este Mês"
-                        : isAdmin
-                        ? "Atividade Mensal"
-                        : "Serviços Este Mês"}
+                      {isBarber ? "Clientes Este Mês" : isAdmin ? "Atividade Mensal" : "Serviços Este Mês"}
                     </p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -233,26 +197,18 @@ export default async function DashboardPage() {
                       {isBarber
                         ? (metrics as any)?.averageRating?.toFixed(1) || "0.0"
                         : isAdmin
-                        ? (metrics as any)?.globalAverage?.toFixed(1) || "0.0"
-                        : (metrics as any)?.averageGiven?.toFixed(1) || "0.0"}
+                          ? (metrics as any)?.globalAverage?.toFixed(1) || "0.0"
+                          : (metrics as any)?.averageGiven?.toFixed(1) || "0.0"}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {isBarber
-                        ? "Avaliação Média"
-                        : isAdmin
-                        ? "Média Global"
-                        : "Sua Média"}
+                      {isBarber ? "Avaliação Média" : isAdmin ? "Média Global" : "Sua Média"}
                     </p>
                   </div>
                   <div className="text-center p-4 bg-yellow-50 rounded-lg">
                     <p className="text-2xl font-bold text-yellow-600">
-                      {isAdmin
-                        ? (metrics as any)?.totalUsers || 0
-                        : (metrics as any)?.totalReviews || 0}
+                      {isAdmin ? (metrics as any)?.totalUsers || 0 : (metrics as any)?.totalReviews || 0}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {isAdmin ? "Total de Usuários" : "Total de Reviews"}
-                    </p>
+                    <p className="text-sm text-gray-600">{isAdmin ? "Total de Usuários" : "Total de Reviews"}</p>
                   </div>
                 </div>
               </CardContent>
@@ -288,8 +244,7 @@ export default async function DashboardPage() {
             <div className="text-center space-y-2">
               <h3 className="font-semibold">✅ Sistema Integrado</h3>
               <p className="text-sm text-gray-600">
-                Dashboard personalizado por tipo de usuário com acesso completo
-                ao sistema de reviews
+                Dashboard personalizado por tipo de usuário com acesso completo ao sistema de reviews
               </p>
               <div className="flex justify-center gap-4 text-xs text-gray-500">
                 <span>• Agendamentos</span>

@@ -1,9 +1,7 @@
 import { db } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import type {
-  NotificationFiltersInput,
-  NotificationType,
-} from "@/schemas/notificationSchemas";
+import type { NotificationFiltersInput, NotificationType } from "@/schemas/notificationSchemas";
+import { emitRealtimeEvent } from "@/lib/realtime";
 
 /**
  * Service Layer para gerenciamento de notificações
@@ -18,9 +16,9 @@ export class NotificationService {
     title: string,
     message: string,
     relatedId?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ) {
-    return db.notification.create({
+    const notification = await db.notification.create({
       data: {
         userId,
         type,
@@ -30,15 +28,33 @@ export class NotificationService {
         metadata: metadata || undefined,
       },
     });
+
+    try {
+      const unreadCount = await this.getUnreadCount(userId);
+      emitRealtimeEvent({
+        type: "notification:new",
+        payload: {
+          notification: {
+            ...notification,
+            createdAt: notification.createdAt.toISOString(),
+            metadata: notification.metadata ?? null,
+            relatedId: notification.relatedId ?? null,
+          },
+          unreadCount,
+        },
+        target: { users: [userId] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de notificação:", error);
+    }
+
+    return notification;
   }
 
   /**
    * Busca notificações do usuário com filtros
    */
-  static async getUserNotifications(
-    userId: string,
-    filters: Partial<NotificationFiltersInput> = {}
-  ) {
+  static async getUserNotifications(userId: string, filters: Partial<NotificationFiltersInput> = {}) {
     const { read, type, page = 1, limit = 20 } = filters;
 
     const where: Prisma.NotificationWhereInput = {

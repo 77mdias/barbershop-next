@@ -2,6 +2,24 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Realtime v1.9.0] - 2026-02-xx 🔔
+
+### ⚡ Infra Real-time (#019)
+- Rota SSE `/api/realtime` autenticada com heartbeat, filtragem por usuário/role e emissão centralizada via broker.
+- `RealtimeProvider` (client) com reconexão exponencial, fallback automático para polling e BroadcastChannel para sincronizar múltiplas abas.
+- NotificationBell agora recebe push imediato de novas notificações, sincroniza contadores de não lidas e exibe indicador de live status.
+- Dashboards reativos: ReviewsList, AppointmentsList, ReportsPageClient e bridges de refresh nos dashboards admin/usuário refazem fetch ao receber eventos de agendamento/review/analytics.
+- Server actions (appointments, reviews, notifications) passaram a emitir eventos `appointment:changed`, `review:updated`, `analytics:updated` e `notification:*` para manter métricas e contadores consistentes.
+
+### 🧪 Resiliência & Fallback
+- Heartbeat a cada 15s e deduplicação de eventos por `eventId`.
+- Fallback de polling a cada 30s para todos os subscribers quando SSE não estiver disponível ou exceder retries.
+
+### 📊 Receita por Método de Pagamento (TASK-REALTIME-ANALYTICS-UX #2)
+- `ReportsPageClient` agora refaz o fetch sempre que o período muda (inclusive ao voltar para o range inicial), mantendo percentuais/valores de pagamento alinhados ao filtro aplicado.
+- Exportação CSV continua incluindo período selecionado e drill-down por serviço/barbeiro; empty states mantidos quando não há dados no intervalo.
+- Adicionado teste de regressão em `AdminReportsPageClient.test.tsx` cobrindo troca de período ida e volta para evitar dados defasados.
+
 ## [Analytics v1.8.2] - 2026-01-15 📊
 
 ### 🔧 Dados Reais em Dashboards (TASK #026)

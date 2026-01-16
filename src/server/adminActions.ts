@@ -49,7 +49,23 @@ type MonthlyGrowthEntry = {
 type PaymentBreakdown = {
   method: PaymentMethod;
   count: number;
+  revenue: number;
+  revenueShare: number;
+  volumeShare: number;
+  averageTicket: number;
+};
+
+type PaymentDrilldownEntry = {
+  id: string;
+  name: string | null;
+  revenue: number;
   percentage: number;
+};
+
+type PaymentMethodDetails = {
+  method: PaymentMethod;
+  topServices: PaymentDrilldownEntry[];
+  topBarbers: PaymentDrilldownEntry[];
 };
 
 type BusyHourMetric = {
@@ -82,6 +98,7 @@ interface ReportsData {
   }>;
   monthlyGrowth: MonthlyGrowthEntry[];
   paymentMethods: PaymentBreakdown[];
+  paymentMethodDetails: PaymentMethodDetails[];
   busyHours: BusyHourMetric[];
   periodComparison: PeriodComparison;
   todayRevenue: number;
@@ -230,6 +247,120 @@ async function buildMonthlyGrowth(now: Date): Promise<MonthlyGrowthEntry[]> {
       growthRate: Number(growthRate.toFixed(1)),
     };
   });
+}
+
+type PaymentAggregationBucket = {
+  revenue: number;
+  count: number;
+  services: Map<string, { name: string; revenue: number }>;
+  barbers: Map<string, { name: string | null; revenue: number }>;
+};
+
+async function buildPaymentMethodAnalytics(startDate: Date): Promise<{
+  paymentMethods: PaymentBreakdown[];
+  paymentMethodDetails: PaymentMethodDetails[];
+}> {
+  const histories = await db.serviceHistory.findMany({
+    where: {
+      completedAt: { gte: startDate },
+    },
+    select: {
+      finalPrice: true,
+      paymentMethod: true,
+      service: {
+        select: { id: true, name: true },
+      },
+      appointments: {
+        select: {
+          barber: {
+            select: { id: true, name: true },
+          },
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (histories.length === 0) {
+    return { paymentMethods: [], paymentMethodDetails: [] };
+  }
+
+  const totalRevenue = histories.reduce((acc, history) => acc + toNumber(history.finalPrice), 0);
+  const totalTransactions = histories.length;
+  const byMethod = new Map<PaymentMethod, PaymentAggregationBucket>();
+
+  histories.forEach((history) => {
+    const method = history.paymentMethod ?? PaymentMethod.OTHER;
+    const price = toNumber(history.finalPrice);
+    const current: PaymentAggregationBucket = byMethod.get(method) ?? {
+      revenue: 0,
+      count: 0,
+      services: new Map(),
+      barbers: new Map(),
+    };
+
+    current.revenue += price;
+    current.count += 1;
+
+    if (history.service) {
+      const serviceBucket = current.services.get(history.service.id) ?? {
+        name: history.service.name,
+        revenue: 0,
+      };
+      serviceBucket.revenue += price;
+      current.services.set(history.service.id, serviceBucket);
+    }
+
+    const barber = history.appointments[0]?.barber;
+    if (barber) {
+      const barberBucket = current.barbers.get(barber.id) ?? { name: barber.name, revenue: 0 };
+      barberBucket.revenue += price;
+      current.barbers.set(barber.id, barberBucket);
+    }
+
+    byMethod.set(method, current);
+  });
+
+  const paymentMethods = Array.from(byMethod.entries())
+    .map(([method, data]) => {
+      const revenueShare = totalRevenue > 0 ? Number(((data.revenue / totalRevenue) * 100).toFixed(1)) : 0;
+      const volumeShare = totalTransactions > 0 ? Math.round((data.count / totalTransactions) * 100) : 0;
+
+      return {
+        method,
+        count: data.count,
+        revenue: Number(data.revenue.toFixed(2)),
+        revenueShare,
+        volumeShare,
+        averageTicket: data.count > 0 ? Number((data.revenue / data.count).toFixed(2)) : 0,
+      };
+    })
+    .sort((a, b) => b.revenue - a.revenue);
+
+  const paymentMethodDetails = paymentMethods.map(({ method, revenue }) => {
+    const bucket = byMethod.get(method);
+
+    const toEntries = <T extends { name: string | null; revenue: number }>(
+      source: Map<string, T>,
+    ): PaymentDrilldownEntry[] =>
+      Array.from(source.entries())
+        .map(([id, value]) => ({
+          id,
+          name: value.name,
+          revenue: Number(value.revenue.toFixed(2)),
+          percentage: revenue > 0 ? Math.round((value.revenue / revenue) * 100) : 0,
+        }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5);
+
+    return {
+      method,
+      topServices: toEntries(bucket?.services ?? new Map()),
+      topBarbers: toEntries(bucket?.barbers ?? new Map()),
+    };
+  });
+
+  return { paymentMethods, paymentMethodDetails };
 }
 
 /**
@@ -601,20 +732,7 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
       },
     });
 
-    // Métodos de pagamento no período
-    const paymentBreakdownGroup = await db.serviceHistory.groupBy({
-      by: ["paymentMethod"],
-      where: {
-        completedAt: { gte: startDate },
-      },
-      _count: { _all: true },
-    });
-    const totalPayments = paymentBreakdownGroup.reduce((acc, item) => acc + item._count._all, 0);
-    const paymentMethods: PaymentBreakdown[] = paymentBreakdownGroup.map((item) => ({
-      method: item.paymentMethod,
-      count: item._count._all,
-      percentage: totalPayments > 0 ? Math.round((item._count._all / totalPayments) * 100) : 0,
-    }));
+    const { paymentMethods, paymentMethodDetails } = await buildPaymentMethodAnalytics(startDate);
 
     // Duração média dos atendimentos
     const averageDurationMinutes = (() => {
@@ -683,6 +801,7 @@ export async function getReportsData(dateRange?: "7d" | "30d" | "3m" | "year") {
       })),
       monthlyGrowth,
       paymentMethods,
+      paymentMethodDetails,
       busyHours,
       periodComparison: {
         revenueChangePercent: Number(revenueChangePercent.toFixed(1)),

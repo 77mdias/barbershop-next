@@ -16,6 +16,7 @@ import {
   type GetReviewsInput,
 } from "@/schemas/reviewSchemas";
 import { UserRole } from "@prisma/client";
+import { emitRealtimeEvent } from "@/lib/realtime";
 
 /**
  * Criar uma nova avaliação
@@ -112,6 +113,33 @@ export async function createReview(input: CreateReviewInput) {
     revalidatePath("/reviews");
     revalidatePath(`/services/${serviceHistory.service.id}`);
 
+    const barberId = serviceHistory.appointments[0]?.barberId ?? null;
+
+    try {
+      emitRealtimeEvent({
+        type: "review:updated",
+        payload: {
+          reviewId: updatedServiceHistory.id,
+          rating: updatedServiceHistory.rating,
+          barberId,
+          userId: session.user.id,
+          serviceHistoryId: updatedServiceHistory.id,
+        },
+        target: {
+          users: [session.user.id, barberId].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "reviews", reason: "created" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de review:", error);
+    }
+
     return {
       success: true,
       data: serializeServiceHistory(updatedServiceHistory),
@@ -155,6 +183,9 @@ export async function updateReview(input: UpdateReviewInput) {
         id: validatedInput.id,
         userId: session.user.id,
         rating: { not: null }, // Garantir que já tem avaliação
+      },
+      include: {
+        appointments: true,
       },
     });
 
@@ -209,6 +240,33 @@ export async function updateReview(input: UpdateReviewInput) {
     revalidatePath("/dashboard");
     revalidatePath("/reviews");
     revalidatePath(`/services/${updatedServiceHistory.service.id}`);
+
+    const barberId = serviceHistory?.appointments?.[0]?.barberId ?? null;
+
+    try {
+      emitRealtimeEvent({
+        type: "review:updated",
+        payload: {
+          reviewId: updatedServiceHistory.id,
+          rating: updatedServiceHistory.rating,
+          barberId,
+          userId: session.user.id,
+          serviceHistoryId: updatedServiceHistory.id,
+        },
+        target: {
+          users: [session.user.id, barberId].filter(Boolean) as string[],
+          roles: ["ADMIN"],
+        },
+      });
+
+      emitRealtimeEvent({
+        type: "analytics:updated",
+        payload: { scope: "reviews", reason: "updated" },
+        target: { roles: ["ADMIN"] },
+      });
+    } catch (error) {
+      console.error("Erro ao emitir evento de atualização de review:", error);
+    }
 
     return {
       success: true,
