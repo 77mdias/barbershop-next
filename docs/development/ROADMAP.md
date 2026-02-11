@@ -31,6 +31,20 @@ Este documento mantém o histórico e planejamento de desenvolvimento do projeto
 - [x] Excel (xls) de cohort/LTV por barbeiro respeitando filtros.
 - [x] Feedback de progresso/erro via toasts + retry e loading compartilhado entre botões.
 
+#### ⏳ UX de Loading/Erros (2026-02-11)
+
+- [x] Separação de loading inicial vs refetch no `ReportsPageClient`, mantendo estrutura estável durante atualização.
+- [x] Skeletons adicionados nos blocos de growth/payment para reduzir layout shift em trocas de período/serviço.
+- [x] Snackbar de erro com ação de retry para falhas de `getReportsData`.
+- [x] Cobertura de regressão em `AdminReportsPageClient.test.tsx` para skeletons de refetch e erro com retry.
+
+#### 🛡️ Segurança/Limpeza de Inputs (2026-02-11)
+
+- [x] Sanitização server-side de `dateRange` com whitelist permitida para relatórios.
+- [x] Sanitização e validação de `serviceId`; filtros inválidos/desconhecidos retornam dataset vazio (sem expansão de escopo).
+- [x] Guardas client-side para valores inválidos dos filtros de período/serviço.
+- [x] Empty-state amigável validado com teste em `AdminReportsPageClient.test.tsx`.
+
 #### 🚀 Sprint 2 - Notificações em Tempo Real (2026-02)
 
 - [x] SSE centralizado com autenticação e heartbeat (`/api/realtime`)

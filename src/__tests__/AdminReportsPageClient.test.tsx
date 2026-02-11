@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ReportsPageClient } from "@/app/dashboard/admin/reports/ReportsPageClient";
 import { getReportsData } from "@/server/adminActions";
@@ -10,6 +10,15 @@ jest.mock("@/server/adminActions", () => ({
 
 const mockGetReportsData = getReportsData as jest.MockedFunction<typeof getReportsData>;
 const toastMock = toast as unknown as jest.Mocked<typeof toast>;
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolver) => {
+    resolve = resolver;
+  });
+
+  return { promise, resolve };
+}
 
 describe("ReportsPageClient", () => {
   const initialReports = {
@@ -195,6 +204,82 @@ describe("ReportsPageClient", () => {
     });
   });
 
+  it("shows growth/payment skeletons during refetch", async () => {
+    const deferred = createDeferred<any>();
+    mockGetReportsData.mockImplementationOnce(() => deferred.promise);
+
+    render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
+
+    expect(await screen.findByText(/R\$ 1200\.00/)).toBeInTheDocument();
+
+    const dateSelect = screen.getAllByRole("combobox")[0];
+    fireEvent.click(dateSelect);
+    fireEvent.click(screen.getByText("Últimos 7 dias"));
+
+    expect(await screen.findByTestId("reports-growth-skeleton")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Financeiro"));
+    expect(await screen.findByTestId("reports-payment-breakdown-skeleton")).toBeInTheDocument();
+    expect(screen.getByTestId("reports-payment-details-skeleton")).toBeInTheDocument();
+
+    deferred.resolve({
+      success: true,
+      data: { ...initialReports, monthlyRevenue: 330 },
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("reports-payment-breakdown-skeleton")).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows snackbar error with retry when report fetch fails", async () => {
+    mockGetReportsData
+      .mockResolvedValueOnce({
+        success: false,
+        error: "Serviço indisponível",
+        data: null,
+      } as any)
+      .mockResolvedValueOnce({
+        success: true,
+        data: initialReports,
+      } as any);
+
+    render(<ReportsPageClient initialReports={initialReports as any} initialDateRange="30d" />);
+
+    const dateSelect = screen.getAllByRole("combobox")[0];
+    fireEvent.click(dateSelect);
+    fireEvent.click(screen.getByText("Últimos 7 dias"));
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(
+        "Falha ao atualizar relatórios",
+        expect.objectContaining({
+          description: "Serviço indisponível",
+          action: expect.objectContaining({
+            label: "Tentar novamente",
+            onClick: expect.any(Function),
+          }),
+        }),
+      );
+    });
+
+    const errorCalls = (toastMock.error as jest.Mock).mock.calls;
+    const latestErrorCall = errorCalls[errorCalls.length - 1];
+    const options = latestErrorCall[1] as {
+      action?: { onClick: () => void };
+    };
+
+    expect(options.action).toBeDefined();
+    await act(async () => {
+      options.action?.onClick();
+    });
+
+    await waitFor(() => {
+      expect(mockGetReportsData).toHaveBeenCalledTimes(2);
+      expect(mockGetReportsData).toHaveBeenLastCalledWith("7d", undefined);
+    });
+  });
+
   it("shows empty payment state when there is no breakdown", async () => {
     render(
       <ReportsPageClient
@@ -218,6 +303,25 @@ describe("ReportsPageClient", () => {
     expect(screen.getAllByText(/No-show 5\.0%/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/12\/15 slots/i)).toBeInTheDocument();
     expect(screen.getByText("Capacidade por Serviço")).toBeInTheDocument();
+  });
+
+  it("shows friendly empty-state when fetch fails without cached data", async () => {
+    mockGetReportsData.mockResolvedValueOnce({
+      success: false,
+      error: "Filtro inválido",
+      data: null,
+    } as any);
+
+    render(<ReportsPageClient initialReports={null} initialDateRange="30d" />);
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(
+        "Falha ao atualizar relatórios",
+        expect.objectContaining({ description: "Filtro inválido" }),
+      );
+    });
+
+    expect(await screen.findByText("Nenhum dado disponível para o período.")).toBeInTheDocument();
   });
 
   it("exporta pagamentos em CSV com filtros ativos e feedback", async () => {

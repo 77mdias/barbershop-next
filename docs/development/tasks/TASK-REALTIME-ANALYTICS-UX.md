@@ -72,16 +72,30 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
   - `AdminReportsPageClient.test.tsx` cobre exportação CSV com filtros ativos e feedback (jest/RTL).
 
 ### 6) UX de Loading/Erros
+- **Status**: ✅ Entregue (2026-02-11) – Skeletons de refetch nos blocos de growth/payment e toast de erro com retry para falhas de fetch.
 - **Escopo**: Loading/skeletons nos blocos de growth/payment; snackbars para falhas de fetch.
 - **Critérios de aceite**:
-  - Skeletons exibidos durante refetch; sem layout shift brusco.
-  - Erros exibidos com ação de retry; logs em console apenas para debug.
+  - [x] Skeletons exibidos durante refetch; sem layout shift brusco.
+  - [x] Erros exibidos com ação de retry; logs em console apenas para debug.
+- **Entregas**:
+  - `ReportsPageClient` passou a diferenciar loading inicial de refetch, mantendo layout principal renderizado durante atualização.
+  - Skeletons localizados adicionados em `Crescimento Mensal`, `Método em Destaque`, `Receita por Método de Pagamento` e `Detalhamento por Método`.
+  - Feedback de erro com `toast.error` + ação `Tentar novamente` no fluxo de `fetchReports`.
+- **Testes**:
+  - [x] `AdminReportsPageClient.test.tsx` cobre skeletons durante refetch e snackbar de erro com retry.
 
 ### 7) Segurança/Limpeza de Inputs
+- **Status**: ✅ Entregue (2026-02-11) – Sanitização server-side de `dateRange`/`serviceId` com whitelist e empty-state consistente para filtros inválidos.
 - **Escopo**: Revalidar whitelist de dateRange e filtros; estados “sem dados” consistentes.
 - **Critérios de aceite**:
-  - Inputs sanitizados e validados no server (range permitido); UI mostra empty-state amigável.
-  - Nenhum acesso a dados fora do range permitido.
+  - [x] Inputs sanitizados e validados no server (range permitido); UI mostra empty-state amigável.
+  - [x] Nenhum acesso a dados fora do range permitido.
+- **Entregas**:
+  - `getReportsData` agora sanitiza `dateRange` por whitelist (`7d`, `30d`, `3m`, `year`) e normaliza valores inválidos para o range padrão seguro.
+  - `serviceId` passa por limpeza/validação (`trim`, tamanho máximo e pattern seguro); quando inválido/desconhecido, o backend retorna dataset vazio em vez de ampliar para dados sem filtro.
+  - `ReportsPageClient` adicionou guardas client-side para `dateRange`/`serviceId` vindos dos selects e mantém empty-state amigável quando não há dados.
+- **Testes**:
+  - [x] `AdminReportsPageClient.test.tsx` cobre fallback de empty-state amigável em falha de fetch sem cache.
 
 ## Entregáveis
 - Server actions/handlers para WS/SSE, cohorts, ocupação e métodos de pagamento.
@@ -101,4 +115,4 @@ Entregar métricas em tempo real, visões financeiras detalhadas, análises de c
 - **Performance**: agregar consultas (groupBy) e paginar exportações; índices em campos de data/método.
 
 ## Status
-- 🚀 Itens 1, 3, 4 e 5 entregues (SSE/real-time ativo; cohort/LTV com filtro de serviço; capacidade/no-show com alertas; playbook de exportação completo); itens 6 e 7 permanecem pendentes.
+- ✅ Todos os itens (1 a 7) entregues no plano TASK-REALTIME-ANALYTICS-UX.

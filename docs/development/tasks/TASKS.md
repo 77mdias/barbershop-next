@@ -50,6 +50,31 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/docs/development/CHANGELOG.md`
     - `/docs/development/ROADMAP.md`
   - **Testes**: `AdminReportsPageClient.test.tsx` cobre exportação CSV com filtros ativos (não executado localmente; rodar Jest no container app).
+- [x] **#031** - UX de Loading/Erros (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Aplicar skeletons de refetch nos blocos de growth/payment e feedback de erro com retry para falhas de fetch dos relatórios.
+  - **Componentes**: ReportsPageClient (loading/refetch UX + toast de erro), teste AdminReportsPageClient.
+  - **Status**: Concluído – loading inicial separado de refetch, skeletons localizados sem layout shift e snackbar de erro com ação “Tentar novamente”.
+  - **Arquivos modificados**:
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+    - `/docs/development/tasks/TASKS.md`
+    - `/docs/development/CHANGELOG.md`
+    - `/docs/development/ROADMAP.md`
+  - **Testes**: `docker compose exec app npm test -- AdminReportsPageClient.test.tsx` ✅ (9 testes passando).
+- [x] **#032** - Segurança/Limpeza de Inputs (TASK-REALTIME-ANALYTICS-UX)
+  - **Descrição**: Revalidar whitelist de `dateRange`/filtros no backend e garantir estado sem dados consistente para entradas inválidas.
+  - **Componentes**: `adminActions.getReportsData` (sanitização server-side), `ReportsPageClient` (guardas client-side), teste AdminReportsPageClient.
+  - **Status**: Concluído – `dateRange` restrito à whitelist permitida, `serviceId` sanitizado e filtros inválidos passam a retornar dataset vazio (sem fallback para dados sem filtro).
+  - **Arquivos modificados**:
+    - `/src/server/adminActions.ts`
+    - `/src/app/dashboard/admin/reports/ReportsPageClient.tsx`
+    - `/src/__tests__/AdminReportsPageClient.test.tsx`
+    - `/docs/development/tasks/TASK-REALTIME-ANALYTICS-UX.md`
+    - `/docs/development/tasks/TASKS.md`
+    - `/docs/development/CHANGELOG.md`
+    - `/docs/development/ROADMAP.md`
+  - **Testes**: `docker compose exec app npm test -- AdminReportsPageClient.test.tsx` ✅ (10 testes passando).
 
 ## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
 

@@ -11,6 +11,10 @@ import { logger } from "@/lib/logger";
 const toNumber = (value: Prisma.Decimal | number | null | undefined) => (value ? Number(value) : 0);
 
 type ReportDateRange = "7d" | "30d" | "3m" | "year";
+const REPORT_DATE_RANGE_VALUES = ["7d", "30d", "3m", "year"] as const satisfies readonly ReportDateRange[];
+const DEFAULT_REPORT_DATE_RANGE: ReportDateRange = "30d";
+const SERVICE_FILTER_MAX_LENGTH = 64;
+const SERVICE_FILTER_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 const busyHourBuckets = [
   { label: "Manhã (8h-12h)", start: 8, end: 12 },
@@ -187,6 +191,48 @@ interface ReportsData {
   ltv: LtvMetrics;
   serviceOptions: ServiceOption[];
   capacity: CapacityMetrics;
+}
+
+function sanitizeReportDateRange(value: unknown): ReportDateRange {
+  if (typeof value !== "string") {
+    return DEFAULT_REPORT_DATE_RANGE;
+  }
+
+  if (REPORT_DATE_RANGE_VALUES.includes(value as ReportDateRange)) {
+    return value as ReportDateRange;
+  }
+
+  return DEFAULT_REPORT_DATE_RANGE;
+}
+
+function sanitizeServiceFilter(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!normalized || normalized.toLowerCase() === "all") {
+    return null;
+  }
+
+  if (normalized.length > SERVICE_FILTER_MAX_LENGTH || !SERVICE_FILTER_PATTERN.test(normalized)) {
+    return null;
+  }
+
+  return normalized;
+}
+
+function getReportStartDate(now: Date, dateRange: ReportDateRange): Date {
+  switch (dateRange) {
+    case "7d":
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "30d":
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "3m":
+      return new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    case "year":
+      return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  }
 }
 
 function calculateBusyHours(appointments: Array<{ date: Date }>): BusyHourMetric[] {
@@ -463,6 +509,54 @@ async function getServiceOptions(): Promise<ServiceOption[]> {
     name: service.name,
     active: service.active,
   }));
+}
+
+function createEmptyReportsData(serviceOptions: ServiceOption[]): ReportsData {
+  return {
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    totalClients: 0,
+    totalAppointments: 0,
+    monthlyAppointments: 0,
+    averageRating: 0,
+    totalReviews: 0,
+    topBarbers: [],
+    monthlyGrowth: [],
+    paymentMethods: [],
+    paymentMethodDetails: [],
+    busyHours: [],
+    periodComparison: {
+      revenueChangePercent: 0,
+      appointmentsChangePercent: 0,
+      newClients: 0,
+    },
+    todayRevenue: 0,
+    weekRevenue: 0,
+    averageTicket: 0,
+    averageDurationMinutes: 0,
+    returnRate: 0,
+    customerCohort: [],
+    ltv: {
+      totalRevenue: 0,
+      uniqueClients: 0,
+      globalLtv: 0,
+      byBarber: [],
+    },
+    capacity: {
+      summary: {
+        slotsUsed: 0,
+        slotsAvailable: 0,
+        occupancyRate: 0,
+        noShowRate: 0,
+        cancelRate: 0,
+        totalAppointments: 0,
+      },
+      thresholds: { ...CAPACITY_CONFIG.thresholds },
+      byBarber: [],
+      byService: [],
+    },
+    serviceOptions,
+  };
 }
 
 const getMonthKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}`;
@@ -997,10 +1091,10 @@ export async function getBarbersForAdmin(filters?: {
 /**
  * Buscar dados para relatórios
  *
- * @param dateRange - Período do relatório: "7d" | "30d" | "3m" | "year" (default: "30d")
+ * @param dateRange - Período do relatório (whitelist): "7d" | "30d" | "3m" | "year"
  * @param serviceId - Filtro opcional por serviço para métricas e coortes
  */
-export async function getReportsData(dateRange?: ReportDateRange, serviceId?: string) {
+export async function getReportsData(dateRange?: ReportDateRange | string, serviceId?: string | null) {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions);
@@ -1021,26 +1115,37 @@ export async function getReportsData(dateRange?: ReportDateRange, serviceId?: st
       };
     }
 
-    // Calcular data de início baseado no range
-    const now = new Date();
-    let startDate: Date;
-
-    switch (dateRange || "30d") {
-      case "7d":
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case "30d":
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case "3m":
-        startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-        break;
-      case "year":
-        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-        break;
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const normalizedDateRange = sanitizeReportDateRange(dateRange);
+    if (typeof dateRange === "string" && dateRange !== normalizedDateRange) {
+      logger.warn("Invalid report dateRange sanitized", {
+        userId: session.user.id,
+        receivedDateRange: dateRange,
+        normalizedDateRange,
+      });
     }
+
+    const serviceOptions = await getServiceOptions();
+    const requestedServiceFilter =
+      typeof serviceId === "string" && serviceId.trim().length > 0 && serviceId.trim().toLowerCase() !== "all";
+    const normalizedServiceId = sanitizeServiceFilter(serviceId);
+    const selectedServiceId =
+      normalizedServiceId && serviceOptions.some((option) => option.id === normalizedServiceId) ? normalizedServiceId : null;
+
+    if (requestedServiceFilter && !selectedServiceId) {
+      logger.warn("Invalid report service filter sanitized", {
+        userId: session.user.id,
+        receivedServiceId: typeof serviceId === "string" ? serviceId.slice(0, 80) : serviceId,
+      });
+
+      return {
+        success: true,
+        data: createEmptyReportsData(serviceOptions),
+      };
+    }
+
+    // Calcular data de início baseado no range sanitizado
+    const now = new Date();
+    const startDate = getReportStartDate(now, normalizedDateRange);
 
     const normalizedStart = new Date(startDate);
     normalizedStart.setHours(0, 0, 0, 0);
@@ -1054,9 +1159,6 @@ export async function getReportsData(dateRange?: ReportDateRange, serviceId?: st
 
     const periodLength = now.getTime() - startDate.getTime();
     const previousPeriodStart = new Date(startDate.getTime() - periodLength);
-
-    const serviceOptions = await getServiceOptions();
-    const selectedServiceId = serviceId && serviceOptions.some((option) => option.id === serviceId) ? serviceId : null;
 
     const appointmentBaseWhere = {
       status: { notIn: ["CANCELLED", "NO_SHOW"] },

@@ -35,6 +35,18 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - CSV de pagamentos inclui drill-down por serviços/barbeiros e metadados de filtro; Excel (xls) de cohort/LTV por barbeiro respeita o filtro ativo.
 - Botões de exportação compartilham estado de loading, usam toasts (sonner) para sucesso/erro e oferecem retry em caso de falha; teste de regressão em `AdminReportsPageClient.test.tsx`.
 
+### ⏳ UX de Loading/Erros (TASK-REALTIME-ANALYTICS-UX #6)
+- `ReportsPageClient` agora separa loading inicial de refetch: o conteúdo principal permanece renderizado durante atualização e evita layout shift brusco.
+- Skeletons localizados adicionados nos blocos de growth/payment (`Crescimento Mensal`, `Método em Destaque`, `Receita por Método de Pagamento` e `Detalhamento por Método`).
+- Falhas de fetch em relatórios passam a exibir snackbar (`toast.error`) com ação de retry (`Tentar novamente`).
+- `AdminReportsPageClient.test.tsx` expandido para cobrir skeletons de refetch e fluxo de erro+retry (execução validada via `docker compose exec app npm test -- AdminReportsPageClient.test.tsx`).
+
+### 🛡️ Segurança/Limpeza de Inputs (TASK-REALTIME-ANALYTICS-UX #7)
+- `getReportsData` agora valida `dateRange` por whitelist explícita (`7d`, `30d`, `3m`, `year`) e sanitiza entradas inválidas para range seguro padrão.
+- `serviceId` recebeu sanitização (trim, tamanho máximo e pattern seguro); quando inválido/desconhecido, o backend retorna dataset vazio em vez de ampliar para dados sem filtro.
+- `ReportsPageClient` adicionou guardas client-side para valores inválidos nos filtros de período/serviço.
+- `AdminReportsPageClient.test.tsx` ganhou cenário de empty-state amigável quando fetch falha sem cache; suíte validada via `docker compose exec app npm test -- AdminReportsPageClient.test.tsx` (10/10).
+
 ## [Analytics v1.8.2] - 2026-01-15 📊
 
 ### 🔧 Dados Reais em Dashboards (TASK #026)

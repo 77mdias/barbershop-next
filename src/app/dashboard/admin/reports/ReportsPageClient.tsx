@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FilterSelect } from "@/components/admin/FilterSelect";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getReportsData } from "@/server/adminActions";
 import {
   Activity,
@@ -188,6 +189,7 @@ const dateRangeLabels: Record<DateRange, string> = {
   "3m": "Últimos 3 meses",
   year: "Último ano",
 };
+const allowedDateRanges: DateRange[] = ["7d", "30d", "3m", "year"];
 
 const capacityThresholdFallback: CapacityThresholds = {
   occupancy: 85,
@@ -208,6 +210,8 @@ const formatCurrency = (value: number) => `R$ ${Number(value || 0).toFixed(2)}`;
 
 const formatPercent = (value: number) => `${Number(value || 0).toFixed(1)}%`;
 
+const isValidDateRange = (value: string): value is DateRange => allowedDateRanges.includes(value as DateRange);
+
 interface ReportsPageClientProps {
   initialReports: ReportsData | null;
   initialDateRange: DateRange;
@@ -226,6 +230,8 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
   );
   const [exporting, setExporting] = React.useState<ExportKind | null>(null);
   const { subscribe } = useRealtime();
+  const isInitialLoading = isLoading && !reports;
+  const isRefetching = isLoading && !!reports;
 
   const fetchReports = React.useCallback(
     async (force = false) => {
@@ -239,12 +245,27 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
       setIsLoading(true);
       try {
         const result = await getReportsData(dateRange, serviceParam);
-        if (result.success) {
-          setReports(result.data as ReportsData);
-          setLastFetchedKey(currentKey);
+        if (!result.success) {
+          toast.error("Falha ao atualizar relatórios", {
+            description: result.error || "Não foi possível carregar os dados agora.",
+            action: {
+              label: "Tentar novamente",
+              onClick: () => fetchReports(true),
+            },
+          });
+          return;
         }
-      } catch (error) {
-        console.error("Erro ao buscar relatórios:", error);
+
+        setReports(result.data as ReportsData);
+        setLastFetchedKey(currentKey);
+      } catch {
+        toast.error("Falha ao atualizar relatórios", {
+          description: "Verifique a conexão e tente novamente.",
+          action: {
+            label: "Tentar novamente",
+            onClick: () => fetchReports(true),
+          },
+        });
       } finally {
         setIsLoading(false);
       }
@@ -605,7 +626,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:max-w-xl">
             <FilterSelect
               value={dateRange}
-              onChange={(value) => setDateRange(value as DateRange)}
+              onChange={(value) => setDateRange(isValidDateRange(value) ? value : initialDateRange)}
               options={[
                 { value: "7d", label: "Últimos 7 dias" },
                 { value: "30d", label: "Últimos 30 dias" },
@@ -618,7 +639,9 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
 
             <FilterSelect
               value={selectedService}
-              onChange={setSelectedService}
+              onChange={(value) =>
+                setSelectedService(serviceOptions.some((option) => option.value === value) ? value : "all")
+              }
               options={serviceOptions}
               className="w-full"
               label="Serviço"
@@ -647,13 +670,13 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
         </p>
       </div>
 
-      {isLoading && (
+      {isInitialLoading && (
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner />
         </div>
       )}
 
-      {!isLoading && !reports && (
+      {!isInitialLoading && !reports && (
         <Card>
           <CardContent className="py-10 text-center">
             <p className="text-gray-600">Nenhum dado disponível para o período.</p>
@@ -661,7 +684,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
         </Card>
       )}
 
-      {!isLoading && reports && (
+      {reports && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="border-l-4 border-l-green-500">
@@ -779,25 +802,42 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {reports.monthlyGrowth.length === 0 && (
-                        <p className="text-sm text-gray-600">Sem histórico recente.</p>
-                      )}
-                      {reports.monthlyGrowth.map((entry) => (
-                        <div className="flex items-center justify-between" key={entry.month}>
-                          <span className="text-sm">{entry.month}</span>
-                          <div className="flex items-center gap-3">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div className="bg-green-500 h-2 rounded-full" style={{ width: `${entry.progress}%` }} />
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm font-medium block">{formatCurrency(entry.revenue)}</span>
-                              <span className="text-xs text-gray-500">{entry.services} serviços</span>
+                    {isRefetching ? (
+                      <div className="space-y-4 min-h-[208px]" data-testid="reports-growth-skeleton">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                          <div className="flex items-center justify-between" key={`growth-skeleton-${index}`}>
+                            <Skeleton className="h-4 w-20" />
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-2 w-32 rounded-full" />
+                              <div className="space-y-2 text-right">
+                                <Skeleton className="h-4 w-24 ml-auto" />
+                                <Skeleton className="h-3 w-16 ml-auto" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-4 min-h-[208px]">
+                        {reports.monthlyGrowth.length === 0 && (
+                          <p className="text-sm text-gray-600">Sem histórico recente.</p>
+                        )}
+                        {reports.monthlyGrowth.map((entry) => (
+                          <div className="flex items-center justify-between" key={entry.month}>
+                            <span className="text-sm">{entry.month}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="w-32 bg-gray-200 rounded-full h-2">
+                                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${entry.progress}%` }} />
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm font-medium block">{formatCurrency(entry.revenue)}</span>
+                                <span className="text-xs text-gray-500">{entry.services} serviços</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -899,8 +939,25 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     <p className="text-sm text-gray-600">Maior receita no período selecionado</p>
                   </CardHeader>
                   <CardContent>
-                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>}
-                    {hasPaymentData && topPaymentMethod && (
+                    {isRefetching && (
+                      <div className="space-y-3 min-h-[232px]" data-testid="reports-payment-highlight-skeleton">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-3 w-3 rounded-full" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-28" />
+                          </div>
+                        </div>
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-2 w-full rounded-full" />
+                        <Skeleton className="h-2 w-full rounded-full" />
+                      </div>
+                    )}
+                    {!isRefetching && !hasPaymentData && (
+                      <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>
+                    )}
+                    {!isRefetching && hasPaymentData && topPaymentMethod && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <span
@@ -961,8 +1018,39 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     <p className="text-sm text-gray-600">Percentuais e valores absolutos por período</p>
                   </CardHeader>
                   <CardContent>
-                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>}
-                    {hasPaymentData && (
+                    {isRefetching && (
+                      <div className="space-y-6 min-h-[340px]" data-testid="reports-payment-breakdown-skeleton">
+                        <div className="flex flex-col xl:flex-row gap-6 items-center">
+                          <div className="flex-1 flex items-center justify-center">
+                            <Skeleton className="h-48 w-48 rounded-full" />
+                          </div>
+                          <div className="flex-1 space-y-4 w-full">
+                            <Skeleton className="h-3 w-full rounded-full" />
+                            <div className="space-y-3">
+                              {Array.from({ length: 3 }).map((_, index) => (
+                                <div className="flex items-center justify-between gap-3" key={`payment-skeleton-${index}`}>
+                                  <div className="flex items-center gap-2">
+                                    <Skeleton className="h-3 w-3 rounded-full" />
+                                    <div className="space-y-2">
+                                      <Skeleton className="h-4 w-24" />
+                                      <Skeleton className="h-3 w-32" />
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2 text-right">
+                                    <Skeleton className="h-4 w-20 ml-auto" />
+                                    <Skeleton className="h-3 w-16 ml-auto" />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {!isRefetching && !hasPaymentData && (
+                      <p className="text-sm text-gray-600">Sem dados de pagamento no período.</p>
+                    )}
+                    {!isRefetching && hasPaymentData && (
                       <div className="space-y-6">
                         <div className="flex flex-col xl:flex-row gap-6 items-center">
                           <div className="flex-1 flex items-center justify-center">
@@ -1031,6 +1119,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                             size="sm"
                             variant={selectedPaymentMethod === method.method ? "default" : "outline"}
                             onClick={() => setSelectedPaymentMethod(method.method)}
+                            disabled={isRefetching}
                           >
                             {paymentLabels[method.method]}
                           </Button>
@@ -1039,8 +1128,45 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {!hasPaymentData && <p className="text-sm text-gray-600">Sem dados de pagamento para exibir.</p>}
-                    {hasPaymentData && selectedPayment && (
+                    {isRefetching && (
+                      <div className="space-y-4 min-h-[320px]" data-testid="reports-payment-details-skeleton">
+                        <div className="grid grid-cols-2 gap-3">
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <div key={`detail-kpi-skeleton-${index}`} className="space-y-2">
+                              <Skeleton className="h-3 w-20" />
+                              <Skeleton className="h-6 w-24" />
+                            </div>
+                          ))}
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {Array.from({ length: 2 }).map((_, colIndex) => (
+                            <div className="space-y-2" key={`detail-list-skeleton-${colIndex}`}>
+                              <div className="flex items-center justify-between">
+                                <Skeleton className="h-4 w-20" />
+                                <Skeleton className="h-5 w-12" />
+                              </div>
+                              {Array.from({ length: 3 }).map((__, rowIndex) => (
+                                <div
+                                  key={`detail-row-skeleton-${colIndex}-${rowIndex}`}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <div className="space-y-2">
+                                    <Skeleton className="h-4 w-24" />
+                                    <Skeleton className="h-3 w-16" />
+                                  </div>
+                                  <Skeleton className="h-4 w-20" />
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {!isRefetching && !hasPaymentData && (
+                      <p className="text-sm text-gray-600">Sem dados de pagamento para exibir.</p>
+                    )}
+                    {!isRefetching && hasPaymentData && selectedPayment && (
                       <>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
