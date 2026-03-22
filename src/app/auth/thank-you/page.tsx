@@ -2,14 +2,6 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
 import { CheckCircle, Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -67,34 +59,34 @@ function ThankYouContent() {
   };
 
   return (
-    <div className="flex justify-center bg-[var(--all-black)] px-4 py-8">
-      <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-            <CheckCircle className="h-8 w-8 text-green-400" />
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8">
+        <div className="text-center">
+          <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+            <CheckCircle className="h-6 w-6" />
           </div>
-          <CardTitle className="text-center text-2xl text-white">
+          <h1 className="font-display text-2xl font-bold italic text-foreground">
             {verified
               ? "Email Verificado com Sucesso!"
               : "Conta Criada com Sucesso!"}
-          </CardTitle>
-          <CardDescription className="mt-2 text-center text-gray-400">
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-fg-muted">
             {verified
               ? "Sua conta foi ativada! Agora você pode fazer login e começar a usar nossa plataforma."
               : "Obrigado por se cadastrar em nossa plataforma. Para começar a usar sua conta, verifique seu email."}
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
 
-        <CardContent className="space-y-6">
+        <div className="mt-6 space-y-6">
           {/* Informações sobre o email */}
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
+          <div className="rounded-xl border border-border bg-surface-1 p-4">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-blue-400" />
+              <Mail className="h-5 w-5 shrink-0 text-accent" />
               <div>
-                <p className="text-sm font-medium text-blue-400">
+                <p className="text-sm font-medium text-foreground">
                   Email de verificação enviado
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-fg-muted">
                   Verifique sua caixa de entrada e spam
                 </p>
               </div>
@@ -104,29 +96,29 @@ function ThankYouContent() {
           {/* Email do usuário */}
           {email && (
             <div className="text-center">
-              <p className="text-sm text-gray-400">Email:</p>
-              <p className="font-medium text-white">{email}</p>
+              <p className="text-sm text-fg-muted">Email:</p>
+              <p className="font-medium text-foreground">{email}</p>
             </div>
           )}
 
           {/* Instruções */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-white">Próximos passos:</h4>
-            <div className="space-y-2 text-sm text-gray-400">
+            <h4 className="text-sm font-medium text-foreground">Próximos passos:</h4>
+            <div className="space-y-2 text-sm text-fg-muted">
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-on-accent">
                   1
                 </span>
                 <span>Abra o email que enviamos para você</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-on-accent">
                   2
                 </span>
                 <span>Clique no botão &quot;Verificar Email&quot;</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-on-accent">
                   3
                 </span>
                 <span>Faça login e comece a usar sua conta</span>
@@ -136,40 +128,39 @@ function ThankYouContent() {
 
           {/* Botões */}
           <div className="space-y-3">
-            <Button
+            <button
               onClick={resendVerificationEmail}
               disabled={isResending || hasResent}
-              className="w-full bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)]"
+              className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90 disabled:opacity-50"
             >
               {isResending
                 ? "Reenviando..."
                 : hasResent
-                  ? "Email Reenviado ✓"
+                  ? "Email Reenviado"
                   : "Reenviar Email"}
-            </Button>
+            </button>
 
-            <Button
+            <button
               onClick={goToLogin}
-              variant="outline"
-              className="w-full border-gray-600 bg-[var(--card-product)] text-white hover:bg-gray-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
             >
               Ir para Login
-            </Button>
+            </button>
           </div>
 
           {/* Link para voltar */}
           <div className="text-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-2 text-sm text-fg-muted transition-colors hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Voltar para o inicio
+              Voltar para o início
             </Link>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </main>
   );
 }
 
@@ -177,17 +168,8 @@ export default function ThankYouPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex justify-center bg-[var(--all-black)] px-4 py-8">
-          <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-                <CheckCircle className="h-8 w-8 text-green-400" />
-              </div>
-              <CardTitle className="text-center text-2xl text-white">
-                Carregando...
-              </CardTitle>
-            </CardHeader>
-          </Card>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
         </div>
       }
     >

@@ -2,15 +2,6 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 function VerifyEmailContent() {
@@ -103,140 +94,132 @@ function VerifyEmailContent() {
 
   if (isVerifying) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)]">
-        <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-          <CardHeader>
-            <CardTitle className="text-center text-white">
-              Verificando Email
-            </CardTitle>
-            <CardDescription className="text-center text-gray-400">
-              Aguarde enquanto verificamos seu email...
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-[var(--text-price)]"></div>
-          </CardContent>
-        </Card>
-      </div>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
+          <h1 className="font-display text-2xl font-bold italic text-foreground">
+            Verificando Email
+          </h1>
+          <p className="mt-3 text-sm text-fg-muted">
+            Aguarde enquanto verificamos seu email...
+          </p>
+          <div className="mt-6 flex justify-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+          </div>
+        </div>
+      </main>
     );
   }
 
   if (verificationStatus === "success") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)]">
-        <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-          <CardHeader>
-            <CardTitle className="text-center text-green-400">
-              Email Verificado!
-            </CardTitle>
-            <CardDescription className="text-center text-gray-400">
-              Sua conta foi ativada com sucesso. Você será redirecionado para a
-              página de agradecimento.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Button
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
+          <h1 className="font-display text-2xl font-bold italic text-accent">
+            Email Verificado!
+          </h1>
+          <p className="mt-3 text-sm text-fg-muted">
+            Sua conta foi ativada com sucesso. Você será redirecionado para a
+            página de agradecimento.
+          </p>
+          <div className="mt-6">
+            <button
               onClick={() => {
                 const thankYouUrl = `/auth/thank-you?verified=true&email=${encodeURIComponent(email)}`;
                 router.push(thankYouUrl);
               }}
-              className="bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)]"
+              className="gold-shimmer inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
             >
               Ir para Agradecimento
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            </button>
+          </div>
+        </div>
+      </main>
     );
   }
 
   if (verificationStatus === "error") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)]">
-        <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-          <CardHeader>
-            <CardTitle className="text-center text-red-400">
-              Erro na Verificação
-            </CardTitle>
-            <CardDescription className="text-center text-gray-400">
-              O link de verificação é inválido ou expirou. Solicite um novo
-              email de verificação.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Input
-                type="email"
-                placeholder="Digite seu email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border-gray-600 bg-[var(--card-product)] text-white placeholder-gray-400"
-              />
-            </div>
-            <Button
-              onClick={resendVerificationEmail}
-              disabled={isResending}
-              className="w-full bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)]"
-            >
-              {isResending ? "Reenviando..." : "Reenviar Email de Verificação"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={goToLogin}
-              className="w-full border-gray-600 bg-[var(--card-product)] text-white hover:bg-gray-700"
-            >
-              Voltar para Login
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)]">
-      <Card className="w-full max-w-md border-gray-600 bg-[var(--card-product)]">
-        <CardHeader>
-          <CardTitle className="text-center text-white">
-            Verificação de Email
-          </CardTitle>
-          <CardDescription className="text-center text-gray-400">
-            Digite seu email para receber um novo link de verificação.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Input
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8">
+          <h1 className="font-display text-center text-2xl font-bold italic text-destructive">
+            Erro na Verificação
+          </h1>
+          <p className="mt-3 text-center text-sm text-fg-muted">
+            O link de verificação é inválido ou expirou. Solicite um novo
+            email de verificação.
+          </p>
+          <div className="mt-6 space-y-4">
+            <input
               type="email"
               placeholder="Digite seu email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border-gray-600 bg-[var(--card-product)] text-white placeholder-gray-400"
+              className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground placeholder:text-fg-subtle focus:border-accent focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.18)]"
             />
+            <button
+              onClick={resendVerificationEmail}
+              disabled={isResending}
+              className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90 disabled:opacity-50"
+            >
+              {isResending ? "Reenviando..." : "Reenviar Email de Verificação"}
+            </button>
+            <button
+              onClick={goToLogin}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+            >
+              Voltar para Login
+            </button>
           </div>
-          <Button
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8">
+        <h1 className="font-display text-center text-2xl font-bold italic text-foreground">
+          Verificação de Email
+        </h1>
+        <p className="mt-3 text-center text-sm text-fg-muted">
+          Digite seu email para receber um novo link de verificação.
+        </p>
+        <div className="mt-6 space-y-4">
+          <input
+            type="email"
+            placeholder="Digite seu email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground placeholder:text-fg-subtle focus:border-accent focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.18)]"
+          />
+          <button
             onClick={resendVerificationEmail}
             disabled={isResending}
-            className="w-full bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)]"
+            className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90 disabled:opacity-50"
           >
             {isResending ? "Reenviando..." : "Reenviar Email de Verificação"}
-          </Button>
-          <Button
-            variant="outline"
+          </button>
+          <button
             onClick={goToLogin}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-white hover:bg-gray-700"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
           >
             Voltar para Login
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Carregando...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+        </div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

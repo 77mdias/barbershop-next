@@ -331,26 +331,28 @@ export default function ErrorContent() {
   if (error === "OAuthAccountNotLinked" || error === "AccessDenied") {
     logger.component.debug("ErrorContent", "rendering OAuth error modal");
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)] px-4">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <AlertCircle className="h-8 w-8 text-red-600" />
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
+          <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+            <AlertCircle className="h-6 w-6" />
           </div>
-          <h2 className="mb-4 text-3xl font-bold text-white">
+          <h2 className="font-display text-2xl font-bold italic text-foreground">
             Email já cadastrado
           </h2>
-          <p className="mb-8 text-gray-400">
+          <p className="mt-3 text-sm text-fg-muted">
             {loading
               ? "Carregando informações..."
               : "Clique no botão abaixo para ver mais detalhes"}
           </p>
-          <Button
-            onClick={() => setShowModal(true)}
-            disabled={loading}
-            className="bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)] disabled:opacity-50"
-          >
-            {loading ? "Carregando..." : "Ver Detalhes"}
-          </Button>
+          <div className="mt-6">
+            <Button
+              onClick={() => setShowModal(true)}
+              disabled={loading}
+              className="gold-shimmer inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90 disabled:opacity-50"
+            >
+              {loading ? "Carregando..." : "Ver Detalhes"}
+            </Button>
+          </div>
         </div>
 
         <Modal
@@ -373,28 +375,25 @@ export default function ErrorContent() {
             },
           ]}
         />
-      </div>
+      </main>
     );
   }
 
   // Renderização padrão para outros erros
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--all-black)] px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <AlertCircle className="h-8 w-8 text-red-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-white">
-            Erro de Autenticação
-          </h2>
-          <p className="mt-2 text-sm text-gray-400">{errorData as string}</p>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
+        <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+          <AlertCircle className="h-6 w-6" />
         </div>
-
-        <div className="space-y-4">
+        <h2 className="font-display text-2xl font-bold italic text-foreground">
+          Erro de Autenticação
+        </h2>
+        <p className="mt-3 text-sm text-fg-muted">{errorData as string}</p>
+        <div className="mt-6 space-y-3">
           <Button
             asChild
-            className="w-full bg-[var(--button-primary)] text-white hover:bg-[var(--text-price-secondary)]"
+            className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
           >
             <Link
               href={`/auth/signin?callbackUrl=${encodeURIComponent(finalSlug ? `/${finalSlug}` : "/")}`}
@@ -406,7 +405,7 @@ export default function ErrorContent() {
           <Button
             asChild
             variant="outline"
-            className="w-full border-gray-600 bg-transparent text-white hover:bg-gray-700"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
           >
             <Link href={finalSlug ? `/${finalSlug}` : "/"}>
               Voltar ao Início
@@ -414,6 +413,6 @@ export default function ErrorContent() {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
