@@ -3,69 +3,41 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/prisma";
 import { sendVerificationEmail, generateVerificationToken } from "@/lib/email";
 import { logger } from "@/lib/logger";
+import { RegisterBodySchema } from "@/schemas/authApiSchemas";
+import { checkRateLimit, createRateLimitErrorResponse } from "@/lib/security/rate-limit";
 
-// Função para validar senha com requisitos de segurança
-function validatePassword(password: string): {
-  isValid: boolean;
-  errors: string[];
-} {
-  const errors: string[] = [];
-
-  // Mínimo 8 caracteres
-  if (password.length < 8) {
-    errors.push("A senha deve ter pelo menos 8 caracteres");
-  }
-
-  // Pelo menos uma letra maiúscula
-  if (!/[A-Z]/.test(password)) {
-    errors.push("A senha deve conter pelo menos uma letra maiúscula (A-Z)");
-  }
-
-  // Pelo menos uma letra minúscula
-  if (!/[a-z]/.test(password)) {
-    errors.push("A senha deve conter pelo menos uma letra minúscula (a-z)");
-  }
-
-  // Pelo menos um número
-  if (!/\d/.test(password)) {
-    errors.push("A senha deve conter pelo menos um número (0-9)");
-  }
-
-  // Pelo menos um caractere especial
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    errors.push("A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;':\",./<>?)");
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
-}
+const REGISTER_RATE_LIMIT = {
+  scope: "auth:register",
+  max: 5,
+  windowMs: 10 * 60 * 1000,
+  blockDurationMs: 15 * 60 * 1000,
+} as const;
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(request, REGISTER_RATE_LIMIT);
+  if (!rateLimit.allowed) {
+    return createRateLimitErrorResponse(REGISTER_RATE_LIMIT, rateLimit, "Muitas tentativas de cadastro.");
+  }
+
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    const parsedBody = RegisterBodySchema.safeParse(body);
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ message: "Nome, email, senha e CPF são obrigatórios" }, { status: 400 });
-    }
-
-    // Validação de senha robusta
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
+    if (!parsedBody.success) {
       return NextResponse.json(
-        {
-          message: "Senha não atende aos requisitos de segurança",
-          details: passwordValidation.errors,
-        },
+        { message: "Dados inválidos", details: parsedBody.error.flatten().fieldErrors },
         { status: 400 },
       );
     }
 
+    const { name, email, password } = parsedBody.data;
+
+    logger.api.info("Tentativa de cadastro recebida", { hasName: !!name });
+
     // Verificar se o usuário já existe
     const existingUser = await db.user.findFirst({
       where: {
-        email: email.toLowerCase(),
+        email,
       },
       include: {
         accounts: true, // Incluir contas OAuth para verificação
@@ -106,7 +78,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: name, // Adicionar campo name também
         nickname: name, // Manter nickname para compatibilidade
-        email: email.toLowerCase(),
+        email,
         password: hashedPassword,
         role: "CLIENT", // Definir como cliente por padrão
         isActive: false, // Usuário inativo até verificar email

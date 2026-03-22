@@ -1,8 +1,10 @@
+# Compose de produção self-hosted (ativo): migrator + app
 services:
   # ==================
   # 🗄️ MIGRATION SERVICE (Separado)
   # ==================
   migrator:
+    image: barbershop-next-migrator
     build:
       context: .
       dockerfile: Dockerfile.pro
@@ -20,6 +22,7 @@ services:
   # 🚀 APPLICATION (Limpa)
   # ==================
   app:
+    image: barbershop-next-app-prod
     build:
       context: .
       dockerfile: Dockerfile.pro

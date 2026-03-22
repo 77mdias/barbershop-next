@@ -2,6 +2,8 @@
 
 Este documento descreve a **arquitetura Docker profissional** implementada seguindo as melhores práticas de produção empresarial.
 
+> Status atual (2026): Docker é o fluxo oficial para desenvolvimento local. Em produção, o caminho oficial do projeto é Vercel; Docker em produção é modo self-hosted opcional.
+
 > **� Nova Arquitetura (Out/2025)**: **Separação de responsabilidades** com containers especializados para máxima segurança e performance.
 
 ## 🎯 Princípios da Arquitetura Profissional

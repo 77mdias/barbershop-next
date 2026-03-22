@@ -1,12 +1,37 @@
 /** @type {import('next').NextConfig} */
+const allowUnsafeBuildBypass = process.env.ALLOW_UNSAFE_BUILD === "1";
+const disableCspHeader = process.env.DISABLE_CSP_HEADER === "1";
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+  "style-src 'self' 'unsafe-inline' https:",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https:",
+  "connect-src 'self' https: wss:",
+  "form-action 'self'",
+].join("; ");
+
+const defaultSecurityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  ...(disableCspHeader ? [] : [{ key: "Content-Security-Policy", value: contentSecurityPolicy }]),
+];
+
 const nextConfig = {
   output: "standalone",
-  // Desabilita ESLint e TypeScript durante build para resolver problemas
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: allowUnsafeBuildBypass,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: allowUnsafeBuildBypass,
   },
   experimental: {
     serverActions: {
@@ -49,6 +74,10 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: defaultSecurityHeaders,
+      },
       {
         source: "/api/webhooks",
         headers: [

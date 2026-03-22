@@ -2,27 +2,43 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { logger } from "@/lib/logger";
+import { ResetPasswordBodySchema } from "@/schemas/authApiSchemas";
+import { checkRateLimit, createRateLimitErrorResponse } from "@/lib/security/rate-limit";
+
+const RESET_PASSWORD_RATE_LIMIT = {
+  scope: "auth:reset-password",
+  max: 10,
+  windowMs: 10 * 60 * 1000,
+  blockDurationMs: 15 * 60 * 1000,
+} as const;
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(request, RESET_PASSWORD_RATE_LIMIT);
+  if (!rateLimit.allowed) {
+    return createRateLimitErrorResponse(
+      RESET_PASSWORD_RATE_LIMIT,
+      rateLimit,
+      "Muitas tentativas de redefinição de senha.",
+    );
+  }
+
   try {
-    const { email, newPassword, token } = await request.json();
+    const body = await request.json();
+    const parsedBody = ResetPasswordBodySchema.safeParse(body);
 
-    if (!email || !newPassword) {
-      return NextResponse.json({ error: "Email e nova senha são obrigatórios" }, { status: 400 });
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        { error: "Dados inválidos", details: parsedBody.error.flatten().fieldErrors },
+        { status: 400 },
+      );
     }
 
-    if (!token) {
-      return NextResponse.json({ error: "Token de reset é obrigatório" }, { status: 400 });
-    }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json({ error: "A senha deve ter pelo menos 6 caracteres" }, { status: 400 });
-    }
+    const { email, newPassword, token } = parsedBody.data;
 
     // Buscar usuário com o token válido
     const user = await db.user.findFirst({
       where: {
-        email,
+        email: email.toLowerCase(),
         deletedAt: null,
         resetPasswordToken: token,
         resetPasswordExpires: {

@@ -1,5 +1,7 @@
 # 🚀 Guia de Produção - Arquitetura Docker Profissional
 
+> Este guia é para operação **self-hosted Docker**. A produção oficial do projeto segue Vercel.
+
 ## 📋 Checklist de Deploy
 
 ### ✅ **Pré-requisitos**

@@ -2,6 +2,8 @@
 
 Guias de deploy e configuração de produção para o sistema Barbershop Next.
 
+> Caminho oficial de produção: Vercel. Os comandos Docker deste documento cobrem apenas cenário self-hosted opcional.
+
 ## 📚 Documentos Disponíveis
 
 ### 📦 Production Setup

@@ -1,5 +1,7 @@
 # ⚡ Comandos Rápidos - Docker Multi-Stage
 
+> Nota: para execução oficial do projeto, use o [Runbook Operacional](../operations/RUNBOOK.md). Este guia cobre também caminhos Docker legados.
+
 ## 🚀 Start Rápido
 
 ### Desenvolvimento

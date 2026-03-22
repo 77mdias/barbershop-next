@@ -34,6 +34,7 @@ services:
   # 🚀 APLICAÇÃO
   # ==================
   app:
+    image: barbershop-next-app-dev
     build:
       context: .
       dockerfile: Dockerfile

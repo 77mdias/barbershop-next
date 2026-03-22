@@ -1,6 +1,9 @@
 # ===============================================
 # 🐳 DOCKER COMPOSE - PRODUÇÃO
 # ===============================================
+# ⚠️ ARQUIVO LEGADO:
+# Mantido por compatibilidade. Para fluxo self-hosted profissional,
+# prefira docker-compose.pro.yml + scripts/deploy-pro.sh
 # Configuração otimizada para ambiente de produção
 # com banco externo (Neon) e segurança
 
@@ -9,6 +12,7 @@ services:
   # 🚀 APLICAÇÃO
   # ==================
   app:
+    image: barbershop-next-app-prod-legacy
     build:
       context: .
       dockerfile: Dockerfile

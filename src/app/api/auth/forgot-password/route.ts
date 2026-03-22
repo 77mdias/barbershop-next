@@ -2,33 +2,39 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { sendResetPasswordEmail, generateResetToken } from "@/lib/email";
 import { logger } from "@/lib/logger";
+import { ForgotPasswordBodySchema } from "@/schemas/authApiSchemas";
+import { checkRateLimit, createRateLimitErrorResponse } from "@/lib/security/rate-limit";
+
+const FORGOT_PASSWORD_RATE_LIMIT = {
+  scope: "auth:forgot-password",
+  max: 5,
+  windowMs: 10 * 60 * 1000,
+  blockDurationMs: 15 * 60 * 1000,
+} as const;
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(request, FORGOT_PASSWORD_RATE_LIMIT);
+  if (!rateLimit.allowed) {
+    return createRateLimitErrorResponse(
+      FORGOT_PASSWORD_RATE_LIMIT,
+      rateLimit,
+      "Muitas tentativas de recuperação de senha.",
+    );
+  }
+
   try {
-    logger.api.info("Starting password reset process");
+    const body = await request.json();
+    const parsedBody = ForgotPasswordBodySchema.safeParse(body);
 
-    const { email } = await request.json();
-    logger.api.info("Password reset requested", { email });
-
-    if (!email) {
-      return NextResponse.json({ error: "Email é obrigatório" }, { status: 400 });
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: "Email inválido" }, { status: 400 });
     }
 
-    logger.api.debug("Testing database connection");
-
-    // Teste de conexão simples primeiro
-    try {
-      await db.$connect();
-      logger.api.debug("Database connection established");
-    } catch (connectError) {
-      logger.api.error("Database connection error", { error: connectError });
-      throw connectError;
-    }
+    const { email } = parsedBody.data;
 
     // Verificar se o usuário existe
-    logger.api.debug("Searching for user in database", { email });
     const user = await db.user.findFirst({
-      where: { email: email.toLowerCase(), deletedAt: null },
+      where: { email, deletedAt: null },
     });
 
     if (!user) {
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Salvar token no banco
     await db.user.update({
-      where: { email: email.toLowerCase() },
+      where: { email },
       data: {
         resetPasswordToken: resetToken,
         resetPasswordExpires: resetTokenExpiry,
@@ -58,7 +64,7 @@ export async function POST(request: NextRequest) {
     const emailResult = await sendResetPasswordEmail(email, resetToken);
 
     if (!emailResult.success) {
-      logger.api.error("Error sending reset email", { email, error: emailResult.error });
+      logger.api.error("Error sending reset email", { reason: emailResult.error });
       return NextResponse.json({ error: "Erro ao enviar email de redefinição" }, { status: 500 });
     }
 

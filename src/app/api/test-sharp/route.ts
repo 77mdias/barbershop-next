@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
+import { canAccessDebugEndpoints } from "@/lib/security/debug-access";
 
 export async function GET(request: NextRequest) {
+  if (!canAccessDebugEndpoints(request.headers)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     console.log("🧪 Testing Sharp installation...");
-    
-    // Teste básico do Sharp
-    const testBuffer = Buffer.from("test");
-    
+
     // Verificar se Sharp está instalado e funcionando
     const sharpVersion = sharp.versions;
     console.log("✅ Sharp versions:", sharpVersion);
@@ -41,8 +43,7 @@ export async function GET(request: NextRequest) {
     console.error("❌ Sharp test failed:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
-      stack: error.stack,
+      error: error instanceof Error ? error.message : "Unknown error",
       platform: process.platform,
       arch: process.arch,
       nodeVersion: process.version

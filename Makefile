@@ -16,7 +16,7 @@ log_info = @printf "$(BLUE)[info]$(RESET) %s\n" "$(1)"
 log_run = @printf "$(GREEN)[run ]$(RESET) %s\n" "$(1)"
 log_warn = @printf "$(YELLOW)[warn]$(RESET) %s\n" "$(1)"
 
-.PHONY: help dev build start \
+.PHONY: help dev build start dev-up dev-down dev-logs dev-shell quality-check prod-local prod-migrate-vercel \
 	lint lint-fix type-check validate quality \
 	test test-watch test-coverage test-ci \
 	db-migrate db-push db-pull db-seed db-reset db-status db-studio db-generate \
@@ -29,6 +29,15 @@ log_warn = @printf "$(YELLOW)[warn]$(RESET) %s\n" "$(1)"
 help:
 	@printf "\nBarbershop Next.js Makefile\n"
 	@printf "=================================\n"
+	@printf "\nOfficial Commands (Recommended)\n"
+	@printf "  %-22s %s\n" "dev-up" "Start official dev stack (Docker)"
+	@printf "  %-22s %s\n" "dev-down" "Stop official dev stack"
+	@printf "  %-22s %s\n" "dev-logs" "Tail dev app logs"
+	@printf "  %-22s %s\n" "dev-shell" "Shell into dev app container"
+	@printf "  %-22s %s\n" "quality-check" "Run lint + type-check"
+	@printf "  %-22s %s\n" "test" "Run test suite"
+	@printf "  %-22s %s\n" "prod-local" "Simulate production locally (build + start)"
+	@printf "  %-22s %s\n" "prod-migrate-vercel" "Run production migrations (Vercel/external DB)"
 	@printf "\nDevelopment\n"
 	@printf "  %-22s %s\n" "dev" "Start Next.js dev server (npm run dev)"
 	@printf "  %-22s %s\n" "build" "Build production bundle (npm run build)"
@@ -84,6 +93,28 @@ help:
 	@printf "  %-22s %s\n" "prod-status" "Container status (docker-compose.pro.yml)"
 
 # Development
+dev-up:
+	@$(MAKE) docker-up-dev
+
+dev-down:
+	@$(MAKE) docker-down-dev
+
+dev-logs:
+	@$(MAKE) docker-logs-dev
+
+dev-shell:
+	@$(MAKE) docker-shell-dev
+
+quality-check:
+	@$(MAKE) validate
+
+prod-local:
+	@$(MAKE) build
+	@$(MAKE) start
+
+prod-migrate-vercel:
+	@$(MAKE) db-prod-migrate
+
 dev:
 	$(call log_run,Starting Next.js dev server)
 	@$(NPM) run dev

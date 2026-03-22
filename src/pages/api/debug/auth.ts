@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { logger } from "@/lib/logger";
+import { canAccessDebugEndpoints } from "@/lib/security/debug-access";
 
 /**
  * Debug endpoint para investigar problemas de autenticação em produção
@@ -11,11 +12,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Verificar se é ambiente de produção e aceitar apenas requests específicos
-  if (
-    process.env.NODE_ENV === "production" &&
-    req.headers["x-debug-auth"] !== "barbershop-debug-2024"
-  ) {
+  if (!canAccessDebugEndpoints(req.headers)) {
     return res.status(404).json({ error: "Not found" });
   }
 
@@ -32,9 +29,7 @@ export default async function handler(
         user: session?.user
           ? {
               id: session.user.id,
-              email: session.user.email,
               role: session.user.role,
-              isActive: true, // Assumindo que se tem sessão, está ativo
             }
           : null,
       },

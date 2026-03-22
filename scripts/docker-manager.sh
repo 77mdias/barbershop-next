@@ -24,8 +24,8 @@ show_help() {
     echo "Uso: ./scripts/docker-manager.sh [comando] [ambiente]"
     echo ""
     echo "Comandos disponíveis:"
-    echo "  ${GREEN}up [dev|prod]${NC}      - Subir containers"
-    echo "  ${GREEN}down [dev|prod]${NC}    - Parar containers"
+    echo "  ${GREEN}up [dev|prod]${NC}      - Subir containers (prod = modo self-hosted legado)"
+    echo "  ${GREEN}down [dev|prod]${NC}    - Parar containers (prod = modo self-hosted legado)"
     echo "  ${GREEN}build [dev|prod]${NC}   - Fazer build das imagens (target específico)"
     echo "  ${GREEN}rebuild [dev|prod]${NC} - Rebuild completo (sem cache)"
     echo "  ${GREEN}logs [dev|prod]${NC}    - Ver logs dos containers"
@@ -72,6 +72,10 @@ docker_up() {
     local compose_file=$(get_compose_file $1)
     
     echo -e "${GREEN}🚀 Subindo containers para ambiente: $1${NC}"
+    if [ "$1" = "prod" ]; then
+        echo -e "${YELLOW}⚠️  'up prod' usa docker-compose.prod.yml (modo legado).${NC}"
+        echo -e "${YELLOW}ℹ️  Para fluxo profissional self-hosted, prefira: ./scripts/deploy-pro.sh deploy${NC}"
+    fi
     
     if [ "$1" = "dev" ]; then
         docker compose -f $compose_file up -d
