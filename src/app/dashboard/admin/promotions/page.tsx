@@ -3,9 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { getPromotionsForAdmin } from "@/server/promotionAdminActions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -22,10 +19,10 @@ import {
   Percent,
   Globe2,
   Target,
-  ArrowLeft,
 } from "lucide-react";
 import PromotionTableActions from "@/components/PromotionTableActions";
 import { type PromotionFiltersInput } from "@/schemas/promotionSchemas";
+import { PageHero } from "@/components/shared/PageHero";
 
 function formatValue(promotion: any) {
   const value = Number(promotion.value);
@@ -50,11 +47,9 @@ type AdminPromotionsPageProps = {
 
 function buildStatusHref(status: "all" | "active" | "inactive") {
   const params = new URLSearchParams();
-
   if (status !== "all") {
     params.set("status", status);
   }
-
   const query = params.toString();
   return query ? `/dashboard/admin/promotions?${query}` : "/dashboard/admin/promotions";
 }
@@ -90,168 +85,156 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
   const targetedPromotions = totalPromotions - globalPromotions;
 
   return (
-    <div className="container mt-20 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/admin">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Voltar ao Dashboard</span>
-                  <span className="sm:hidden">Voltar</span>
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-                  <span>Gerenciar Promoções</span>
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
-                  Crie, edite e acompanhe promoções e campanhas especiais
-                </p>
-              </div>
-            </div>
-            <Button asChild className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700">
-              <Link href="/dashboard/admin/promotions/new">
-                <Plus className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Nova Promoção</span>
-                <span className="sm:hidden">Nova</span>
-              </Link>
-            </Button>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Administrador"
+        title="Gerenciar Promoções"
+        subtitle="Crie, edite e acompanhe promoções e campanhas especiais."
+        actions={[
+          { label: "Voltar ao Dashboard", href: "/dashboard/admin", variant: "outline" },
+          { label: "Nova Promoção", href: "/dashboard/admin/promotions/new", variant: "primary" },
+        ]}
+      />
+
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4 space-y-6">
+          {/* Stats cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              {
+                icon: Gift,
+                label: "Total",
+                value: totalPromotions,
+                cls: "text-accent",
+              },
+              {
+                icon: Power,
+                label: "Ativas",
+                value: activePromotions,
+                cls: "text-[hsl(var(--success))]",
+              },
+              {
+                icon: Power,
+                label: "Inativas",
+                value: inactivePromotions,
+                cls: "text-fg-muted",
+              },
+              {
+                icon: Globe2,
+                label: "Globais",
+                value: globalPromotions,
+                cls: "text-accent",
+              },
+              {
+                icon: Target,
+                label: "Específicas",
+                value: targetedPromotions,
+                cls: "text-accent",
+              },
+            ].map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <article
+                  key={stat.label}
+                  className="card-hover rounded-2xl border border-border bg-surface-card p-5"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                        {stat.label}
+                      </p>
+                      <p className={`font-display text-2xl font-bold italic ${stat.cls}`}>
+                        {stat.value}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Gift className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total</p>
-                  <p className="text-2xl font-bold">{totalPromotions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Power className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Ativas</p>
-                  <p className="text-2xl font-bold text-green-600">{activePromotions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <Power className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Inativas</p>
-                  <p className="text-2xl font-bold text-red-600">{inactivePromotions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Globe2 className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Globais</p>
-                  <p className="text-2xl font-bold text-blue-600">{globalPromotions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg">
-                  <Target className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Específicas</p>
-                  <p className="text-2xl font-bold text-amber-600">{targetedPromotions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Promoções</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Promotions table */}
+          <div className="rounded-2xl border border-border bg-surface-card">
+            <div className="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="font-display text-xl font-bold italic text-foreground">
+                Lista de Promoções
+              </h2>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-gray-600">Status:</span>
-                <Button
-                  asChild
-                  size="sm"
-                  variant={statusFilter === undefined || statusFilter === "all" ? "default" : "outline"}
+                <span className="text-xs text-fg-muted">Status:</span>
+                <Link
+                  href={buildStatusHref("all")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    statusFilter === undefined || statusFilter === "all"
+                      ? "bg-accent text-on-accent"
+                      : "border border-border text-fg-muted hover:border-accent hover:text-accent"
+                  }`}
                 >
-                  <Link href={buildStatusHref("all")}>Todas</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  variant={statusFilter === "active" ? "default" : "outline"}
+                  Todas
+                </Link>
+                <Link
+                  href={buildStatusHref("active")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    statusFilter === "active"
+                      ? "bg-accent text-on-accent"
+                      : "border border-border text-fg-muted hover:border-accent hover:text-accent"
+                  }`}
                 >
-                  <Link href={buildStatusHref("active")}>Ativas</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  variant={statusFilter === "inactive" ? "default" : "outline"}
+                  Ativas
+                </Link>
+                <Link
+                  href={buildStatusHref("inactive")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    statusFilter === "inactive"
+                      ? "bg-accent text-on-accent"
+                      : "border border-border text-fg-muted hover:border-accent hover:text-accent"
+                  }`}
                 >
-                  <Link href={buildStatusHref("inactive")}>Inativas</Link>
-                </Button>
+                  Inativas
+                </Link>
               </div>
-              <p className="text-sm text-gray-600">
-                {statusFilter === "active" && "Mostrando apenas promoções ativas"}
-                {statusFilter === "inactive" && "Mostrando apenas promoções inativas"}
-                {(statusFilter === undefined || statusFilter === "all") && "Mostrando todas as promoções"}
-              </p>
             </div>
-            <div className="rounded-md border">
+
+            <div className="overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Promoção</TableHead>
-                    <TableHead>Tipo / Valor</TableHead>
-                    <TableHead>Validade</TableHead>
-                    <TableHead>Alcance</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Promoção
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Tipo / Valor
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Validade
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Alcance
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-right text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      Ações
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {promotions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <Gift className="w-8 h-8 text-gray-400" />
-                          <p className="text-gray-600">Nenhuma promoção encontrada</p>
-                          <Button asChild variant="outline" size="sm">
-                            <Link href="/dashboard/admin/promotions/new">Criar primeira promoção</Link>
-                          </Button>
+                      <TableCell colSpan={6} className="py-12 text-center">
+                        <div className="flex flex-col items-center gap-3 text-fg-muted">
+                          <Gift className="h-10 w-10 opacity-30" />
+                          <p className="text-sm">Nenhuma promoção encontrada</p>
+                          <Link
+                            href="/dashboard/admin/promotions/new"
+                            className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Criar primeira promoção
+                          </Link>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -265,16 +248,19 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
                       };
 
                       return (
-                        <TableRow key={promotion.id}>
+                        <TableRow
+                          key={promotion.id}
+                          className="border-border hover:bg-surface-1"
+                        >
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
-                                <Gift className="w-5 h-5 text-white" />
+                              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+                                <Gift className="h-5 w-5" />
                               </div>
                               <div>
-                                <p className="font-medium">{promotion.name}</p>
+                                <p className="font-medium text-foreground">{promotion.name}</p>
                                 {promotion.description && (
-                                  <p className="text-sm text-gray-600 truncate max-w-xs">
+                                  <p className="max-w-xs truncate text-xs text-fg-muted">
                                     {promotion.description}
                                   </p>
                                 )}
@@ -282,18 +268,18 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-foreground">
                               {promotion.type === "DISCOUNT_PERCENTAGE" ? (
-                                <Percent className="w-4 h-4 text-gray-400" />
+                                <Percent className="h-4 w-4 text-fg-subtle" />
                               ) : (
-                                <Gift className="w-4 h-4 text-gray-400" />
+                                <Gift className="h-4 w-4 text-fg-subtle" />
                               )}
                               <span className="font-medium">{formatValue(promotion)}</span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Calendar className="w-4 h-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-fg-muted">
+                              <Calendar className="h-4 w-4" />
                               <span>
                                 {formatDate(promotion.validFrom)}
                                 {" - "}
@@ -303,25 +289,30 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
                           </TableCell>
                           <TableCell>
                             {promotion.isGlobal ? (
-                              <Badge className="bg-blue-600">Global</Badge>
+                              <span className="inline-flex items-center rounded-full bg-[hsl(var(--accent)/0.1)] px-2.5 py-0.5 text-xs font-semibold text-accent">
+                                Global
+                              </span>
                             ) : (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">
+                              <div className="flex flex-col gap-1">
+                                <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-fg-muted">
                                   Serviços: {promotion._count?.servicePromotions || 0}
-                                </Badge>
-                                <Badge variant="outline">
+                                </span>
+                                <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-fg-muted">
                                   Usuários: {promotion._count?.userPromotions || 0}
-                                </Badge>
+                                </span>
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant={promotion.active ? "default" : "secondary"}
-                              className={promotion.active ? "bg-green-500" : "bg-gray-400"}
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                promotion.active
+                                  ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]"
+                                  : "bg-border text-fg-subtle"
+                              }`}
                             >
                               {promotion.active ? "Ativa" : "Inativa"}
-                            </Badge>
+                            </span>
                           </TableCell>
                           <TableCell className="text-right">
                             <PromotionTableActions promotion={serializedPromotion} />
@@ -335,22 +326,32 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
             </div>
 
             {promotions.length > 0 && (
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-gray-600">Mostrando {promotions.length} promoções</p>
+              <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                <p className="text-xs text-fg-muted">
+                  Mostrando {promotions.length} promoções
+                </p>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled>
+                  <button
+                    disabled
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-fg-subtle opacity-50"
+                  >
                     Anterior
-                  </Button>
-                  <Badge variant="outline">1</Badge>
-                  <Button variant="outline" size="sm" disabled>
+                  </button>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-accent text-xs font-semibold text-accent">
+                    1
+                  </span>
+                  <button
+                    disabled
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-fg-subtle opacity-50"
+                  >
                     Próximo
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,15 +1,12 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 import { getPromotionByIdForAdmin } from "@/server/promotionAdminActions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import PromotionFormWrapper from "@/components/PromotionFormWrapper";
-import { ArrowLeft, Gift, Power, Target, Calendar } from "lucide-react";
+import { PageHero } from "@/components/shared/PageHero";
+import { Calendar, Target } from "lucide-react";
 
 interface EditPromotionPageProps {
   params: {
@@ -56,89 +53,72 @@ export default async function EditPromotionPage({ params }: EditPromotionPagePro
   };
 
   return (
-    <div className="container mt-20 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/dashboard/admin/promotions">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Voltar para Promoções</span>
-                <span className="sm:hidden">Voltar</span>
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-                <span>Editar Promoção</span>
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
-                Atualize as informações da promoção
-              </p>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Administrador"
+        title="Editar Promoção"
+        subtitle="Atualize as informações da promoção."
+        actions={[
+          { label: "Voltar para Promoções", href: "/dashboard/admin/promotions", variant: "outline" },
+        ]}
+      />
+
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl space-y-5">
+            {promotion._count && (
+              <div className="grid grid-cols-2 gap-4 rounded-2xl border border-border bg-surface-card p-6 sm:grid-cols-4">
+                {[
+                  { label: "Agendamentos", value: promotion._count.appointments || 0 },
+                  { label: "Serviços", value: promotion._count.servicePromotions || 0 },
+                  { label: "Usuários", value: promotion._count.userPromotions || 0 },
+                  { label: "Status", value: promotion.active ? "Ativa" : "Inativa" },
+                ].map((stat) => (
+                  <div key={stat.label}>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                      {stat.label}
+                    </p>
+                    <p className="mt-2 font-display text-2xl font-bold italic text-accent">
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-border bg-surface-card p-6">
+              <h2 className="mb-6 font-display text-xl font-bold italic text-foreground">
+                Informações da Promoção
+              </h2>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-8">
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+                  </div>
+                }
+              >
+                <PromotionFormWrapper initialData={initialData} availableServices={services} />
+              </Suspense>
+            </div>
+
+            <div className="flex flex-col items-start gap-3 rounded-2xl border border-border bg-surface-card px-6 py-4 text-sm text-fg-muted sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  Criada em{" "}
+                  {promotion.createdAt
+                    ? new Date(promotion.createdAt).toLocaleDateString("pt-BR")
+                    : "--"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span>{promotion.isGlobal ? "Promoção global" : "Promoção específica"}</span>
+              </div>
             </div>
           </div>
         </div>
-
-        {promotion._count && (
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Agendamentos</p>
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                    {promotion._count.appointments || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Serviços</p>
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                    {promotion._count.servicePromotions || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Usuários</p>
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                    {promotion._count.userPromotions || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                    <Power className="w-5 h-5" />
-                    {promotion.active ? "Ativa" : "Inativa"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações da Promoção</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<LoadingSpinner />}>
-              <PromotionFormWrapper initialData={initialData} availableServices={services} />
-            </Suspense>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>
-                Criada em {promotion.createdAt ? new Date(promotion.createdAt).toLocaleDateString("pt-BR") : "--"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              <span>{promotion.isGlobal ? "Promoção global" : "Promoção específica"}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

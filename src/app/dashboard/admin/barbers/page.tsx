@@ -1,10 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { getBarbersForAdmin } from "@/server/adminActions";
-import Link from "next/link";
-import { ArrowLeft, Plus, UserCog } from "lucide-react";
+import { PageHero } from "@/components/shared/PageHero";
 import { BarbersPageClient } from "./BarbersPageClient";
 
 export default async function AdminBarbersPage() {
@@ -14,12 +12,10 @@ export default async function AdminBarbersPage() {
     redirect("/auth/signin");
   }
 
-  // Verificar se o usuário é administrador
   if (session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-  // Buscar lista de barbeiros
   const barbersResult = await getBarbersForAdmin({
     page: 1,
     limit: 20,
@@ -39,45 +35,26 @@ export default async function AdminBarbersPage() {
       };
 
   return (
-    <div className="container mt-20 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/admin">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Voltar ao Dashboard</span>
-                  <span className="sm:hidden">Voltar</span>
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <UserCog className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
-                  <span>Gerenciar Barbeiros</span>
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
-                  Visualize e gerencie todos os barbeiros da plataforma
-                </p>
-              </div>
-            </div>
-            <Button asChild className="w-full sm:w-auto">
-              <Link href="/dashboard/admin/barbers/new">
-                <Plus className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Promover a Barbeiro</span>
-                <span className="sm:hidden">Promover</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Administrador"
+        title="Gerenciar Barbeiros"
+        subtitle="Visualize e gerencie todos os barbeiros da plataforma."
+        actions={[
+          { label: "Voltar ao Dashboard", href: "/dashboard/admin", variant: "outline" },
+          { label: "Promover a Barbeiro", href: "/dashboard/admin/barbers/new", variant: "primary" },
+        ]}
+      />
 
-        <BarbersPageClient
-          initialBarbers={barbers}
-          initialPagination={initialPagination}
-          initialMetrics={initialMetrics}
-        />
-      </div>
-    </div>
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4">
+          <BarbersPageClient
+            initialBarbers={barbers}
+            initialPagination={initialPagination}
+            initialMetrics={initialMetrics}
+          />
+        </div>
+      </section>
+    </main>
   );
 }

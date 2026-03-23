@@ -1,17 +1,13 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { UserAvatar } from "@/components/UserAvatar";
-import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getUserById } from "@/server/adminActions";
-import Link from "next/link";
 import UserForm from "@/components/forms/UserForm";
 import { UserTableActions } from "@/components/UserTableActions";
-import { User, ArrowLeft, Calendar, Mail, Star, Activity, DollarSign } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
+import { PageHero } from "@/components/shared/PageHero";
+import { User, Calendar, Star, Activity, DollarSign } from "lucide-react";
 
 interface UserEditPageProps {
   params: {
@@ -26,88 +22,49 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
     redirect("/auth/signin");
   }
 
-  // Verificar se o usuário é administrador
   if (session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-  // Buscar dados do usuário
   const userResult = await getUserById(params.id);
 
   if (!userResult.success || !userResult.data) {
     return (
-      <div className="container mt-12 mb-16 mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4">Usuário não encontrado</h2>
-              <p className="text-gray-600 mb-4">O usuário com ID {params.id} não existe ou foi removido.</p>
-              <Button asChild>
-                <Link href="/dashboard/admin/users">Voltar para lista de usuários</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <main className="flex min-h-screen flex-col bg-background text-foreground">
+        <PageHero
+          badge="Administrador"
+          title="Usuário não encontrado"
+          subtitle={`O usuário com ID ${params.id} não existe ou foi removido.`}
+          actions={[{ label: "Voltar para lista", href: "/dashboard/admin/users", variant: "outline" }]}
+        />
+      </main>
     );
   }
 
   const user = userResult.data;
   const userImage = "image" in user ? ((user as { image?: string | null }).image ?? null) : null;
 
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleLabel = (role: string) => {
     switch (role) {
-      case "ADMIN":
-        return "destructive";
-      case "BARBER":
-        return "default";
-      case "CLIENT":
-        return "secondary";
-      default:
-        return "outline";
+      case "ADMIN": return "Admin";
+      case "BARBER": return "Barbeiro";
+      case "CLIENT": return "Cliente";
+      default: return role;
     }
   };
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return "🛡️";
-      case "BARBER":
-        return "✂️";
-      case "CLIENT":
-        return "👤";
-      default:
-        return "❓";
-    }
+  const getStatusLabel = () => {
+    if (user.deletedAt) return { label: "Removido", cls: "bg-red-500/10 text-red-500" };
+    if (!user.isActive) return { label: "Inativo", cls: "bg-border text-fg-muted" };
+    return { label: "Ativo", cls: "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]" };
   };
 
-  const renderStatusBadge = () => {
-    if (user.deletedAt) {
-      return (
-        <Badge variant="destructive" className="bg-red-500">
-          Removido
-        </Badge>
-      );
-    }
+  const statusInfo = getStatusLabel();
 
-    if (!user.isActive) {
-      return (
-        <Badge variant="outline" className="border-orange-300 text-orange-700">
-          Inativo
-        </Badge>
-      );
-    }
-
-    return (
-      <Badge variant="default" className="bg-green-500">
-        Ativo
-      </Badge>
-    );
-  };
-
-  // Calcular estatísticas
   const totalAppointments = user.appointments?.length || 0;
-  const appointmentsWithReviews = (user.appointments || []).filter((apt) => apt.serviceHistory?.rating);
+  const appointmentsWithReviews = (user.appointments || []).filter(
+    (apt) => apt.serviceHistory?.rating
+  );
   const averageRating =
     appointmentsWithReviews.length > 0
       ? appointmentsWithReviews.reduce((acc, apt) => acc + (apt.serviceHistory?.rating || 0), 0) /
@@ -119,236 +76,237 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
   }, 0);
 
   return (
-    <div className="container mt-8 sm:mt-12 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/admin/users">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Voltar</span>
-                  <span className="sm:hidden">Voltar</span>
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-                  <span>Editar Usuário</span>
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
-                  Gerencie as informações e permissões do usuário
-                </p>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Administrador"
+        title="Editar Usuário"
+        subtitle="Gerencie as informações e permissões do usuário."
+        actions={[{ label: "Voltar", href: "/dashboard/admin/users", variant: "outline" }]}
+      />
+
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Main content */}
+              <div className="lg:col-span-2 space-y-6">
+                <article className="rounded-2xl border border-border bg-surface-card p-6">
+                  <h2 className="mb-4 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                    <User className="h-5 w-5 text-accent" />
+                    Informações Básicas
+                  </h2>
+                  <div className="mb-5 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-semibold text-foreground">
+                      {getRoleLabel(user.role)}
+                    </span>
+                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.cls}`}>
+                      {statusInfo.label}
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-semibold text-fg-muted">
+                      Criado em{" "}
+                      {new Date(user.createdAt).toLocaleDateString("pt-BR", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <UserForm
+                    initialData={{
+                      id: user.id,
+                      name: user.name || "",
+                      nickname: user.nickname || "",
+                      email: user.email,
+                      role: user.role,
+                      isActive: user.isActive,
+                      phone: user.phone || "",
+                    }}
+                  />
+                </article>
+
+                <article className="rounded-2xl border border-border bg-surface-card">
+                  <div className="border-b border-border px-6 py-4">
+                    <h2 className="font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-accent" />
+                      Histórico de Agendamentos
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    {user.appointments && user.appointments.length > 0 ? (
+                      <div className="overflow-hidden rounded-xl border border-border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-border hover:bg-surface-1">
+                              <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                                Data
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                                Status
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                                Avaliação
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                                Valor
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {user.appointments.map((appointment) => (
+                              <TableRow
+                                key={appointment.id}
+                                className="border-border hover:bg-surface-1"
+                              >
+                                <TableCell className="text-sm text-foreground">
+                                  {new Date(appointment.createdAt).toLocaleDateString("pt-BR")}
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                      appointment.status === "COMPLETED"
+                                        ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]"
+                                        : "bg-border text-fg-muted"
+                                    }`}
+                                  >
+                                    {appointment.status}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  {appointment.serviceHistory?.rating ? (
+                                    <div className="flex items-center gap-1 text-sm text-foreground">
+                                      <Star className="h-4 w-4 text-accent fill-accent" />
+                                      {appointment.serviceHistory.rating}/5
+                                    </div>
+                                  ) : (
+                                    <span className="text-xs text-fg-subtle">Sem avaliação</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-sm text-foreground">
+                                  {(() => {
+                                    const priceValue = appointment.serviceHistory?.finalPrice;
+                                    const price =
+                                      typeof priceValue === "number"
+                                        ? priceValue
+                                        : Number(priceValue ?? 25);
+                                    return `R$ ${price.toFixed(2)}`;
+                                  })()}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-3 py-8 text-fg-muted">
+                        <Activity className="h-8 w-8 opacity-40" />
+                        <p className="text-sm">Nenhum agendamento encontrado</p>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                <article className="rounded-2xl border border-border bg-surface-card p-6 text-center">
+                  <UserAvatar
+                    src={userImage ?? undefined}
+                    name={user.name}
+                    email={user.email}
+                    size="xl"
+                    className="mx-auto mb-4 h-20 w-20"
+                  />
+                  <h3 className="font-display text-xl font-bold italic text-foreground">
+                    {user.name || "Sem nome"}
+                  </h3>
+                  <p className="mt-1 text-sm text-fg-muted">{user.email}</p>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    <span className="inline-flex items-center rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-semibold text-foreground">
+                      {getRoleLabel(user.role)}
+                    </span>
+                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${statusInfo.cls}`}>
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-xs text-fg-subtle">ID: {user.id.slice(0, 8)}...</p>
+                  <div className="mt-4">
+                    <UserTableActions
+                      user={{
+                        id: user.id,
+                        name: user.name || user.email,
+                        role: user.role,
+                        isActive: user.isActive,
+                        deletedAt: user.deletedAt ?? null,
+                      }}
+                      showEditButton={false}
+                    />
+                  </div>
+                </article>
+
+                <article className="rounded-2xl border border-border bg-surface-card p-6">
+                  <h3 className="mb-4 font-display text-lg font-bold italic text-foreground">
+                    Estatísticas
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-fg-muted">
+                        <Calendar className="h-4 w-4 text-accent" />
+                        Agendamentos
+                      </div>
+                      <span className="font-bold text-foreground">{totalAppointments}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-fg-muted">
+                        <Star className="h-4 w-4 text-accent" />
+                        Avaliação Média
+                      </div>
+                      <span className="font-bold text-foreground">
+                        {averageRating > 0 ? averageRating.toFixed(1) : "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-fg-muted">
+                        <DollarSign className="h-4 w-4 text-accent" />
+                        Total Gasto
+                      </div>
+                      <span className="font-bold text-accent">R$ {totalSpent.toFixed(2)}</span>
+                    </div>
+
+                    <div className="border-t border-border pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-fg-muted">
+                        <Activity className="h-4 w-4 text-accent" />
+                        Reviews Feitas
+                      </div>
+                      <span className="font-bold text-foreground">{appointmentsWithReviews.length}</span>
+                    </div>
+                  </div>
+                </article>
+
+                <article className="rounded-2xl border border-border bg-surface-card p-6">
+                  <h3 className="mb-4 font-display text-lg font-bold italic text-foreground">
+                    Ações Rápidas
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent">
+                      <span>Enviar Email</span>
+                    </button>
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent">
+                      <Calendar className="h-4 w-4" />
+                      Ver Agendamentos
+                    </button>
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent">
+                      <Star className="h-4 w-4" />
+                      Ver Avaliações
+                    </button>
+                  </div>
+                </article>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <UserTableActions
-                user={{
-                  id: user.id,
-                  name: user.name || user.email,
-                  role: user.role,
-                  isActive: user.isActive,
-                  deletedAt: user.deletedAt ?? null,
-                }}
-                showEditButton={false}
-              />
-            </div>
-          </div>
-          <Separator />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {/* Informações do Usuário */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Dados Básicos */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Informações Básicas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {getRoleIcon(user.role)} {user.role}
-                  </Badge>
-                  {renderStatusBadge()}
-                  <Badge variant="outline" className="border-gray-200 text-gray-700">
-                    Criado em{" "}
-                    {new Date(user.createdAt).toLocaleDateString("pt-BR", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </Badge>
-                </div>
-
-                <UserForm
-                  initialData={{
-                    id: user.id,
-                    name: user.name || "",
-                    nickname: user.nickname || "",
-                    email: user.email,
-                    role: user.role,
-                    isActive: user.isActive,
-                    phone: user.phone || "",
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Histórico de Agendamentos */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Histórico de Agendamentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {user.appointments && user.appointments.length > 0 ? (
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Data</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Avaliação</TableHead>
-                          <TableHead>Valor</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {user.appointments.map((appointment) => (
-                          <TableRow key={appointment.id}>
-                            <TableCell>{new Date(appointment.createdAt).toLocaleDateString("pt-BR")}</TableCell>
-                            <TableCell>
-                              <Badge variant={appointment.status === "COMPLETED" ? "default" : "outline"}>
-                                {appointment.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {appointment.serviceHistory?.rating ? (
-                                <div className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 text-yellow-500" />
-                                  <span>{appointment.serviceHistory.rating}/5</span>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">Sem avaliação</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {(() => {
-                                const priceValue = appointment.serviceHistory?.finalPrice;
-                                const price = typeof priceValue === "number" ? priceValue : Number(priceValue ?? 25);
-                                return `R$ ${price.toFixed(2)}`;
-                              })()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Activity className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">Nenhum agendamento encontrado</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar com Estatísticas */}
-          <div className="space-y-6">
-            {/* Avatar e Info Rápida */}
-            <Card>
-              <CardContent className="p-6 text-center">
-                <UserAvatar
-                  src={userImage ?? undefined}
-                  name={user.name}
-                  email={user.email}
-                  size="xl"
-                  className="w-20 h-20 mx-auto mb-4"
-                />
-                <h3 className="font-bold text-lg">{user.name || "Sem nome"}</h3>
-                <p className="text-gray-600 text-sm mb-3">{user.email}</p>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {getRoleIcon(user.role)} {user.role}
-                  </Badge>
-                  {renderStatusBadge()}
-                </div>
-                <p className="text-xs text-gray-500">ID: {user.id.slice(0, 8)}...</p>
-              </CardContent>
-            </Card>
-
-            {/* Estatísticas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Estatísticas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm">Agendamentos</span>
-                  </div>
-                  <span className="font-bold">{totalAppointments}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm">Avaliação Média</span>
-                  </div>
-                  <span className="font-bold">{averageRating > 0 ? averageRating.toFixed(1) : "N/A"}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">Total Gasto</span>
-                  </div>
-                  <span className="font-bold text-green-600">R$ {totalSpent.toFixed(2)}</span>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm">Reviews Feitas</span>
-                  </div>
-                  <span className="font-bold">{appointmentsWithReviews.length}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Ações Rápidas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full" variant="outline">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Enviar Email
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Ver Agendamentos
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <Star className="w-4 h-4 mr-2" />
-                  Ver Avaliações
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

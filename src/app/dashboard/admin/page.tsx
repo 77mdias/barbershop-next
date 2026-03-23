@@ -1,23 +1,18 @@
-import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getAdminMetrics } from "@/server/dashboardActions";
 import { getServicesForAdmin } from "@/server/serviceAdminActions";
+import { PageHero } from "@/components/shared/PageHero";
+import { RealtimeRefreshBridge } from "@/components/realtime/RealtimeRefreshBridge";
 import Link from "next/link";
 import {
   Users,
   BarChart3,
   Star,
   TrendingUp,
-  Calendar,
-  Shield,
   UserCog,
   Settings,
   Activity,
@@ -29,7 +24,6 @@ import {
   Edit,
   Power,
 } from "lucide-react";
-import { RealtimeRefreshBridge } from "@/components/realtime/RealtimeRefreshBridge";
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -38,16 +32,13 @@ export default async function AdminDashboardPage() {
     redirect("/auth/signin");
   }
 
-  // Verificar se o usuário é administrador
   if (session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-  // Buscar métricas administrativas
   const metricsResult = await getAdminMetrics();
   const metrics = metricsResult.success ? metricsResult.data : null;
 
-  // Buscar serviços para a aba Serviços
   const servicesResult = await getServicesForAdmin({ limit: 10 });
   const services = servicesResult.success ? servicesResult.data : [];
   const totalServices = services.length;
@@ -55,513 +46,503 @@ export default async function AdminDashboardPage() {
   const inactiveServices = services.filter((s: any) => !s.active).length;
 
   return (
-    <div className="container mt-20 sm:mt-16 mb-16 mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-        <RealtimeRefreshBridge events={["appointment:changed", "review:updated", "analytics:updated"]} />
-        {/* Header Administrativo */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
-                <span>Painel Administrativo</span>
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-2 sm:mt-1">
-                Gerencie toda a plataforma e monitore métricas globais
-              </p>
-            </div>
-            <div className="flex justify-start sm:justify-end">
-              <Badge variant="destructive" className="px-3 py-2 text-sm">
-                <Shield className="w-4 h-4 mr-2" />
-                Administrador
-              </Badge>
-            </div>
-          </div>
-          <Separator />
-        </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <RealtimeRefreshBridge events={["appointment:changed", "review:updated", "analytics:updated"]} />
+      <PageHero
+        badge="Administrador"
+        title="Painel Administrativo"
+        subtitle="Gerencie toda a plataforma e monitore métricas globais."
+      />
 
-        {/* Loading State */}
-        {!metrics && (
-          <div className="flex items-center justify-center py-8">
+      {!metrics && (
+        <section className="bg-background py-12">
+          <div className="container mx-auto px-4 flex items-center justify-center py-8">
             <LoadingSpinner />
           </div>
-        )}
+        </section>
+      )}
 
-        {metrics && (
-          <>
-            {/* Cards de Métricas Principais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Total de Usuários */}
-              <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-500" />
+      {metrics && (
+        <>
+          {/* KPI Cards */}
+          <section className="bg-background py-12">
+            <div className="container mx-auto px-4">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Total de Usuários
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-3xl font-bold text-blue-600">{metrics.totalUsers}</p>
-                    <div className="flex flex-col gap-1 text-sm text-gray-600">
-                      <span>👥 Clientes: {metrics.clientsCount}</span>
-                      <span>✂️ Barbeiros: {metrics.barbersCount}</span>
-                      <span>🛡️ Admins: {metrics.adminsCount}</span>
-                    </div>
+                  </p>
+                  <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                    {metrics.totalUsers}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-xs text-fg-muted">
+                    <span>Clientes: {metrics.clientsCount}</span>
+                    <span>Barbeiros: {metrics.barbersCount}</span>
+                    <span>Admins: {metrics.adminsCount}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </article>
 
-              {/* Métricas de Avaliações */}
-              <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500" />
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <Star className="h-5 w-5" />
+                  </div>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Sistema de Reviews
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-3xl font-bold text-yellow-600">{metrics.totalReviews}</p>
-                    <div className="flex flex-col gap-1 text-sm text-gray-600">
-                      <span>⭐ Média: {metrics.globalAverage}/5</span>
-                      <span>📈 Este mês: {metrics.monthlyReviews}</span>
-                      <span>🏆 5 estrelas: {metrics.fiveStarReviews}</span>
-                    </div>
+                  </p>
+                  <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                    {metrics.totalReviews}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-xs text-fg-muted">
+                    <span>Média: {metrics.globalAverage}/5</span>
+                    <span>Este mês: {metrics.monthlyReviews}</span>
+                    <span>5 estrelas: {metrics.fiveStarReviews}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </article>
 
-              {/* Atividade do Mês */}
-              <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-green-500" />
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <Activity className="h-5 w-5" />
+                  </div>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Atividade Mensal
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-3xl font-bold text-green-600">{metrics.monthlyActivity}</p>
-                    <div className="flex flex-col gap-1 text-sm text-gray-600">
-                      <span>📅 Agendamentos: {metrics.monthlyAppointments}</span>
-                      <span>⭐ Avaliações: {metrics.monthlyReviews}</span>
-                      <span>👤 Novos usuários: {metrics.newUsersThisMonth}</span>
-                    </div>
+                  </p>
+                  <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                    {metrics.monthlyActivity}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-xs text-fg-muted">
+                    <span>Agendamentos: {metrics.monthlyAppointments}</span>
+                    <span>Avaliações: {metrics.monthlyReviews}</span>
+                    <span>Novos usuários: {metrics.newUsersThisMonth}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </article>
 
-              {/* Receita Estimada */}
-              <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-purple-500" />
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <DollarSign className="h-5 w-5" />
+                  </div>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Receita Mensal
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-3xl font-bold text-purple-600">R$ {(metrics.monthlyRevenue || 0).toFixed(2)}</p>
-                    <div className="flex flex-col gap-1 text-sm text-gray-600">
-                      <span>💰 Total acumulado: R$ {(metrics.totalRevenue || 0).toFixed(2)}</span>
-                      <span>📊 Serviços pagos: {metrics.paidServices}</span>
-                    </div>
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                    R$ {(metrics.monthlyRevenue || 0).toFixed(2)}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-xs text-fg-muted">
+                    <span>Total: R$ {(metrics.totalRevenue || 0).toFixed(2)}</span>
+                    <span>Serviços pagos: {metrics.paidServices}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </article>
+              </div>
             </div>
+          </section>
 
-            {/* Tabs de Gestão */}
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1">
-                <TabsTrigger
-                  value="overview"
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Visão Geral</span>
-                  <span className="sm:hidden">Visão</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="users"
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>Usuários</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="reviews"
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Avaliações</span>
-                  <span className="sm:hidden">Reviews</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="services"
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  <Scissors className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>Serviços</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="system"
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>Sistema</span>
-                </TabsTrigger>
-              </TabsList>
+          {/* Tabs */}
+          <section className="bg-surface-1 py-12">
+            <div className="container mx-auto px-4">
+              <Tabs defaultValue="overview" className="space-y-6">
+                <TabsList className="rounded-2xl border border-border bg-surface-card p-1 flex flex-wrap gap-1 h-auto">
+                  <TabsTrigger
+                    value="overview"
+                    className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Visão Geral</span>
+                    <span className="sm:hidden">Visão</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="users"
+                    className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+                  >
+                    <Users className="h-4 w-4" />
+                    Usuários
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="reviews"
+                    className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+                  >
+                    <Star className="h-4 w-4" />
+                    <span className="hidden sm:inline">Avaliações</span>
+                    <span className="sm:hidden">Reviews</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="services"
+                    className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+                  >
+                    <Scissors className="h-4 w-4" />
+                    Serviços
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="system"
+                    className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Sistema
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Visão Geral */}
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Top Barbeiros */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" />
+                {/* Visão Geral */}
+                <TabsContent value="overview" className="space-y-6">
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <article className="rounded-2xl border border-border bg-surface-card p-6">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-accent" />
                         Top Barbeiros (Avaliações)
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                      </h3>
                       <div className="space-y-4">
                         {metrics.topBarbers?.map((barber, index) => (
                           <div key={barber.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <Badge
-                                variant="outline"
-                                className="w-8 h-8 rounded-full flex items-center justify-center"
-                              >
+                              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface-1 text-sm font-semibold text-foreground">
                                 {index + 1}
-                              </Badge>
+                              </span>
                               <div>
-                                <p className="font-medium">{barber.name}</p>
-                                <p className="text-sm text-gray-600">{barber.totalReviews} avaliações</p>
+                                <p className="font-medium text-foreground">{barber.name}</p>
+                                <p className="text-xs text-fg-muted">{barber.totalReviews} avaliações</p>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold text-yellow-600">⭐ {barber.averageRating}</p>
-                            </div>
+                            <p className="font-bold text-accent">
+                              <Star className="inline h-4 w-4 mr-1 fill-accent" />
+                              {barber.averageRating}
+                            </p>
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </article>
 
-                  {/* Distribuição de Avaliações */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="w-5 h-5" />
+                    <article className="rounded-2xl border border-border bg-surface-card p-6">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-accent" />
                         Distribuição de Avaliações
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                      </h3>
                       <div className="space-y-3">
                         {metrics.ratingDistribution?.map((rating) => (
                           <div key={rating.rating} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">{rating.rating} ⭐</span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-1 ml-4">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <span className="text-sm font-medium text-foreground">
+                              {rating.rating} <Star className="inline h-4 w-4 text-accent fill-accent" />
+                            </span>
+                            <div className="flex flex-1 items-center gap-3 ml-4">
+                              <div className="flex-1 rounded-full bg-border h-2">
                                 <div
-                                  className="bg-yellow-500 h-2 rounded-full"
+                                  className="h-2 rounded-full bg-accent"
                                   style={{
                                     width: `${(rating._count.rating / metrics.totalReviews) * 100}%`,
                                   }}
                                 />
                               </div>
-                              <span className="text-sm text-gray-600 min-w-[3rem] text-right">
+                              <span className="min-w-[3rem] text-right text-sm text-fg-muted">
                                 {rating._count.rating}
                               </span>
                             </div>
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+                    </article>
+                  </div>
+                </TabsContent>
 
-              {/* Gestão de Usuários */}
-              <TabsContent value="users" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Ações Rápidas de Usuários */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <UserCog className="w-5 h-5" />
+                {/* Gestão de Usuários */}
+                <TabsContent value="users" className="space-y-6">
+                  <div className="grid gap-5 lg:grid-cols-3">
+                    <article className="rounded-2xl border border-border bg-surface-card p-6">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                        <UserCog className="h-5 w-5 text-accent" />
                         Ações Rápidas
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Button asChild className="w-full">
-                        <Link href="/dashboard/admin/users">
-                          <Users className="w-4 h-4 mr-2" />
+                      </h3>
+                      <div className="flex flex-col gap-3">
+                        <Link
+                          href="/dashboard/admin/users"
+                          className="gold-shimmer inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
+                        >
+                          <Users className="h-4 w-4" />
                           Gerenciar Usuários
                         </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/dashboard/admin/barbers">
-                          <UserCog className="w-4 h-4 mr-2" />
+                        <Link
+                          href="/dashboard/admin/barbers"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <UserCog className="h-4 w-4" />
                           Gerenciar Barbeiros
                         </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/dashboard/admin/reports">
-                          <BarChart3 className="w-4 h-4 mr-2" />
+                        <Link
+                          href="/dashboard/admin/reports"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <BarChart3 className="h-4 w-4" />
                           Relatórios
                         </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      </div>
+                    </article>
 
-                  {/* Estatísticas de Usuários */}
-                  <Card className="lg:col-span-2">
-                    <CardHeader>
-                      <CardTitle>Estatísticas Detalhadas</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-600">Usuários Ativos (30 dias)</p>
-                          <p className="text-2xl font-bold text-green-600">{metrics.activeUsers}</p>
+                    <article className="rounded-2xl border border-border bg-surface-card p-6 lg:col-span-2">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground">
+                        Estatísticas Detalhadas
+                      </h3>
+                      <div className="grid grid-cols-2 gap-5">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                            Usuários Ativos (30 dias)
+                          </p>
+                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                            {metrics.activeUsers}
+                          </p>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-600">Novos Usuários (mês)</p>
-                          <p className="text-2xl font-bold text-blue-600">{metrics.newUsersThisMonth}</p>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                            Novos Usuários (mês)
+                          </p>
+                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                            {metrics.newUsersThisMonth}
+                          </p>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-600">Taxa de Conversão</p>
-                          <p className="text-2xl font-bold text-purple-600">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                            Taxa de Conversão
+                          </p>
+                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
                             {((metrics.activeUsers / metrics.totalUsers) * 100).toFixed(1)}%
                           </p>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-600">Barbeiros Ativos</p>
-                          <p className="text-2xl font-bold text-orange-600">{metrics.activeBarbersCount}</p>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                            Barbeiros Ativos
+                          </p>
+                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                            {metrics.activeBarbersCount}
+                          </p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+                    </article>
+                  </div>
+                </TabsContent>
 
-              {/* Sistema de Avaliações */}
-              <TabsContent value="reviews" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Monitoramento de Avaliações</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600">Avaliações Hoje</p>
-                        <p className="text-2xl font-bold">{metrics.todayReviews}</p>
+                {/* Sistema de Avaliações */}
+                <TabsContent value="reviews" className="space-y-6">
+                  <article className="rounded-2xl border border-border bg-surface-card p-6">
+                    <h3 className="mb-5 font-display text-xl font-bold italic text-foreground">
+                      Monitoramento de Avaliações
+                    </h3>
+                    <div className="grid gap-5 sm:grid-cols-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                          Avaliações Hoje
+                        </p>
+                        <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                          {metrics.todayReviews}
+                        </p>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600">Média Geral</p>
-                        <p className="text-2xl font-bold text-yellow-600">⭐ {metrics.globalAverage}</p>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                          Média Geral
+                        </p>
+                        <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                          {metrics.globalAverage}
+                        </p>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600">Reviews Pendentes</p>
-                        <p className="text-2xl font-bold text-orange-600">{metrics.pendingReviews}</p>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                          Reviews Pendentes
+                        </p>
+                        <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                          {metrics.pendingReviews}
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </article>
+                </TabsContent>
 
-              {/* Serviços */}
-              <TabsContent value="services" className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {/* Card: Total de Serviços */}
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total de Serviços</CardTitle>
-                      <Scissors className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">{totalServices}</div>
-                      <p className="text-xs text-muted-foreground mt-1">cadastrados na plataforma</p>
-                    </CardContent>
-                  </Card>
+                {/* Serviços */}
+                <TabsContent value="services" className="space-y-5">
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                        <Scissors className="h-5 w-5" />
+                      </div>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                        Total de Serviços
+                      </p>
+                      <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                        {totalServices}
+                      </p>
+                      <p className="mt-1 text-xs text-fg-muted">cadastrados na plataforma</p>
+                    </article>
 
-                  {/* Card: Serviços Ativos */}
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Serviços Ativos</CardTitle>
-                      <Power className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-700 dark:text-green-400">{activeServices}</div>
-                      <p className="text-xs text-muted-foreground mt-1">disponíveis para agendamento</p>
-                    </CardContent>
-                  </Card>
+                    <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                        <Power className="h-5 w-5" />
+                      </div>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                        Serviços Ativos
+                      </p>
+                      <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                        {activeServices}
+                      </p>
+                      <p className="mt-1 text-xs text-fg-muted">disponíveis para agendamento</p>
+                    </article>
 
-                  {/* Card: Serviços Inativos */}
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Serviços Inativos</CardTitle>
-                      <Power className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-muted-foreground">{inactiveServices}</div>
-                      <p className="text-xs text-muted-foreground mt-1">temporariamente desativados</p>
-                    </CardContent>
-                  </Card>
+                    <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                        <Power className="h-5 w-5 opacity-50" />
+                      </div>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                        Serviços Inativos
+                      </p>
+                      <p className="mt-2 font-display text-4xl font-bold italic text-fg-muted">
+                        {inactiveServices}
+                      </p>
+                      <p className="mt-1 text-xs text-fg-muted">temporariamente desativados</p>
+                    </article>
 
-                  {/* Card: Ações Rápidas */}
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Gerenciamento</CardTitle>
-                      <Settings className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <Button
-                        asChild
-                        className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
-                        size="sm"
-                      >
-                        <Link href="/dashboard/admin/services">
-                          <Scissors className="w-4 h-4 mr-2" />
+                    <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                        <Settings className="h-5 w-5" />
+                      </div>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                        Gerenciamento
+                      </p>
+                      <div className="mt-3 flex flex-col gap-2">
+                        <Link
+                          href="/dashboard/admin/services"
+                          className="gold-shimmer inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
+                        >
+                          <Scissors className="h-3.5 w-3.5" />
                           Ver Todos
                         </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full" size="sm">
-                        <Link href="/dashboard/admin/services/new">
-                          <Plus className="w-4 h-4 mr-2" />
+                        <Link
+                          href="/dashboard/admin/services/new"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-xs font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
                           Novo Serviço
                         </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
+                      </div>
+                    </article>
+                  </div>
 
-                {/* Lista de Serviços Recentes */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Serviços Recentes</CardTitle>
-                    <CardDescription>Últimos serviços cadastrados ou atualizados</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
+                  <article className="rounded-2xl border border-border bg-surface-card">
+                    <div className="border-b border-border px-6 py-4">
+                      <h3 className="font-display text-xl font-bold italic text-foreground">
+                        Serviços Recentes
+                      </h3>
+                      <p className="mt-1 text-sm text-fg-muted">
+                        Últimos serviços cadastrados ou atualizados
+                      </p>
+                    </div>
+                    <div className="divide-y divide-border">
                       {services.slice(0, 5).map((service: any) => (
                         <div
                           key={service.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+                          className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-1"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700 rounded-full flex items-center justify-center">
-                              <Scissors className="w-5 h-5 text-white" />
+                            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+                              <Scissors className="h-5 w-5" />
                             </div>
                             <div>
                               <p className="font-medium text-foreground">{service.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {service.duration} min • R$ {Number(service.price).toFixed(2)}
+                              <p className="text-sm text-fg-muted">
+                                {service.duration} min · R$ {Number(service.price).toFixed(2)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant={service.active ? "default" : "secondary"}
-                              className={service.active ? "bg-green-500 dark:bg-green-600" : ""}
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                service.active
+                                  ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]"
+                                  : "bg-border text-fg-subtle"
+                              }`}
                             >
                               {service.active ? "Ativo" : "Inativo"}
-                            </Badge>
-                            <Button asChild variant="ghost" size="sm">
-                              <Link href={`/dashboard/admin/services/${service.id}/edit`}>
-                                <Edit className="w-4 h-4" />
-                              </Link>
-                            </Button>
+                            </span>
+                            <Link
+                              href={`/dashboard/admin/services/${service.id}/edit`}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-fg-muted transition-colors hover:border-accent hover:text-accent"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Link>
                           </div>
                         </div>
                       ))}
 
                       {services.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Scissors className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>Nenhum serviço cadastrado ainda</p>
-                          <Button asChild variant="outline" className="mt-4" size="sm">
-                            <Link href="/dashboard/admin/services/new">Criar primeiro serviço</Link>
-                          </Button>
+                        <div className="flex flex-col items-center justify-center gap-3 py-12 text-fg-muted">
+                          <Scissors className="h-12 w-12 opacity-30" />
+                          <p className="text-sm">Nenhum serviço cadastrado ainda</p>
+                          <Link
+                            href="/dashboard/admin/services/new"
+                            className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                          >
+                            Criar primeiro serviço
+                          </Link>
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </article>
+                </TabsContent>
 
-              {/* Sistema */}
-              <TabsContent value="system" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="w-5 h-5" />
+                {/* Sistema */}
+                <TabsContent value="system" className="space-y-6">
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <article className="rounded-2xl border border-border bg-surface-card p-6">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                        <Database className="h-5 w-5 text-accent" />
                         Status do Sistema
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span>Status da API</span>
-                          <Badge variant="default" className="bg-green-500">
-                            ✓ Online
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Banco de Dados</span>
-                          <Badge variant="default" className="bg-green-500">
-                            ✓ Conectado
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Uploads de Imagem</span>
-                          <Badge variant="default" className="bg-green-500">
-                            ✓ Funcionando
-                          </Badge>
-                        </div>
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          { label: "Status da API", status: "Online" },
+                          { label: "Banco de Dados", status: "Conectado" },
+                          { label: "Uploads de Imagem", status: "Funcionando" },
+                        ].map((item) => (
+                          <div key={item.label} className="flex items-center justify-between">
+                            <span className="text-sm text-foreground">{item.label}</span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 py-0.5 text-xs font-semibold text-[hsl(var(--success))]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" />
+                              {item.status}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </article>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
+                    <article className="rounded-2xl border border-border bg-surface-card p-6">
+                      <h3 className="mb-5 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-accent" />
                         Configurações Administrativas
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/settings">
-                          <Settings className="w-4 h-4 mr-2" />
+                      </h3>
+                      <div className="flex flex-col gap-3">
+                        <Link
+                          href="/admin/settings"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <Settings className="h-4 w-4" />
                           Configurações Gerais
                         </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/backup">
-                          <Database className="w-4 h-4 mr-2" />
-                          Backup & Restore
+                        <Link
+                          href="/admin/backup"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <Database className="h-4 w-4" />
+                          Backup &amp; Restore
                         </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/logs">
-                          <AlertTriangle className="w-4 h-4 mr-2" />
+                        <Link
+                          href="/admin/logs"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                        >
+                          <AlertTriangle className="h-4 w-4" />
                           Logs do Sistema
                         </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
-      </div>
-    </div>
+                      </div>
+                    </article>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </section>
+        </>
+      )}
+    </main>
   );
 }

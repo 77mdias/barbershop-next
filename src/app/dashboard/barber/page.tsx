@@ -2,25 +2,19 @@ import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewsList } from "@/components/ReviewsList";
-import { ReviewSection } from "@/components/ReviewSection";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getBarberMetrics } from "@/server/dashboardActions";
+import { PageHero } from "@/components/shared/PageHero";
+import { RealtimeRefreshBridge } from "@/components/realtime/RealtimeRefreshBridge";
 import Link from "next/link";
 import {
-  Scissors,
   Star,
   Calendar,
   Users,
   TrendingUp,
   BarChart3,
   MessageSquare,
-  Clock,
   DollarSign,
   Award,
 } from "lucide-react";
@@ -32,24 +26,17 @@ export default async function BarberDashboardPage() {
     redirect("/auth/signin");
   }
 
-  // Verificar se o usuário é barbeiro
   if (session.user.role !== "BARBER" && session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-  // Buscar métricas reais do barbeiro
   const metricsResult = await getBarberMetrics(session.user.id);
   const metrics = metricsResult.success ? metricsResult.data : null;
 
   const ratingDistribution = [5, 4, 3, 2, 1].map((score) => {
-    const entry = metrics?.ratingDistribution?.find(
-      (item) => item.rating === score
-    );
+    const entry = metrics?.ratingDistribution?.find((item) => item.rating === score);
     const rawPercentage = entry?.percentage ?? 0;
-    const normalizedPercentage = Math.max(
-      0,
-      Math.min(100, Math.round(rawPercentage))
-    );
+    const normalizedPercentage = Math.max(0, Math.min(100, Math.round(rawPercentage)));
 
     return {
       rating: score,
@@ -59,464 +46,353 @@ export default async function BarberDashboardPage() {
   });
 
   return (
-    <div className="container mt-12 mb-16 mx-auto py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <Scissors className="w-8 h-8" />
-                Dashboard do Barbeiro
-              </h1>
-              <p className="text-gray-600">
-                Gerencie seus atendimentos, reviews e performance
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="default" className="px-3 py-1">
-                Barbeiro Ativo
-              </Badge>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard">Dashboard Geral</Link>
-              </Button>
-            </div>
-          </div>
-          <Separator />
-        </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <RealtimeRefreshBridge
+        events={["appointment:changed", "review:updated", "analytics:updated"]}
+      />
+      <PageHero
+        badge="Barbeiro"
+        title="Dashboard do Barbeiro"
+        subtitle="Gerencie seus atendimentos, reviews e performance."
+        actions={[{ label: "Dashboard Geral", href: "/dashboard", variant: "outline" }]}
+      />
 
-        {/* Métricas principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Agendamentos Hoje */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+      {/* KPI Cards */}
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                 Hoje
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold">--</p>
-                <p className="text-xs text-gray-600">Agendamentos</p>
-                <Badge variant="secondary" className="text-xs">
-                  📅 {new Date().toLocaleDateString("pt-BR")}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+              <p className="mt-2 font-display text-4xl font-bold italic text-accent">--</p>
+              <p className="mt-1 text-xs text-fg-muted">
+                {new Date().toLocaleDateString("pt-BR")}
+              </p>
+            </article>
 
-          {/* Avaliação Média */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Star className="w-4 h-4" />
+            <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                <Star className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                 Avaliação
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold">
-                  {metrics?.averageRating?.toFixed(1) || "0.0"}
-                </p>
-                <p className="text-xs text-gray-600">Média Geral</p>
-                <Badge variant="secondary" className="text-xs">
-                  ⭐ Este Mês
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+              <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                {metrics?.averageRating?.toFixed(1) || "0.0"}
+              </p>
+              <p className="mt-1 text-xs text-fg-muted">Média Geral</p>
+            </article>
 
-          {/* Total de Clientes */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="w-4 h-4" />
+            <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                <Users className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                 Clientes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold">
-                  {metrics?.totalClients || 0}
-                </p>
-                <p className="text-xs text-gray-600">Total Atendidos</p>
-                <Badge variant="secondary" className="text-xs">
-                  👥 Este Mês
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+              <p className="mt-2 font-display text-4xl font-bold italic text-accent">
+                {metrics?.totalClients || 0}
+              </p>
+              <p className="mt-1 text-xs text-fg-muted">Total Atendidos</p>
+            </article>
 
-          {/* Revenue */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
+            <article className="card-hover rounded-2xl border border-border bg-surface-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                <DollarSign className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                 Receita
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold">
-                  R$ {metrics?.monthlyRevenue?.toFixed(2) || "0.00"}
-                </p>
-                <p className="text-xs text-gray-600">Este Mês</p>
-                <Badge variant="secondary" className="text-xs">
-                  💰 Estimativa
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+              <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                R$ {metrics?.monthlyRevenue?.toFixed(2) || "0.00"}
+              </p>
+              <p className="mt-1 text-xs text-fg-muted">Este Mês</p>
+            </article>
+          </div>
         </div>
+      </section>
 
-        {/* Tabs principais */}
-        <Tabs defaultValue="reviews" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 gap-1 h-auto p-1">
-            <TabsTrigger
-              value="reviews"
-              className="flex items-center gap-2 py-3"
-            >
-              <Star className="w-4 h-4" />
-              Reviews
-            </TabsTrigger>
-            <TabsTrigger
-              value="appointments"
-              className="flex items-center gap-2 py-3"
-            >
-              <Calendar className="w-4 h-4" />
-              Agendamentos
-            </TabsTrigger>
-            <TabsTrigger
-              value="analytics"
-              className="flex items-center gap-2 py-3"
-            >
-              <BarChart3 className="w-4 h-4" />
-              Análises
-            </TabsTrigger>
-            <TabsTrigger
-              value="performance"
-              className="flex items-center gap-2 py-3"
-            >
-              <TrendingUp className="w-4 h-4" />
-              Performance
-            </TabsTrigger>
-          </TabsList>
+      {/* Tabs */}
+      <section className="bg-surface-1 py-12">
+        <div className="container mx-auto px-4">
+          <Tabs defaultValue="reviews" className="w-full">
+            <TabsList className="mb-8 rounded-2xl border border-border bg-surface-card p-1">
+              <TabsTrigger
+                value="reviews"
+                className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+              >
+                <Star className="h-4 w-4" />
+                Reviews
+              </TabsTrigger>
+              <TabsTrigger
+                value="appointments"
+                className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+              >
+                <Calendar className="h-4 w-4" />
+                Agendamentos
+              </TabsTrigger>
+              <TabsTrigger
+                value="analytics"
+                className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Análises
+              </TabsTrigger>
+              <TabsTrigger
+                value="performance"
+                className="flex items-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Performance
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Tab de Reviews */}
-          <TabsContent value="reviews" className="space-y-6">
-            {/* Estatísticas de Reviews */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <MessageSquare className="w-8 h-8 mx-auto text-blue-600" />
-                    <p className="text-3xl font-bold">
-                      {metrics?.totalReviews || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Total de Reviews</p>
-                    <Badge variant="outline">📝 Todas</Badge>
+            {/* Tab: Reviews */}
+            <TabsContent value="reviews" className="space-y-6">
+              <div className="grid gap-5 sm:grid-cols-3">
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6 text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <MessageSquare className="h-5 w-5" />
                   </div>
-                </CardContent>
-              </Card>
+                  <p className="mt-3 font-display text-4xl font-bold italic text-accent">
+                    {metrics?.totalReviews || 0}
+                  </p>
+                  <p className="mt-2 text-sm text-fg-muted">Total de Reviews</p>
+                </article>
 
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <Star className="w-8 h-8 mx-auto text-yellow-600" />
-                    <p className="text-3xl font-bold">
-                      {metrics?.fiveStarReviews || 0}
-                    </p>
-                    <p className="text-sm text-gray-600">Reviews 5 ⭐</p>
-                    <Badge variant="outline">🏆 Excelência</Badge>
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6 text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <Star className="h-5 w-5" />
                   </div>
-                </CardContent>
-              </Card>
+                  <p className="mt-3 font-display text-4xl font-bold italic text-accent">
+                    {metrics?.fiveStarReviews || 0}
+                  </p>
+                  <p className="mt-2 text-sm text-fg-muted">Reviews 5 Estrelas</p>
+                </article>
 
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <TrendingUp className="w-8 h-8 mx-auto text-green-600" />
-                    <p className="text-3xl font-bold">
-                      {metrics?.monthlyAverageRating?.toFixed(1) || "0.0"}
-                    </p>
-                    <p className="text-sm text-gray-600">Média Este Mês</p>
-                    <Badge variant="outline">📊 Tendência</Badge>
+                <article className="card-hover rounded-2xl border border-border bg-surface-card p-6 text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                    <TrendingUp className="h-5 w-5" />
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <p className="mt-3 font-display text-4xl font-bold italic text-accent">
+                    {metrics?.monthlyAverageRating?.toFixed(1) || "0.0"}
+                  </p>
+                  <p className="mt-2 text-sm text-fg-muted">Média Este Mês</p>
+                </article>
+              </div>
 
-            {/* Lista de Reviews do Barbeiro */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-6 h-6" />
+              <article className="rounded-2xl border border-border bg-surface-card p-6">
+                <h3 className="mb-4 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-accent" />
                   Distribuição de Notas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h3>
                 <div className="space-y-2">
                   {ratingDistribution.map((distribution) => (
                     <div
                       key={`summary-${distribution.rating}`}
                       className="flex items-center justify-between text-sm"
                     >
-                      <span className="flex items-center gap-1 font-medium">
+                      <span className="flex items-center gap-1 font-medium text-foreground">
                         {distribution.rating}
-                        <Star className="w-4 h-4 text-yellow-500" />
+                        <Star className="h-4 w-4 text-accent" />
                       </span>
-                      <span className="text-muted-foreground">
+                      <span className="text-fg-muted">
                         {distribution.count} reviews · {distribution.percentage}%
                       </span>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </article>
 
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-6 h-6" />
+              <article className="rounded-2xl border border-border bg-surface-card">
+                <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                  <h3 className="font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-accent" />
                     Suas Reviews Recentes
-                  </CardTitle>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/reviews?view=barber">Ver Todas</Link>
-                  </Button>
+                  </h3>
+                  <Link
+                    href="/reviews?view=barber"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                  >
+                    Ver Todas
+                  </Link>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <Suspense
-                  fallback={
-                    <LoadingSpinner
-                      text="Carregando reviews..."
-                      className="py-8"
+                <div className="p-6">
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center py-8">
+                        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+                      </div>
+                    }
+                  >
+                    <ReviewsList
+                      barberId={session.user.id}
+                      showStats={true}
+                      showActions={true}
+                      limit={5}
                     />
-                  }
-                >
-                  <ReviewsList
-                    barberId={session.user.id}
-                    showStats={true}
-                    showActions={true}
-                    limit={5}
-                  />
-                </Suspense>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Tab de Agendamentos */}
-          <TabsContent value="appointments" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-6 h-6" />
-                  Próximos Agendamentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>
-                    Integração com sistema de agendamentos em desenvolvimento
-                  </p>
-                  <Button asChild variant="outline" className="mt-4">
-                    <Link href="/scheduling">Ver Agendamentos</Link>
-                  </Button>
+                  </Suspense>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </article>
+            </TabsContent>
 
-          {/* Tab de Análises */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Gráfico de Reviews por Mês */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-6 h-6" />
+            {/* Tab: Agendamentos */}
+            <TabsContent value="appointments" className="space-y-6">
+              <article className="rounded-2xl border border-border bg-surface-card p-8 text-center">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                  <Calendar className="h-8 w-8 opacity-60" />
+                </div>
+                <p className="mt-4 text-fg-muted">
+                  Integração com sistema de agendamentos em desenvolvimento
+                </p>
+                <Link
+                  href="/scheduling"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                >
+                  Ver Agendamentos
+                </Link>
+              </article>
+            </TabsContent>
+
+            {/* Tab: Análises */}
+            <TabsContent value="analytics" className="space-y-6">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <article className="rounded-2xl border border-border bg-surface-card p-6">
+                  <h3 className="mb-4 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-accent" />
                     Reviews por Mês
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Gráficos de análise em desenvolvimento</p>
+                  </h3>
+                  <div className="flex flex-col items-center justify-center py-8 text-fg-muted">
+                    <BarChart3 className="h-12 w-12 opacity-40" />
+                    <p className="mt-4 text-sm">Gráficos de análise em desenvolvimento</p>
                   </div>
-                </CardContent>
-              </Card>
+                </article>
 
-              {/* Distribuição de Notas */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-6 h-6" />
+                <article className="rounded-2xl border border-border bg-surface-card p-6">
+                  <h3 className="mb-4 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                    <Star className="h-5 w-5 text-accent" />
                     Distribuição de Notas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+                  </h3>
+                  <div className="space-y-3">
                     {ratingDistribution.map((distribution) => (
-                      <div
-                        key={distribution.rating}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="text-sm w-4">{distribution.rating}</span>
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div key={distribution.rating} className="flex items-center gap-3">
+                        <span className="w-4 text-sm text-foreground">{distribution.rating}</span>
+                        <Star className="h-4 w-4 fill-accent text-accent" />
+                        <div className="flex-1 rounded-full bg-border h-2">
                           <div
-                            className="bg-yellow-400 h-2 rounded-full"
+                            className="h-2 rounded-full bg-accent"
                             style={{ width: `${distribution.percentage}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-600 w-10 text-right">
+                        <span className="w-10 text-right text-sm text-fg-muted">
                           {distribution.percentage}%
                         </span>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                </article>
+              </div>
+            </TabsContent>
 
-          {/* Tab de Performance */}
-          <TabsContent value="performance" className="space-y-6">
-            {/* Badges de Conquistas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-6 h-6" />
+            {/* Tab: Performance */}
+            <TabsContent value="performance" className="space-y-6">
+              <article className="rounded-2xl border border-border bg-surface-card p-6">
+                <h3 className="mb-6 font-display text-xl font-bold italic text-foreground flex items-center gap-2">
+                  <Award className="h-5 w-5 text-accent" />
                   Conquistas e Metas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-                    <Award className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
-                    <p className="font-semibold text-yellow-800">Top Rated</p>
-                    <p className="text-xs text-yellow-600">
-                      Média 4.5+ por 3 meses
-                    </p>
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border bg-surface-1 p-4 text-center">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.1)] text-accent">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <p className="mt-3 font-semibold text-foreground">Top Rated</p>
+                    <p className="mt-1 text-xs text-fg-muted">Média 4.5+ por 3 meses</p>
                   </div>
 
-                  <div className="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                    <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                    <p className="font-semibold text-blue-800">
-                      Client Favorite
-                    </p>
-                    <p className="text-xs text-blue-600">
-                      50+ clientes atendidos
-                    </p>
+                  <div className="rounded-xl border border-border bg-surface-1 p-4 text-center">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.1)] text-accent">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <p className="mt-3 font-semibold text-foreground">Client Favorite</p>
+                    <p className="mt-1 text-xs text-fg-muted">50+ clientes atendidos</p>
                   </div>
 
-                  <div className="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
-                    <MessageSquare className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                    <p className="font-semibold text-green-800">
-                      Review Master
-                    </p>
-                    <p className="text-xs text-green-600">
-                      100+ reviews recebidas
-                    </p>
+                  <div className="rounded-xl border border-border bg-surface-1 p-4 text-center">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.1)] text-accent">
+                      <MessageSquare className="h-5 w-5" />
+                    </div>
+                    <p className="mt-3 font-semibold text-foreground">Review Master</p>
+                    <p className="mt-1 text-xs text-fg-muted">100+ reviews recebidas</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </article>
 
-            {/* Metas mensais */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Metas do Mês</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <article className="rounded-2xl border border-border bg-surface-card p-6">
+                <h3 className="mb-6 font-display text-xl font-bold italic text-foreground">
+                  Metas do Mês
+                </h3>
+                <div className="space-y-5">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Avaliação Média (Meta: 4.5)</span>
-                      <span>
-                        {metrics?.goals?.averageRating?.current?.toFixed(1) ||
-                          "0.0"}{" "}
-                        / 4.5
+                    <div className="mb-2 flex justify-between text-sm">
+                      <span className="text-foreground">Avaliação Média (Meta: 4.5)</span>
+                      <span className="font-medium text-fg-muted">
+                        {metrics?.goals?.averageRating?.current?.toFixed(1) || "0.0"} / 4.5
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 w-full rounded-full bg-border">
                       <div
-                        className="bg-blue-600 h-2 rounded-full"
+                        className="h-2 rounded-full bg-accent"
                         style={{
-                          width: `${
-                            metrics?.goals?.averageRating?.percentage || 0
-                          }%`,
+                          width: `${metrics?.goals?.averageRating?.percentage || 0}%`,
                         }}
-                      ></div>
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Reviews Recebidas (Meta: 20)</span>
-                      <span>
+                    <div className="mb-2 flex justify-between text-sm">
+                      <span className="text-foreground">Reviews Recebidas (Meta: 20)</span>
+                      <span className="font-medium text-fg-muted">
                         {metrics?.goals?.monthlyReviews?.current || 0} / 20
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 w-full rounded-full bg-border">
                       <div
-                        className="bg-green-600 h-2 rounded-full"
+                        className="h-2 rounded-full bg-accent"
                         style={{
-                          width: `${
-                            metrics?.goals?.monthlyReviews?.percentage || 0
-                          }%`,
+                          width: `${metrics?.goals?.monthlyReviews?.percentage || 0}%`,
                         }}
-                      ></div>
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Clientes Atendidos (Meta: 100)</span>
-                      <span>
+                    <div className="mb-2 flex justify-between text-sm">
+                      <span className="text-foreground">Clientes Atendidos (Meta: 100)</span>
+                      <span className="font-medium text-fg-muted">
                         {metrics?.goals?.monthlyClients?.current || 0} / 100
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 w-full rounded-full bg-border">
                       <div
-                        className="bg-purple-600 h-2 rounded-full"
+                        className="h-2 rounded-full bg-accent"
                         style={{
-                          width: `${
-                            metrics?.goals?.monthlyClients?.percentage || 0
-                          }%`,
+                          width: `${metrics?.goals?.monthlyClients?.percentage || 0}%`,
                         }}
-                      ></div>
+                      />
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Footer */}
-        <Card className="border-dashed">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-2">
-              <h3 className="font-semibold">
-                🚀 Dashboard Profissional do Barbeiro
-              </h3>
-              <p className="text-sm text-gray-600">
-                Gerencie reviews, acompanhe performance e melhore seus serviços
-              </p>
-              <div className="flex justify-center gap-4 text-xs text-gray-500">
-                <span>• Reviews Management</span>
-                <span>• Performance Analytics</span>
-                <span>• Client Insights</span>
-                <span>• Goal Tracking</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              </article>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+    </main>
   );
 }
