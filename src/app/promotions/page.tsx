@@ -1,50 +1,106 @@
 import Link from "next/link";
-import { ArrowLeft, Gift } from "lucide-react";
+import { Gift, Sparkles, Tag } from "lucide-react";
+import { PageHero } from "@/components/shared/PageHero";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { getHomePageData } from "@/server/home/getHomePageData";
 
 export default async function PromotionsPage() {
   const data = await getHomePageData();
   const promotions = data.promotions.items;
+  const filters = [
+    "Todos",
+    "Cortes",
+    "Barbas",
+    "Pacotes",
+    "VIP",
+  ];
 
   return (
-    <main className="container mx-auto flex min-h-screen flex-col gap-6 mt-8 px-4 py-10 sm:py-16">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Link href="/" className="inline-flex items-center gap-2 text-accent hover:text-accent/80">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para a Home
-        </Link>
-      </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Ofertas exclusivas"
+        title="Ofertas Exclusivas"
+        subtitle="Cupons e campanhas ativas com leitura clara de prazo, valor e contexto de uso."
+        actions={[
+          {
+            label: "Agendar agora",
+            href: "/scheduling",
+          },
+        ]}
+      />
 
-      <header className="space-y-2">
-        <p className="text-sm font-semibold text-accent">Promoções</p>
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Ofertas e cupons ativos</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Aplique os códigos no agendamento para garantir desconto. As datas de validade são atualizadas
-          automaticamente.
-        </p>
-      </header>
+      <section className="bg-background py-12">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            title="Filtros visuais"
+            subtitle="Referências de categoria para orientar a navegação sem alterar a lógica atual."
+            centered={false}
+          />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {promotions.map((promo) => (
-          <article key={promo.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
-              <Gift className="h-4 w-4 text-accent" />
-              <span>{promo.badgeLabel}</span>
-            </div>
-            <h2 className="mt-3 text-lg font-semibold text-foreground">{promo.title}</h2>
-            {promo.description && <p className="mt-1 text-sm text-muted-foreground">{promo.description}</p>}
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-2 text-sm font-semibold text-accent">
-              {promo.code}
-            </div>
-            {promo.expiresLabel && <p className="mt-2 text-xs text-muted-foreground">{promo.expiresLabel}</p>}
-            <Link
-              href="/scheduling"
-              className="mt-4 inline-flex text-sm font-semibold text-accent hover:text-accent/80"
-            >
-              Usar agora
-            </Link>
-          </article>
-        ))}
+          <div className="mt-6 flex flex-wrap gap-3">
+            {filters.map((filter, index) => {
+              const active = index === 0;
+
+              return (
+                <span
+                  key={filter}
+                  className={[
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300",
+                    active
+                      ? "border-accent bg-[hsl(var(--accent)/0.1)] text-accent"
+                      : "border-border bg-surface-card text-fg-muted",
+                  ].join(" ")}
+                >
+                  {active ? <Sparkles className="h-4 w-4" /> : <Tag className="h-4 w-4" />}
+                  {filter}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-surface-1 py-16">
+        <div className="container mx-auto px-4">
+          <div className="stagger-reveal grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {promotions.map((promo) => (
+              <article
+                key={promo.id}
+                className="card-hover group rounded-2xl border border-border bg-surface-card p-6 transition-all duration-300"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                    <Gift className="h-3.5 w-3.5" />
+                    {promo.badgeLabel}
+                  </span>
+                  {promo.expiresLabel ? (
+                    <span className="rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-medium text-fg-muted">
+                      {promo.expiresLabel}
+                    </span>
+                  ) : null}
+                </div>
+
+                <h2 className="mt-5 font-display text-2xl font-bold italic text-foreground">
+                  {promo.title}
+                </h2>
+                {promo.description ? (
+                  <p className="mt-3 text-sm leading-relaxed text-fg-muted">{promo.description}</p>
+                ) : null}
+
+                <div className="mt-5 rounded-xl border border-dashed border-[hsl(var(--accent)/0.32)] bg-[hsl(var(--accent)/0.05)] px-4 py-3 text-center text-sm font-bold tracking-[0.18em] text-accent">
+                  {promo.code}
+                </div>
+
+                <Link
+                  href="/scheduling"
+                  className="gold-shimmer mt-6 inline-flex w-full items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
+                >
+                  Usar agora
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );

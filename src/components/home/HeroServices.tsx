@@ -24,10 +24,10 @@ type HeroServicesProps = {
 
 export function HeroServices({ title, subtitle, services, className }: HeroServicesProps) {
   return (
-    <section className={cn("w-full bg-surface-1 py-16", className)}>
+    <section className={cn("w-full bg-background py-20 lg:py-28", className)}>
       <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-4 text-center sm:gap-5">
-          <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <div className="stagger-reveal flex flex-col gap-4 text-center">
+          <h2 className="font-display text-3xl font-bold italic tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             {title}
           </h2>
           {subtitle ? (
@@ -35,41 +35,58 @@ export function HeroServices({ title, subtitle, services, className }: HeroServi
               {subtitle}
             </p>
           ) : null}
+          <div className="mx-auto mt-1 h-0.5 w-12 bg-accent" />
         </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => {
+
+        <div className="stagger-reveal mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service, index) => {
             const Icon = iconMap[service.icon ?? "scissors"] ?? Scissors;
+            const isFeature = index === 0;
+
             return (
               <article
                 key={service.id}
-                className="group flex h-full flex-col rounded-2xl border border-border bg-surface-card p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-lg"
+                className={cn(
+                  "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface-card p-7 transition-all duration-500",
+                  "hover:border-[hsl(var(--accent)/0.4)] hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)]",
+                  isFeature && "sm:row-span-1 lg:border-[hsl(var(--accent)/0.2)]",
+                )}
               >
-                <div className="flex items-start justify-between">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent">
-                    <Icon className="h-6 w-6" />
+                {/* Hover gradient overlay */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[hsl(var(--accent)/0.03)] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+                <div className="relative z-10 flex items-start justify-between">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent transition-colors duration-300 group-hover:bg-[hsl(var(--accent)/0.15)]">
+                    <Icon className="h-5 w-5" />
                   </span>
-                  <span className="rounded-full bg-badge-surface px-3 py-1 text-xs font-medium text-badge-fg">
+                  <span className="rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-medium text-fg-muted">
                     {service.durationLabel}
                   </span>
                 </div>
-                <div className="mt-6 flex flex-1 flex-col gap-3 text-left">
+
+                <div className="relative z-10 mt-6 flex flex-1 flex-col gap-3 text-left">
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground sm:text-xl">
+                    <h3 className="font-display text-xl font-semibold italic text-foreground">
                       {service.name}
                     </h3>
                     {service.description ? (
-                      <p className="mt-1 text-sm text-fg-muted">
+                      <p className="mt-2 text-sm leading-relaxed text-fg-muted">
                         {service.description}
                       </p>
                     ) : null}
                   </div>
-                  <p className="mt-auto text-base font-semibold text-foreground sm:text-lg">
+
+                  <p className="mt-auto text-lg font-bold text-accent">
                     {service.priceLabel}
                   </p>
+
                   <Button
                     asChild
                     variant="secondary"
-                    className="mt-4 rounded-full border border-border bg-surface-1 text-foreground transition group-hover:border-accent group-hover:text-accent"
+                    className={cn(
+                      "mt-3 rounded-xl border border-border bg-transparent text-foreground transition-all duration-300",
+                      "group-hover:border-accent group-hover:bg-accent group-hover:text-on-accent",
+                    )}
                   >
                     <Link href={service.href}>Agendar</Link>
                   </Button>

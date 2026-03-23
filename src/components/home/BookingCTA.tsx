@@ -18,33 +18,61 @@ export function BookingCTA({
   className,
 }: BookingCTAProps) {
   return (
-    <section className={cn("w-full bg-surface-emphasis py-20", className)}>
-      <div className="container mx-auto px-4">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">
+    <section
+      className={cn(
+        "grain-overlay relative w-full overflow-hidden bg-surface-1 py-16 lg:py-24",
+        className,
+      )}
+    >
+      {/* Atmospheric gradient orbs */}
+      <div className="pointer-events-none absolute -right-1/4 -top-1/4 h-[500px] w-[500px] rounded-full bg-[hsl(var(--accent)/0.06)] blur-[100px]" />
+      <div className="pointer-events-none absolute -bottom-1/4 -left-1/4 h-[400px] w-[400px] rounded-full bg-[hsl(var(--accent)/0.04)] blur-[80px]" />
+
+      <div className="container relative z-10 mx-auto px-4">
+        <div className="stagger-reveal mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
+          {/* Decorative top element */}
+          <div className="flex items-center gap-4">
+            <div className="h-px w-20 bg-gradient-to-r from-transparent to-[hsl(var(--accent)/0.5)]" />
+            <div className="h-2 w-2 rotate-45 border border-[hsl(var(--accent)/0.5)]" />
+            <div className="h-px w-20 bg-gradient-to-l from-transparent to-[hsl(var(--accent)/0.5)]" />
+          </div>
+
+          <h2 className="font-display text-3xl font-bold italic text-foreground sm:text-4xl lg:text-5xl">
             {title}
           </h2>
-          <p className="text-base text-fg-muted sm:text-lg">
+
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {description}
           </p>
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
             <Button
               asChild
-              className="w-full rounded-full bg-accent text-on-accent shadow-soft hover:bg-accent/90 sm:w-auto"
+              className={cn(
+                "gold-shimmer h-13 w-full rounded-xl bg-accent px-8 text-base font-semibold text-on-accent shadow-lg transition-all duration-300 sm:w-auto",
+                "hover:bg-accent/90 hover:shadow-[0_8px_30px_-4px_hsl(var(--accent)/0.4)]",
+              )}
             >
               <Link href={primaryHref}>{primaryLabel}</Link>
             </Button>
             <Button
               asChild
               variant="secondary"
-              className="w-full rounded-full border border-border bg-surface-1 text-foreground hover:border-accent hover:text-accent sm:w-auto"
+              className={cn(
+                "h-13 w-full rounded-xl border border-border bg-transparent px-8 text-base font-semibold text-foreground transition-all duration-300 sm:w-auto",
+                "hover:border-[hsl(var(--accent))] hover:text-[hsl(var(--accent))]",
+              )}
             >
               <Link href={secondaryHref}>{secondaryLabel}</Link>
             </Button>
           </div>
-          <p className="text-sm text-fg-muted">
+
+          <p className="text-sm text-muted-foreground/60">
             Já tem conta?
-            <Link href={signinHref} className="ml-2 font-semibold text-accent">
+            <Link
+              href={signinHref}
+              className="ml-2 font-semibold text-[hsl(var(--accent))] transition-colors hover:text-[hsl(var(--accent)/0.8)]"
+            >
               Entrar
             </Link>
           </p>

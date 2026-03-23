@@ -17,17 +17,19 @@ const socialIconMap: Record<FooterProps["social"][number]["icon"], ComponentType
 
 export function Footer({ brand, columns, legal, social, copyright, className }: FooterProps) {
   return (
-    <footer className={cn("bg-surface-1 pt-20", className)}>
+    <footer className={cn("bg-surface-2 pt-20", className)}>
       <div className="container mx-auto px-4">
-        <div className="grid gap-10 md:grid-cols-12">
+        <div className="grid gap-12 md:grid-cols-12">
+          {/* Brand column */}
           <div className="md:col-span-4">
-            <div className="text-3xl font-extrabold text-foreground">
+            <div className="font-display text-3xl font-bold italic text-foreground">
               <span>{brand.name}</span>
-              <span className="ml-1 text-accent">{brand.highlight}</span>
+              <span className="ml-1 text-[hsl(var(--accent))]">{brand.highlight}</span>
             </div>
-            <p className="mt-4 max-w-sm text-sm text-fg-muted">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {brand.description}
             </p>
+            <div className="mt-3 h-0.5 w-10 bg-[hsl(var(--accent)/0.4)]" />
             <div className="mt-6 flex items-center gap-3">
               {social.map((item) => {
                 const Icon = socialIconMap[item.icon] ?? Globe;
@@ -35,26 +37,31 @@ export function Footer({ brand, columns, legal, social, copyright, className }: 
                   <Link
                     key={item.icon}
                     href={item.href}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-fg-muted transition hover:border-accent hover:text-accent"
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-all duration-300",
+                      "hover:border-[hsl(var(--accent)/0.5)] hover:text-[hsl(var(--accent))]",
+                    )}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                   </Link>
                 );
               })}
             </div>
           </div>
-          <div className="md:col-span-8 grid gap-8 sm:grid-cols-3">
+
+          {/* Link columns */}
+          <div className="grid gap-8 sm:grid-cols-3 md:col-span-8">
             {columns.map((column) => (
-              <div key={column.title} className="space-y-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+              <div key={column.title} className="space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/50">
                   {column.title}
                 </h3>
-                <ul className="space-y-2 text-sm text-fg-muted">
+                <ul className="space-y-3 text-sm text-muted-foreground">
                   {column.links.map((link) => (
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="transition hover:text-accent"
+                        className="transition-colors duration-300 hover:text-[hsl(var(--accent))]"
                       >
                         {link.label}
                       </Link>
@@ -65,11 +72,17 @@ export function Footer({ brand, columns, legal, social, copyright, className }: 
             ))}
           </div>
         </div>
-        <div className="mt-12 border-t border-border py-6 text-sm text-fg-subtle sm:flex sm:items-center sm:justify-between">
+
+        {/* Bottom bar */}
+        <div className="mt-16 border-t border-border/30 py-6 text-sm text-muted-foreground/40 sm:flex sm:items-center sm:justify-between">
           <p>{copyright}</p>
-          <div className="mt-4 flex flex-wrap gap-4 sm:mt-0">
+          <div className="mt-4 flex flex-wrap gap-6 sm:mt-0">
             {legal.map((link) => (
-              <Link key={link.label} href={link.href} className="hover:text-accent">
+              <Link
+                key={link.label}
+                href={link.href}
+                className="transition-colors duration-300 hover:text-[hsl(var(--accent))]"
+              >
                 {link.label}
               </Link>
             ))}

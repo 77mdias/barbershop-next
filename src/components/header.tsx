@@ -61,7 +61,7 @@ export function Header({ userName = "User", userImage, onFilterClick, className 
         variant="ghost"
         size="icon"
         onClick={onFilterClick}
-        className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:scale-105"
+        className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-accent hover:bg-accent/90 text-on-accent transition-all duration-300 hover:scale-105"
       >
         <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path

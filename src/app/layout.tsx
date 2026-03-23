@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/SessionProvider";
 import { ConditionalBottomNavigation } from "@/components/ConditionalBottomNavigation";
 import HeaderNavigation from "@/components/HeaderNavigation";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
+const displayFont = Playfair_Display({
+  variable: "--font-display",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const bodyFont = Plus_Jakarta_Sans({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -123,7 +130,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable}  antialiased flex flex-col items-center `}
+        className={`${displayFont.variable} ${bodyFont.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <Providers>
           <HeaderNavigation />

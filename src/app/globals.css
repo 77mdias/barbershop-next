@@ -4,166 +4,161 @@
 
 @layer base {
   :root {
-    /* 🎨 Sistema de Cores Minimalista - Light Mode */
-    --background: 0 0% 98%;
-    --foreground: 220 13% 18%;
+    /* Luxury Grooming - Light Mode (clean, refined) */
+    --background: 0 0% 100%;
+    --foreground: 24 10% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 220 13% 18%;
+    --card-foreground: 24 10% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 18%;
+    --popover-foreground: 24 10% 14%;
 
-    /* Cores neutras suaves */
-    --text: 220 13% 18%;
-    --surface-1: 0 0% 100%;
-    --surface-2: 210 20% 98%;
+    --text: 24 10% 14%;
+    --surface-1: 30 6% 96%;
+    --surface-2: 30 5% 93%;
     --surface-card: 0 0% 100%;
-    --surface-emphasis: 220 14% 94%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --fg-muted: 220 8.9% 46.1%;
-    --fg-subtle: 220 7% 60%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 264 83% 67%;
+    --surface-emphasis: 30 5% 91%;
+    --muted: 30 6% 95%;
+    --muted-foreground: 24 5% 44%;
+    --fg-muted: 24 5% 44%;
+    --fg-subtle: 24 4% 56%;
+    --border: 30 8% 89%;
+    --input: 30 8% 89%;
+    --ring: 36 72% 48%;
 
-    /* Cores pasteis */
     --green-pastel: 142 71% 75%;
     --red-pastel: 0 72% 80%;
     --blue-pastel: 213 94% 80%;
     --yellow-pastel: 38 92% 75%;
 
-    /*CORES CARD*/
     --text-card: 0 0% 100%;
 
-    /* Paleta moderna e minimalista */
-    --primary: 264 83% 67%;          /* Roxo suave e moderno */
+    --primary: 36 72% 48%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;        /* Cinza muito claro */
-    --secondary-foreground: 220 13% 18%;
-    --accent: 142 71% 45%;           /* Verde menta suave */
+    --secondary: 30 6% 95%;
+    --secondary-foreground: 24 10% 14%;
+    --accent: 36 72% 48%;
     --accent-foreground: 0 0% 100%;
     --on-accent: 0 0% 100%;
-    --color-text: 220 14% 96%;       /* branco */
-    
-    /* Estados e feedback */
-    --success: 142 71% 45%;          /* Verde menta */
+    --color-text: 30 8% 98%;
+
+    --success: 152 56% 42%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;           /* Amarelo suave */
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;        /* Vermelho suave */
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --badge-surface: 0 0% 100% / 0.82;
-    --badge-fg: 220 13% 18%;
-    --badge-success-fg: 142 71% 35%;
-    --badge-danger-fg: 0 72% 40%;
-    --state-open-surface: 142 44% 92%;
-    --state-open-fg: 142 71% 35%;
-    --state-warning-surface: 38 100% 95%;
-    --state-warning-fg: 25 95% 35%;
-    --state-closed-surface: 0 85% 96%;
-    --state-closed-fg: 0 72% 40%;
+    --badge-surface: 30 10% 95% / 0.9;
+    --badge-fg: 24 10% 25%;
+    --badge-success-fg: 152 56% 32%;
+    --badge-danger-fg: 0 65% 38%;
+    --state-open-surface: 152 40% 92%;
+    --state-open-fg: 152 56% 32%;
+    --state-warning-surface: 38 80% 92%;
+    --state-warning-fg: 25 85% 32%;
+    --state-closed-surface: 0 45% 94%;
+    --state-closed-fg: 0 65% 38%;
 
-    --glass-border: 220 13% 91% / 0.3; /* Borda translúcida */
-    --glass-border-dark: 220 15% 16% / 0.3; /* Borda translúcida no dark */
-    --glass-bg: 220 14% 96% / 0.3;
+    --glass-border: 30 8% 89% / 0.5;
+    --glass-border-dark: 220 15% 16% / 0.3;
+    --glass-bg: 0 0% 100% / 0.7;
 
-
-    --shadow-card: 0 4px 4px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.06);
     --shadow: white 0px 0px 4px;
     --shadow-foreground: black 0px 0px 12px;
-    --shadow-soft: 0px 18px 40px -24px rgba(15, 15, 15, 0.25);
+    --shadow-soft: 0 8px 32px -8px rgba(0, 0, 0, 0.08);
 
-    /* Cores complementares suaves */
-    --soft-blue: 213 94% 68%;        /* Azul céu */
-    --soft-purple: 264 83% 67%;      /* Roxo principal */
-    --soft-red: 0 72% 51%;          /* Vermelho suave */
-    --soft-green: 142 71% 45%;       /* Verde menta */
-    --soft-orange: 25 95% 53%;       /* Laranja suave */
-    --soft-pink: 330 81% 60%;        /* Rosa suave */
+    --soft-blue: 213 60% 58%;
+    --soft-purple: 264 50% 58%;
+    --soft-red: 0 65% 48%;
+    --soft-green: 152 56% 42%;
+    --soft-orange: 25 80% 50%;
+    --soft-pink: 330 60% 55%;
 
-    /* Configurações */
-    --radius: 0.75rem;               /* Bordas mais arredondadas */
-    
-    /* Charts com cores harmoniosas */
-    --chart-1: 264 83% 67%;          /* Roxo */
-    --chart-2: 142 71% 45%;          /* Verde */
-    --chart-3: 213 94% 68%;          /* Azul */
-    --chart-4: 25 95% 53%;           /* Laranja */
-    --chart-5: 330 81% 60%;          /* Rosa */
+    --radius: 0.75rem;
+
+    --chart-1: 36 72% 48%;
+    --chart-2: 152 56% 42%;
+    --chart-3: 213 60% 58%;
+    --chart-4: 25 80% 50%;
+    --chart-5: 330 60% 55%;
+
+    /* Hero-specific - always dark for dramatic contrast */
+    --hero-bg: 24 15% 8%;
+    --hero-fg: 40 20% 96%;
+    --hero-muted: 30 10% 68%;
   }
 
   @layer components {
-  .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid hsl(var(--glass-border));
-    box-shadow: var(--shadow-card);
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid hsl(var(--glass-border));
+      box-shadow: var(--shadow-card);
+    }
   }
-}
-
 
   .dark {
-    /* 🌙 Modo escuro elegante e suave */
-    --background: 220 15% 6%;
-    --foreground: 220 14% 96%;
-    --card: 220 15% 12%;
-    --card-foreground: 220 14% 96%;
-    --popover: 220 15% 8%;
-    --popover-foreground: 220 14% 96%;
+    --background: 30 12% 5%;
+    --foreground: 40 18% 92%;
+    --card: 30 10% 9%;
+    --card-foreground: 40 18% 92%;
+    --popover: 30 10% 7%;
+    --popover-foreground: 40 18% 92%;
 
-    /* Neutros escuros suaves */
-    --muted: 220 15% 12%;
-    --surface-1: 220 18% 7%;
-    --surface-2: 220 16% 9%;
-    --surface-card: 220 16% 12%;
-    --surface-emphasis: 220 15% 16%;
-    --muted-foreground: 220 8% 56%;
-    --fg-muted: 220 10% 68%;
-    --fg-subtle: 220 12% 52%;
-    --border: 220 15% 16%;
-    --input: 220 15% 16%;
-    --ring: 264 83% 67%;
+    --muted: 30 10% 12%;
+    --surface-1: 30 10% 6%;
+    --surface-2: 30 8% 9%;
+    --surface-card: 30 8% 11%;
+    --surface-emphasis: 30 8% 15%;
+    --muted-foreground: 30 8% 50%;
+    --fg-muted: 40 10% 62%;
+    --fg-subtle: 40 8% 46%;
+    --border: 30 10% 16%;
+    --input: 30 10% 16%;
+    --ring: 36 72% 52%;
 
+    --primary: 36 72% 52%;
+    --primary-foreground: 30 12% 5%;
+    --secondary: 30 10% 12%;
+    --secondary-foreground: 40 18% 92%;
+    --accent: 36 72% 52%;
+    --accent-foreground: 30 12% 5%;
+    --on-accent: 30 12% 5%;
+    --color-text: 30 12% 5%;
 
-
-    /* Primárias mantendo a mesma essência */
-    --primary: 264 83% 67%;          /* Roxo mais vibrante no dark */
-    --primary-foreground: 220 15% 6%;
-    --secondary: 220 15% 12%;
-    --secondary-foreground: 220 14% 96%;
-    --accent: 142 71% 45%;
-    --accent-foreground: 220 15% 6%;
-    --on-accent: 220 15% 6%;
-    --color-text: 220 15% 6%; /* black */
-    
-    /* Estados no modo escuro */
-    --success: 142 71% 45%;
-    --success-foreground: 220 15% 6%;
+    --success: 152 56% 42%;
+    --success-foreground: 30 12% 5%;
     --warning: 38 92% 50%;
-    --warning-foreground: 220 15% 6%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 220 14% 96%;
+    --warning-foreground: 30 12% 5%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 40 18% 92%;
 
-    --badge-surface: 220 16% 24% / 0.82;
-    --badge-fg: 220 14% 92%;
-    --badge-success-fg: 142 71% 55%;
-    --badge-danger-fg: 0 72% 60%;
-    --state-open-surface: 142 45% 22%;
-    --state-open-fg: 142 71% 62%;
-    --state-warning-surface: 38 90% 28%;
-    --state-warning-fg: 38 95% 70%;
-    --state-closed-surface: 0 72% 22%;
-    --state-closed-fg: 0 82% 74%;
+    --badge-surface: 30 12% 18% / 0.85;
+    --badge-fg: 40 18% 88%;
+    --badge-success-fg: 152 56% 52%;
+    --badge-danger-fg: 0 65% 58%;
+    --state-open-surface: 152 40% 18%;
+    --state-open-fg: 152 56% 58%;
+    --state-warning-surface: 38 80% 22%;
+    --state-warning-fg: 38 90% 65%;
+    --state-closed-surface: 0 50% 18%;
+    --state-closed-fg: 0 70% 68%;
 
-    --glass-border: 220 15% 16% / 0.3;
+    --glass-border: 30 10% 16% / 0.4;
+    --glass-bg: 30 10% 8% / 0.6;
 
-    /* Charts harmoniosos para dark mode */
-    --chart-1: 264 83% 67%;
-    --chart-2: 142 71% 45%;
-    --chart-3: 213 94% 68%;
-    --chart-4: 25 95% 53%;
-    --chart-5: 330 81% 60%;
+    --shadow-soft: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+
+    --chart-1: 36 72% 52%;
+    --chart-2: 152 56% 42%;
+    --chart-3: 213 60% 58%;
+    --chart-4: 25 80% 50%;
+    --chart-5: 330 60% 55%;
+
+    --hero-bg: 30 15% 4%;
+    --hero-fg: 40 25% 95%;
+    --hero-muted: 40 12% 62%;
   }
 }
 
@@ -177,25 +172,24 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Scrollbar personalizada */
   ::-webkit-scrollbar {
     width: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background: hsl(var(--surface-2));
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary-500 rounded-full;
+    background: hsl(var(--accent) / 0.4);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary-600;
+    background: hsl(var(--accent) / 0.6);
   }
 }
 
-/* Animações personalizadas para as tabs */
 @layer utilities {
   .animate-in {
     animation-duration: 0.5s;
@@ -217,13 +211,85 @@
     }
   }
 
-  /* Hover effects para cards */
   .card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Grain texture overlay for hero */
+  .grain-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Staggered reveal animations */
+  .stagger-reveal > * {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: staggerReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .stagger-reveal > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-reveal > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-reveal > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-reveal > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-reveal > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-reveal > *:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes staggerReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Gold shimmer effect for buttons */
+  .gold-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gold-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.15) 45%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.15) 55%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .gold-shimmer:hover::after {
+    transform: translateX(100%);
+  }
+
+  /* Diagonal accent line */
+  .accent-line::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: hsl(var(--accent));
+    margin-top: 1rem;
+    border-radius: 2px;
+  }
+
+  .accent-line-center::after {
+    margin-left: auto;
+    margin-right: auto;
   }
 }

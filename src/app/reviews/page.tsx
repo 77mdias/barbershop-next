@@ -5,15 +5,12 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewsList } from "@/components/ReviewsList";
 import { ReviewSystemManager } from "@/components/ReviewSystemManager";
-import { 
-  PhotoIcon, 
-  StarIcon, 
-  PlusIcon, 
-  ChartBarIcon 
-} from "@heroicons/react/24/outline";
+import { Reviews } from "@/components/home/Reviews";
+import { PageHero } from "@/components/shared/PageHero";
+import { getHomePageData } from "@/server/home/getHomePageData";
+import { BarChart3, Camera, Plus, Star } from "lucide-react";
 
 export default async function ReviewsPage() {
   const session = await getServerSession(authOptions);
@@ -22,233 +19,160 @@ export default async function ReviewsPage() {
     redirect("/auth/signin");
   }
 
+  const homeData = await getHomePageData();
+  const publicReviews = homeData.reviews.items;
+  const totalReviews = publicReviews.length;
+  const averageRating = totalReviews
+    ? (publicReviews.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
+    : "0.0";
+  const maxRatingCount = publicReviews.filter((review) => review.rating === 5).length;
+
   return (
-    <div className="min-h-screen ">
-      <div className="container mx-auto px-4 py-8 mt-12 mb-16">
-        <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-foreground">Sistema de Avaliações</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Gerencie e visualize avaliações dos serviços de forma simples e eficiente
-          </p>
-        </div>
+    <main className="min-h-screen bg-background pb-16">
+      <PageHero
+        badge="Experiência Real"
+        title="Avaliações"
+        subtitle="Acompanhe feedbacks da comunidade, publique sua experiência e veja estatísticas dos serviços em um único lugar."
+      />
 
-        <Separator />
+      <div className="container mx-auto mt-10 px-4">
+        <div className="mx-auto max-w-6xl space-y-8">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <article className="rounded-2xl border border-border bg-surface-card p-6 card-hover">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">Nota Média</p>
+              <p className="mt-3 font-display text-4xl font-bold italic text-accent">{averageRating}</p>
+              <p className="mt-2 text-sm text-fg-muted">Baseado nas avaliações mais recentes</p>
+            </article>
+            <article className="rounded-2xl border border-border bg-surface-card p-6 card-hover">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">Total de Reviews</p>
+              <p className="mt-3 font-display text-4xl font-bold italic text-accent">{totalReviews}</p>
+              <p className="mt-2 text-sm text-fg-muted">Comentários da comunidade BarberKings</p>
+            </article>
+            <article className="rounded-2xl border border-border bg-surface-card p-6 card-hover sm:col-span-2 lg:col-span-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">5 Estrelas</p>
+              <p className="mt-3 font-display text-4xl font-bold italic text-accent">{maxRatingCount}</p>
+              <p className="mt-2 text-sm text-fg-muted">Atendimentos com excelência máxima</p>
+            </article>
+          </section>
 
-        {/* Tabs para diferentes funcionalidades */}
-        <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 h-11 p-0.5 bg-card rounded-lg">
+          <Separator className="bg-border" />
+
+          <Tabs defaultValue="gallery" className="w-full">
+            <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl border border-border bg-surface-card p-1 md:grid-cols-4">
             <TabsTrigger
               value="gallery"
-              className="flex items-center justify-center gap-1 px-1 py-2 text-xs font-medium rounded-md transition-all duration-200  text-foreground hover:text-foreground"
+              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-fg-muted transition-all duration-300 hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none sm:text-sm"
             >
-              <PhotoIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Galeria</span>
+              <Camera className="h-4 w-4" />
+              <span>Galeria</span>
             </TabsTrigger>
             <TabsTrigger
               value="list"
-              className="flex items-center justify-center gap-1 px-1 py-2 text-xs font-medium rounded-md transition-all duration-200  text-foreground hover:text-foreground"
+              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-fg-muted transition-all duration-300 hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none sm:text-sm"
             >
-              <StarIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Minhas</span>
+              <Star className="h-4 w-4" />
+              <span>Minhas</span>
             </TabsTrigger>
             <TabsTrigger
               value="form"
-              className="flex items-center justify-center gap-1 px-1 py-2 text-xs font-medium rounded-md transition-all duration-200  text-foreground hover:text-foreground"
+              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-fg-muted transition-all duration-300 hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none sm:text-sm"
             >
-              <PlusIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Nova</span>
+              <Plus className="h-4 w-4" />
+              <span>Nova</span>
             </TabsTrigger>
             <TabsTrigger
               value="stats"
-              className="flex items-center justify-center gap-1 px-1 py-2 text-xs font-medium rounded-md transition-all duration-200  text-foreground"
+              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-fg-muted transition-all duration-300 hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-on-accent data-[state=active]:shadow-none sm:text-sm"
             >
-              <ChartBarIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
+              <BarChart3 className="h-4 w-4" />
+              <span>Stats</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="gallery" className="space-y-6 mt-8">
-            <Card className="border border-border">
-              <CardHeader className="border-b border-border bg-card">
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <PhotoIcon className="w-5 h-5" />
-                  Galeria Pública
-                </CardTitle>
-                <p className="text-muted-foreground text-sm">
-                  Veja as avaliações de todos os clientes da barbearia
-                </p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Suspense
-                  fallback={
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600 mx-auto"></div>
-                      <p className="mt-3 text-gray-500 text-sm">Carregando avaliações...</p>
-                    </div>
-                  }
-                >
-                  <ReviewsList
-                    showStats={true}
-                    showActions={false}
-                    limit={10}
-                    showAllReviews={true}
-                  />
-                </Suspense>
-              </CardContent>
-            </Card>
-          </TabsContent>
+            <TabsContent value="gallery" className="mt-8 space-y-6">
+              <Reviews
+                title="Histórias da Comunidade"
+                subtitle="Resultado real de quem passa pelas nossas cadeiras todos os dias."
+                reviews={publicReviews}
+                className="rounded-3xl border border-border !bg-surface-1 !py-14"
+              />
+            </TabsContent>
 
-          <TabsContent value="list" className="space-y-6 mt-8">
-            <Card className="border border-border">
-              <CardHeader className="border-b border-border bg-card">
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <StarIcon className="w-5 h-5" />
-                  Minhas Avaliações
-                </CardTitle>
-                <p className="text-muted-foreground text-sm">
-                  Gerencie suas próprias avaliações
-                </p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Suspense
-                  fallback={
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600 mx-auto"></div>
-                      <p className="mt-3 text-gray-500 text-sm">Carregando avaliações...</p>
-                    </div>
-                  }
-                >
-                  <ReviewsList
-                    userId={session.user.id}
-                    showStats={true}
-                    showActions={true}
-                    limit={10}
-                  />
-                </Suspense>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="form" className="space-y-6 mt-8">
-            <Card className="border border-border">
-              <CardHeader className="border-b border-border bg-card">
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <PlusIcon className="w-5 h-5" />
-                  Nova Avaliação
-                </CardTitle>
-                <p className="text-muted-foreground text-sm">
-                  Crie uma nova avaliação para um serviço
-                </p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <ReviewSystemManager userId={session.user.id} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="stats" className="space-y-6 mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Stats por Usuário */}
-              <Card className="border border-border">
-                <CardHeader className="border-b border-border bg-card">
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <StarIcon className="w-5 h-5" />
-                    Estatísticas
+            <TabsContent value="list" className="mt-8 space-y-6">
+              <Card className="rounded-2xl border border-border bg-surface-card">
+                <CardHeader className="border-b border-border bg-surface-card">
+                  <CardTitle className="font-display text-2xl font-semibold italic text-foreground">
+                    Minhas Avaliações
                   </CardTitle>
+                  <p className="text-sm text-fg-muted">Gerencie seus comentários e acompanhe interações.</p>
                 </CardHeader>
                 <CardContent className="p-6">
                   <Suspense
                     fallback={
-                      <div className="text-center py-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-gray-600 mx-auto"></div>
+                      <div className="py-8 text-center">
+                        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+                        <p className="mt-3 text-sm text-fg-muted">Carregando avaliações...</p>
                       </div>
                     }
                   >
-                    <ReviewsList
-                      userId={session.user.id}
-                      showStats={true}
-                      showActions={true}
-                      limit={5}
-                    />
+                    <ReviewsList userId={session.user.id} showStats={true} showActions={true} limit={10} />
                   </Suspense>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              {/* {/* Guia de Uso */}
-              {/* <Card className="border border-border">
-                <CardHeader className="border-b border-border bg-card">
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <ChartBarIcon className="w-5 h-5" />
-                    Guia de Uso
+            <TabsContent value="form" className="mt-8 space-y-6">
+              <Card className="rounded-2xl border border-border bg-surface-card">
+                <CardHeader className="border-b border-border bg-surface-card">
+                  <CardTitle className="font-display text-2xl font-semibold italic text-foreground">
+                    Nova Avaliação
                   </CardTitle>
+                  <p className="text-sm text-fg-muted">Compartilhe sua experiência para ajudar a comunidade.</p>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div>
-                    <h4 className="font-medium text-sm mb-2 text-foreground">
-                      1. Componente ReviewForm
-                    </h4>
-                    <div className="bg-card p-3 rounded border text-xs font-mono text-foreground">
-                      {`<ReviewForm 
-  serviceHistoryId="hist_123"
-  onSuccess={() => router.push('/dashboard')}
-/>`}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-sm mb-2 text-foreground">
-                      2. Lista de Avaliações
-                    </h4>
-                    <div className="bg-card p-3 rounded border text-xs font-mono text-foreground">
-                      {`<ReviewsList 
-  userId="user_123"
-  showStats={true}
-  limit={10}
-/>`}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-sm mb-2 text-foreground">
-                      3. Server Actions
-                    </h4>
-                    <div className="bg-card p-3 rounded border text-xs font-mono text-foreground">
-                      {`import { 
-  createReview,
-  getReviews
-} from '@/server/reviewActions';`}
-                    </div>
-                  </div>
+                <CardContent className="p-6">
+                  <ReviewSystemManager userId={session.user.id} />
                 </CardContent>
-              </Card> */}
-            </div>
-          </TabsContent>
-        </Tabs>
+              </Card>
+            </TabsContent>
 
-        {/* Footer com informações técnicas */}
-        <Card className="border border-border bg-card">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-3">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-foreground rounded-lg">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="font-medium text-sm">Sistema Implementado</span>
+            <TabsContent value="stats" className="mt-8 space-y-6">
+              <Card className="rounded-2xl border border-border bg-surface-card">
+                <CardHeader className="border-b border-border bg-surface-card">
+                  <CardTitle className="font-display text-2xl font-semibold italic text-foreground">
+                    Estatísticas Detalhadas
+                  </CardTitle>
+                  <p className="text-sm text-fg-muted">Números atualizados sobre avaliações e desempenho.</p>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <Suspense
+                    fallback={
+                      <div className="py-4 text-center">
+                        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent" />
+                      </div>
+                    }
+                  >
+                    <ReviewsList userId={session.user.id} showStats={true} showActions={true} limit={5} />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          <Card className="rounded-2xl border border-border bg-surface-1">
+            <CardContent className="pt-6">
+              <div className="space-y-3 text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.3)] bg-[hsl(var(--accent)/0.08)] px-4 py-2">
+                  <span className="h-2 w-2 rounded-full bg-accent" />
+                  <span className="text-sm font-semibold text-accent">Sistema de Reviews Ativo</span>
+                </div>
+                <p className="mx-auto max-w-2xl text-sm text-fg-muted">
+                  Fluxo completo com upload de imagens, validações e integração em tempo real.
+                </p>
               </div>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
-                CRUD completo, upload de imagens, validações e integração
-              </p>
-              <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
-                <span className="px-3 py-1 bg-foreground border border-border rounded-md text-background">ReviewForm</span>
-                <span className="px-3 py-1 bg-foreground border border-border rounded-md text-background">ReviewsList</span>
-                <span className="px-3 py-1 bg-foreground border border-border rounded-md text-background">Server Actions</span>
-                <span className="px-3 py-1 bg-foreground border border-border rounded-md text-background">Validações</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

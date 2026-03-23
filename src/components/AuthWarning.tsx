@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Clock, User, Lock } from 'lucide-react';
+import { Clock, User, Lock } from 'lucide-react';
 
 interface AuthWarningProps {
   /** Tempo em segundos para o redirecionamento automático */
@@ -74,75 +73,71 @@ export function AuthWarning({
   };
 
   return (
-    <div className="w-full h-screen flex flex-col mt-16  items-center  justify-start p-4">
-      <Card className="w-full mt-12 max-w-md shadow-xl border-0 bg-card backdrop-blur-sm">
-        <CardContent className="p-6 text-center space-y-6">
-          {/* Ícone e título */}
-          <div className="space-y-3">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-              <Lock className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-text">
-              Autenticação Necessária
-            </h1>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 text-foreground">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
+        {/* Ícone e título */}
+        <div className="space-y-3">
+          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.1)] text-accent">
+            <Lock className="h-6 w-6" />
           </div>
+          <h1 className="font-display text-2xl font-bold italic text-foreground">
+            Autenticação Necessária
+          </h1>
+        </div>
 
-          {/* Mensagem principal */}
-          <div className="space-y-2">
-            <p className="text-foreground">
-              Para acessar <span className="font-semibold text-text">{getRouteDisplayName(targetRoute)}</span> você precisa estar autenticado.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Você será redirecionado para login automaticamente em:
-            </p>
-          </div>
+        {/* Mensagem principal */}
+        <div className="mt-4 space-y-2">
+          <p className="text-sm text-fg-muted">
+            Para acessar <span className="font-semibold text-foreground">{getRouteDisplayName(targetRoute)}</span> você precisa estar autenticado.
+          </p>
+          <p className="text-sm text-fg-muted">
+            Você será redirecionado para login automaticamente em:
+          </p>
+        </div>
 
-          {/* Countdown */}
-          <div className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-4">
-            <Clock className="w-5 h-5 text-blue-600" />
-            <span className="text-2xl font-bold text-blue-700">
-              {timeLeft}s
-            </span>
-          </div>
+        {/* Countdown */}
+        <div className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-border bg-surface-1 p-4">
+          <Clock className="h-5 w-5 text-accent" />
+          <span className="text-2xl font-bold text-accent">
+            {timeLeft}s
+          </span>
+        </div>
 
-          {/* Ações */}
-          <div className="space-y-3 pt-4">
-            <Button 
-              onClick={handleLoginNow}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-              size="lg"
+        {/* Ações */}
+        <div className="mt-6 space-y-3">
+          <Button
+            onClick={handleLoginNow}
+            className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
+          >
+            <User className="h-4 w-4" />
+            Fazer Login Agora
+          </Button>
+
+          {allowCancel && (
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
             >
-              <User className="w-4 h-4 mr-2" />
-              Fazer Login Agora
+              Voltar
             </Button>
-            
-            {allowCancel && (
-              <Button 
-                onClick={handleCancel}
-                variant="outline"
-                className="w-full"
-                size="lg"
-              >
-                Voltar
-              </Button>
-            )}
-          </div>
+          )}
+        </div>
 
-          {/* Informação adicional */}
-          <div className="pt-4 border-t border-gray-100">
-            <p className="text-xs text-muted-foreground">
-              Não tem uma conta? 
-              <button 
-                onClick={() => router.push('/auth/signup')}
-                className="ml-1 text-blue-600 hover:text-blue-700 underline"
-              >
-                Cadastre-se aqui
-              </button>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Informação adicional */}
+        <div className="mt-6 border-t border-border pt-4">
+          <p className="text-xs text-fg-muted">
+            Não tem uma conta?{" "}
+            <button
+              onClick={() => router.push('/auth/signup')}
+              className="text-accent underline transition-colors hover:text-accent/80"
+            >
+              Cadastre-se aqui
+            </button>
+          </p>
+        </div>
+      </div>
+    </main>
   );
 }
 
