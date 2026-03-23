@@ -53,7 +53,7 @@ export default async function ChatConversationPage({
   }
 
   return (
-    <div className="flex flex-col w-full mt-16 items-center h-full">
+    <main className="flex h-screen flex-col bg-background text-foreground">
       <ChatWindow
         conversationId={conversationId}
         currentUserId={session.user.id}
@@ -62,6 +62,6 @@ export default async function ChatConversationPage({
         friendId={friend.user.id}
         initialMessages={messages as any}
       />
-    </div>
+    </main>
   );
 }

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { createAppointment } from "@/server/appointmentActions";
+import { PageHero } from "@/components/shared/PageHero";
 
 interface Service {
   id: string;
@@ -34,7 +35,7 @@ interface AppointmentFormData {
 
 /**
  * Página principal de agendamento
- * 
+ *
  * Permite aos usuários autenticados criar novos agendamentos
  * através do wizard interativo. Integra com as server actions
  * para persistir os dados no banco.
@@ -51,13 +52,12 @@ export default async function SchedulingPage() {
     barber: Barber;
   }) => {
     "use server";
-    
+
     try {
       if (!data.date || !data.time || !data.serviceId || !data.barberId) {
         throw new Error("Dados incompletos para agendamento");
       }
 
-      // Combinar data e hora em um objeto Date
       const [hours, minutes] = data.time.split(':').map(Number);
       const appointmentDate = new Date(data.date);
       appointmentDate.setHours(hours, minutes, 0, 0);
@@ -70,7 +70,6 @@ export default async function SchedulingPage() {
       });
 
       if (result.success) {
-        // Agendamento criado com sucesso
         return;
       } else {
         throw new Error(result.error || "Erro ao criar agendamento");
@@ -82,6 +81,16 @@ export default async function SchedulingPage() {
   };
 
   return (
-    <SchedulingClient onSubmit={handleAppointmentSubmit} />
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Agendamentos"
+        title="Novo Agendamento"
+        subtitle="Escolha o serviço, barbeiro e horário ideal para você."
+        className="py-10 lg:py-14"
+      />
+      <section className="flex-1">
+        <SchedulingClient onSubmit={handleAppointmentSubmit} />
+      </section>
+    </main>
   );
 }
