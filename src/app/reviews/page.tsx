@@ -122,17 +122,7 @@ export default async function ReviewsPage() {
             </TabsContent>
 
             <TabsContent value="form" className="mt-8 space-y-6">
-              <Card className="rounded-2xl border border-border bg-surface-card">
-                <CardHeader className="border-b border-border bg-surface-card">
-                  <CardTitle className="font-display text-2xl font-semibold italic text-foreground">
-                    Nova Avaliação
-                  </CardTitle>
-                  <p className="text-sm text-fg-muted">Compartilhe sua experiência para ajudar a comunidade.</p>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <ReviewSystemManager userId={session.user.id} />
-                </CardContent>
-              </Card>
+              <ReviewSystemManager userId={session.user.id} />
             </TabsContent>
 
             <TabsContent value="stats" className="mt-8 space-y-6">

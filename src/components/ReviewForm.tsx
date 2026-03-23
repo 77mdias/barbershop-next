@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Star, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { reviewFormSchema, type ReviewFormData } from '@/schemas/reviewSchemas';
@@ -117,8 +116,8 @@ export function ReviewForm({
             key={star}
             type="button"
             onClick={() => setValue('rating', star)}
-            className={`p-1 rounded transition-colors hover:bg-gray-100 ${
-              currentRating >= star ? 'text-yellow-400' : 'text-gray-300'
+            className={`rounded p-1 transition-colors hover:bg-surface-1 ${
+              currentRating >= star ? 'text-accent' : 'text-border'
             }`}
             disabled={isPending}
           >
@@ -134,16 +133,15 @@ export function ReviewForm({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <div className="rounded-2xl border border-border bg-surface-card p-6">
+      <div className="mb-6 flex items-center gap-2">
+        <h2 className="font-display text-xl font-bold italic text-foreground">
           {isEditing ? 'Editar Avaliação' : 'Nova Avaliação'}
-          {submitStatus === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
-          {submitStatus === 'error' && <AlertCircle className="w-5 h-5 text-red-500" />}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        </h2>
+        {submitStatus === 'success' && <CheckCircle className="h-5 w-5 text-[hsl(var(--success))]" />}
+        {submitStatus === 'error' && <AlertCircle className="h-5 w-5 text-destructive" />}
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Rating Stars */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
@@ -168,12 +166,12 @@ export function ReviewForm({
               className="min-h-[100px] resize-none"
               disabled={isPending}
             />
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-fg-muted">
               <span>
                 {currentFeedback?.length || 0}/1000 caracteres
               </span>
               {currentFeedback && currentFeedback.length >= 10 && (
-                <span className="text-green-600">✓ Válido</span>
+                <span className="text-[hsl(var(--success))]">✓ Válido</span>
               )}
             </div>
             {errors.feedback && (
@@ -253,7 +251,6 @@ export function ReviewForm({
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReviewForm } from "@/components/ReviewForm";
 import { CheckCircle, AlertCircle, Info } from "lucide-react";
 
@@ -77,14 +76,10 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
   // Se ainda está verificando, mostra loading
   if (!hasCheckedExisting) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="ml-2 text-gray-600">
-            Verificando histórico de serviços...
-          </span>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
+        <span className="ml-3 text-sm text-fg-muted">Verificando histórico de serviços...</span>
+      </div>
     );
   }
 
@@ -93,92 +88,56 @@ export function ReviewSystemManager({ userId }: ReviewSystemManagerProps) {
     return (
       <div className="space-y-6">
         {message && (
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-green-800">
-                <CheckCircle className="w-5 h-5" />
-                <p className="font-medium">{message}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-3 rounded-xl border border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.08)] px-4 py-3">
+            <CheckCircle className="h-5 w-5 shrink-0 text-[hsl(var(--success))]" />
+            <p className="text-sm font-medium text-foreground">{message}</p>
+          </div>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              Avaliar Serviço
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Avalie a qualidade do serviço prestado
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ReviewForm
-              serviceHistoryId={serviceHistoryId}
-              onSuccess={() => {
-                setMessage("✅ Avaliação enviada com sucesso!");
-                setServiceHistoryId(null); // Reset para permitir nova avaliação
-              }}
-            />
-          </CardContent>
-        </Card>
+        <ReviewForm
+          serviceHistoryId={serviceHistoryId}
+          onSuccess={() => {
+            setMessage("Avaliação enviada com sucesso!");
+            setServiceHistoryId(null);
+          }}
+        />
       </div>
     );
   }
 
   // Se não tem serviceHistory, mostra opção para criar
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-primary" />
-          Sistema de Avaliações
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900 mb-1">
-                Nenhum Serviço Pendente
-              </h4>
-              <p className="text-sm text-blue-800">
-                Você só pode avaliar serviços que foram concluídos. Complete um
-                serviço para poder deixar sua avaliação.
-              </p>
-            </div>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-surface-card p-4">
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+        <div>
+          <h4 className="font-semibold text-foreground">Nenhum Serviço Pendente</h4>
+          <p className="mt-1 text-sm text-fg-muted">
+            Você só pode avaliar serviços concluídos. Complete um atendimento para deixar sua avaliação.
+          </p>
         </div>
+      </div>
 
-        <Button
-          onClick={createTestData}
-          disabled={isCreatingTestData}
-          className="w-full"
-        >
-          {isCreatingTestData ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Verificando serviços...
-            </>
-          ) : (
-            <>
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Verificar Serviços Concluídos
-            </>
-          )}
-        </Button>
-
-        {message && !isSuccess && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <p className="font-medium text-red-800">{message}</p>
-            </div>
-          </div>
+      <Button onClick={createTestData} disabled={isCreatingTestData} className="w-full">
+        {isCreatingTestData ? (
+          <>
+            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Verificando serviços...
+          </>
+        ) : (
+          <>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Verificar Serviços Concluídos
+          </>
         )}
-      </CardContent>
-    </Card>
+      </Button>
+
+      {message && !isSuccess && (
+        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3">
+          <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
+          <p className="text-sm font-medium text-foreground">{message}</p>
+        </div>
+      )}
+    </div>
   );
 }
