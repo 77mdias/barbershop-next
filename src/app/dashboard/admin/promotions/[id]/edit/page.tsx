@@ -9,12 +9,13 @@ import { PageHero } from "@/components/shared/PageHero";
 import { Calendar, Target } from "lucide-react";
 
 interface EditPromotionPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditPromotionPage({ params }: EditPromotionPageProps) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -26,7 +27,7 @@ export default async function EditPromotionPage({ params }: EditPromotionPagePro
   }
 
   const [promotionResult, services] = await Promise.all([
-    getPromotionByIdForAdmin(params.id),
+    getPromotionByIdForAdmin(id),
     db.service.findMany({
       select: { id: true, name: true, active: true },
       orderBy: { name: "asc" },

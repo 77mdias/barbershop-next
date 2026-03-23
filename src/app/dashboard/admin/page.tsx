@@ -301,7 +301,7 @@ export default async function AdminDashboardPage() {
                             Taxa de Conversão
                           </p>
                           <p className="mt-2 font-display text-4xl font-bold italic text-accent">
-                            {((metrics.activeUsers / metrics.totalUsers) * 100).toFixed(1)}%
+                            {metrics.totalUsers > 0 ? ((metrics.activeUsers / metrics.totalUsers) * 100).toFixed(1) : "0.0"}%
                           </p>
                         </div>
                         <div>

@@ -7,12 +7,13 @@ import { getServiceByIdForAdmin } from "@/server/serviceAdminActions";
 import { PageHero } from "@/components/shared/PageHero";
 
 interface EditServicePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditServicePage({ params }: EditServicePageProps) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -23,7 +24,7 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
     redirect("/dashboard");
   }
 
-  const result = await getServiceByIdForAdmin(params.id);
+  const result = await getServiceByIdForAdmin(id);
 
   if (!result.success || !result.data) {
     notFound();

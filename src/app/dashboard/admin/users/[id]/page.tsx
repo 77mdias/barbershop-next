@@ -10,12 +10,13 @@ import { PageHero } from "@/components/shared/PageHero";
 import { User, Calendar, Star, Activity, DollarSign } from "lucide-react";
 
 interface UserEditPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function UserEditPage({ params }: UserEditPageProps) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -26,7 +27,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
     redirect("/dashboard");
   }
 
-  const userResult = await getUserById(params.id);
+  const userResult = await getUserById(id);
 
   if (!userResult.success || !userResult.data) {
     return (
@@ -34,7 +35,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
         <PageHero
           badge="Administrador"
           title="Usuário não encontrado"
-          subtitle={`O usuário com ID ${params.id} não existe ou foi removido.`}
+          subtitle={`O usuário com ID ${id} não existe ou foi removido.`}
           actions={[{ label: "Voltar para lista", href: "/dashboard/admin/users", variant: "outline" }]}
         />
       </main>
@@ -70,9 +71,9 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
       ? appointmentsWithReviews.reduce((acc, apt) => acc + (apt.serviceHistory?.rating || 0), 0) /
         appointmentsWithReviews.length
       : 0;
-  const totalSpent = appointmentsWithReviews.reduce((acc, apt) => {
+  const totalSpent = user.appointments.reduce((acc, apt) => {
     const price = apt.serviceHistory?.finalPrice;
-    return acc + (typeof price === "number" ? price : Number(price ?? 25));
+    return acc + (price != null ? Number(price) : 0);
   }, 0);
 
   return (

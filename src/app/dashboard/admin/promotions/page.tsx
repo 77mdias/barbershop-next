@@ -40,9 +40,9 @@ function formatDate(date?: Date | string | null) {
 }
 
 type AdminPromotionsPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     status?: string;
-  };
+  }>;
 };
 
 function buildStatusHref(status: "all" | "active" | "inactive") {
@@ -65,7 +65,7 @@ export default async function AdminPromotionsPage({ searchParams }: AdminPromoti
     redirect("/dashboard");
   }
 
-  const statusFilter = searchParams?.status;
+  const { status: statusFilter } = await (searchParams ?? Promise.resolve({} as { status?: string }));
 
   const filters: PromotionFiltersInput = { page: 1, limit: 20 };
 
