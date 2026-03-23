@@ -126,7 +126,7 @@ export default async function AdminDashboardPage() {
                   <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Receita Mensal
                   </p>
-                  <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                  <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                     R$ {(metrics.monthlyRevenue || 0).toFixed(2)}
                   </p>
                   <div className="mt-3 flex flex-col gap-1 text-xs text-fg-muted">

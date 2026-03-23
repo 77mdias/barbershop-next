@@ -57,7 +57,7 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                       {stat.label}
                     </p>
-                    <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                    <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                       {stat.value}
                     </p>
                   </div>
