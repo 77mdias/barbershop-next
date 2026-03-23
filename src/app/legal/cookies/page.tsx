@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cookie, FileText, ArrowRight } from "lucide-react";
+import { Settings, FileText, ArrowRight } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
 
 export default function CookiesPage() {
@@ -18,7 +18,7 @@ export default function CookiesPage() {
             <article className="rounded-2xl border border-border bg-surface-card p-8">
               <div className="mb-4 flex items-center gap-3">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
-                  <Cookie className="h-5 w-5" />
+                  <Settings className="h-5 w-5" />
                 </span>
                 <h2 className="font-display text-xl font-bold italic text-foreground">
                   Controle e transparência
