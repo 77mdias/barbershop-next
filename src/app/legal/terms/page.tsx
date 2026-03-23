@@ -1,37 +1,56 @@
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ShieldCheck, FileText, ArrowRight } from "lucide-react";
+import { PageHero } from "@/components/shared/PageHero";
 
 export default function TermsPage() {
   return (
-    <main className="container mx-auto flex min-h-screen flex-col gap-6 px-4 py-10 sm:py-16">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Link href="/" className="inline-flex items-center gap-2 text-accent hover:text-accent/80">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para a Home
-        </Link>
-      </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Legal"
+        title="Termos de Uso"
+        subtitle="Transparência e clareza sobre o uso da plataforma BarberKings."
+        actions={[{ label: "Voltar para a Home", href: "/" }]}
+      />
 
-      <header className="space-y-2">
-        <p className="text-sm font-semibold text-accent">Termos</p>
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Termos de Uso (versão demo)</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Conteúdo institucional para navegação segura. As políticas completas são fornecidas no ambiente de produção.
-        </p>
-      </header>
+      <section className="bg-surface-1 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <article className="rounded-2xl border border-border bg-surface-card p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <h2 className="font-display text-xl font-bold italic text-foreground">
+                  Transparência e privacidade
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm leading-relaxed text-fg-muted">
+                <p>Reservamo-nos o direito de ajustar funcionalidades e conteúdos sem aviso prévio nesta versão demonstrativa.</p>
+                <p>Dados sensíveis não são coletados neste ambiente; informações exibidas podem ser fictícias.</p>
+                <p>Agendamentos e pagamentos reais devem ser realizados apenas em ambientes autorizados.</p>
+              </div>
+            </article>
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2 text-foreground font-semibold">
-          <ShieldCheck className="h-4 w-4 text-accent" />
-          Transparência e privacidade
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/legal/privacy"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              >
+                <FileText className="h-4 w-4" />
+                Política de Privacidade
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/legal/cookies"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              >
+                <FileText className="h-4 w-4" />
+                Política de Cookies
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
-        <p>
-          • Reservamo-nos o direito de ajustar funcionalidades e conteúdos sem aviso prévio nesta versão demonstrativa.
-        </p>
-        <p>• Dados sensíveis não são coletados neste ambiente; informações exibidas podem ser fictícias.</p>
-        <p>• Agendamentos e pagamentos reais devem ser realizados apenas em ambientes autorizados.</p>
-        <Link href="/legal/privacy" className="text-accent font-semibold hover:text-accent/80">
-          Ler política de privacidade
-        </Link>
       </section>
     </main>
   );

@@ -1,39 +1,62 @@
 import Link from "next/link";
-import { ArrowLeft, Cookie } from "lucide-react";
+import { Cookie, FileText, ArrowRight } from "lucide-react";
+import { PageHero } from "@/components/shared/PageHero";
 
 export default function CookiesPage() {
   return (
-    <main className="container mx-auto flex min-h-screen flex-col gap-6 px-4 py-10 sm:py-16">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Link href="/" className="inline-flex items-center gap-2 text-accent hover:text-accent/80">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para a Home
-        </Link>
-      </div>
+    <main className="flex min-h-screen flex-col bg-background text-foreground">
+      <PageHero
+        badge="Legal"
+        title="Preferências de Cookies"
+        subtitle="Utilizamos apenas cookies essenciais neste ambiente de demonstração."
+        actions={[{ label: "Voltar para a Home", href: "/" }]}
+      />
 
-      <header className="space-y-2">
-        <p className="text-sm font-semibold text-accent">Cookies</p>
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Preferências de Cookies (demo)</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Utilizamos apenas cookies essenciais neste ambiente de demonstração. Configurações adicionais são exibidas no
-          ambiente de produção.
-        </p>
-      </header>
+      <section className="bg-surface-1 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <article className="rounded-2xl border border-border bg-surface-card p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent">
+                  <Cookie className="h-5 w-5" />
+                </span>
+                <h2 className="font-display text-xl font-bold italic text-foreground">
+                  Controle e transparência
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm leading-relaxed text-fg-muted">
+                <p>Cookies de sessão são usados para manter navegação básica.</p>
+                <p>Não utilizamos rastreamento de terceiros nesta versão.</p>
+                <p>
+                  Para dúvidas, fale conosco pela{" "}
+                  <Link href="/support" className="font-semibold text-accent hover:text-accent/80">
+                    Central de Ajuda
+                  </Link>
+                  .
+                </p>
+              </div>
+            </article>
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2 text-foreground font-semibold">
-          <Cookie className="h-4 w-4 text-accent" />
-          Controle e transparência
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/legal/terms"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              >
+                <FileText className="h-4 w-4" />
+                Termos de Uso
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/legal/privacy"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              >
+                <FileText className="h-4 w-4" />
+                Política de Privacidade
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
-        <p>• Cookies de sessão são usados para manter navegação básica.</p>
-        <p>• Não utilizamos rastreamento de terceiros nesta versão.</p>
-        <p>
-          • Para dúvidas, fale conosco pela{" "}
-          <Link href="/support" className="text-accent hover:text-accent/80">
-            Central de Ajuda
-          </Link>
-          .
-        </p>
       </section>
     </main>
   );
