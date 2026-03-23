@@ -18,9 +18,8 @@ import {
   UserCheck,
   UserMinus,
   Copy,
-  X
+  X,
 } from "lucide-react";
-import styles from "./page.module.scss";
 import {
   getFriends,
   getFriendSuggestions,
@@ -34,6 +33,7 @@ import {
 import { getOrCreateConversation } from "@/server/chatActions";
 import { SearchUsersModal } from "@/components/social/SearchUsersModal";
 import { SocialPageSkeleton } from "@/components/social/SocialSkeleton";
+import { PageHero } from "@/components/shared/PageHero";
 
 /**
  * Página Friend & Social - Mobile First
@@ -47,7 +47,9 @@ import { SocialPageSkeleton } from "@/components/social/SocialSkeleton";
 export default function FriendSocial() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = React.useState<"friends" | "suggestions">("friends");
+  const [activeTab, setActiveTab] = React.useState<"friends" | "suggestions">(
+    "friends"
+  );
   const [isLoadingData, setIsLoadingData] = React.useState(true);
   const [friends, setFriends] = React.useState<any[]>([]);
   const [suggestions, setSuggestions] = React.useState<any[]>([]);
@@ -57,9 +59,13 @@ export default function FriendSocial() {
     pendingSentCount: 0,
   });
   const [inviteCode, setInviteCode] = React.useState<string>("");
-  const [loadingActions, setLoadingActions] = React.useState<Record<string, boolean>>({});
+  const [loadingActions, setLoadingActions] = React.useState<
+    Record<string, boolean>
+  >({});
   const [isSearchModalOpen, setIsSearchModalOpen] = React.useState(false);
-  const [pendingRequestIds, setPendingRequestIds] = React.useState<string[]>([]);
+  const [pendingRequestIds, setPendingRequestIds] = React.useState<string[]>(
+    []
+  );
 
   // Redirect se não autenticado
   React.useEffect(() => {
@@ -78,7 +84,13 @@ export default function FriendSocial() {
   const loadData = async () => {
     setIsLoadingData(true);
     try {
-      const [friendsRes, suggestionsRes, statsRes, receivedRes, sentRes] = await Promise.all([
+      const [
+        friendsRes,
+        suggestionsRes,
+        statsRes,
+        receivedRes,
+        sentRes,
+      ] = await Promise.all([
         getFriends(),
         getFriendSuggestions(10),
         getSocialStats(),
@@ -98,7 +110,6 @@ export default function FriendSocial() {
         setStats(statsRes.data);
       }
 
-      // Montar lista de IDs pendentes para o modal de busca
       const pendingIds: string[] = [];
       if (receivedRes.success && receivedRes.data) {
         pendingIds.push(...receivedRes.data.map((r: any) => r.sender.id));
@@ -143,7 +154,10 @@ export default function FriendSocial() {
       if (result.success) {
         toast.success("Amigo removido com sucesso!");
         setFriends((prev) => prev.filter((f) => f.id !== friendId));
-        setStats((prev) => ({ ...prev, friendsCount: prev.friendsCount - 1 }));
+        setStats((prev) => ({
+          ...prev,
+          friendsCount: prev.friendsCount - 1,
+        }));
       } else {
         toast.error(result.error || "Erro ao remover amigo");
       }
@@ -215,7 +229,10 @@ export default function FriendSocial() {
     } catch (error) {
       toast.error("Erro ao abrir chat");
     } finally {
-      setLoadingActions((prev) => ({ ...prev, [`chat-${friendId}`]: false }));
+      setLoadingActions((prev) => ({
+        ...prev,
+        [`chat-${friendId}`]: false,
+      }));
     }
   };
 
@@ -228,332 +245,316 @@ export default function FriendSocial() {
   }
 
   return (
-    <div className="min-h-screen mt-16 mb-20 w-full flex flex-col ">
-      {/* Header */}
-      <div className={cn("border-b sticky top-16 z-10", styles.socialHeader)}>
-        <div className="flex items-center justify-between px-4 py-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold text-foreground">Friend & Social</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSearchModalOpen(true)}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-        </div>
+    <div className="mb-20 min-h-screen w-full flex-col">
+      {/* Hero */}
+      <PageHero
+        badge="Social"
+        title="Amigos & Conexões"
+        subtitle="Conecte-se com barbeiros e clientes da comunidade"
+        actions={[{ label: "Voltar", href: "/profile", variant: "outline" }]}
+      />
 
-        {/* Tabs */}
-        <div className="flex border-t">
-          <button
-            onClick={() => setActiveTab("friends")}
-            className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
-              activeTab === "friends"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <div className="flex items-center justify-center gap-2">
+      {/* Tabs */}
+      <div className="sticky top-16 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+          <div className="flex flex-1">
+            <button
+              onClick={() => setActiveTab("friends")}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-2 border-b-2 py-2 text-sm font-medium transition-colors",
+                activeTab === "friends"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-fg-muted hover:text-foreground"
+              )}
+            >
               <Users className="h-4 w-4" />
               <span>Amigos</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab("suggestions")}
-            className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
-              activeTab === "suggestions"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <div className="flex items-center justify-center gap-2">
+            </button>
+            <button
+              onClick={() => setActiveTab("suggestions")}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-2 border-b-2 py-2 text-sm font-medium transition-colors",
+                activeTab === "suggestions"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-fg-muted hover:text-foreground"
+              )}
+            >
               <UserPlus className="h-4 w-4" />
               <span>Sugestões</span>
-            </div>
+            </button>
+          </div>
+          <button
+            onClick={() => setIsSearchModalOpen(true)}
+            className="ml-3 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border text-fg-muted transition-colors hover:border-accent hover:text-accent"
+            title="Buscar usuários"
+          >
+            <Search className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-6 max-w-2xl w-full mx-auto">
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
         {isLoadingData ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent" />
           </div>
         ) : (
           <>
             {/* Tab: Amigos */}
             {activeTab === "friends" && (
-          <div className="space-y-4">
-            {/* Stats Card */}
-            <div className={cn("bg-card rounded-2xl p-6 shadow-sm border border-border", styles.statsCard)}>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className={styles.statItem}>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {stats.friendsCount}
+              <div className="space-y-4">
+                {/* Stats Card */}
+                <div className="rounded-2xl border border-border bg-surface-card p-6">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="font-display text-2xl font-bold italic text-accent">
+                        {stats.friendsCount}
+                      </div>
+                      <div className="mt-1 text-xs text-fg-subtle">Amigos</div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        router.push("/profile/social/requests")
+                      }
+                      className="rounded-lg px-1 transition-colors hover:bg-[hsl(var(--accent)/0.05)]"
+                    >
+                      <div className="font-display text-2xl font-bold italic text-accent">
+                        {stats.pendingSentCount}
+                      </div>
+                      <div className="mt-1 text-xs text-fg-subtle">
+                        Enviadas
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        router.push("/profile/social/requests")
+                      }
+                      className="relative rounded-lg px-1 transition-colors hover:bg-[hsl(var(--accent)/0.05)]"
+                    >
+                      <div className="relative inline-flex font-display text-2xl font-bold italic text-accent">
+                        {stats.pendingReceivedCount}
+                        {stats.pendingReceivedCount > 0 && (
+                          <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-destructive" />
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-fg-subtle">
+                        Recebidas
+                      </div>
+                      {stats.pendingReceivedCount > 0 && (
+                        <div className="absolute right-1 top-1">
+                          <span className="relative flex h-3 w-3">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                            <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
+                          </span>
+                        </div>
+                      )}
+                    </button>
                   </div>
-                  <div className="text-xs text-foreground mt-1">Amigos</div>
                 </div>
-                <button
-                  onClick={() => router.push("/profile/social/requests")}
-                  className={cn(
-                    styles.statItem,
-                    "cursor-pointer hover:bg-purple-50 transition-colors rounded-lg -mx-1 px-1 relative"
-                  )}
-                >
-                  <div className="text-2xl font-bold text-purple-600">
-                    {stats.pendingSentCount}
+
+                {/* Invite Card */}
+                <div className="rounded-2xl border border-[hsl(var(--accent)/0.3)] bg-[hsl(var(--accent)/0.08)] p-6">
+                  <div className="mb-4 flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="mb-2 font-semibold text-foreground">
+                        Convide seus amigos!
+                      </h3>
+                      <p className="text-sm text-fg-muted">
+                        Compartilhe com amigos e ganhe benefícios exclusivos
+                      </p>
+                    </div>
+                    <Share2 className="ml-2 h-6 w-6 shrink-0 text-accent" />
                   </div>
-                  <div className="text-xs text-foreground mt-1">Enviadas</div>
-                </button>
-                <button
-                  onClick={() => router.push("/profile/social/requests")}
-                  className={cn(
-                    styles.statItem,
-                    "cursor-pointer hover:bg-teal-50 transition-colors rounded-lg -mx-1 px-1 relative"
-                  )}
-                >
-                  <div className="text-2xl font-bold text-teal-600 relative inline-flex">
-                    {stats.pendingReceivedCount}
-                    {stats.pendingReceivedCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-                    )}
-                  </div>
-                  <div className="text-xs text-foreground mt-1">Recebidas</div>
-                  {stats.pendingReceivedCount > 0 && (
-                    <div className="absolute top-1 right-1">
-                      <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
-                      </span>
+                  {inviteCode && (
+                    <div className="mb-3 flex items-center gap-2 rounded-xl border border-border bg-background p-2">
+                      <code className="flex-1 font-mono text-sm text-foreground">
+                        {inviteCode}
+                      </code>
+                      <button
+                        onClick={() => handleCopyInvite()}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition-colors hover:text-accent"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
                     </div>
                   )}
-                </button>
-              </div>
-            </div>
-
-            {/* Invite Card */}
-            <div className={cn("bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg", styles.inviteCard)}>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-2">
-                    Convide seus amigos!
-                  </h3>
-                  <p className="text-sm text-blue-100 opacity-90">
-                    Compartilhe com amigos e ganhe benefícios exclusivos
-                  </p>
-                </div>
-                <Share2 className="h-6 w-6 flex-shrink-0 ml-2" />
-              </div>
-              {inviteCode && (
-                <div className="mb-3 flex items-center gap-2 bg-white/20 rounded-lg p-2">
-                  <code className="flex-1 text-sm font-mono">{inviteCode}</code>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleCopyInvite()}
-                    className="h-8 w-8 text-white hover:bg-white/20"
+                  <button
+                    onClick={handleShareInvite}
+                    className="gold-shimmer w-full inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90"
                   >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                    Compartilhar Convite
+                  </button>
                 </div>
-              )}
-              <Button
-                variant="secondary"
-                className="w-full bg-white text-blue-600 hover:bg-blue-50"
-                onClick={handleShareInvite}
-              >
-                Compartilhar Convite
-              </Button>
-            </div>
 
-            {/* Friends List */}
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-foreground px-1 flex items-center justify-between">
-                <span>Meus Amigos</span>
-                <span className="text-xs text-muted-foreground font-normal">
-                  {friends.length} amigos
-                </span>
-              </h2>
+                {/* Friends List */}
+                <div className="space-y-3">
+                  <h2 className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+                    <span>Meus Amigos</span>
+                    <span className="normal-case tracking-normal font-normal text-fg-subtle">
+                      {friends.length} amigos
+                    </span>
+                  </h2>
 
-              {friends.length === 0 ? (
-                <div className="bg-card rounded-2xl p-8 text-center shadow-sm border border-border">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                  <h3 className="font-semibold text-foreground mb-2">
-                    Nenhum amigo ainda
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Comece a conectar com outras pessoas da comunidade
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => setActiveTab("suggestions")}
-                    className="mx-auto"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Ver Sugestões
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {friends.map((friend) => (
-                    <div
-                      key={friend.id}
-                      className={cn(
-                        "bg-card rounded-xl p-4 shadow-sm border border-border transition-all hover:shadow-md",
-                        styles.friendCard
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <UserAvatar
-                            src={friend.image}
-                            name={friend.name}
-                            email=""
-                            size="md"
-                            className="w-12 h-12 flex-shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground truncate">
-                              {friend.name}
-                            </h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span className="capitalize text-xs">
-                                {friend.role === "BARBER" ? "Barbeiro" : "Cliente"}
-                              </span>
+                  {friends.length === 0 ? (
+                    <div className="rounded-2xl border border-border bg-surface-card p-8 text-center">
+                      <Users className="mx-auto mb-3 h-12 w-12 text-fg-subtle" />
+                      <h3 className="mb-2 font-semibold text-foreground">
+                        Nenhum amigo ainda
+                      </h3>
+                      <p className="mb-4 text-sm text-fg-muted">
+                        Comece a conectar com outras pessoas da comunidade
+                      </p>
+                      <button
+                        onClick={() => setActiveTab("suggestions")}
+                        className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Ver Sugestões
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {friends.map((friend) => (
+                        <div
+                          key={friend.id}
+                          className="card-hover rounded-2xl border border-border bg-surface-card p-4 transition-all duration-300 hover:border-[hsl(var(--accent)/0.3)]"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                              <UserAvatar
+                                src={friend.image}
+                                name={friend.name}
+                                email=""
+                                size="md"
+                                className="h-12 w-12 shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <h3 className="truncate font-semibold text-foreground">
+                                  {friend.name}
+                                </h3>
+                                <div className="text-xs text-fg-muted">
+                                  <span className="capitalize">
+                                    {friend.role === "BARBER"
+                                      ? "Barbeiro"
+                                      : "Cliente"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <button
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-accent transition-colors hover:bg-[hsl(var(--accent)/0.1)] disabled:opacity-50"
+                                onClick={() => handleOpenChat(friend.id)}
+                                disabled={
+                                  loadingActions[`chat-${friend.id}`]
+                                }
+                                title="Enviar mensagem"
+                              >
+                                {loadingActions[`chat-${friend.id}`] ? (
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                  <MessageCircle className="h-5 w-5" />
+                                )}
+                              </button>
+                              <button
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-destructive transition-colors hover:bg-[hsl(var(--destructive)/0.1)] disabled:opacity-50"
+                                onClick={() => handleRemoveFriend(friend.id)}
+                                disabled={loadingActions[friend.id]}
+                                title="Remover amigo"
+                              >
+                                {loadingActions[friend.id] ? (
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                  <UserMinus className="h-5 w-5" />
+                                )}
+                              </button>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => handleOpenChat(friend.id)}
-                            disabled={loadingActions[`chat-${friend.id}`]}
-                            title="Enviar mensagem"
-                          >
-                            {loadingActions[`chat-${friend.id}`] ? (
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                              <MessageCircle className="h-5 w-5" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => handleRemoveFriend(friend.id)}
-                            disabled={loadingActions[friend.id]}
-                            title="Remover amigo"
-                          >
-                            {loadingActions[friend.id] ? (
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                              <UserMinus className="h-5 w-5" />
-                            )}
-                          </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Sugestões */}
+            {activeTab === "suggestions" && (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border bg-surface-card p-4">
+                  <div className="flex items-center gap-2 text-sm text-fg-muted">
+                    <UserPlus className="h-4 w-4 text-accent" />
+                    <span>Pessoas que você pode conhecer</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {suggestions.map((suggestion) => (
+                    <div
+                      key={suggestion.id}
+                      className="card-hover rounded-2xl border border-border bg-surface-card p-4 transition-all duration-300 hover:border-[hsl(var(--accent)/0.3)]"
+                    >
+                      <div className="mb-3 flex items-center gap-3">
+                        <UserAvatar
+                          src={suggestion.image}
+                          name={suggestion.name}
+                          email=""
+                          size="md"
+                          className="h-12 w-12"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-semibold text-foreground">
+                            {suggestion.name}
+                          </h3>
+                          {suggestion.mutualFriends > 0 && (
+                            <p className="text-xs text-fg-muted">
+                              {suggestion.mutualFriends} amigos em comum
+                            </p>
+                          )}
                         </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="gold-shimmer flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-all duration-300 hover:bg-accent/90 disabled:opacity-50"
+                          onClick={() =>
+                            handleSendFriendRequest(suggestion.id)
+                          }
+                          disabled={loadingActions[suggestion.id]}
+                        >
+                          {loadingActions[suggestion.id] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <UserCheck className="h-4 w-4" />
+                          )}
+                          Adicionar
+                        </button>
+                        <button
+                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
+                          onClick={() =>
+                            handleRemoveSuggestion(suggestion.id)
+                          }
+                        >
+                          <X className="h-4 w-4" />
+                          Remover
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
-        )}
 
-            
-
-            {/* Tab: Sugestões */}
-            {activeTab === "suggestions" && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <UserPlus className="h-4 w-4" />
-                <span>Pessoas que você pode conhecer</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {suggestions.map((suggestion) => (
-                <div
-                  key={suggestion.id}
-                  className={cn(
-                    "bg-white rounded-xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md",
-                    styles.suggestionCard
-                  )}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <UserAvatar
-                      src={suggestion.image}
-                      name={suggestion.name}
-                      email=""
-                      size="md"
-                      className="w-12 h-12"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">
-                        {suggestion.name}
-                      </h3>
-                      {suggestion.mutualFriends > 0 && (
-                        <p className="text-xs text-gray-500">
-                          {suggestion.mutualFriends} amigos em comum
-                        </p>
-                      )}
-                    </div>
+                {suggestions.length === 0 && (
+                  <div className="rounded-2xl border border-border bg-surface-card p-8 text-center">
+                    <UserPlus className="mx-auto mb-3 h-12 w-12 text-fg-subtle" />
+                    <h3 className="mb-2 font-semibold text-foreground">
+                      Nenhuma sugestão no momento
+                    </h3>
+                    <p className="text-sm text-fg-muted">
+                      Volte mais tarde para ver novas sugestões de amigos
+                    </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
-                      onClick={() => handleSendFriendRequest(suggestion.id)}
-                      disabled={loadingActions[suggestion.id]}
-                    >
-                      {loadingActions[suggestion.id] ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : (
-                        <UserCheck className="h-4 w-4 mr-1" />
-                      )}
-                      Adicionar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleRemoveSuggestion(suggestion.id)}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Remover
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {suggestions.length === 0 && (
-              <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-                <UserPlus className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Nenhuma sugestão no momento
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Volte mais tarde para ver novas sugestões de amigos
-                </p>
+                )}
               </div>
-            )}
-          </div>
             )}
           </>
         )}
