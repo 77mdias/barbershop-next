@@ -284,7 +284,7 @@ export default async function AdminDashboardPage() {
                           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                             Usuários Ativos (30 dias)
                           </p>
-                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                          <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                             {metrics.activeUsers}
                           </p>
                         </div>
@@ -292,7 +292,7 @@ export default async function AdminDashboardPage() {
                           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                             Novos Usuários (mês)
                           </p>
-                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                          <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                             {metrics.newUsersThisMonth}
                           </p>
                         </div>
@@ -300,7 +300,7 @@ export default async function AdminDashboardPage() {
                           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                             Taxa de Conversão
                           </p>
-                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                          <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                             {((metrics.activeUsers / metrics.totalUsers) * 100).toFixed(1)}%
                           </p>
                         </div>
@@ -308,7 +308,7 @@ export default async function AdminDashboardPage() {
                           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                             Barbeiros Ativos
                           </p>
-                          <p className="mt-2 font-display text-3xl font-bold italic text-accent">
+                          <p className="mt-2 font-display text-4xl font-bold italic text-accent">
                             {metrics.activeBarbersCount}
                           </p>
                         </div>
