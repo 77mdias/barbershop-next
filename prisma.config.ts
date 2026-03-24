@@ -25,10 +25,7 @@ if (fs.existsSync(envPath)) {
 }
 
 export default defineConfig({
-  experimental: {
-    externalTables: true,
-    studio: true,
-  },
+  earlyAccess: true,
   schema: path.join("prisma", "schema.prisma"),
   migrations: {
     path: path.join("prisma", "migrations"),

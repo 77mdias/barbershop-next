@@ -22,6 +22,11 @@ Guias de deploy e configuração de produção para o sistema Barbershop Next.
   - Performance tips
   - Deploy configurations
 
+- **[GitHub Actions CI/CD](./github-actions.md)** - Pipeline de integração e entrega contínua
+  - CI com lint, type-check, testes e build
+  - CD com deploy automático para Vercel após CI da `main`
+  - Migrações Prisma antes do deploy (quando `DATABASE_URL` estiver configurado)
+
 - **[Email Setup](./email-setup.md)** - Configuração de envio de emails
   - Providers suportados (Gmail, SendGrid, etc.)
   - SMTP configuration

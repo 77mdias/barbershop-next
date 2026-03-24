@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/prisma";
+import { canAccessDebugEndpoints } from "@/lib/security/debug-access";
 
 /**
  * Endpoint para criar dados de teste para o sistema de avaliações
  * Cria: User, Service, Appointment, ServiceHistory
  */
 export async function POST(request: NextRequest) {
+  if (!canAccessDebugEndpoints(request.headers)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     const session = await getServerSession(authOptions);
 

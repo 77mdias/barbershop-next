@@ -41,6 +41,12 @@ make dev-down        # derrubar ambiente
 - Push para branch configurada no Vercel
 - Build padrão: `npm run build:vercel`
 
+### CI/CD (GitHub Actions)
+
+- CI automático em PR/push: lint, type-check, testes e build
+- CD automático para Vercel após CI bem-sucedido na `main`
+- Guia de configuração: [docs/deployment/github-actions.md](./docs/deployment/github-actions.md)
+
 ### Migrações de banco
 
 ```bash
@@ -96,4 +102,3 @@ Guia: [Security Playbook](./docs/security/PLAYBOOK.md)
 
 - `docker-compose.pro.yml`: fluxo profissional self-hosted (migrator + app)
 - `docker-compose.prod.yml`: fluxo legado de produção Docker
-

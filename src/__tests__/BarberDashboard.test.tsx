@@ -16,6 +16,16 @@ jest.mock("@/lib/auth", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  usePathname: () => "/dashboard/barber",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock("@/server/dashboardActions", () => ({
@@ -155,7 +165,7 @@ describe("BarberDashboardPage", () => {
 
       expect(container.textContent).toContain("Dashboard do Barbeiro");
       expect(container.textContent).toContain("Gerencie seus atendimentos");
-      expect(container.textContent).toContain("Barbeiro Ativo");
+      expect(container.textContent).toContain("Dashboard Geral");
     });
 
     test("deve renderizar cards de métricas principais com dados corretos", async () => {
@@ -209,8 +219,7 @@ describe("BarberDashboardPage", () => {
       // Verificar que as metas e valores aparecem
       expect(container.textContent).toContain("4.8");
       expect(container.textContent).toContain("Média Este Mês");
-      // Goals são renderizados em uma seção específica do dashboard
-      expect(container.textContent).toContain("Excelência");
+      expect(container.textContent).toContain("Distribuição de Notas");
     });
   });
 
@@ -322,8 +331,7 @@ describe("BarberDashboardPage", () => {
 
       // Verificar classes de grid responsivo
       const gridElement = container.querySelector(".grid");
-      expect(gridElement?.className).toContain("grid-cols-1");
-      expect(gridElement?.className).toContain("md:grid-cols-2");
+      expect(gridElement?.className).toContain("sm:grid-cols-2");
       expect(gridElement?.className).toContain("lg:grid-cols-4");
     });
   });

@@ -43,8 +43,8 @@ describe("MessageBubble", () => {
       <MessageBubble {...defaultProps} isOwn={true} />
     );
 
-    // Own messages should have blue background
-    const bubble = container.querySelector(".bg-blue-600");
+    // Own messages should use accent token
+    const bubble = container.querySelector(".bg-accent");
     expect(bubble).toBeInTheDocument();
   });
 
@@ -53,8 +53,8 @@ describe("MessageBubble", () => {
       <MessageBubble {...defaultProps} isOwn={false} />
     );
 
-    // Received messages should have white background
-    const bubble = container.querySelector(".bg-white");
+    // Received messages should use surface token
+    const bubble = container.querySelector(".bg-surface-card");
     expect(bubble).toBeInTheDocument();
   });
 
