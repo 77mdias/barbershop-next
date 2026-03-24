@@ -165,15 +165,15 @@ export function NotificationBell() {
   const getNotificationIcon = (type: Notification["type"]) => {
     switch (type) {
       case "FRIEND_REQUEST_RECEIVED":
-        return <UserPlus className="h-4 w-4 text-blue-500" />;
+        return <UserPlus className="h-4 w-4 text-accent" />;
       case "FRIEND_REQUEST_ACCEPTED":
-        return <UserCheck className="h-4 w-4 text-green-500" />;
+        return <UserCheck className="h-4 w-4 text-emerald-500" />;
       case "FRIEND_REQUEST_REJECTED":
-        return <UserX className="h-4 w-4 text-red-500" />;
+        return <UserX className="h-4 w-4 text-destructive" />;
       case "FRIEND_INVITE_USED":
-        return <Gift className="h-4 w-4 text-purple-500" />;
+        return <Gift className="h-4 w-4 text-accent" />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className="h-4 w-4 text-fg-muted" />;
     }
   };
 
@@ -202,8 +202,7 @@ export function NotificationBell() {
           />
           {unreadCount > 0 && (
             <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse"
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-[hsl(var(--background))]"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
@@ -211,7 +210,7 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-80 p-0 bg-surface-card border-border" align="end">
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
@@ -246,7 +245,7 @@ export function NotificationBell() {
                       ${
                         notification.read
                           ? "bg-background hover:bg-muted/50 border-border"
-                          : "bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-950/50 dark:hover:bg-blue-950/70 dark:border-blue-800"
+                          : "bg-[hsl(var(--accent)/0.06)] hover:bg-[hsl(var(--accent)/0.10)] border-[hsl(var(--accent)/0.20)]"
                       }
                     `}
                   >
@@ -277,7 +276,7 @@ export function NotificationBell() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs text-muted-foreground hover:text-foreground"
+                    className="text-xs text-accent hover:text-accent/80"
                     onClick={() => setIsOpen(false)}
                   >
                     Ver todas as notificações

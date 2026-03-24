@@ -132,7 +132,7 @@ export function ChatList({
       <ScrollArea className="flex-1">
         {isLoading && conversations.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">

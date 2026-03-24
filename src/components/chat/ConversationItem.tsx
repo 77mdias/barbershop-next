@@ -55,8 +55,8 @@ export function ConversationItem({
       onClick={handleClick}
       className={cn(
         "flex items-center gap-3 p-4 cursor-pointer transition-all border-b border-border",
-        "hover:bg-card active:bg-card",
-        isActive && "bg-blue-50 hover:bg-card border-l-4 border-l-blue-600"
+        "hover:bg-surface-card active:bg-surface-card",
+        isActive && "bg-[hsl(var(--accent)/0.08)] hover:bg-[hsl(var(--accent)/0.10)] border-l-2 border-l-accent"
       )}
     >
       {/* Avatar */}
@@ -71,7 +71,7 @@ export function ConversationItem({
 
         {/* Unread badge on avatar */}
         {unreadCount > 0 && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <div className="absolute -top-1 -right-1 bg-accent text-[hsl(var(--background))] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </div>
         )}
@@ -92,7 +92,7 @@ export function ConversationItem({
 
           {/* Timestamp */}
           {timeAgo && (
-            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+            <span className="text-xs text-fg-subtle flex-shrink-0 ml-2">
               {timeAgo}
             </span>
           )}
@@ -115,7 +115,7 @@ export function ConversationItem({
 
       {/* Unread indicator */}
       {unreadCount > 0 && (
-        <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full" />
+        <div className="flex-shrink-0 w-2 h-2 bg-accent rounded-full" />
       )}
     </div>
   );

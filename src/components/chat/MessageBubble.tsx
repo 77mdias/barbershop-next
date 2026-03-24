@@ -65,7 +65,7 @@ export function MessageBubble({
       <div className="flex flex-col gap-1">
         {/* Sender name (only for received messages) */}
         {!isOwn && senderName && (
-          <span className="text-xs text-gray-500 px-1">{senderName}</span>
+          <span className="text-xs text-fg-subtle px-1">{senderName}</span>
         )}
 
         {/* Bubble */}
@@ -73,8 +73,8 @@ export function MessageBubble({
           className={cn(
             "rounded-2xl px-4 py-2 break-words shadow-sm",
             isOwn
-              ? "bg-blue-600 text-white rounded-br-sm"
-              : "bg-white text-gray-900 border border-gray-200 rounded-bl-sm"
+              ? "bg-accent text-[hsl(var(--background))] rounded-br-sm"
+              : "bg-surface-card text-foreground border border-border rounded-bl-sm"
           )}
         >
           {/* Message text */}
@@ -86,7 +86,7 @@ export function MessageBubble({
           <div
             className={cn(
               "flex items-center gap-1 mt-1 text-xs",
-              isOwn ? "text-blue-100" : "text-gray-500"
+              isOwn ? "text-[hsl(var(--background)/0.6)]" : "text-fg-subtle"
             )}
           >
             <span>{formattedTime}</span>

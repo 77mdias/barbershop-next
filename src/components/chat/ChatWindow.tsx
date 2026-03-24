@@ -158,9 +158,9 @@ export function ChatWindow({
   }, [messages.length]);
 
   return (
-    <div className="w-full  flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100vh-4rem)]">
+    <div className="w-full flex flex-col h-[calc(100dvh-65px)] max-h-[calc(100dvh-65px)]">
       {/* Header - Fixo no topo da conversa */}
-      <div className="bg-card w-full px-4 py-3 flex items-center gap-3 border-b shadow-md flex-shrink-0 z-10">
+      <div className="bg-background/80 backdrop-blur-md w-full px-4 py-3 flex items-center gap-3 border-b border-border shadow-[0_1px_16px_-4px_rgba(0,0,0,0.4)] flex-shrink-0 z-10">
         <Button
           variant="ghost"
           size="icon"
@@ -180,7 +180,6 @@ export function ChatWindow({
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-foreground truncate">{friendName}</h2>
-          <p className="text-xs text-muted-foreground">Online</p>
         </div>
       </div>
 
@@ -211,8 +210,8 @@ export function ChatWindow({
           {/* Messages */}
           {messages.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">Nenhuma mensagem ainda</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-fg-muted">Nenhuma mensagem ainda</p>
+              <p className="text-sm text-fg-subtle mt-1">
                 Envie uma mensagem para começar a conversa
               </p>
             </div>
@@ -242,7 +241,7 @@ export function ChatWindow({
       </ScrollArea>
 
       {/* Input Area - Fixo no bottom */}
-      <div className=" w-full border-t shadow-lg px-4 py-3 flex-shrink-0">
+      <div className="w-full border-t border-border shadow-[0_-1px_16px_-4px_rgba(0,0,0,0.3)] px-4 py-3 flex-shrink-0">
         <div className="max-w-4xl mx-auto">
           <MessageInput
             onSendMessage={handleSendMessage}
