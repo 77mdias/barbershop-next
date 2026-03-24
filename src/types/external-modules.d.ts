@@ -208,6 +208,7 @@ declare module "next/navigation" {
 
   export function usePathname(): string;
   export function useSearchParams(): URLSearchParams;
+  export function useParams<T extends Record<string, string | string[]> = Record<string, string | string[]>>(): T;
   export function redirect(url: string): never;
   export function notFound(): never;
 }
