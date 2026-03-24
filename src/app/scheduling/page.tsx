@@ -86,7 +86,7 @@ export default async function SchedulingPage() {
         badge="Agendamentos"
         title="Novo Agendamento"
         subtitle="Escolha o serviço, barbeiro e horário ideal para você."
-        className="py-10 lg:py-14"
+        className="pb-10 lg:pb-14"
       />
       <section className="flex-1">
         <SchedulingClient onSubmit={handleAppointmentSubmit} />

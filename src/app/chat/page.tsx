@@ -25,7 +25,7 @@ export default async function ChatPage() {
         badge="Mensagens"
         title="Suas Conversas"
         subtitle="Fale com a equipe e acompanhe atendimentos em tempo real."
-        className="py-10 lg:py-14"
+        className="pb-10 lg:pb-14"
       />
       <section className="container mx-auto flex-1 px-4 py-6">
         <ChatList
