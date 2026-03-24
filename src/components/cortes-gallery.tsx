@@ -1,56 +1,7 @@
 "use client";
 
-import { Gallery, type GalleryImage } from "@/components/gallery";
-
-// Dados das imagens da galeria
-const galleryImages: GalleryImage[] = [
-  
-  {
-    src: "/images/cortes/corteluz.jpg",
-    alt: "Corte com Luzes",
-    title: "Corte com Luzes"
-  },
-  {
-    src: "/images/cortes/corte moner.jpeg",
-    alt: "Corte Moderno",
-    title: "Corte Moderno"
-  },
-  {
-    src: "/images/cortes/images.jpg",
-    alt: "Corte Estilizado",
-    title: "Corte Estilizado"
-  },
-  {
-    src: "/images/cortes/imagescorte.jpg",
-    alt: "Corte Premium",
-    title: "Corte Premium"
-  },
-  {
-    src: "/images/cortes/ook.jpg",
-    alt: "Corte Personalizado",
-    title: "Corte Personalizado"
-  },
-  {
-    src: "/images/cortes/dqeasd.jpg",
-    alt: "Corte Exclusivo",
-    title: "Corte Exclusivo"
-  },
-  {
-    src: "/images/cortes/3.webp",
-    alt: "Corte Contemporâneo",
-    title: "Corte Contemporâneo"
-  },
-  {
-    src: "/images/cortes/men-hairstyle-2022-cortes-de-cabelo-masculino-2022-liso-cacheado-crespo-curto-longo-01.webp",
-    alt: "Tendências 2022",
-    title: "Tendências 2022"
-  },
-  {
-    src: "/images/cortes/cdn.manualdohomem.com.webp",
-    alt: "Corte Profissional",
-    title: "Corte Profissional"
-  }
-];
+import { Gallery } from "@/components/gallery";
+import { galleryImages } from "@/components/gallery-images";
 
 /**
  * Componente da seção de galeria de cortes

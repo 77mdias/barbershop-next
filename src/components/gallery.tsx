@@ -1,4 +1,4 @@
-                                                      "use client";
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface GalleryImage {
+export interface GalleryImage {
   /** Caminho da imagem */
   src: string;
   /** Texto alternativo da imagem */
@@ -45,7 +45,7 @@ export function Gallery({
   showZoomOverlay = true,
 }: GalleryProps) {
   const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
-  const [isLoading, setIsLoading] = React.useState<{ [key: number]: boolean }>({});
+  const [isLoading, setIsLoading] = React.useState<Record<number, boolean>>({});
 
   // Navegação por teclado
   React.useEffect(() => {
@@ -135,9 +135,11 @@ export function Gallery({
         gridCols[columns]
       )}>
         {images.map((image, index) => (
-          <div
-            key={index}
-            className="group relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 cursor-pointer transition-all duration-300 hover:shadow-xl"
+          <button
+            key={`${image.src}-${index}`}
+            type="button"
+            aria-label={`Abrir imagem ${image.title || image.alt} em tela cheia`}
+            className="group relative w-full overflow-hidden rounded-xl bg-gray-100 text-left transition-all duration-300 hover:shadow-xl dark:bg-gray-800"
             onClick={() => setSelectedImage(index)}
           >
             {/* Loading Skeleton */}
@@ -174,17 +176,23 @@ export function Gallery({
                 </p>
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
       {/* Lightbox Modal */}
       {selectedImage !== null && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Visualização ampliada de ${images[selectedImage].title || images[selectedImage].alt}`}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+        >
           {/* Botão Fechar */}
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Fechar galeria"
             className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
             onClick={() => setSelectedImage(null)}
           >
@@ -196,6 +204,7 @@ export function Gallery({
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Imagem anterior"
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
               onClick={() => navigateImage("prev")}
             >
@@ -208,6 +217,7 @@ export function Gallery({
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Próxima imagem"
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
               onClick={() => navigateImage("next")}
             >
@@ -244,6 +254,8 @@ export function Gallery({
               {images.map((_, index) => (
                 <button
                   key={index}
+                  type="button"
+                  aria-label={`Ir para imagem ${index + 1}`}
                   className={cn(
                     "w-2 h-2 rounded-full transition-all duration-200",
                     selectedImage === index 
@@ -260,6 +272,3 @@ export function Gallery({
     </div>
   );
 }
-
-// Export do tipo para uso externo
-export type { GalleryImage };

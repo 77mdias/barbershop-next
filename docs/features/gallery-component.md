@@ -4,6 +4,22 @@
 
 Componente moderno e responsivo de galeria de imagens criado especificamente para a barbershop. Inclui lightbox integrado, navegação por teclado, e otimização para mobile.
 
+## 🆕 Redesign 3D da rota `/gallery`
+
+A rota dedicada da galeria agora usa uma experiência 3D moderna com Motion + React Three Fiber:
+
+- `src/app/gallery/page.tsx` usa `GalleryExperience`.
+- `src/components/gallery-3d/GalleryExperience.tsx` orquestra hero editorial, coleções e portfólio.
+- `src/components/gallery-3d/GallerySceneBackdrop.tsx` controla tier de performance, tema e fallback.
+- `src/components/gallery-3d/GallerySceneCanvas.tsx` renderiza os elementos 3D da barbearia.
+
+### Fallbacks e acessibilidade aplicados
+
+- Fallback para gradiente estático quando `prefers-reduced-motion` está ativo.
+- Fallback para gradiente estático quando WebGL não está disponível.
+- Thumbnails da galeria como `button` semântico com `aria-label`.
+- Controles do lightbox com `aria-label` e modal com `role="dialog"` + `aria-modal`.
+
 ## 🚀 Características
 
 - ✅ **Responsive**: Adaptável a todos os tamanhos de tela
