@@ -146,6 +146,8 @@ declare module "lucide-react" {
   export const Clock4: Icon;
   export const MapPinIcon: Icon;
   export const StarOff: Icon;
+  export const UserCircle: Icon;
+  export const LogIn: Icon;
 }
 
 declare module "@aws-sdk/client-s3";

@@ -36,7 +36,7 @@ const samplePrices = [
 
 export default function PricesPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-background text-foreground">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-background text-foreground">
       <PageHero
         badge="Tabela transparente"
         title="Preços & Serviços"
@@ -56,14 +56,14 @@ export default function PricesPage() {
 
       <section className="bg-background py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface-card px-5 py-4">
-            <div className="flex items-center gap-3 text-sm text-fg-muted">
-              <Percent className="h-4 w-4 text-accent" />
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface-card px-5 py-4">
+            <div className="flex min-w-0 flex-1 items-start gap-3 text-sm text-fg-muted">
+              <Percent className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
               <span>Quer economizar mais? Confira promoções ativas e pacotes especiais antes de fechar o horário.</span>
             </div>
             <Link
               href="/promotions"
-              className="text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              className="shrink-0 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
             >
               Abrir promoções
             </Link>
@@ -85,10 +85,10 @@ export default function PricesPage() {
               return (
                 <article
                   key={item.label}
-                  className="card-hover group rounded-2xl border border-border bg-surface-card p-6 transition-all duration-300"
+                  className="card-hover group rounded-2xl border border-border bg-surface-card p-4 sm:p-6 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent transition-colors duration-300 group-hover:bg-[hsl(var(--accent)/0.16)]">
+                    <div className="inline-flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.1)] text-accent transition-colors duration-300 group-hover:bg-[hsl(var(--accent)/0.16)]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className="rounded-full border border-border bg-surface-1 px-3 py-1 text-xs font-medium text-fg-muted">
@@ -96,10 +96,10 @@ export default function PricesPage() {
                     </span>
                   </div>
 
-                  <div className="mt-6 space-y-3">
-                    <h2 className="font-display text-2xl font-bold italic text-foreground">{item.label}</h2>
+                  <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
+                    <h2 className="font-display text-xl sm:text-2xl font-bold italic text-foreground">{item.label}</h2>
                     <p className="text-sm leading-relaxed text-fg-muted">{item.description}</p>
-                    <p className="text-2xl font-bold text-accent">{item.price}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-accent">{item.price}</p>
                   </div>
 
                   <Link

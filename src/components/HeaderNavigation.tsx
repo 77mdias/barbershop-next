@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuthSafe } from "@/hooks/useAuthSafe";
 import { ClientOnlyAuth } from "./ClientOnlyAuth";
-import { Menu, X, Scissors } from "lucide-react";
+import { Menu, X, Scissors, UserCircle, LogIn } from "lucide-react";
 import Link from "next/link";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ChatBell } from "@/components/ChatBell";
@@ -141,6 +141,31 @@ const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
+                </Link>
+              )}
+            </ClientOnlyAuth>
+
+            {/* Profile / Auth separator */}
+            <div className="my-1 border-t border-white/[0.07]" />
+
+            <ClientOnlyAuth>
+              {isAuthenticated ? (
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <UserCircle className="h-4 w-4 shrink-0 text-accent" />
+                  {user?.name ? user.name : "Meu Perfil"}
+                </Link>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-accent transition-colors hover:text-accent/80"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LogIn className="h-4 w-4 shrink-0" />
+                  Entrar
                 </Link>
               )}
             </ClientOnlyAuth>
