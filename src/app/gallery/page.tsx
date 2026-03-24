@@ -1,10 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import { Camera, Sparkles, Users, ArrowRight } from "lucide-react";
-import { Header } from "@/components/header";
 import { CortesGallerySection } from "@/components/cortes-gallery";
-import { useAuth } from "@/hooks/useAuth";
 import { PageHero } from "@/components/shared/PageHero";
 
 /**
@@ -14,20 +10,8 @@ import { PageHero } from "@/components/shared/PageHero";
  * seguindo o padrão de design da aplicação.
  */
 export default function GalleryPage() {
-  const { user, isAuthenticated } = useAuth();
-
   return (
     <main className="flex min-h-screen flex-col bg-background text-foreground">
-      <div className="container mx-auto w-full px-4 pt-6 lg:pt-8">
-        <Header
-          userName={isAuthenticated ? (user?.name || user?.email?.split('@')[0] || "Usuário") : "Visitante"}
-          userImage={isAuthenticated ? user?.image : undefined}
-          onFilterClick={() => {
-            /* AIDEV: TODO: conectar o filtro da galeria quando a busca estiver disponível. */
-          }}
-        />
-      </div>
-
       <PageHero
         badge="Inspiração"
         title="Galeria de Estilos"

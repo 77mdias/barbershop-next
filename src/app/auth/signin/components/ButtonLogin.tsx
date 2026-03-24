@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/ui/notification";
 import { useState } from "react";
-import styles from "@/app/scss/components/CourseCard.module.scss";
 import { logger } from "@/lib/logger";
 
 const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
@@ -50,19 +49,19 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
       <Button
         type="submit"
         disabled={isLoading}
-        className={`w-full text-white ${styles.buttonAccent}`}
+        className="w-full bg-accent text-on-accent hover:bg-accent/90"
       >
         {isLoading ? "Entrando..." : "Entrar"}
       </Button>
 
       <div className="mt-6">
         <div className="relative mt-6">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-border" />
           <div className="flex justify-center text-sm">
-            <span className="relative z-10 bg-black px-2 text-gray-400">
+            <span className="relative z-10 bg-background px-2 text-fg-muted">
               Ou continue com
             </span>
           </div>
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-gray-600" />
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
@@ -71,7 +70,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             variant="outline"
             onClick={() => handleOAuthSignIn("github")}
             disabled={isOAuthLoading === "github"}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-[var(--primary)] transition-all duration-700 hover:border-primary hover:bg-[hsl(var(--foreground))] "
+            className="w-full border-border text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
           >
             <Github className="mr-2 h-4 w-4" />
             {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
@@ -82,7 +81,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             variant="outline"
             onClick={() => handleOAuthSignIn("google")}
             disabled={isOAuthLoading === "google"}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))] "
+            className="w-full border-border text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
           >
             <Mail className="mr-2 h-4 w-4" />
             {isOAuthLoading === "google" ? "Conectando..." : "Google"}
@@ -93,7 +92,7 @@ const ButtonLogin = ({ isLoading }: { isLoading: boolean }) => {
             variant="outline"
             onClick={() => handleOAuthSignIn("discord")}
             disabled={isOAuthLoading === "discord"}
-            className="w-full border-gray-600 bg-[var(--card-product)] text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))] "
+            className="w-full border-border text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
           >
             <Mail className="mr-2 h-4 w-4" />
             {isOAuthLoading === "discord" ? "Conectando..." : "Discord"}

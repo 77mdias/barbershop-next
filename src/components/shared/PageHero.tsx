@@ -29,7 +29,7 @@ export function PageHero({
   return (
     <section
       className={cn(
-        "grain-overlay relative overflow-hidden bg-surface-1 py-14 lg:py-20",
+        "grain-overlay relative overflow-hidden bg-surface-1 pt-[calc(65px+3.5rem)] pb-14 lg:pt-[calc(65px+4rem)] lg:pb-20",
         className,
       )}
     >

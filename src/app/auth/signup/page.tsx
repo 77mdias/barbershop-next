@@ -12,7 +12,7 @@ export default function SignUpPage() {
         </div>
       }
     >
-      <main className="flex min-h-screen bg-background text-foreground">
+      <main className="flex min-h-[calc(100vh-65px)] mt-[65px] bg-background text-foreground">
         <div className="grain-overlay hidden lg:flex lg:w-1/2 flex-col justify-between bg-surface-1 p-12">
           <div className="font-display text-3xl font-bold italic text-foreground">
             Barber<span className="text-accent">Kings</span>
@@ -51,7 +51,7 @@ export default function SignUpPage() {
           <div className="w-full max-w-sm">
             <Link
               href="/"
-              className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              className="mb-8 flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar para o início
@@ -64,7 +64,10 @@ export default function SignUpPage() {
               Crie sua conta
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-              Preencha os dados abaixo para começar a usar a plataforma.
+              Preencha os dados abaixo para começar.{" "}
+              <a href="/auth/signin" className="font-semibold text-accent hover:text-accent/80 transition-colors">
+                Já tem conta? Entre aqui.
+              </a>
             </p>
             <div className="mt-8">
               <SignUpForm />

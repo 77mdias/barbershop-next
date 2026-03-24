@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github, Mail, Eye, EyeOff } from "lucide-react";
-import styles from "@/app/scss/components/CourseCard.module.scss";
 import { logger } from "@/lib/logger";
 
 export default function SignUpForm() {
@@ -168,22 +166,8 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="container mx-auto mb-8 w-full flex justify-center px-4 ">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-[var(--foreground)]">Crie sua conta</h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Ou{" "}
-            <Link
-              href={`/auth/signin`}
-              className={`font-medium text-[var(--text-price)] transition-all duration-300 hover:text-[var(--text-price-secondary)] ${styles.textPrimary}`}
-            >
-              faça login em sua conta existente
-            </Link>
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <div className="w-full">
+      <form className="space-y-5" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
@@ -204,7 +188,7 @@ export default function SignUpForm() {
                 placeholder="Nickname"
                 value={formData.name}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 text-foreground placeholder:text-fg-subtle"
               />
             </div>
 
@@ -221,7 +205,7 @@ export default function SignUpForm() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 text-foreground placeholder:text-fg-subtle"
               />
             </div>
 
@@ -238,7 +222,7 @@ export default function SignUpForm() {
                 placeholder="Senha (requisitos abaixo)"
                 value={formData.password}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 pr-10 text-foreground placeholder:text-fg-subtle"
               />
               <button
                 type="button"
@@ -246,22 +230,22 @@ export default function SignUpForm() {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className="h-4 w-4 text-fg-muted" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className="h-4 w-4 text-fg-muted" />
                 )}
               </button>
             </div>
 
             {/* Requisitos de senha */}
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-fg-muted">
               <p className="mb-1 font-medium">Sua senha deve conter:</p>
               <div className="grid grid-cols-1 gap-1">
                 <div
                   className={`flex items-center ${
                     formData.password.length >= 8
-                      ? "text-green-400"
-                      : "text-gray-400"
+                      ? "text-[hsl(var(--state-open-fg))]"
+                      : "text-fg-subtle"
                   }`}
                 >
                   <span className="mr-1">
@@ -272,8 +256,8 @@ export default function SignUpForm() {
                 <div
                   className={`flex items-center ${
                     /[A-Z]/.test(formData.password)
-                      ? "text-green-400"
-                      : "text-gray-400"
+                      ? "text-[hsl(var(--state-open-fg))]"
+                      : "text-fg-subtle"
                   }`}
                 >
                   <span className="mr-1">
@@ -284,8 +268,8 @@ export default function SignUpForm() {
                 <div
                   className={`flex items-center ${
                     /[a-z]/.test(formData.password)
-                      ? "text-green-400"
-                      : "text-gray-400"
+                      ? "text-[hsl(var(--state-open-fg))]"
+                      : "text-fg-subtle"
                   }`}
                 >
                   <span className="mr-1">
@@ -296,8 +280,8 @@ export default function SignUpForm() {
                 <div
                   className={`flex items-center ${
                     /\d/.test(formData.password)
-                      ? "text-green-400"
-                      : "text-gray-400"
+                      ? "text-[hsl(var(--state-open-fg))]"
+                      : "text-fg-subtle"
                   }`}
                 >
                   <span className="mr-1">
@@ -310,8 +294,8 @@ export default function SignUpForm() {
                     /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
                       formData.password
                     )
-                      ? "text-green-400"
-                      : "text-gray-400"
+                      ? "text-[hsl(var(--state-open-fg))]"
+                      : "text-fg-subtle"
                   }`}
                 >
                   <span className="mr-1">
@@ -339,7 +323,7 @@ export default function SignUpForm() {
                 placeholder="Confirmar senha"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 pr-10 text-foreground placeholder:text-fg-subtle"
               />
               <button
                 type="button"
@@ -347,9 +331,9 @@ export default function SignUpForm() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className="h-4 w-4 text-fg-muted" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className="h-4 w-4 text-fg-muted" />
                 )}
               </button>
             </div>
@@ -358,19 +342,19 @@ export default function SignUpForm() {
           <Button
             type="submit"
             disabled={isLoading || isOAuthLoading !== null}
-            className={`w-full text-white hover:bg-[var(--text-price-secondary)] ${styles.buttonAccent}`}
+            className="w-full bg-accent text-on-accent hover:bg-accent/90"
           >
             {isLoading ? "Criando conta..." : "Criar conta"}
           </Button>
 
           <div className="mt-6">
             <div className="relative mt-6">
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-border" />
               <div className="flex justify-center text-sm">
-                <span className="relative z-10 bg-black px-2 text-gray-400">
+                <span className="relative z-10 bg-background px-2 text-fg-muted">
                   Ou continue com
                 </span>
               </div>
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-gray-600" />
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
@@ -379,7 +363,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("github")}
                 disabled={isLoading || isOAuthLoading === "github"}
-                className={`w-full border-gray-600 text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))]`}
+                className="w-full border-border text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
               >
                 <Github className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "github" ? "Conectando..." : "GitHub"}
@@ -390,7 +374,7 @@ export default function SignUpForm() {
                 variant="outline"
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={isLoading || isOAuthLoading === "google"}
-                className={`w-full border-gray-600 text-[var(--primary)] transition-all duration-300 hover:border-primary hover:bg-[hsl(var(--foreground))]`}
+                className="w-full border-border text-foreground transition-all duration-300 hover:border-accent hover:text-accent"
               >
                 <Mail className="mr-2 h-4 w-4" />
                 {isOAuthLoading === "google" ? "Conectando..." : "Google"}
@@ -398,7 +382,6 @@ export default function SignUpForm() {
             </div>
           </div>
         </form>
-      </div>
     </div>
   );
 }

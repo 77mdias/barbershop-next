@@ -9,7 +9,6 @@ import { Eye, EyeOff } from "lucide-react";
 import ButtonLogin from "./ButtonLogin";
 import { useNotification } from "@/components/ui/notification";
 import { Alert } from "@/components/ui/alert";
-import styles from "@/app/scss/components/CourseCard.module.scss";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -84,27 +83,7 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="container mb-8 flex justify-center px-4 w-full">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-2xl text-[var(--text)] font-bold md:text-3xl">
-            Faça login e desfrute de{" "}
-            <span
-              className={`bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text uppercase text-transparent`}
-            >
-              conteúdos exclusivos
-            </span>
-          </h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Ou{" "}
-            <Link
-              href={`/auth/signup`}
-              className={`font-medium transition-all duration-300 ${styles.textPrimary}`}
-            >
-              crie uma nova conta
-            </Link>
-          </p>
-        </div>
+    <div className="w-full">
 
         {/* Alerta de erro OAuth */}
         {oauthError === "OAuthAccountNotLinked" && (
@@ -128,7 +107,7 @@ export default function SignInForm() {
           />
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
@@ -159,7 +138,7 @@ export default function SignInForm() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-gray-600 bg-[var(--card-product)] text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 text-foreground placeholder:text-fg-subtle"
               />
             </div>
 
@@ -176,7 +155,7 @@ export default function SignInForm() {
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-gray-600 bg-[var(--card-product)] pr-10 text-[var(--foreground)] placeholder-gray-400"
+                className="border-border bg-surface-1 pr-10 text-foreground placeholder:text-fg-subtle"
               />
               <button
                 type="button"
@@ -184,9 +163,9 @@ export default function SignInForm() {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className="h-4 w-4 text-fg-muted" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className="h-4 w-4 text-fg-muted" />
                 )}
               </button>
             </div>
@@ -195,7 +174,7 @@ export default function SignInForm() {
           <div className="flex items-center justify-between hover:text-[var(--primary)]">
             <Link
               href={`/auth/reset-password`}
-              className={`text-sm text-gray-400 transition-all duration-300 ${styles.textPrimary}`}
+              className="text-sm text-fg-muted transition-all duration-300 hover:text-accent"
             >
               Esqueceu sua senha?
             </Link>
@@ -203,7 +182,6 @@ export default function SignInForm() {
 
           <ButtonLogin isLoading={isLoading} />
         </form>
-      </div>
 
       <NotificationContainer />
     </div>

@@ -12,7 +12,7 @@ export default function SignInPage() {
         </div>
       }
     >
-      <main className="flex min-h-screen bg-background text-foreground">
+      <main className="flex min-h-[calc(100vh-65px)] mt-[65px] bg-background text-foreground">
         {/* Left side — desktop only */}
         <div className="grain-overlay hidden lg:flex lg:w-1/2 flex-col justify-between bg-surface-1 p-12">
           <div className="font-display text-3xl font-bold italic text-foreground">
@@ -53,7 +53,7 @@ export default function SignInPage() {
           <div className="w-full max-w-sm">
             <Link
               href="/"
-              className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+              className="mb-8 flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar para o início
@@ -66,7 +66,10 @@ export default function SignInPage() {
               Bem-vindo de volta
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-              Acesse sua conta para gerenciar agendamentos e avaliações.
+              Acesse sua conta para gerenciar agendamentos e avaliações.{" "}
+              <a href="/auth/signup" className="font-semibold text-accent hover:text-accent/80 transition-colors">
+                Novo? Cadastre-se.
+              </a>
             </p>
             <div className="mt-8">
               <SignInForm />

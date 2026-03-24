@@ -135,8 +135,10 @@ export default function RootLayout({
         <Providers>
           <HeaderNavigation />
           {children}
-          {/* Navegação inferior */}
-          <ConditionalBottomNavigation items={navigationItems} />
+          {/* Navegação inferior — somente mobile */}
+          <div className="md:hidden">
+            <ConditionalBottomNavigation items={navigationItems} />
+          </div>
           <Toaster />
         </Providers>
       </body>
