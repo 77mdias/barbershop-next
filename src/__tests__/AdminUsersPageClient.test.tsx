@@ -52,7 +52,7 @@ describe("UsersPageClient", () => {
   });
 
   it("renders initial users and fetches on mount", async () => {
-    render(<UsersPageClient initialUsers={initialUsers} initialPagination={initialPagination} />);
+    render(<UsersPageClient initialUsers={initialUsers as any} initialPagination={initialPagination} />);
 
     await waitFor(() => {
       expect(screen.getByText("Alice")).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe("UsersPageClient", () => {
   });
 
   it("applies search and role filters", async () => {
-    render(<UsersPageClient initialUsers={initialUsers} initialPagination={initialPagination} />);
+    render(<UsersPageClient initialUsers={initialUsers as any} initialPagination={initialPagination} />);
 
     const searchInput = screen.getByPlaceholderText(/buscar por nome ou email/i);
     fireEvent.change(searchInput, { target: { value: "admin" } });

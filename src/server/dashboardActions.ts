@@ -8,10 +8,10 @@ import { db } from "@/lib/prisma";
 const toNumber = (value: Prisma.Decimal | number | null | undefined) => (value ? Number(value) : 0);
 
 async function buildTopBarberRanking(startDate?: Date) {
-  const histories = await db.serviceHistory.findMany({
+  const histories = (await db.serviceHistory.findMany({
     where: {
       ...(startDate ? { completedAt: { gte: startDate } } : {}),
-      appointments: { some: { barberId: { not: null } } },
+      appointments: { some: { barberId: { not: null as any } } },
     },
     select: {
       finalPrice: true,
@@ -20,7 +20,7 @@ async function buildTopBarberRanking(startDate?: Date) {
         select: { barberId: true },
       },
     },
-  });
+  })) as Array<{ finalPrice: Prisma.Decimal; rating: number | null; appointments: Array<{ barberId: string | null }> }>;
 
   const stats = new Map<string, { revenue: number; ratingSum: number; reviews: number; services: number }>();
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useContext, useEffect } from "react";
-import { RealtimeContext, type RealtimeEventType } from "@/providers/RealtimeProvider";
+import { RealtimeContext } from "@/providers/RealtimeProvider";
+import type { RealtimeEventType } from "@/types/realtime";
 import type { RealtimeEvent } from "@/types/realtime";
 
 export function useRealtime() {

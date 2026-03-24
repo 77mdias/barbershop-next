@@ -47,8 +47,8 @@ export default async function AdminServicesPage() {
       <section className="bg-background py-12">
         <div className="container mx-auto px-4">
           <ServicesPageClient
-            initialServices={services}
-            initialPagination={initialPagination}
+            initialServices={services as any}
+            initialPagination={initialPagination as any}
             initialStats={initialStats}
           />
         </div>

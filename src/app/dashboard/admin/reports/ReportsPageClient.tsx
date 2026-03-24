@@ -296,7 +296,9 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
       handler: (event) => {
         if (
           event.type === "analytics:updated" &&
-          !["revenue", "appointments", "reviews"].includes(event.payload.scope)
+          !["revenue", "appointments", "reviews"].includes(
+            (event.payload as { scope: string }).scope
+          )
         ) {
           return;
         }
@@ -427,7 +429,7 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
           const rows: string[][] = [
             ["Relatório", "Receita por Método de Pagamento"],
             ...metadata,
-            [],
+            [] as string[],
             ["Método", "Receita (R$)", "Transações", "Ticket médio (R$)", "Share receita (%)", "Share volume (%)"],
             ...paymentMethods.map((method) => [
               paymentLabels[method.method],
@@ -471,22 +473,22 @@ export function ReportsPageClient({ initialReports, initialDateRange }: ReportsP
           const rows: string[][] = [
             ["Relatório", "Clientes e Cohort"],
             ...metadata,
-            [],
+            [] as string[],
             ["Cohort Mensal"],
             ["Mês", "Novos", "Recorrentes", "Retenção (%)"],
             ...cohortData.map((bucket) => [
-              bucket.month,
-              bucket.newClients,
-              bucket.returningClients,
-              bucket.retentionRate,
+              String(bucket.month),
+              String(bucket.newClients),
+              String(bucket.returningClients),
+              String(bucket.retentionRate),
             ]),
-            [],
+            [] as string[],
             ["LTV por Barbeiro"],
             ["Barbeiro", "Clientes Únicos", "Receita (R$)", "LTV (R$)"],
             ...(ltvData?.byBarber?.length
               ? ltvData.byBarber.map((barber) => [
                   barber.barberName || "Sem nome",
-                  barber.uniqueClients,
+                  String(barber.uniqueClients),
                   barber.revenue.toFixed(2),
                   barber.ltv.toFixed(2),
                 ])

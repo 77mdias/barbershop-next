@@ -26,6 +26,9 @@ const eslintConfig = [
       "*.config.mjs",
       // Ignore coverage files
       "coverage/**",
+      // Ignore backup build artifacts
+      ".next_nobody_backup/**",
+      ".playwright-mcp/**",
     ],
   },
   {

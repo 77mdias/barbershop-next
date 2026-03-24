@@ -257,10 +257,10 @@ function calculateBusyHours(appointments: Array<{ date: Date }>): BusyHourMetric
 }
 
 async function getTopBarbersByRevenue(startDate?: Date, serviceId?: string) {
-  const histories = await db.serviceHistory.findMany({
+  const histories = (await db.serviceHistory.findMany({
     where: {
       ...(startDate ? { completedAt: { gte: startDate } } : {}),
-      appointments: { some: { barberId: { not: null } } },
+      appointments: { some: { barberId: { not: null as any } } },
       ...(serviceId ? { serviceId } : {}),
     },
     select: {
@@ -270,7 +270,7 @@ async function getTopBarbersByRevenue(startDate?: Date, serviceId?: string) {
         select: { barberId: true },
       },
     },
-  });
+  })) as Array<{ finalPrice: import("@prisma/client").Prisma.Decimal; rating: number | null; appointments: Array<{ barberId: string | null }> }>;
 
   const stats = new Map<string, { revenue: number; ratingSum: number; reviews: number }>();
 
@@ -767,7 +767,7 @@ function buildCapacityMetrics({
 
   appointments.forEach((appointment) => {
     const slotsNeeded = Math.max(1, Math.ceil((appointment.service?.duration ?? slotMinutes) / slotMinutes));
-    const isUsed = ![AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW].includes(appointment.status);
+    const isUsed = appointment.status !== AppointmentStatus.CANCELLED && appointment.status !== AppointmentStatus.NO_SHOW;
 
     const barberEntry =
       barberStats.get(appointment.barberId) ??
@@ -1160,8 +1160,8 @@ export async function getReportsData(dateRange?: ReportDateRange | string, servi
     const periodLength = now.getTime() - startDate.getTime();
     const previousPeriodStart = new Date(startDate.getTime() - periodLength);
 
-    const appointmentBaseWhere = {
-      status: { notIn: ["CANCELLED", "NO_SHOW"] },
+    const appointmentBaseWhere: Prisma.AppointmentWhereInput = {
+      status: { notIn: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] },
       ...(selectedServiceId ? { serviceId: selectedServiceId } : {}),
     };
 
@@ -1274,11 +1274,11 @@ export async function getReportsData(dateRange?: ReportDateRange | string, servi
       _sum: { finalPrice: true },
     });
 
-    const { paymentMethods, paymentMethodDetails } = await buildPaymentMethodAnalytics(startDate, selectedServiceId);
+    const { paymentMethods, paymentMethodDetails } = await buildPaymentMethodAnalytics(startDate, selectedServiceId ?? undefined);
 
-    const customerCohort = await buildCustomerCohort(startDate, selectedServiceId);
+    const customerCohort = await buildCustomerCohort(startDate, selectedServiceId ?? undefined);
     const newClientsInPeriod = customerCohort.reduce((acc, bucket) => acc + bucket.newClients, 0);
-    const ltv = await calculateLtvMetrics(startDate, selectedServiceId);
+    const ltv = await calculateLtvMetrics(startDate, selectedServiceId ?? undefined);
 
     // Duração média dos atendimentos
     const averageDurationMinutes = (() => {
@@ -1304,12 +1304,12 @@ export async function getReportsData(dateRange?: ReportDateRange | string, servi
       _count: { _all: true },
     });
 
-    const returningClients = returnRateGroup.filter((entry) => entry._count._all > 1).length;
+    const returningClients = returnRateGroup.filter((entry) => (entry._count as { _all: number })._all > 1).length;
     const returnRate = returnRateGroup.length > 0 ? Math.round((returningClients / returnRateGroup.length) * 100) : 0;
 
     const busyHours = calculateBusyHours(periodAppointments);
 
-    const monthlyGrowth = await buildMonthlyGrowth(now, selectedServiceId);
+    const monthlyGrowth = await buildMonthlyGrowth(now, selectedServiceId ?? undefined);
 
     const capacity = buildCapacityMetrics({
       appointments: periodAppointmentsDetailed as AppointmentForCapacity[],
@@ -1334,7 +1334,7 @@ export async function getReportsData(dateRange?: ReportDateRange | string, servi
         ? Number((periodRevenue / (periodRevenueData._count?.id || 1)).toFixed(2))
         : 0;
 
-    const topBarbers = (await getTopBarbersByRevenue(startDate, selectedServiceId)).slice(0, 10);
+    const topBarbers = (await getTopBarbersByRevenue(startDate, selectedServiceId ?? undefined)).slice(0, 10);
 
     const reportsData: ReportsData = {
       totalRevenue: toNumber(totalRevenueData._sum.finalPrice),

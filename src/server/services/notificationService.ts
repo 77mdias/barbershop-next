@@ -37,7 +37,7 @@ export class NotificationService {
           notification: {
             ...notification,
             createdAt: notification.createdAt.toISOString(),
-            metadata: notification.metadata ?? null,
+            metadata: (notification.metadata ?? null) as Record<string, any> | null,
             relatedId: notification.relatedId ?? null,
           },
           unreadCount,

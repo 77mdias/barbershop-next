@@ -63,10 +63,15 @@ export type RealtimePayloadMap = {
   };
 };
 
-export type RealtimeEvent<T extends RealtimeEventType = RealtimeEventType> = {
+export type RealtimeEventGeneric<T extends RealtimeEventType = RealtimeEventType> = {
   type: T;
   payload: RealtimePayloadMap[T];
   target: RealtimeTarget;
   eventId: string;
   createdAt: number;
 };
+
+// Distributive union — allows TypeScript to narrow payload by event.type
+export type RealtimeEvent = {
+  [T in RealtimeEventType]: RealtimeEventGeneric<T>;
+}[RealtimeEventType];

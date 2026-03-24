@@ -11,7 +11,7 @@ import { toast } from "sonner";
 interface UserTableActionsProps {
   user: {
     id: string;
-    name: string;
+    name: string | null;
     role: string;
     isActive: boolean;
     deletedAt: Date | string | null;

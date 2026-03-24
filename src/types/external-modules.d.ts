@@ -129,6 +129,23 @@ declare module "lucide-react" {
   export const Tag: Icon;
   export const Percent: Icon;
   export const Globe2: Icon;
+  export const LayoutDashboard: Icon;
+  export const RotateCcw: Icon;
+  export const ChevronsLeft: Icon;
+  export const ChevronsRight: Icon;
+  export const MessageSquareQuote: Icon;
+  export const ArrowUpDown: Icon;
+  export const SlidersHorizontal: Icon;
+  export const CalendarDays: Icon;
+  export const ClipboardList: Icon;
+  export const BarChart2: Icon;
+  export const Package: Icon;
+  export const Banknote: Icon;
+  export const ListOrdered: Icon;
+  export const Repeat: Icon;
+  export const Clock4: Icon;
+  export const MapPinIcon: Icon;
+  export const StarOff: Icon;
 }
 
 declare module "@aws-sdk/client-s3";

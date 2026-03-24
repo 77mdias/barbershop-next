@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import type { Session } from "next-auth";
-import type { RealtimeEvent, RealtimeTarget } from "@/types/realtime";
+import type { RealtimeEvent, RealtimeEventGeneric, RealtimeTarget } from "@/types/realtime";
 import type { UserRole } from "@prisma/client";
 
 const emitter = new EventEmitter();
@@ -14,14 +14,16 @@ const generateId = () => {
   return Math.random().toString(36).slice(2);
 };
 
-export function emitRealtimeEvent(event: Omit<RealtimeEvent, "eventId" | "createdAt">): RealtimeEvent {
-  const enrichedEvent: RealtimeEvent = {
+export function emitRealtimeEvent<T extends import("@/types/realtime").RealtimeEventType>(
+  event: Omit<RealtimeEventGeneric<T>, "eventId" | "createdAt">,
+): RealtimeEventGeneric<T> {
+  const enrichedEvent = {
     ...event,
     eventId: generateId(),
     createdAt: Date.now(),
-  };
+  } as RealtimeEventGeneric<T>;
 
-  emitter.emit("message", enrichedEvent);
+  emitter.emit("message", enrichedEvent as RealtimeEvent);
   return enrichedEvent;
 }
 
@@ -53,7 +55,7 @@ export function eventMatchesSession(event: RealtimeEvent, session: Session) {
 export function buildLiveStatusEvent(
   status: "connected" | "reconnecting" | "fallback",
   target: RealtimeTarget
-): RealtimeEvent<"live:status"> {
+): RealtimeEventGeneric<"live:status"> {
   return {
     type: "live:status",
     payload: { status },

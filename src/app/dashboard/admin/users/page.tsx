@@ -23,9 +23,9 @@ export default async function AdminUsersPage() {
     page: 1,
   });
 
-  const initialUsers = usersResult.success ? usersResult.data.users : [];
+  const initialUsers = usersResult.success ? (usersResult.data?.users ?? []) : [];
   const initialPagination = usersResult.success
-    ? usersResult.data.pagination
+    ? (usersResult.data?.pagination ?? { page: 1, limit: 20, total: 0, totalPages: 0 })
     : { page: 1, limit: 20, total: 0, totalPages: 0 };
 
   return (

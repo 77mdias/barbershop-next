@@ -320,7 +320,7 @@ export const authOptions: NextAuthOptions = {
               logger.auth.warn("⚠️ User not found or deleted during session refresh", {
                 userId: token.id,
               });
-              return null;
+              return session;
             }
 
             // Atualizar token com dados frescos SEMPRE

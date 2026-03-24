@@ -25,7 +25,7 @@ export function RealtimeRefreshBridge({ events, refreshOnFallback = true }: Real
     };
 
     const unsubscribe = subscribe({
-      events,
+      events: events as RealtimeEventType[] | "*",
       handler: refresh,
       onFallback: refreshOnFallback ? refresh : undefined,
     });
