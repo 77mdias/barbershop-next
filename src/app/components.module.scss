@@ -164,45 +164,6 @@
   }
 }
 
-/* Bottom Navigation Styles */
-.bottomNav {
-  display: flex;
-  align-items: center;
-  backdrop-filter: blur(20px);
-  background: hsl(var(--background));
-  border-top: 1px solid hsl(var(--border));
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-
-  .bottomNav__item {
-    border-radius: 100%;
-    transition: all 0.3s ease;
-    color: hsl(1, 69%, 67%);
-
-    &:hover {
-      transform: scale(1.07);
-      color: hsl(var(--primary));
-    }
-
-    &--active {
-      color: white;
-      background: hsl(1, 69%, 67%);
-    }
-  }
-  
-
-  .bottomNav__icon {
-    font-size: 1.5rem;
-    transition: transform 0.3s ease, color 0.3s ease;
-  }
-
-  &__label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-top: 0.25rem;
-  }
-
-  
-}
 
 /* Avatar Styles */
 .avatar {

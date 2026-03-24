@@ -8,7 +8,6 @@ import { EditProfileModal } from "@/components/EditProfileModal";
 import { ProfileUploadSimple } from "@/components/upload/ProfileUploadSimple";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/UserAvatar";
-import { BottomNavigation } from "@/components/bottom-navigation";
 import { cn } from "@/lib/utils";
 import { ProfilePageSkeleton } from "@/components/profile/ProfileSkeleton";
 import {
