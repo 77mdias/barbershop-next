@@ -33,7 +33,7 @@ const Header = () => {
   const { isAuthenticated, user } = useAuthSafe();
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 h-[65px] border-b border-border bg-background/60 backdrop-blur-md">
+    <header className="fixed left-0 right-0 top-0 z-50 h-[65px] border-b border-white/[0.07] bg-background/75 backdrop-blur-xl shadow-[0_1px_24px_-4px_rgba(0,0,0,0.4)] dark:bg-[hsl(30_10%_5%/0.80)]">
       {/* Desktop Layout */}
       <div className="container mx-auto hidden h-full grid-cols-3 items-center px-4 md:grid">
         {/* Logo */}
@@ -121,7 +121,7 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="glass-card border-t border-border md:hidden">
+        <div className="border-t border-white/[0.07] bg-background/90 backdrop-blur-xl md:hidden">
           <nav className="flex flex-col px-4 py-3">
             {mobileNavLinks.map((link) => (
               <Link
