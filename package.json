@@ -73,6 +73,7 @@
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.6.1",
     "form-data": "^4.0.4",
     "lucide-react": "^0.544.0",
     "multer": "^2.0.2",
