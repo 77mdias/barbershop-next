@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { cn } from "@/lib/utils";
 
 type SalonDetailsPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 const serviceCards = [
@@ -46,12 +46,13 @@ const statusLabels = {
 } as const;
 
 export default async function SalonDetailsPage({ params }: SalonDetailsPageProps) {
+  const { id } = await params;
   const data = await getHomePageData();
   const salons = data.salons.items;
   const salon =
-    salons.find((item) => item.id === params.id) ??
-    salons.find((item) => item.id === `fallback-${params.id}`) ??
-    salons.find((item) => item.id === `salon-${params.id}`);
+    salons.find((item) => item.id === id) ??
+    salons.find((item) => item.id === `fallback-${id}`) ??
+    salons.find((item) => item.id === `salon-${id}`);
 
   const name = salon?.name ?? "Barbearia em destaque";
   const imageUrl = salon?.imageUrl ?? "/images/salon1.svg";

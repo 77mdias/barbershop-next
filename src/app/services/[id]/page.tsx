@@ -3,10 +3,11 @@ import { Scissors, Clock, DollarSign, Calendar } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
 
 type ServiceDetailsPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default function ServiceDetailsPage({ params }: ServiceDetailsPageProps) {
+export default async function ServiceDetailsPage({ params }: ServiceDetailsPageProps) {
+  const { id } = await params;
   return (
     <main className="flex min-h-screen flex-col bg-background text-foreground">
       <PageHero
@@ -32,7 +33,7 @@ export default function ServiceDetailsPage({ params }: ServiceDetailsPageProps) 
                   <h2 className="font-display text-xl font-bold italic text-foreground">
                     ID do serviço
                   </h2>
-                  <p className="mt-0.5 font-mono text-sm text-fg-muted">{params.id}</p>
+                  <p className="mt-0.5 font-mono text-sm text-fg-muted">{id}</p>
                 </div>
               </div>
               <p className="text-sm leading-relaxed text-fg-muted">
