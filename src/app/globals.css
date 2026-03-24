@@ -87,6 +87,13 @@
     --hero-bg: 24 15% 8%;
     --hero-fg: 40 20% 96%;
     --hero-muted: 30 10% 68%;
+
+    /* Home 3D backdrop - light theme */
+    --home-3d-bg-1: 214 52% 96%;
+    --home-3d-bg-2: 220 40% 94%;
+    --home-3d-bg-3: 28 30% 94%;
+    --home-3d-accent-glow: 36 72% 48%;
+    --home-3d-secondary-glow: 213 70% 56%;
   }
 
   @layer components {
@@ -159,6 +166,13 @@
     --hero-bg: 30 15% 4%;
     --hero-fg: 40 25% 95%;
     --hero-muted: 40 12% 62%;
+
+    /* Home 3D backdrop - dark theme */
+    --home-3d-bg-1: 230 24% 8%;
+    --home-3d-bg-2: 225 28% 6%;
+    --home-3d-bg-3: 20 20% 5%;
+    --home-3d-accent-glow: 36 72% 52%;
+    --home-3d-secondary-glow: 213 70% 60%;
   }
 }
 
