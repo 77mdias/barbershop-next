@@ -52,7 +52,7 @@ RUN npx prisma generate
 EXPOSE 3000 5555
 
 # Comando para desenvolvimento com hot reload
-CMD ["sh", "-c", "npx prisma generate && npm run dev"]
+CMD ["sh", "-c", "./scripts/docker-entrypoint-dev.sh"]
 
 # ==================
 # STAGE 3: builder - Build de produção

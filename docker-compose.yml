@@ -60,6 +60,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: ["sh", "-c", "./scripts/docker-entrypoint-dev.sh"]
     networks:
       - barbershop-network
     stdin_open: true

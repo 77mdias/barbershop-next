@@ -66,6 +66,27 @@ get_compose_file() {
     fi
 }
 
+# Função para aguardar ferramentas do app estarem prontas
+wait_for_app_ready() {
+    local compose_file="$1"
+    local retries=60
+    local interval=2
+
+    echo -e "${BLUE}⏳ Aguardando dependências do app (prisma/next)...${NC}"
+
+    for i in $(seq 1 $retries); do
+        if docker compose -f "$compose_file" exec -T app sh -lc 'test -x /app/node_modules/.bin/prisma && test -x /app/node_modules/.bin/next'; then
+            echo -e "${GREEN}✅ App pronto para comandos npm/prisma${NC}"
+            return 0
+        fi
+        sleep $interval
+    done
+
+    echo -e "${RED}❌ Timeout aguardando dependências no container app${NC}"
+    echo -e "${YELLOW}💡 Confira logs com: docker compose -f $compose_file logs app${NC}"
+    return 1
+}
+
 # Função para subir containers
 docker_up() {
     validate_env $1
@@ -81,6 +102,7 @@ docker_up() {
         docker compose -f $compose_file up -d
         echo -e "${BLUE}📊 Aguardando banco de dados...${NC}"
         sleep 5
+        wait_for_app_ready $compose_file
         echo -e "${BLUE}🔧 Executando migrações...${NC}"
         docker compose -f $compose_file exec app npm run db:migrate
     else
@@ -172,6 +194,7 @@ docker_studio() {
     fi
     
     # Executar Prisma Studio no container app
+    wait_for_app_ready $compose_file
     echo -e "${BLUE}🚀 Iniciando Prisma Studio no container app...${NC}"
     docker compose -f $compose_file exec -d app npx prisma studio --port 5555 --hostname 0.0.0.0
     echo -e "${GREEN}✅ Prisma Studio disponível em: http://localhost:5555${NC}"
@@ -183,6 +206,7 @@ docker_migrate() {
     local compose_file=$(get_compose_file $1)
     
     echo -e "${BLUE}🔧 Executando migrações (ambiente: $1)${NC}"
+    wait_for_app_ready $compose_file
     docker compose -f $compose_file exec app npm run db:migrate
     echo -e "${GREEN}✅ Migrações executadas com sucesso!${NC}"
 }
@@ -193,6 +217,7 @@ docker_seed() {
     local compose_file=$(get_compose_file $1)
     
     echo -e "${BLUE}🌱 Executando seed (ambiente: $1)${NC}"
+    wait_for_app_ready $compose_file
     docker compose -f $compose_file exec app npm run db:seed
     echo -e "${GREEN}✅ Seed executado com sucesso!${NC}"
 }

@@ -38,6 +38,13 @@ docker compose down
 docker compose logs app -f
 ```
 
+### Sincronização automática de dependências
+
+- O container `app` agora valida o hash do `package-lock.json` ao iniciar.
+- Se o lockfile mudou (ou `node_modules` está incompleto), ele executa `npm ci` automaticamente antes do `npm run dev`.
+- Isso evita erros como `Module not found` quando novas dependências foram adicionadas no host.
+- O `docker-manager.sh` aguarda `prisma` e `next` estarem disponíveis no container antes de executar `db:migrate`, reduzindo falhas de corrida no boot.
+
 ### Comandos Frequentes
 
 ```bash
