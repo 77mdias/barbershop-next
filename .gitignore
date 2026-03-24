@@ -92,3 +92,9 @@ next-env.d.ts
 
 #MCPs
 .mcp**
+
+# Build backups, audit screenshots & brainstorm artifacts
+.next_nobody_backup/
+.playwright-mcp/
+.superpowers/
+*.png
