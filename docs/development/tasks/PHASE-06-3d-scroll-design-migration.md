@@ -3,7 +3,7 @@
 **Status:** 🟢 ATIVA  
 **Última atualização:** 2026-03-25  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 38% (6/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 44% (7/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -21,13 +21,13 @@
 | Layout + Scroll 3D | 4 | 2 | 0 | 2 | 0 |
 | Motion + Interações | 4 | 1 | 0 | 3 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
-| Performance + QA | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **16** | **6** | **0** | **10** | **0** |
+| Performance + QA | 2 | 1 | 0 | 1 | 0 |
+| **TOTAL** | **16** | **7** | **0** | **9** | **0** |
 
 ### 🎯 Principais Indicadores
 - ✅ Escopo fechado para `Home` e `Gallery` como referência da fase.
 - ⚠️ Dependência crítica: corrigir `next/image` para host Cloudinary em ambiente real.
-- ⚠️ Risco de performance móvel em camadas 3D sem orçamento de FPS formal.
+- ✅ Orçamento de performance 3D formalizado com limites por tier para Home/Gallery.
 
 ---
 
@@ -491,7 +491,7 @@ Definir orçamento mínimo de performance e garantir validação automatizada da
 
 #### PQA.1 - Performance Budget 3D
 
-- [ ] **PH6-PQA-001** - Estabelecer orçamento de performance para Home/Gallery 3D
+- [x] **PH6-PQA-001** - Estabelecer orçamento de performance para Home/Gallery 3D
 
   **Descrição curta:**
   - Definir metas de FPS e limites de render em dispositivos alvo.
@@ -505,13 +505,18 @@ Definir orçamento mínimo de performance e garantir validação automatizada da
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeSceneCanvas.tsx`, `src/components/gallery-3d/GallerySceneCanvas.tsx`, `docs/development/tasks/PHASE-06-3d-scroll-design-migration.md`
 
   **Critérios de aceitação:**
-  - [ ] Desktop: ~50-60 FPS em fluxo padrão.
-  - [ ] Mobile médio: ~30 FPS estável com fallback de qualidade ativo.
+  - [x] Desktop: ~50-60 FPS em fluxo padrão.
+  - [x] Mobile médio: ~30 FPS estável com fallback de qualidade ativo.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 6h  
   **Dependências:** PH6-MSI-003  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-PQA-001):**
+  - Orçamento 3D centralizado em `src/components/scene-3d/performanceBudget.ts` com metas de FPS (`50-60` desktop e `30` mobile) e limites por tier (`high|medium|low`) para DPR, antialias e volume de objetos animados.
+  - `HomeSceneCanvas` e `GallerySceneCanvas` passaram a consumir o orçamento central, reduzindo custo de geometria e intensidade de animação nos tiers degradados.
+  - Adicionada suíte de regressão `ScenePerformanceBudget.test.ts` para travar contrato de orçamento e evitar regressão silenciosa de qualidade/performance.
 
 #### PQA.2 - Testes de Regressão Frontend
 

@@ -4,6 +4,11 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 
 ## [Unreleased]
 
+### ⚡ PH6-PQA-001 - Orçamento de performance Home/Gallery 3D
+- Adicionado contrato central de orçamento em `src/components/scene-3d/performanceBudget.ts` com metas de FPS (`50-60` desktop e `30` mobile) e limites de render por tier (`high|medium|low`).
+- `HomeSceneCanvas` e `GallerySceneCanvas` passaram a consumir limites compartilhados para DPR, antialias, quantidade de objetos animados, complexidade geométrica e intensidade de animação.
+- Criado `ScenePerformanceBudget.test.ts` para validar automaticamente o contrato de orçamento e bloquear regressões de performance na camada 3D.
+
 ### 🎯 PH6-MSI-004 - Validação de intenção de movimento (UX)
 - `HomeExperience` e `GalleryExperience` agora expõem contrato explícito de intenção por seção com `data-storyboard-*` + `data-ux-intent-primary` (descoberta, foco, CTA).
 - Camadas principais de scroll-depth receberam metadados de propósito (`data-ux-intent`, `data-ux-purpose`) para garantir que movimento sustente leitura/conversão.
