@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
+import { getSceneTierBudget } from "@/components/scene-3d/performanceBudget";
 
 export type GallerySceneQualityTier = "high" | "medium" | "low";
 export type GallerySceneTheme = "light" | "dark";
@@ -67,6 +68,8 @@ function BarberPole({
   speed,
   rotationIntensity,
   floatIntensity,
+  cylinderSegments,
+  capSegments,
   palette,
 }: {
   position: [number, number, number];
@@ -75,6 +78,8 @@ function BarberPole({
   speed: number;
   rotationIntensity: number;
   floatIntensity: number;
+  cylinderSegments: number;
+  capSegments: number;
   palette: ScenePalette;
 }) {
   const stripeAngles = useMemo(() => [0, 0.85, 1.7, 2.55], []);
@@ -83,7 +88,7 @@ function BarberPole({
     <Float speed={speed} rotationIntensity={rotationIntensity} floatIntensity={floatIntensity}>
       <group position={position} rotation={rotation} scale={scale}>
         <mesh>
-          <cylinderGeometry args={[0.2, 0.2, 2.2, 30]} />
+          <cylinderGeometry args={[0.2, 0.2, 2.2, cylinderSegments]} />
           <meshStandardMaterial color={palette.poleBody} metalness={0.1} roughness={0.3} />
         </mesh>
 
@@ -95,12 +100,12 @@ function BarberPole({
         ))}
 
         <mesh position={[0, -1.18, 0]}>
-          <cylinderGeometry args={[0.28, 0.28, 0.16, 22]} />
+          <cylinderGeometry args={[0.28, 0.28, 0.16, capSegments]} />
           <meshStandardMaterial color={palette.metal} metalness={0.24} roughness={0.25} />
         </mesh>
 
         <mesh position={[0, 1.18, 0]}>
-          <cylinderGeometry args={[0.28, 0.28, 0.16, 22]} />
+          <cylinderGeometry args={[0.28, 0.28, 0.16, capSegments]} />
           <meshStandardMaterial color={palette.metal} metalness={0.24} roughness={0.25} />
         </mesh>
       </group>
@@ -115,6 +120,8 @@ function ShearMark({
   speed,
   rotationIntensity,
   floatIntensity,
+  torusRadialSegments,
+  torusTubularSegments,
   palette,
 }: {
   position: [number, number, number];
@@ -123,6 +130,8 @@ function ShearMark({
   speed: number;
   rotationIntensity: number;
   floatIntensity: number;
+  torusRadialSegments: number;
+  torusTubularSegments: number;
   palette: ScenePalette;
 }) {
   return (
@@ -139,12 +148,12 @@ function ShearMark({
         </mesh>
 
         <mesh position={[-0.42, -0.32, 0]}>
-          <torusGeometry args={[0.22, 0.05, 12, 28]} />
+          <torusGeometry args={[0.22, 0.05, torusRadialSegments, torusTubularSegments]} />
           <meshStandardMaterial color={palette.poleStripe} metalness={0.26} roughness={0.35} />
         </mesh>
 
         <mesh position={[0.42, -0.32, 0]}>
-          <torusGeometry args={[0.22, 0.05, 12, 28]} />
+          <torusGeometry args={[0.22, 0.05, torusRadialSegments, torusTubularSegments]} />
           <meshStandardMaterial color={palette.poleStripe} metalness={0.26} roughness={0.35} />
         </mesh>
       </group>
@@ -153,6 +162,7 @@ function ShearMark({
 }
 
 function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palette: ScenePalette }) {
+  const budget = getSceneTierBudget("gallery", tier);
   const objects: FloatingObject[] =
     tier === "high"
       ? [
@@ -167,14 +177,15 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
             { kind: "shear", position: [2.2, 1.7, -2.2], rotation: [0.2, -0.42, 0.12], scale: 0.66, speed: 0.82 },
             { kind: "pole", position: [2.4, -1.1, -1.8], rotation: [-0.06, -0.24, 0.08], scale: 0.76, speed: 0.9 },
           ]
-        : [
+      : [
             { kind: "pole", position: [-2.1, 1.2, -1.3], rotation: [0.05, 0.25, -0.04], scale: 0.8, speed: 0.84 },
             { kind: "shear", position: [1.9, -1.2, -1.8], rotation: [0.16, -0.32, 0.08], scale: 0.58, speed: 0.72 },
           ];
+  const visibleObjects = objects.slice(0, budget.maxAnimatedObjects);
 
   return (
     <>
-      {objects.map((item, index) => {
+      {visibleObjects.map((item, index) => {
         if (item.kind === "pole") {
           return (
             <BarberPole
@@ -182,9 +193,11 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
               position={item.position}
               rotation={item.rotation}
               scale={item.scale}
-              speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
-              rotationIntensity={tier === "low" ? 0.12 : tier === "medium" ? 0.18 : 0.24}
-              floatIntensity={tier === "low" ? 0.36 : tier === "medium" ? 0.48 : 0.58}
+              speed={item.speed * budget.speedMultiplier}
+              rotationIntensity={budget.rotationIntensity}
+              floatIntensity={budget.floatIntensity}
+              cylinderSegments={budget.cylinderSegments}
+              capSegments={budget.capSegments}
               palette={palette}
             />
           );
@@ -196,9 +209,11 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
-            speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
-            rotationIntensity={tier === "low" ? 0.12 : tier === "medium" ? 0.16 : 0.2}
-            floatIntensity={tier === "low" ? 0.4 : tier === "medium" ? 0.5 : 0.62}
+            speed={item.speed * budget.speedMultiplier}
+            rotationIntensity={budget.rotationIntensity}
+            floatIntensity={budget.floatIntensity}
+            torusRadialSegments={budget.torusRadialSegments}
+            torusTubularSegments={budget.torusTubularSegments}
             palette={palette}
           />
         );
@@ -208,7 +223,7 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
 }
 
 export function GallerySceneCanvas({ tier, theme, pointerMode }: GallerySceneCanvasProps) {
-  const dprLimit = tier === "high" ? 1.5 : tier === "medium" ? 1.25 : 1;
+  const budget = getSceneTierBudget("gallery", tier);
   const palette: ScenePalette =
     theme === "dark"
       ? {
@@ -230,9 +245,9 @@ export function GallerySceneCanvas({ tier, theme, pointerMode }: GallerySceneCan
 
   return (
     <Canvas
-      dpr={[1, dprLimit]}
+      dpr={[1, budget.maxDpr]}
       camera={{ position: [0, 0, 7.2], fov: 40 }}
-      gl={{ antialias: tier !== "low", alpha: true, powerPreference: "high-performance" }}
+      gl={{ antialias: budget.antialias, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
       }}

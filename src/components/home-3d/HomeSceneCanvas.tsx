@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
+import { getSceneTierBudget } from "@/components/scene-3d/performanceBudget";
 
 export type SceneQualityTier = "high" | "medium" | "low";
 export type SceneTheme = "light" | "dark";
@@ -52,15 +53,17 @@ function BarberPole({
   speed,
   rotationIntensity,
   floatIntensity,
+  cylinderSegments,
+  capSegments,
   palette,
-}: PoleProps & { palette: ScenePalette }) {
+}: PoleProps & { palette: ScenePalette; cylinderSegments: number; capSegments: number }) {
   const stripeAngles = useMemo(() => [0, 0.85, 1.7, 2.55], []);
 
   return (
     <Float speed={speed} rotationIntensity={rotationIntensity} floatIntensity={floatIntensity}>
       <group position={position} rotation={rotation} scale={scale}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.24, 0.24, 2.5, 32]} />
+          <cylinderGeometry args={[0.24, 0.24, 2.5, cylinderSegments]} />
           <meshStandardMaterial color={palette.poleBody} metalness={0.12} roughness={0.32} />
         </mesh>
 
@@ -72,12 +75,12 @@ function BarberPole({
         ))}
 
         <mesh position={[0, -1.35, 0]}>
-          <cylinderGeometry args={[0.31, 0.31, 0.18, 24]} />
+          <cylinderGeometry args={[0.31, 0.31, 0.18, capSegments]} />
           <meshStandardMaterial color={palette.poleCap} metalness={0.24} roughness={0.28} />
         </mesh>
 
         <mesh position={[0, 1.35, 0]}>
-          <cylinderGeometry args={[0.31, 0.31, 0.18, 24]} />
+          <cylinderGeometry args={[0.31, 0.31, 0.18, capSegments]} />
           <meshStandardMaterial color={palette.poleCap} metalness={0.24} roughness={0.28} />
         </mesh>
       </group>
@@ -100,6 +103,7 @@ function CameraRig({ tier, pointerMode }: { tier: SceneQualityTier; pointerMode:
 }
 
 function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: ScenePalette }) {
+  const budget = getSceneTierBudget("home", tier);
   const objects =
     tier === "high"
       ? [
@@ -114,22 +118,25 @@ function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: Scen
             { position: [2.1, -0.9, -1.5], rotation: [-0.05, -0.24, 0.1], scale: 0.9, speed: 1 },
             { position: [0.4, 2.2, -2.8], rotation: [0.03, 0.18, 0], scale: 0.55, speed: 0.82 },
           ]
-        : [
+      : [
             { position: [-1.9, 1, -1.1], rotation: [0.05, 0.25, -0.06], scale: 0.84, speed: 0.86 },
             { position: [1.8, -0.8, -1.2], rotation: [-0.04, -0.2, 0.08], scale: 0.78, speed: 0.82 },
           ];
+  const visibleObjects = objects.slice(0, budget.maxAnimatedObjects);
 
   return (
     <>
-      {objects.map((item, index) => (
+      {visibleObjects.map((item, index) => (
         <BarberPole
           key={`pole-${index}`}
           position={item.position as [number, number, number]}
           rotation={item.rotation as [number, number, number]}
           scale={item.scale}
-          speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
-          rotationIntensity={tier === "low" ? 0.14 : tier === "medium" ? 0.2 : 0.25}
-          floatIntensity={tier === "low" ? 0.42 : tier === "medium" ? 0.54 : 0.65}
+          speed={item.speed * budget.speedMultiplier}
+          rotationIntensity={budget.rotationIntensity}
+          floatIntensity={budget.floatIntensity}
+          cylinderSegments={budget.cylinderSegments}
+          capSegments={budget.capSegments}
           palette={palette}
         />
       ))}
@@ -138,7 +145,7 @@ function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: Scen
 }
 
 export function HomeSceneCanvas({ tier, theme, pointerMode }: HomeSceneCanvasProps) {
-  const dprLimit = tier === "high" ? 1.6 : tier === "medium" ? 1.35 : 1.1;
+  const budget = getSceneTierBudget("home", tier);
   const palette: ScenePalette =
     theme === "dark"
       ? {
@@ -160,9 +167,9 @@ export function HomeSceneCanvas({ tier, theme, pointerMode }: HomeSceneCanvasPro
 
   return (
     <Canvas
-      dpr={[1, dprLimit]}
+      dpr={[1, budget.maxDpr]}
       camera={{ position: [0, 0, 7], fov: 42 }}
-      gl={{ antialias: tier !== "low", alpha: true, powerPreference: "high-performance" }}
+      gl={{ antialias: budget.antialias, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
       }}
