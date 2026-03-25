@@ -22,15 +22,32 @@ function getInitialTier(): GallerySceneQualityTier {
   return "high";
 }
 
+function getInteractionProfile(tier: GallerySceneQualityTier) {
+  if (typeof window === "undefined") {
+    return { tier, pointerMode: "enabled" as const };
+  }
+
+  const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+  const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const normalizedTier = isMobileViewport && tier === "high" ? "medium" : isMobileViewport ? "low" : tier;
+  const pointerMode: "enabled" | "limited" | "disabled" =
+    normalizedTier === "low" || hasCoarsePointer ? "disabled" : normalizedTier === "medium" ? "limited" : "enabled";
+
+  return { tier: normalizedTier, pointerMode };
+}
+
 export function GallerySceneBackdrop() {
   const shouldReduceMotion = useReducedMotion();
   const [tier, setTier] = useState<GallerySceneQualityTier>("medium");
   const [theme, setTheme] = useState<GallerySceneTheme>("light");
+  const [pointerMode, setPointerMode] = useState<"enabled" | "limited" | "disabled">("enabled");
   const [webglEnabled, setWebglEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setTier(getInitialTier());
+    const profile = getInteractionProfile(getInitialTier());
+    setTier(profile.tier);
+    setPointerMode(profile.pointerMode);
     setIsMounted(true);
 
     const root = document.documentElement;
@@ -65,7 +82,7 @@ export function GallerySceneBackdrop() {
       aria-hidden
     >
       {showCanvas ? (
-        <DynamicGallerySceneCanvas tier={tier} theme={theme} />
+        <DynamicGallerySceneCanvas tier={tier} theme={theme} pointerMode={pointerMode} />
       ) : (
         <div className="h-full w-full bg-[radial-gradient(720px_420px_at_80%_16%,hsl(var(--accent)/0.16),transparent_58%),radial-gradient(520px_320px_at_18%_78%,hsl(var(--primary)/0.14),transparent_56%)]" />
       )}

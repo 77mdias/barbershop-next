@@ -68,4 +68,14 @@ describe("GallerySceneBackdrop", () => {
       expect(screen.getByTestId("dynamic-gallery-scene")).toHaveAttribute("data-theme", "dark");
     });
   });
+
+  test("renders static fallback when WebGL is unavailable", async () => {
+    getContextSpy.mockReturnValue(null);
+
+    render(<GallerySceneBackdrop />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("dynamic-gallery-scene")).not.toBeInTheDocument();
+    });
+  });
 });

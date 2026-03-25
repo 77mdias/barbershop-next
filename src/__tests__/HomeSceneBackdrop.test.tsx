@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { HomeSceneBackdrop } from "@/components/home-3d/HomeSceneBackdrop";
 
 let reducedMotionValue = false;
+let getContextSpy: jest.SpiedFunction<HTMLCanvasElement["getContext"]>;
 
 jest.mock("motion/react", () => ({
   useReducedMotion: () => reducedMotionValue,
@@ -18,6 +19,17 @@ describe("HomeSceneBackdrop", () => {
   beforeEach(() => {
     reducedMotionValue = false;
     document.documentElement.classList.remove("dark");
+    getContextSpy = jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((contextId) => {
+      if (contextId === "webgl2" || contextId === "webgl") {
+        return {} as WebGLRenderingContext;
+      }
+
+      return null;
+    });
+  });
+
+  afterEach(() => {
+    getContextSpy.mockRestore();
   });
 
   test("renders static fallback when reduced motion is enabled", async () => {
@@ -50,6 +62,16 @@ describe("HomeSceneBackdrop", () => {
     await waitFor(() => {
       expect(screen.getByTestId("dynamic-home-scene")).toBeInTheDocument();
       expect(screen.getByTestId("dynamic-home-scene")).toHaveAttribute("data-theme", "dark");
+    });
+  });
+
+  test("renders static fallback when WebGL is unavailable", async () => {
+    getContextSpy.mockReturnValue(null);
+
+    render(<HomeSceneBackdrop />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("dynamic-home-scene")).not.toBeInTheDocument();
     });
   });
 });
