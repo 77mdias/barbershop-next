@@ -90,6 +90,15 @@
     --chart-4: 25 80% 50%;
     --chart-5: 330 60% 55%;
 
+    /* Layering tokens */
+    --layer-base: 0;
+    --layer-3d-scene: 10;
+    --layer-header: 40;
+    --layer-overlay: 60;
+    --layer-mobile-menu: 70;
+    --layer-modal: 80;
+    --layer-toast: 90;
+
     /* Hero-specific - always dark for dramatic contrast */
     --hero-bg: 24 15% 8%;
     --hero-fg: 40 20% 96%;

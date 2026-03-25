@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthSafe } from "@/hooks/useAuthSafe";
 import { ClientOnlyAuth } from "./ClientOnlyAuth";
 import { Menu, X, Scissors, UserCircle, LogIn } from "lucide-react";
@@ -32,8 +32,37 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuthSafe();
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      window.addEventListener("keydown", handleEsc);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [isMenuOpen]);
+
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 h-[65px] border-b border-white/[0.07] bg-background/75 backdrop-blur-xl shadow-[0_1px_24px_-4px_rgba(0,0,0,0.4)] dark:bg-[hsl(30_10%_5%/0.80)]">
+    <header className="fixed left-0 right-0 top-0 z-[var(--layer-header)] h-[65px] border-b border-white/[0.07] bg-background/75 backdrop-blur-xl shadow-[0_1px_24px_-4px_rgba(0,0,0,0.4)] dark:bg-[hsl(30_10%_5%/0.80)]">
       {/* Desktop Layout */}
       <div className="container mx-auto hidden h-full grid-cols-3 items-center px-4 md:grid">
         {/* Logo */}
@@ -113,6 +142,8 @@ const Header = () => {
             className="rounded-md p-2 text-accent transition-colors hover:bg-[hsl(var(--accent)/0.08)]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation-panel"
           >
             {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -121,56 +152,66 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="border-t border-white/[0.07] bg-background/90 backdrop-blur-xl md:hidden">
-          <nav className="flex flex-col px-4 py-3">
-            {mobileNavLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <ClientOnlyAuth>
-              {user?.role === "ADMIN" && (
+        <>
+          <div
+            className="fixed inset-x-0 bottom-0 top-[65px] z-[var(--layer-overlay)] bg-black/55 md:hidden"
+            aria-hidden="true"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <div
+            id="mobile-navigation-panel"
+            className="fixed inset-x-0 bottom-0 top-[65px] z-[var(--layer-mobile-menu)] overflow-y-auto border-t border-white/[0.07] bg-background/95 backdrop-blur-xl md:hidden"
+          >
+            <nav className="flex flex-col px-4 py-3">
+              {mobileNavLinks.map((link) => (
                 <Link
-                  href="/dashboard"
+                  key={link.href}
+                  href={link.href}
                   className="py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Dashboard
+                  {link.label}
                 </Link>
-              )}
-            </ClientOnlyAuth>
+              ))}
+              <ClientOnlyAuth>
+                {user?.role === "ADMIN" && (
+                  <Link
+                    href="/dashboard"
+                    className="py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+              </ClientOnlyAuth>
 
-            {/* Profile / Auth separator */}
-            <div className="my-1 border-t border-white/[0.07]" />
+              {/* Profile / Auth separator */}
+              <div className="my-1 border-t border-white/[0.07]" />
 
-            <ClientOnlyAuth>
-              {isAuthenticated ? (
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <UserCircle className="h-4 w-4 shrink-0 text-accent" />
-                  {user?.name ? user.name : "Meu Perfil"}
-                </Link>
-              ) : (
-                <Link
-                  href="/auth/signin"
-                  className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-accent transition-colors hover:text-accent/80"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <LogIn className="h-4 w-4 shrink-0" />
-                  Entrar
-                </Link>
-              )}
-            </ClientOnlyAuth>
-          </nav>
-        </div>
+              <ClientOnlyAuth>
+                {isAuthenticated ? (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserCircle className="h-4 w-4 shrink-0 text-accent" />
+                    {user?.name ? user.name : "Meu Perfil"}
+                  </Link>
+                ) : (
+                  <Link
+                    href="/auth/signin"
+                    className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-accent transition-colors hover:text-accent/80"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4 shrink-0" />
+                    Entrar
+                  </Link>
+                )}
+              </ClientOnlyAuth>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
