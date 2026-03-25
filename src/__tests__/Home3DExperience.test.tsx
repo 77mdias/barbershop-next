@@ -227,4 +227,40 @@ describe("HomeExperience", () => {
       expect(layer).toHaveAttribute("data-scroll-depth-disabled", "true");
     });
   });
+
+  test("falls back to local assets when dynamic image URLs are invalid or not allowed", () => {
+    const dataWithUnsafeImages: HomePageData = {
+      ...sampleData,
+      salons: {
+        ...sampleData.salons,
+        items: sampleData.salons.items.map((salon, index) =>
+          index === 0
+            ? {
+                ...salon,
+                imageUrl: "https://unknown-image-host.invalid/salon.jpg",
+              }
+            : salon,
+        ),
+      },
+      reviews: {
+        ...sampleData.reviews,
+        items: sampleData.reviews.items.map((review, index) =>
+          index === 0
+            ? {
+                ...review,
+                avatarUrl: "javascript:alert('xss')",
+              }
+            : review,
+        ),
+      },
+    };
+
+    const { container } = render(<HomeExperience data={dataWithUnsafeImages} />);
+    const allImages = Array.from(container.querySelectorAll("img"));
+    const salonImage = allImages.find((img) => img.getAttribute("alt") === dataWithUnsafeImages.salons.items[0]?.name);
+    const reviewAvatarImage = allImages.find((img) => img.getAttribute("alt") === dataWithUnsafeImages.reviews.items[0]?.author);
+
+    expect(salonImage).toHaveAttribute("src", "/images/salon1.svg");
+    expect(reviewAvatarImage).toHaveAttribute("src", "/images/salon2.svg");
+  });
 });

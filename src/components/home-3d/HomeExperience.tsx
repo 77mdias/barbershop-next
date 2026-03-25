@@ -19,6 +19,39 @@ type HomeExperienceProps = {
   data: HomePageData;
 };
 
+const FALLBACK_SALON_IMAGE_SRC = "/images/salon1.svg";
+const FALLBACK_AVATAR_IMAGE_SRC = "/images/salon2.svg";
+const ALLOWED_REMOTE_IMAGE_HOSTS = new Set([
+  "res.cloudinary.com",
+  "lh3.googleusercontent.com",
+  "avatars.githubusercontent.com",
+  "images.unsplash.com",
+]);
+
+function resolveSafeImageSrc(src: string | null | undefined, fallbackSrc: string) {
+  if (!src) {
+    return fallbackSrc;
+  }
+
+  if (src.startsWith("/")) {
+    return src;
+  }
+
+  try {
+    const parsedSrc = new URL(src);
+    const isHttpProtocol = parsedSrc.protocol === "https:" || parsedSrc.protocol === "http:";
+    const isAllowedRemoteHost = ALLOWED_REMOTE_IMAGE_HOSTS.has(parsedSrc.hostname);
+
+    if (isHttpProtocol && isAllowedRemoteHost) {
+      return src;
+    }
+  } catch {
+    return fallbackSrc;
+  }
+
+  return fallbackSrc;
+}
+
 const sectionTitles = {
   ritual: "Ritual de precisão",
   schedule: "Agenda orientada por disponibilidade",
@@ -556,7 +589,12 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                       className="surface-3d-emphasis overflow-hidden rounded-xl"
                     >
                       <div className="relative h-28 w-full">
-                        <Image src={salon.imageUrl} alt={salon.name} fill className="object-cover" />
+                        <Image
+                          src={resolveSafeImageSrc(salon.imageUrl, FALLBACK_SALON_IMAGE_SRC)}
+                          alt={salon.name}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                       <div className="space-y-2 p-4">
                         <div className="flex items-center justify-between gap-3">
@@ -637,7 +675,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               >
                 <div className="flex items-center gap-3">
                   <Image
-                    src={review.avatarUrl}
+                    src={resolveSafeImageSrc(review.avatarUrl, FALLBACK_AVATAR_IMAGE_SRC)}
                     alt={review.author}
                     width={44}
                     height={44}
