@@ -66,11 +66,15 @@ describe("GalleryExperience", () => {
     const portfolioTitle = screen.getByRole("heading", { name: "Portfólio completo" });
 
     expect(galleryTitle).toBeInTheDocument();
+    const rootMain = container.querySelector("main");
+    expect(rootMain).toHaveAttribute("data-layout-contract", "ph6-rsp-001-gallery");
+    expect(rootMain).toHaveAttribute("data-layout-breakpoints", "390|768|1024|1440");
     expect(galleryTitle).toHaveClass("type-3d-display");
     expect(collectionsTitle).toHaveClass("type-3d-title");
     expect(portfolioTitle).toHaveClass("type-3d-title");
 
     expect(screen.getByRole("link", { name: /Agendar agora/i })).toHaveAttribute("href", "/scheduling");
+    expect(screen.getByRole("link", { name: /Agendar agora/i })).toHaveClass("w-full");
     expect(screen.getByRole("link", { name: /Ver promoções/i })).toHaveAttribute("href", "/promotions");
     expect(screen.getByTestId("gallery-3d-backdrop")).toBeInTheDocument();
     expect(container.querySelectorAll(".surface-3d-card").length).toBeGreaterThan(0);
@@ -89,6 +93,7 @@ describe("GalleryExperience", () => {
       expect(section).toHaveAttribute("data-storyboard-timing-mobile");
       expect(section).toHaveAttribute("data-storyboard-timing-desktop");
       expect(section).toHaveAttribute("data-ux-intent-primary");
+      expect(section).toHaveAttribute("data-layout-contract-step");
     });
     const depthLayerSelectors = [
       "[data-scroll-depth='gallery-hero-intro']",

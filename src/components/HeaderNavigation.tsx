@@ -32,6 +32,12 @@ const navInteractiveClassName =
   "rounded-md px-2 py-1 text-[14px] font-normal text-muted-foreground transition-all duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]";
 const mobileNavInteractiveClassName =
   "rounded-md py-2.5 text-sm font-medium text-foreground transition-all duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]";
+const HEADER_BREAKPOINT_CONTRACT = {
+  id: "ph6-rsp-001-header",
+  targets: "390|768|1024|1440",
+  notes:
+    "390=acoes-priorizadas-sem-overlap;768=transicao-para-nav-desktop;1024=grade-completa;1440=respiro-horizontal",
+} as const;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,7 +73,13 @@ const Header = () => {
   }, [isMenuOpen]);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-[var(--layer-header)] h-[65px] border-b border-white/[0.07] bg-background/75 backdrop-blur-xl shadow-[0_1px_24px_-4px_rgba(0,0,0,0.4)] dark:bg-[hsl(30_10%_5%/0.80)]">
+    <header
+      className="fixed left-0 right-0 top-0 z-[var(--layer-header)] h-[65px] border-b border-white/[0.07] bg-background/75 backdrop-blur-xl shadow-[0_1px_24px_-4px_rgba(0,0,0,0.4)] dark:bg-[hsl(30_10%_5%/0.80)]"
+      data-layout-contract={HEADER_BREAKPOINT_CONTRACT.id}
+      data-layout-breakpoints={HEADER_BREAKPOINT_CONTRACT.targets}
+      data-layout-contract-notes={HEADER_BREAKPOINT_CONTRACT.notes}
+      data-layout-contract-step="header-fixed-layered-nav"
+    >
       {/* Desktop Layout */}
       <div className="container mx-auto hidden h-full grid-cols-3 items-center px-4 md:grid">
         {/* Logo */}

@@ -77,6 +77,13 @@ const galleryStoryboard = {
   },
 } satisfies Record<"hero" | "collections" | "portfolio", GalleryStoryboardAct>;
 
+const GALLERY_BREAKPOINT_CONTRACT = {
+  id: "ph6-rsp-001-gallery",
+  targets: "390|768|1024|1440",
+  notes:
+    "390=hero-cta-em-pilha;768=pilares-e-colecoes-com-espaco-controlado;1024=3-colunas;1440=expansao-com-respiro",
+} as const;
+
 export function GalleryExperience() {
   const reducedMotionFromMotion = useReducedMotion();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -146,7 +153,12 @@ export function GalleryExperience() {
   });
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+    <main
+      className="relative min-h-screen overflow-x-hidden bg-background text-foreground"
+      data-layout-contract={GALLERY_BREAKPOINT_CONTRACT.id}
+      data-layout-breakpoints={GALLERY_BREAKPOINT_CONTRACT.targets}
+      data-layout-contract-notes={GALLERY_BREAKPOINT_CONTRACT.notes}
+    >
       <GallerySceneBackdrop />
 
       <div className="relative z-10">
@@ -160,6 +172,7 @@ export function GalleryExperience() {
           data-storyboard-timing-mobile={heroAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={heroAct.timingByViewport.desktop}
           data-ux-intent-primary={heroAct.uxIntent}
+          data-layout-contract-step="gallery-hero-and-pillar-stack"
         >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deeper }}
@@ -193,17 +206,17 @@ export function GalleryExperience() {
               barbearia e acelerar sua decisão de agendamento.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 min-[390px]:items-center sm:w-auto sm:flex-row sm:flex-wrap">
               <Link
                 href="/scheduling"
-                className="gold-shimmer inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent/90"
+                className="gold-shimmer inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent/90 min-[390px]:w-auto"
               >
                 Agendar agora
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/promotions"
-                className="surface-3d-card inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent"
+                className="surface-3d-card inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent min-[390px]:w-auto"
               >
                 Ver promoções
                 <ArrowRight className="h-4 w-4" />
@@ -266,6 +279,7 @@ export function GalleryExperience() {
           data-storyboard-timing-mobile={collectionsAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={collectionsAct.timingByViewport.desktop}
           data-ux-intent-primary={collectionsAct.uxIntent}
+          data-layout-contract-step="collections-grid-adaptive"
         >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deep }}
@@ -357,6 +371,7 @@ export function GalleryExperience() {
           data-storyboard-timing-mobile={portfolioAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={portfolioAct.timingByViewport.desktop}
           data-ux-intent-primary={portfolioAct.uxIntent}
+          data-layout-contract-step="portfolio-shell-stable"
         >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.hero }}
