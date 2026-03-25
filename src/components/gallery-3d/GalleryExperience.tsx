@@ -9,6 +9,7 @@ import { Gallery } from "@/components/gallery";
 import { galleryCollections, galleryImages } from "@/components/gallery-images";
 import { GallerySceneBackdrop } from "@/components/gallery-3d/GallerySceneBackdrop";
 import { usePrefersReducedMotion, useScrollDepthMotion } from "@/hooks/useScrollDepthMotion";
+import { motionDuration, motionEasing, motionIntensity, motionStagger } from "@/lib/motion-tokens";
 
 const valuePillars = [
   {
@@ -103,9 +104,9 @@ export function GalleryExperience() {
           className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-2xl))] lg:pt-[calc(65px+var(--space-3d-3xl))]"
         >
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 26 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deeper }}
             animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: motionDuration.narrative, ease: motionEasing.emphasized }}
             style={
               shouldReduceMotion
                 ? undefined
@@ -171,11 +172,15 @@ export function GalleryExperience() {
               return (
                 <motion.article
                   key={pillar.title}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deeper }}
                   whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={shouldReduceMotion ? undefined : { y: -5 }}
+                  viewport={{ once: true, amount: motionIntensity.viewportAmount.galleryPillar }}
+                  transition={{
+                    duration: motionDuration.base,
+                    delay: motionStagger.galleryPillars(index),
+                    ease: motionEasing.emphasized,
+                  }}
+                  whileHover={shouldReduceMotion ? undefined : { y: motionIntensity.hover.liftSoft }}
                   className="surface-3d-card rhythm-3d-stack-sm rounded-2xl p-5"
                 >
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.16)] text-accent">
@@ -191,10 +196,10 @@ export function GalleryExperience() {
 
         <section ref={collectionsSectionRef} className="layout-3d-shell rhythm-3d-section">
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deep }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, amount: motionIntensity.viewportAmount.standard }}
+            transition={{ duration: motionDuration.smooth, ease: motionEasing.emphasized }}
             className="mb-3d-xl flex flex-col gap-3d-sm sm:flex-row sm:items-end sm:justify-between"
           >
             <div className="rhythm-3d-stack-sm">
@@ -234,11 +239,15 @@ export function GalleryExperience() {
             {galleryCollections.map((collection, index) => (
               <motion.article
                 key={collection.id}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deep }}
                 whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.55, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={shouldReduceMotion ? undefined : { y: -6 }}
+                viewport={{ once: true, amount: motionIntensity.viewportAmount.galleryCard }}
+                transition={{
+                  duration: motionDuration.base,
+                  delay: motionStagger.galleryCollections(index),
+                  ease: motionEasing.emphasized,
+                }}
+                whileHover={shouldReduceMotion ? undefined : { y: motionIntensity.hover.liftStrong }}
                 className="surface-3d-1 overflow-hidden rounded-3xl"
               >
                 <div className="relative h-56 w-full">
@@ -266,10 +275,10 @@ export function GalleryExperience() {
 
         <section ref={portfolioSectionRef} className="layout-3d-shell rhythm-3d-section">
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.hero }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, amount: motionIntensity.viewportAmount.standard }}
+            transition={{ duration: motionDuration.smooth, ease: motionEasing.emphasized }}
             style={
               shouldReduceMotion
                 ? undefined

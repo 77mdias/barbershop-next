@@ -13,6 +13,7 @@ import { Footer } from "@/components/home/Footer";
 import { HomeSceneBackdrop } from "@/components/home-3d/HomeSceneBackdrop";
 import { RevealBlock, type RevealViewportTiming } from "@/components/home-3d/RevealBlock";
 import { usePrefersReducedMotion, useScrollDepthMotion } from "@/hooks/useScrollDepthMotion";
+import { motionDelay, motionDuration, motionEasing, motionIntensity, motionStagger } from "@/lib/motion-tokens";
 
 type HomeExperienceProps = {
   data: HomePageData;
@@ -51,8 +52,18 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
       desktop: "0-28vh (reveal com composição em duas colunas)",
     },
     revealByViewport: {
-      mobile: { delay: 0, y: 20, duration: 0.56, viewportAmount: 0.28 },
-      desktop: { delay: 0.04, y: 30, duration: 0.7, viewportAmount: 0.24 },
+      mobile: {
+        delay: motionDelay.none,
+        y: motionIntensity.revealY.hero,
+        duration: motionDuration.base,
+        viewportAmount: motionIntensity.viewportAmount.heroMobile,
+      },
+      desktop: {
+        delay: motionDelay.micro,
+        y: motionIntensity.revealY.dramatic,
+        duration: motionDuration.hero,
+        viewportAmount: motionIntensity.viewportAmount.hero,
+      },
     },
   },
   services: {
@@ -66,8 +77,18 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
       desktop: "28-52vh (grid completo com leitura paralela por colunas)",
     },
     revealByViewport: {
-      mobile: { delay: 0.05, y: 18, duration: 0.54, viewportAmount: 0.22 },
-      desktop: { delay: 0.1, y: 26, duration: 0.66, viewportAmount: 0.2 },
+      mobile: {
+        delay: motionDelay.tight,
+        y: motionIntensity.revealY.strong,
+        duration: motionDuration.base,
+        viewportAmount: motionIntensity.viewportAmount.section,
+      },
+      desktop: {
+        delay: motionDelay.standard,
+        y: motionIntensity.revealY.deeper,
+        duration: motionDuration.narrative,
+        viewportAmount: motionIntensity.viewportAmount.standard,
+      },
     },
   },
   discovery: {
@@ -81,8 +102,18 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
       desktop: "52-74vh (promoções e unidades em paralelo)",
     },
     revealByViewport: {
-      mobile: { delay: 0.09, y: 16, duration: 0.54, viewportAmount: 0.2 },
-      desktop: { delay: 0.14, y: 24, duration: 0.64, viewportAmount: 0.2 },
+      mobile: {
+        delay: motionDelay.relaxed,
+        y: motionIntensity.revealY.medium,
+        duration: motionDuration.base,
+        viewportAmount: motionIntensity.viewportAmount.standard,
+      },
+      desktop: {
+        delay: motionDelay.section,
+        y: motionIntensity.revealY.deeper,
+        duration: motionDuration.narrative,
+        viewportAmount: motionIntensity.viewportAmount.standard,
+      },
     },
   },
   socialProof: {
@@ -96,8 +127,18 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
       desktop: "74-88vh (malha de reviews com densidade equilibrada)",
     },
     revealByViewport: {
-      mobile: { delay: 0.11, y: 14, duration: 0.5, viewportAmount: 0.18 },
-      desktop: { delay: 0.16, y: 22, duration: 0.6, viewportAmount: 0.18 },
+      mobile: {
+        delay: motionDelay.soft,
+        y: motionIntensity.revealY.soft,
+        duration: motionDuration.quick,
+        viewportAmount: motionIntensity.viewportAmount.soft,
+      },
+      desktop: {
+        delay: motionDelay.strong,
+        y: motionIntensity.revealY.deep,
+        duration: motionDuration.smooth,
+        viewportAmount: motionIntensity.viewportAmount.soft,
+      },
     },
   },
   cta: {
@@ -111,8 +152,18 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
       desktop: "88-100vh (bloco amplo com hierarquia de ações)",
     },
     revealByViewport: {
-      mobile: { delay: 0.12, y: 12, duration: 0.5, viewportAmount: 0.16 },
-      desktop: { delay: 0.18, y: 18, duration: 0.62, viewportAmount: 0.16 },
+      mobile: {
+        delay: motionDelay.soft,
+        y: motionIntensity.revealY.subtle,
+        duration: motionDuration.quick,
+        viewportAmount: motionIntensity.viewportAmount.focused,
+      },
+      desktop: {
+        delay: motionDelay.pronounced,
+        y: motionIntensity.revealY.strong,
+        duration: motionDuration.smooth,
+        viewportAmount: motionIntensity.viewportAmount.focused,
+      },
     },
   },
 };
@@ -261,7 +312,11 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               <motion.aside
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                transition={{
+                  duration: motionDuration.hero,
+                  delay: motionDelay.heroAside,
+                  ease: motionEasing.emphasized,
+                }}
                 style={
                   shouldReduceMotion
                     ? undefined
@@ -342,8 +397,12 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             {data.services.items.map((service, index) => (
               <motion.article
                 key={service.id}
-                whileHover={shouldReduceMotion ? undefined : { y: -6, rotateX: 3, rotateY: index % 2 === 0 ? -2 : 2 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                whileHover={shouldReduceMotion ? undefined : {
+                  y: motionIntensity.hover.liftStrong,
+                  rotateX: 3,
+                  rotateY: index % 2 === 0 ? -2 : 2,
+                }}
+                transition={{ duration: motionDuration.instant, ease: motionEasing.emphasized }}
                 className="surface-3d-card group rounded-2xl p-6"
               >
                 <div className="flex items-center justify-between">
@@ -421,7 +480,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   {data.promotions.items.map((promo) => (
                     <motion.div
                       key={promo.id}
-                      whileHover={shouldReduceMotion ? undefined : { x: 4 }}
+                      whileHover={shouldReduceMotion ? undefined : { x: motionIntensity.hover.shiftSoft }}
                       className="surface-3d-emphasis rounded-xl p-4"
                     >
                       <div className="flex flex-wrap items-center gap-2">
@@ -471,8 +530,18 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
                 narrativeLabel={`${discoveryAct.label} / unidades`}
                 revealByViewport={{
-                  mobile: { delay: 0.18, y: 14, duration: 0.52, viewportAmount: 0.18 },
-                  desktop: { delay: 0.26, y: 22, duration: 0.62, viewportAmount: 0.18 },
+                  mobile: {
+                    delay: motionDelay.pronounced,
+                    y: motionIntensity.revealY.soft,
+                    duration: motionDuration.quick,
+                    viewportAmount: motionIntensity.viewportAmount.soft,
+                  },
+                  desktop: {
+                    delay: motionDelay.deferred,
+                    y: motionIntensity.revealY.deep,
+                    duration: motionDuration.smooth,
+                    viewportAmount: motionIntensity.viewportAmount.soft,
+                  },
                 }}
               >
                 <h2 className="type-3d-title text-foreground">
@@ -483,7 +552,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   {data.salons.items.slice(0, 3).map((salon) => (
                     <motion.article
                       key={salon.id}
-                      whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                      whileHover={shouldReduceMotion ? undefined : { y: motionIntensity.hover.liftSubtle }}
                       className="surface-3d-emphasis overflow-hidden rounded-xl"
                     >
                       <div className="relative h-28 w-full">
@@ -564,7 +633,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               <RevealBlock
                 key={review.id}
                 className="surface-3d-card rounded-2xl p-5"
-                delay={reviewIndex * 0.05}
+                delay={motionStagger.reviews(reviewIndex)}
               >
                 <div className="flex items-center gap-3">
                   <Image

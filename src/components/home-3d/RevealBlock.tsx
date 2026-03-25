@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { motionDelay, motionDuration, motionEasing, motionIntensity, type MotionEasing } from "@/lib/motion-tokens";
 
 type RevealMotionConfig = {
   delay?: number;
   y?: number;
   duration?: number;
   viewportAmount?: number;
+  ease?: MotionEasing;
 };
 
 export type RevealViewportTiming = {
@@ -28,8 +30,8 @@ type RevealBlockProps = {
 export function RevealBlock({
   children,
   className,
-  delay = 0,
-  y = 28,
+  delay = motionDelay.none,
+  y = motionIntensity.revealY.default,
   revealByViewport,
   narrativeLabel,
 }: RevealBlockProps) {
@@ -64,10 +66,11 @@ export function RevealBlock({
   }, []);
 
   const viewportConfig = isDesktopViewport ? revealByViewport?.desktop : revealByViewport?.mobile;
-  const resolvedDelay = viewportConfig?.delay ?? delay;
+  const resolvedDelay = viewportConfig?.delay ?? delay ?? motionDelay.none;
   const resolvedY = viewportConfig?.y ?? y;
-  const resolvedDuration = viewportConfig?.duration ?? 0.65;
-  const resolvedViewportAmount = viewportConfig?.viewportAmount ?? 0.2;
+  const resolvedDuration = viewportConfig?.duration ?? motionDuration.narrative;
+  const resolvedViewportAmount = viewportConfig?.viewportAmount ?? motionIntensity.viewportAmount.standard;
+  const resolvedEase = viewportConfig?.ease ?? motionEasing.emphasized;
   const revealProfile = isDesktopViewport ? "desktop" : "mobile";
 
   if (shouldReduceMotion) {
@@ -90,7 +93,7 @@ export function RevealBlock({
       initial={{ opacity: 0, y: resolvedY }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: resolvedViewportAmount }}
-      transition={{ duration: resolvedDuration, delay: resolvedDelay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: resolvedDuration, delay: resolvedDelay, ease: resolvedEase }}
     >
       {children}
     </motion.div>

@@ -3,7 +3,7 @@
 **Status:** 🟢 ATIVA  
 **Última atualização:** 2026-03-25  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 31% (5/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 38% (6/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -19,10 +19,10 @@
 | --- | --- | --- | --- | --- | --- |
 | Foundation Design System | 3 | 3 | 0 | 0 | 0 |
 | Layout + Scroll 3D | 4 | 2 | 0 | 2 | 0 |
-| Motion + Interações | 4 | 0 | 0 | 4 | 0 |
+| Motion + Interações | 4 | 1 | 0 | 3 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
 | Performance + QA | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **16** | **5** | **0** | **11** | **0** |
+| **TOTAL** | **16** | **6** | **0** | **10** | **0** |
 
 ### 🎯 Principais Indicadores
 - ✅ Escopo fechado para `Home` e `Gallery` como referência da fase.
@@ -261,7 +261,7 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
 
 #### MSI.1 - Motion Tokens
 
-- [ ] **PH6-MSI-001** - Formalizar motion tokens (tempo, easing, delay, intensidade)
+- [x] **PH6-MSI-001** - Formalizar motion tokens (tempo, easing, delay, intensidade)
 
   **Descrição curta:**
   - Definir padrões de animação reutilizáveis.
@@ -275,13 +275,19 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
   **Arquivos/áreas afetadas:** `src/components/home-3d/RevealBlock.tsx`, `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Curvas/easing e durações padronizadas em Home e Gallery.
-  - [ ] Não há animações com timing conflitante no mesmo fluxo.
+  - [x] Curvas/easing e durações padronizadas em Home e Gallery.
+  - [x] Não há animações com timing conflitante no mesmo fluxo.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 4h  
   **Dependências:** PH6-L3D-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-MSI-001):**
+  - Motion tokens centralizados em `src/lib/motion-tokens.ts` com escalas explícitas de `duration`, `easing`, `delay`, `intensity` e helpers de `stagger`.
+  - `RevealBlock` passou a consumir fallback tokenizado de duração/easing/viewport e mantém compatibilidade da API (`delay`, `y`, `revealByViewport`).
+  - `HomeExperience` e `GalleryExperience` foram migrados para tokens, removendo timings hardcoded em reveals e hover transitions.
+  - Testes adicionados/atualizados: `motionTokens.test.ts` e `RevealBlock.test.tsx` (incluindo validação do fallback de transition).
 
 #### MSI.2 - Interaction States
 

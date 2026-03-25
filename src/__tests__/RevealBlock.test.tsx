@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { RevealBlock } from "@/components/home-3d/RevealBlock";
+import { motionDuration, motionEasing } from "@/lib/motion-tokens";
 
 let reducedMotion = false;
+let lastMotionDivProps: Record<string, unknown> | null = null;
 
 jest.mock("motion/react", () => {
   const ReactLib = jest.requireActual<typeof import("react")>("react");
@@ -22,9 +24,10 @@ jest.mock("motion/react", () => {
 
   return {
     motion: {
-      div: ReactLib.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(({ children, ...props }, ref) =>
-        ReactLib.createElement("div", { ...stripMotionProps(props), ref }, children),
-      ),
+      div: ReactLib.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(({ children, ...props }, ref) => {
+        lastMotionDivProps = props as Record<string, unknown>;
+        return ReactLib.createElement("div", { ...stripMotionProps(props), ref }, children);
+      }),
     },
     useReducedMotion: () => reducedMotion,
   };
@@ -45,6 +48,7 @@ const createMatchMediaMock = (matches: boolean) =>
 describe("RevealBlock", () => {
   beforeEach(() => {
     reducedMotion = false;
+    lastMotionDivProps = null;
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: createMatchMediaMock(false),
@@ -103,5 +107,20 @@ describe("RevealBlock", () => {
     const revealElement = screen.getByText("Conversao").parentElement;
     expect(revealElement).toHaveAttribute("data-reveal-label", "Ato 5 - CTA");
     expect(revealElement).toHaveAttribute("data-reveal-profile", "mobile");
+  });
+
+  test("uses standardized fallback transition tokens", () => {
+    render(
+      <RevealBlock>
+        <span>Tokenized</span>
+      </RevealBlock>,
+    );
+
+    expect(lastMotionDivProps).not.toBeNull();
+    expect(lastMotionDivProps?.transition).toEqual({
+      duration: motionDuration.narrative,
+      delay: 0,
+      ease: motionEasing.emphasized,
+    });
   });
 });
