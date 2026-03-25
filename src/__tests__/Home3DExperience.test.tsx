@@ -149,6 +149,13 @@ const sampleData: HomePageData = {
 describe("HomeExperience", () => {
   test("renders the redesigned narrative sections and primary actions", () => {
     const { container } = render(<HomeExperience data={sampleData} />);
+    const expectedStoryboardActs = [
+      "act-1-hero",
+      "act-2-services",
+      "act-3-discovery",
+      "act-4-social-proof",
+      "act-5-cta",
+    ] as const;
 
     const heroTitle = screen.getByRole("heading", { name: sampleData.hero.title });
     const servicesTitle = screen.getByRole("heading", { name: sampleData.services.title });
@@ -180,10 +187,18 @@ describe("HomeExperience", () => {
 
     const sections = container.querySelectorAll("section");
     expect(sections.length).toBe(5);
-    sections.forEach((section) => {
+    sections.forEach((section, index) => {
       expect(section).toHaveClass("layout-3d-shell");
       expect(section).toHaveClass("rhythm-3d-section");
+      expect(section).toHaveAttribute("data-storyboard-act", expectedStoryboardActs[index]);
+      expect(section).toHaveAttribute("data-storyboard-intent");
+      expect(section).toHaveAttribute("data-storyboard-transition");
+      expect(section).toHaveAttribute("data-storyboard-visual");
+      expect(section).toHaveAttribute("data-storyboard-timing-mobile");
+      expect(section).toHaveAttribute("data-storyboard-timing-desktop");
     });
+
+    expect(container.querySelectorAll("[data-reveal-label]").length).toBeGreaterThanOrEqual(5);
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });
 });

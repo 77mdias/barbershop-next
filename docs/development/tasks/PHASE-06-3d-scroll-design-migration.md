@@ -3,7 +3,7 @@
 **Status:** 🟢 ATIVA  
 **Última atualização:** 2026-03-25  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 19% (3/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 25% (4/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -18,11 +18,11 @@
 | Categoria | Total | Concluído | Em Andamento | Pendente | Bloqueado |
 | --- | --- | --- | --- | --- | --- |
 | Foundation Design System | 3 | 3 | 0 | 0 | 0 |
-| Layout + Scroll 3D | 4 | 0 | 0 | 4 | 0 |
+| Layout + Scroll 3D | 4 | 1 | 0 | 3 | 0 |
 | Motion + Interações | 4 | 0 | 0 | 4 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
 | Performance + QA | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **16** | **3** | **0** | **13** | **0** |
+| **TOTAL** | **16** | **4** | **0** | **12** | **0** |
 
 ### 🎯 Principais Indicadores
 - ✅ Escopo fechado para `Home` e `Gallery` como referência da fase.
@@ -148,7 +148,7 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
 
 #### L3D.1 - Storyboard de Scroll
 
-- [ ] **PH6-L3D-001** - Definir storyboard de 5 atos para Home (hero → serviços → prova social → CTA)
+- [x] **PH6-L3D-001** - Definir storyboard de 5 atos para Home (hero → serviços → prova social → CTA)
 
   **Descrição curta:**
   - Definir blocos com objetivos narrativos e gatilhos de transição.
@@ -162,13 +162,19 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeExperience.tsx`, `src/components/home-3d/RevealBlock.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Cada seção possui intenção e transição definidas.
-  - [ ] O fluxo mantém clareza de conteúdo em desktop e mobile.
+  - [x] Cada seção possui intenção e transição definidas.
+  - [x] O fluxo mantém clareza de conteúdo em desktop e mobile.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 4h  
   **Dependências:** PH6-FDS-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-L3D-001):**
+  - Storyboard de 5 atos formalizado em `HomeExperience` com contrato por seção: `id do ato`, `intenção narrativa`, `gatilho de transição`, `comportamento visual` e `timing por viewport`.
+  - Cada seção da Home recebeu metadados `data-storyboard-*` para tornar explícita a progressão narrativa (hero → serviços → valor tangível → prova social → CTA).
+  - `RevealBlock` evoluído para aceitar `revealByViewport` (mobile/desktop), preservando compatibilidade com a API anterior (`delay`/`y`) e mantendo fallback seguro para `prefers-reduced-motion`.
+  - Testes de regressão atualizados em `Home3DExperience.test.tsx` e novo `RevealBlock.test.tsx` para validar contrato de storyboard e perfil de reveal por viewport.
 
 #### L3D.2 - Scroll-driven Image Animation
 

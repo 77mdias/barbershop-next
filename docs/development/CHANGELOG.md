@@ -16,6 +16,12 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - `HomeExperience` e `GalleryExperience` migrados para classes semânticas de superfície, removendo múltiplas variações ad-hoc de `bg-[hsl(...)]`.
 - Testes de regressão (`Home3DExperience` e `GalleryExperience`) atualizados para garantir adoção explícita da semântica de superfície 3D.
 
+### 🎬 PH6-L3D-001 - Storyboard de Scroll da Home (Layout + Scroll 3D)
+- Definido storyboard de 5 atos em `HomeExperience` com contrato narrativo por seção: intenção, gatilho de transição, comportamento visual e timing por viewport (`mobile`/`desktop`).
+- Cada seção principal da Home agora expõe metadados `data-storyboard-*`, consolidando a progressão `hero → serviços → valor tangível → prova social → CTA`.
+- `RevealBlock` evoluído para suportar `revealByViewport` com fallback compatível para props legadas (`delay`, `y`) e manutenção de fallback para `prefers-reduced-motion`.
+- `Home3DExperience.test.tsx` ampliado para validar os 5 atos do storyboard e criado `RevealBlock.test.tsx` para cobrir perfil de reveal por viewport.
+
 ## [Realtime v1.9.0] - 2026-02-xx 🔔
 
 ### ⚡ Infra Real-time (#019)

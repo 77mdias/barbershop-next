@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Footer } from "@/components/home/Footer";
 import { HomeSceneBackdrop } from "@/components/home-3d/HomeSceneBackdrop";
-import { RevealBlock } from "@/components/home-3d/RevealBlock";
+import { RevealBlock, type RevealViewportTiming } from "@/components/home-3d/RevealBlock";
 
 type HomeExperienceProps = {
   data: HomePageData;
@@ -22,16 +22,123 @@ const sectionTitles = {
   socialProof: "Confiança validada pela comunidade",
 };
 
+type HomeStoryboardActKey = "hero" | "services" | "discovery" | "socialProof" | "cta";
+
+type HomeStoryboardAct = {
+  id: string;
+  label: string;
+  narrativeIntent: string;
+  transitionTrigger: string;
+  visualBehavior: string;
+  timingByViewport: {
+    mobile: string;
+    desktop: string;
+  };
+  revealByViewport: RevealViewportTiming;
+};
+
+const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
+  hero: {
+    id: "act-1-hero",
+    label: "Ato 1 - Hero de intenção",
+    narrativeIntent: "Apresentar proposta de valor e iniciar a busca já no primeiro bloco.",
+    transitionTrigger: "Ao avançar ~20% da viewport, o card de ritual prepara a leitura para o catálogo.",
+    visualBehavior: "Headline dominante + busca com card lateral em profundidade curta.",
+    timingByViewport: {
+      mobile: "0-22vh (reveal linear para leitura sem ruído)",
+      desktop: "0-28vh (reveal com composição em duas colunas)",
+    },
+    revealByViewport: {
+      mobile: { delay: 0, y: 20, duration: 0.56, viewportAmount: 0.28 },
+      desktop: { delay: 0.04, y: 30, duration: 0.7, viewportAmount: 0.24 },
+    },
+  },
+  services: {
+    id: "act-2-services",
+    label: "Ato 2 - Serviços em foco",
+    narrativeIntent: "Transformar interesse em comparação objetiva de serviços e duração.",
+    transitionTrigger: "Depois da busca inicial, o scroll revela cards com feedback de hover em camadas leves.",
+    visualBehavior: "Grid de serviços com microparallax de hover e tag de agenda como âncora.",
+    timingByViewport: {
+      mobile: "22-48vh (cards em sequência para scanning rápido)",
+      desktop: "28-52vh (grid completo com leitura paralela por colunas)",
+    },
+    revealByViewport: {
+      mobile: { delay: 0.05, y: 18, duration: 0.54, viewportAmount: 0.22 },
+      desktop: { delay: 0.1, y: 26, duration: 0.66, viewportAmount: 0.2 },
+    },
+  },
+  discovery: {
+    id: "act-3-discovery",
+    label: "Ato 3 - Valor tangível",
+    narrativeIntent: "Reforçar decisão com ofertas imediatas e prova de presença local (unidades).",
+    transitionTrigger: "Ao fim da grade de serviços, o layout abre duas superfícies para valor e conveniência.",
+    visualBehavior: "Bloco duplo (promoções + unidades) com deslocamentos curtos e ênfase de superfície.",
+    timingByViewport: {
+      mobile: "48-70vh (prioridade ofertas, depois unidades)",
+      desktop: "52-74vh (promoções e unidades em paralelo)",
+    },
+    revealByViewport: {
+      mobile: { delay: 0.09, y: 16, duration: 0.54, viewportAmount: 0.2 },
+      desktop: { delay: 0.14, y: 24, duration: 0.64, viewportAmount: 0.2 },
+    },
+  },
+  socialProof: {
+    id: "act-4-social-proof",
+    label: "Ato 4 - Prova social",
+    narrativeIntent: "Reduzir fricção final com evidência de satisfação e consistência de atendimento.",
+    transitionTrigger: "Após valor/conveniência, o bloco de reviews confirma confiança antes do CTA final.",
+    visualBehavior: "Cards de depoimento em malha com reveal progressivo e destaque de avaliação.",
+    timingByViewport: {
+      mobile: "70-86vh (depoimentos em sequência única)",
+      desktop: "74-88vh (malha de reviews com densidade equilibrada)",
+    },
+    revealByViewport: {
+      mobile: { delay: 0.11, y: 14, duration: 0.5, viewportAmount: 0.18 },
+      desktop: { delay: 0.16, y: 22, duration: 0.6, viewportAmount: 0.18 },
+    },
+  },
+  cta: {
+    id: "act-5-cta",
+    label: "Ato 5 - Conversão",
+    narrativeIntent: "Encerrar a narrativa com duplo caminho de ação (agendar ou criar conta).",
+    transitionTrigger: "O CTA surge após prova social para converter no pico de confiança.",
+    visualBehavior: "Painel central com CTA primário, secundário e acesso de retorno para clientes.",
+    timingByViewport: {
+      mobile: "86-100vh (foco em um CTA por vez)",
+      desktop: "88-100vh (bloco amplo com hierarquia de ações)",
+    },
+    revealByViewport: {
+      mobile: { delay: 0.12, y: 12, duration: 0.5, viewportAmount: 0.16 },
+      desktop: { delay: 0.18, y: 18, duration: 0.62, viewportAmount: 0.16 },
+    },
+  },
+};
+
 export function HomeExperience({ data }: HomeExperienceProps) {
   const shouldReduceMotion = useReducedMotion();
+  const heroAct = homeStoryboard.hero;
+  const servicesAct = homeStoryboard.services;
+  const discoveryAct = homeStoryboard.discovery;
+  const socialProofAct = homeStoryboard.socialProof;
+  const ctaAct = homeStoryboard.cta;
 
   return (
     <main className="relative min-h-screen w-full overflow-x-hidden bg-background text-foreground">
       <HomeSceneBackdrop />
 
       <div className="relative z-10 flex flex-col">
-        <section className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-xl))] lg:pt-[calc(65px+var(--space-3d-2xl))]">
-          <RevealBlock>
+        <section
+          className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-xl))] lg:pt-[calc(65px+var(--space-3d-2xl))]"
+          aria-label={heroAct.label}
+          data-storyboard-act={heroAct.id}
+          data-storyboard-intent={heroAct.narrativeIntent}
+          data-storyboard-transition={heroAct.transitionTrigger}
+          data-storyboard-visual={heroAct.visualBehavior}
+          data-storyboard-timing-mobile={heroAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={heroAct.timingByViewport.desktop}
+        >
+          <RevealBlock narrativeLabel={heroAct.label} revealByViewport={heroAct.revealByViewport}>
             <span className="type-3d-label inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.12)] px-4 py-2 text-[hsl(var(--accent))]">
               <Sparkles className="h-3.5 w-3.5" />
               Nova Home 3D
@@ -93,8 +200,17 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </RevealBlock>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section">
-          <RevealBlock>
+        <section
+          className="layout-3d-shell rhythm-3d-section"
+          aria-label={servicesAct.label}
+          data-storyboard-act={servicesAct.id}
+          data-storyboard-intent={servicesAct.narrativeIntent}
+          data-storyboard-transition={servicesAct.transitionTrigger}
+          data-storyboard-visual={servicesAct.visualBehavior}
+          data-storyboard-timing-mobile={servicesAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={servicesAct.timingByViewport.desktop}
+        >
+          <RevealBlock narrativeLabel={servicesAct.label} revealByViewport={servicesAct.revealByViewport}>
             <div className="mb-3d-xl flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="rhythm-3d-stack-sm">
                 <h2 className="type-3d-title text-foreground">
@@ -142,9 +258,22 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section">
+        <section
+          className="layout-3d-shell rhythm-3d-section"
+          aria-label={discoveryAct.label}
+          data-storyboard-act={discoveryAct.id}
+          data-storyboard-intent={discoveryAct.narrativeIntent}
+          data-storyboard-transition={discoveryAct.transitionTrigger}
+          data-storyboard-visual={discoveryAct.visualBehavior}
+          data-storyboard-timing-mobile={discoveryAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={discoveryAct.timingByViewport.desktop}
+        >
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
-            <RevealBlock className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl">
+            <RevealBlock
+              className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
+              narrativeLabel={`${discoveryAct.label} / ofertas`}
+              revealByViewport={discoveryAct.revealByViewport}
+            >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="type-3d-title text-foreground">
                   {data.promotions.title}
@@ -194,7 +323,11 @@ export function HomeExperience({ data }: HomeExperienceProps) {
 
             <RevealBlock
               className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
-              delay={0.1}
+              narrativeLabel={`${discoveryAct.label} / unidades`}
+              revealByViewport={{
+                mobile: { delay: 0.18, y: 14, duration: 0.52, viewportAmount: 0.18 },
+                desktop: { delay: 0.26, y: 22, duration: 0.62, viewportAmount: 0.18 },
+              }}
             >
               <h2 className="type-3d-title text-foreground">
                 {data.salons.title}
@@ -243,8 +376,21 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section">
-          <RevealBlock className="mb-8 flex items-center justify-between gap-4">
+        <section
+          className="layout-3d-shell rhythm-3d-section"
+          aria-label={socialProofAct.label}
+          data-storyboard-act={socialProofAct.id}
+          data-storyboard-intent={socialProofAct.narrativeIntent}
+          data-storyboard-transition={socialProofAct.transitionTrigger}
+          data-storyboard-visual={socialProofAct.visualBehavior}
+          data-storyboard-timing-mobile={socialProofAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={socialProofAct.timingByViewport.desktop}
+        >
+          <RevealBlock
+            className="mb-8 flex items-center justify-between gap-4"
+            narrativeLabel={socialProofAct.label}
+            revealByViewport={socialProofAct.revealByViewport}
+          >
             <h2 className="type-3d-title text-foreground">{data.reviews.title}</h2>
             <p className="type-3d-label max-w-sm text-right text-fg-subtle">
               {sectionTitles.socialProof}
@@ -285,8 +431,21 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section rhythm-3d-section-tight">
-          <RevealBlock className="surface-3d-1 rounded-3xl p-8 text-center lg:p-12">
+        <section
+          className="layout-3d-shell rhythm-3d-section rhythm-3d-section-tight"
+          aria-label={ctaAct.label}
+          data-storyboard-act={ctaAct.id}
+          data-storyboard-intent={ctaAct.narrativeIntent}
+          data-storyboard-transition={ctaAct.transitionTrigger}
+          data-storyboard-visual={ctaAct.visualBehavior}
+          data-storyboard-timing-mobile={ctaAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={ctaAct.timingByViewport.desktop}
+        >
+          <RevealBlock
+            className="surface-3d-1 rounded-3xl p-8 text-center lg:p-12"
+            narrativeLabel={ctaAct.label}
+            revealByViewport={ctaAct.revealByViewport}
+          >
             <h2 className="type-3d-title text-foreground lg:text-5xl">
               {data.bookingCta.title}
             </h2>
