@@ -13,13 +13,10 @@ import React from "react";
 
 import { HelpCircle, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Button } from "./ui/button";
 
 const MenuNavigation = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
   if (isLoading) {
     return <div className="h-6 w-6 animate-pulse rounded bg-gray-600"></div>;
@@ -31,7 +28,11 @@ const MenuNavigation = () => {
         {/* Desktop - Menu */}
         <NavigationMenu className="hidden md:block">
           <NavigationMenuItem className="list-none">
-            <NavigationMenuTrigger showChevron={false} className="bg-transparent p-0 hover:bg-transparent focus:bg-transparent ">
+            <NavigationMenuTrigger
+              showChevron={false}
+              aria-label="Abrir menu do perfil"
+              className="bg-transparent p-0 hover:bg-transparent focus:bg-transparent "
+            >
               <UserAvatar 
                 src={user.image} 
                 name={user.name} 
@@ -76,7 +77,11 @@ const MenuNavigation = () => {
         {/* Mobile - Ícone de Usuário */}
         <NavigationMenu className="md:hidden ">
           <NavigationMenuItem className="list-none">
-            <NavigationMenuTrigger showChevron={false} className="flex items-center justify-center rounded-full border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
+            <NavigationMenuTrigger
+              showChevron={false}
+              aria-label="Abrir menu do perfil"
+              className="flex items-center justify-center rounded-full border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent"
+            >
               <UserAvatar 
                 src={user.image} 
                 name={user.name} 
@@ -135,7 +140,10 @@ const MenuNavigation = () => {
       {/* Desktop - Menu */}
       <NavigationMenu className="hidden rounded-md md:block">
         <NavigationMenuItem className="list-none">
-          <NavigationMenuTrigger className="flex items-center">
+          <NavigationMenuTrigger
+            aria-label="Abrir menu de autenticação"
+            className="flex items-center"
+          >
             <Menu size={24} className="text-foreground/80" />
           </NavigationMenuTrigger>
           <NavigationMenuContent className="flex">
@@ -168,7 +176,10 @@ const MenuNavigation = () => {
       {/* Mobile - Ícone de Usuário */}
       <NavigationMenu className="md:hidden">
         <NavigationMenuItem className="list-none">
-          <NavigationMenuTrigger className="flex items-center justify-center rounded-full transition-all duration-300 hover:from-[#D13F6A] hover:to-[#7A3DD8]">
+          <NavigationMenuTrigger
+            aria-label="Abrir menu de autenticação"
+            className="flex items-center justify-center rounded-full transition-all duration-300 hover:from-[#D13F6A] hover:to-[#7A3DD8]"
+          >
             <User size={16} className="text-black" />
           </NavigationMenuTrigger>
           <NavigationMenuContent className="flex">

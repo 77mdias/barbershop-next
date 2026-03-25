@@ -69,6 +69,27 @@ describe("Gallery accessibility", () => {
     expect(screen.getByRole("button", { name: /Próxima imagem/i })).toBeInTheDocument();
   });
 
+  test("closes lightbox on Escape", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+          { src: "/images/cortes/3.webp", alt: "Corte Contemporâneo", title: "Corte Contemporâneo" },
+        ]}
+      />,
+    );
+
+    const openButton = screen.getByRole("button", {
+      name: /Abrir imagem Corte com Luzes em tela cheia/i,
+    });
+
+    openButton.focus();
+    fireEvent.click(openButton);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   test("exposes scroll-depth contract for thumbnail grid", () => {
     const { container } = render(
       <Gallery
