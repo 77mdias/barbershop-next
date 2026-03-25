@@ -336,7 +336,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                       )}
                     />
                   </label>
-                  <Button className="h-13 min-w-48 bg-accent px-6 font-semibold text-on-accent hover:bg-accent/90">
+                  <Button className="h-13 min-w-48 bg-accent px-6 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]">
                     {data.hero.ctaLabel}
                   </Button>
                 </form>
@@ -453,7 +453,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   <span className="type-3d-price text-[hsl(var(--accent))]">{service.priceLabel}</span>
                   <Link
                     href={service.href}
-                    className="type-3d-meta inline-flex items-center gap-1 font-semibold text-foreground transition-colors hover:text-[hsl(var(--accent))]"
+                    className="type-3d-meta inline-flex items-center gap-1 rounded-md font-semibold text-foreground transition-all duration-200 hover:text-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                   >
                     Ver
                     <ArrowRight className="h-4 w-4" />
@@ -502,7 +502,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   </h2>
                   <Link
                     href={data.promotions.ctaHref}
-                    className="type-3d-meta inline-flex items-center gap-2 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
+                    className="type-3d-meta inline-flex items-center gap-2 rounded-md font-semibold text-[hsl(var(--accent))] transition-all duration-200 hover:text-[hsl(var(--accent)/0.84)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                   >
                     {data.promotions.ctaLabel}
                     <ArrowRight className="h-4 w-4" />
@@ -533,7 +533,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                         </code>
                         <Link
                           href={promo.href}
-                          className="type-3d-meta font-semibold text-foreground transition-colors hover:text-[hsl(var(--accent))]"
+                          className="type-3d-meta rounded-md font-semibold text-foreground transition-all duration-200 hover:text-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                         >
                           Aplicar oferta
                         </Link>
@@ -610,7 +610,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="type-3d-meta text-fg-subtle">{salon.distanceLabel}</span>
-                          <Link href={salon.href} className="type-3d-meta font-semibold text-foreground hover:text-[hsl(var(--accent))]">
+                          <Link href={salon.href} className="type-3d-meta rounded-md font-semibold text-foreground transition-all duration-200 hover:text-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]">
                             Ver unidade
                           </Link>
                         </div>
@@ -620,7 +620,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 </div>
                 <Link
                   href={data.salons.ctaHref}
-                  className="type-3d-meta mt-5 inline-flex items-center gap-1 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
+                  className="type-3d-meta mt-5 inline-flex items-center gap-1 rounded-md font-semibold text-[hsl(var(--accent))] transition-all duration-200 hover:text-[hsl(var(--accent)/0.84)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                 >
                   {data.salons.ctaLabel}
                   <ArrowRight className="h-4 w-4" />
@@ -721,13 +721,13 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             <p className="type-3d-body mx-auto mt-4 max-w-2xl text-fg-muted">{data.bookingCta.description}</p>
 
             <div className="mt-8 flex flex-col justify-center gap-3d-sm sm:flex-row">
-              <Button asChild className="h-12 bg-accent px-8 font-semibold text-on-accent hover:bg-accent/90">
+              <Button asChild className="h-12 bg-accent px-8 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]">
                 <Link href={data.bookingCta.primaryHref}>{data.bookingCta.primaryLabel}</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className="h-12 border-surface-border-3d bg-transparent px-8 text-foreground hover:bg-surface-3d-emphasis hover:text-foreground"
+                className="h-12 border-surface-border-3d bg-transparent px-8 text-foreground hover:bg-surface-3d-emphasis hover:text-foreground focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]"
               >
                 <Link href={data.bookingCta.secondaryHref}>{data.bookingCta.secondaryLabel}</Link>
               </Button>
@@ -737,7 +737,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               Já é cliente?
               <Link
                 href={data.bookingCta.signinHref}
-                className="ml-1.5 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
+                className="ml-1.5 rounded-md font-semibold text-[hsl(var(--accent))] transition-all duration-200 hover:text-[hsl(var(--accent)/0.84)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
               >
                 Entrar
               </Link>
