@@ -29,6 +29,54 @@ const valuePillars = [
   },
 ];
 
+type GalleryStoryboardAct = {
+  id: string;
+  narrativeIntent: string;
+  transitionTrigger: string;
+  visualBehavior: string;
+  timingByViewport: {
+    mobile: string;
+    desktop: string;
+  };
+  uxIntent: "discovery" | "focus" | "cta";
+};
+
+const galleryStoryboard = {
+  hero: {
+    id: "gallery-act-1-hero",
+    narrativeIntent: "Contextualizar estilo da casa e abrir caminho para agendamento.",
+    transitionTrigger: "Após leitura do hero, os pilares aprofundam confiança técnica.",
+    visualBehavior: "Título central + CTAs imediatos com cartões de pilares em sequência.",
+    timingByViewport: {
+      mobile: "0-34vh (hero + pilares em ritmo linear)",
+      desktop: "0-38vh (hero com pilares em três colunas)",
+    },
+    uxIntent: "discovery",
+  },
+  collections: {
+    id: "gallery-act-2-collections",
+    narrativeIntent: "Direcionar a exploração para coleções com linguagem visual distinta.",
+    transitionTrigger: "Ao sair do hero, a grade assume protagonismo para comparação rápida.",
+    visualBehavior: "Cards de coleção com thumbnails fortes e copy curta.",
+    timingByViewport: {
+      mobile: "34-70vh (cards em pilha para scanning rápido)",
+      desktop: "38-72vh (grid com comparação lateral)",
+    },
+    uxIntent: "focus",
+  },
+  portfolio: {
+    id: "gallery-act-3-portfolio",
+    narrativeIntent: "Fechar descoberta com prova visual extensa e próxima ação.",
+    transitionTrigger: "Após seleção de coleção, o portfólio completo consolida decisão.",
+    visualBehavior: "Shell único para galeria completa com densidade controlada.",
+    timingByViewport: {
+      mobile: "70-100vh (imersão no acervo com menor ruído)",
+      desktop: "72-100vh (exploração ampla e contínua)",
+    },
+    uxIntent: "cta",
+  },
+} satisfies Record<"hero" | "collections" | "portfolio", GalleryStoryboardAct>;
+
 export function GalleryExperience() {
   const reducedMotionFromMotion = useReducedMotion();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -37,6 +85,9 @@ export function GalleryExperience() {
   const collectionsSectionRef = useRef<HTMLElement | null>(null);
   const portfolioSectionRef = useRef<HTMLElement | null>(null);
   const scrollDepthDisabled = shouldReduceMotion ? "true" : "false";
+  const heroAct = galleryStoryboard.hero;
+  const collectionsAct = galleryStoryboard.collections;
+  const portfolioAct = galleryStoryboard.portfolio;
 
   const heroIntroDepth = useScrollDepthMotion({
     target: heroSectionRef,
@@ -102,6 +153,13 @@ export function GalleryExperience() {
         <section
           ref={heroSectionRef}
           className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-2xl))] lg:pt-[calc(65px+var(--space-3d-3xl))]"
+          data-storyboard-act={heroAct.id}
+          data-storyboard-intent={heroAct.narrativeIntent}
+          data-storyboard-transition={heroAct.transitionTrigger}
+          data-storyboard-visual={heroAct.visualBehavior}
+          data-storyboard-timing-mobile={heroAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={heroAct.timingByViewport.desktop}
+          data-ux-intent-primary={heroAct.uxIntent}
         >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deeper }}
@@ -117,6 +175,8 @@ export function GalleryExperience() {
                   }
             }
             data-scroll-depth="gallery-hero-intro"
+            data-ux-intent="discovery"
+            data-ux-purpose="orient-primary-message-and-cta"
             data-scroll-depth-profile={heroIntroDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
             className="mx-auto max-w-4xl text-center"
@@ -163,6 +223,8 @@ export function GalleryExperience() {
                   }
             }
             data-scroll-depth="gallery-value-pillars"
+            data-ux-intent="focus"
+            data-ux-purpose="reinforce-technical-trust"
             data-scroll-depth-profile={pillarsDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
           >
@@ -194,7 +256,17 @@ export function GalleryExperience() {
           </motion.div>
         </section>
 
-        <section ref={collectionsSectionRef} className="layout-3d-shell rhythm-3d-section">
+        <section
+          ref={collectionsSectionRef}
+          className="layout-3d-shell rhythm-3d-section"
+          data-storyboard-act={collectionsAct.id}
+          data-storyboard-intent={collectionsAct.narrativeIntent}
+          data-storyboard-transition={collectionsAct.transitionTrigger}
+          data-storyboard-visual={collectionsAct.visualBehavior}
+          data-storyboard-timing-mobile={collectionsAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={collectionsAct.timingByViewport.desktop}
+          data-ux-intent-primary={collectionsAct.uxIntent}
+        >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.deep }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -233,6 +305,8 @@ export function GalleryExperience() {
                   }
             }
             data-scroll-depth="gallery-collections-grid"
+            data-ux-intent="focus"
+            data-ux-purpose="compare-styles-before-full-portfolio"
             data-scroll-depth-profile={collectionsDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
           >
@@ -273,7 +347,17 @@ export function GalleryExperience() {
           </motion.div>
         </section>
 
-        <section ref={portfolioSectionRef} className="layout-3d-shell rhythm-3d-section">
+        <section
+          ref={portfolioSectionRef}
+          className="layout-3d-shell rhythm-3d-section"
+          data-storyboard-act={portfolioAct.id}
+          data-storyboard-intent={portfolioAct.narrativeIntent}
+          data-storyboard-transition={portfolioAct.transitionTrigger}
+          data-storyboard-visual={portfolioAct.visualBehavior}
+          data-storyboard-timing-mobile={portfolioAct.timingByViewport.mobile}
+          data-storyboard-timing-desktop={portfolioAct.timingByViewport.desktop}
+          data-ux-intent-primary={portfolioAct.uxIntent}
+        >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: motionIntensity.revealY.hero }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -289,6 +373,8 @@ export function GalleryExperience() {
                   }
             }
             data-scroll-depth="gallery-portfolio-shell"
+            data-ux-intent="cta"
+            data-ux-purpose="support-final-selection-and-booking"
             data-scroll-depth-profile={portfolioDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
             className="surface-3d-1 rounded-[2rem] p-3 sm:p-6"

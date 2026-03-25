@@ -204,14 +204,25 @@ describe("HomeExperience", () => {
       expect(section).toHaveAttribute("data-storyboard-visual");
       expect(section).toHaveAttribute("data-storyboard-timing-mobile");
       expect(section).toHaveAttribute("data-storyboard-timing-desktop");
+      expect(section).toHaveAttribute("data-ux-intent-primary");
     });
 
     expect(container.querySelectorAll("[data-reveal-label]").length).toBeGreaterThanOrEqual(5);
-    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
-    expect(depthLayers.length).toBeGreaterThanOrEqual(4);
+    const depthLayerSelectors = [
+      "[data-scroll-depth='home-hero-aside']",
+      "[data-scroll-depth='home-services-grid']",
+      "[data-scroll-depth='home-discovery-offers']",
+      "[data-scroll-depth='home-discovery-salons']",
+      "[data-scroll-depth='home-social-grid']",
+    ] as const;
+    const depthLayers = depthLayerSelectors.map((selector) => container.querySelector(selector));
+
     depthLayers.forEach((layer) => {
+      expect(layer).toBeInTheDocument();
       expect(layer).toHaveAttribute("data-scroll-depth-profile");
       expect(layer).toHaveAttribute("data-scroll-depth-disabled", "false");
+      expect(layer).toHaveAttribute("data-ux-intent");
+      expect(layer).toHaveAttribute("data-ux-purpose");
     });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });

@@ -55,6 +55,11 @@ describe("GalleryExperience", () => {
 
   test("renders redesigned gallery narrative and primary CTAs", () => {
     const { container } = render(<GalleryExperience />);
+    const expectedStoryboardActs = [
+      "gallery-act-1-hero",
+      "gallery-act-2-collections",
+      "gallery-act-3-portfolio",
+    ] as const;
 
     const galleryTitle = screen.getByRole("heading", { name: "Galeria de Estilos" });
     const collectionsTitle = screen.getByRole("heading", { name: "Coleções em destaque" });
@@ -74,15 +79,31 @@ describe("GalleryExperience", () => {
 
     const sections = container.querySelectorAll("section");
     expect(sections.length).toBe(3);
-    sections.forEach((section) => {
+    sections.forEach((section, index) => {
       expect(section).toHaveClass("layout-3d-shell");
       expect(section).toHaveClass("rhythm-3d-section");
+      expect(section).toHaveAttribute("data-storyboard-act", expectedStoryboardActs[index]);
+      expect(section).toHaveAttribute("data-storyboard-intent");
+      expect(section).toHaveAttribute("data-storyboard-transition");
+      expect(section).toHaveAttribute("data-storyboard-visual");
+      expect(section).toHaveAttribute("data-storyboard-timing-mobile");
+      expect(section).toHaveAttribute("data-storyboard-timing-desktop");
+      expect(section).toHaveAttribute("data-ux-intent-primary");
     });
-    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
-    expect(depthLayers.length).toBeGreaterThanOrEqual(4);
+    const depthLayerSelectors = [
+      "[data-scroll-depth='gallery-hero-intro']",
+      "[data-scroll-depth='gallery-value-pillars']",
+      "[data-scroll-depth='gallery-collections-grid']",
+      "[data-scroll-depth='gallery-portfolio-shell']",
+    ] as const;
+    const depthLayers = depthLayerSelectors.map((selector) => container.querySelector(selector));
+
     depthLayers.forEach((layer) => {
+      expect(layer).toBeInTheDocument();
       expect(layer).toHaveAttribute("data-scroll-depth-profile");
       expect(layer).toHaveAttribute("data-scroll-depth-disabled", "false");
+      expect(layer).toHaveAttribute("data-ux-intent");
+      expect(layer).toHaveAttribute("data-ux-purpose");
     });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });
