@@ -2,6 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { GalleryExperience } from "@/components/gallery-3d/GalleryExperience";
 
+let reducedMotionValue = false;
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: ({ fill: _fill, ...props }: Record<string, unknown>) => React.createElement("img", props),
@@ -36,7 +38,9 @@ jest.mock("motion/react", () => {
 
   return {
     motion,
-    useReducedMotion: () => false,
+    useReducedMotion: () => reducedMotionValue,
+    useScroll: () => ({ scrollYProgress: 0 }),
+    useTransform: (_value: unknown, _input: number[], output: number[]) => output[1] ?? output[0] ?? 0,
   };
 });
 
@@ -45,6 +49,10 @@ jest.mock("@/components/gallery-3d/GallerySceneBackdrop", () => ({
 }));
 
 describe("GalleryExperience", () => {
+  beforeEach(() => {
+    reducedMotionValue = false;
+  });
+
   test("renders redesigned gallery narrative and primary CTAs", () => {
     const { container } = render(<GalleryExperience />);
 
@@ -70,6 +78,23 @@ describe("GalleryExperience", () => {
       expect(section).toHaveClass("layout-3d-shell");
       expect(section).toHaveClass("rhythm-3d-section");
     });
+    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
+    expect(depthLayers.length).toBeGreaterThanOrEqual(4);
+    depthLayers.forEach((layer) => {
+      expect(layer).toHaveAttribute("data-scroll-depth-profile");
+      expect(layer).toHaveAttribute("data-scroll-depth-disabled", "false");
+    });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
+  });
+
+  test("keeps static depth layers when reduced motion is enabled", () => {
+    reducedMotionValue = true;
+    const { container } = render(<GalleryExperience />);
+    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
+
+    expect(depthLayers.length).toBeGreaterThan(0);
+    depthLayers.forEach((layer) => {
+      expect(layer).toHaveAttribute("data-scroll-depth-disabled", "true");
+    });
   });
 });

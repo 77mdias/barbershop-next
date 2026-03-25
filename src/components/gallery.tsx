@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePrefersReducedMotion, useScrollDepthMotion } from "@/hooks/useScrollDepthMotion";
 
 export interface GalleryImage {
   /** Caminho da imagem */
@@ -46,6 +48,25 @@ export function Gallery({
 }: GalleryProps) {
   const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
   const [isLoading, setIsLoading] = React.useState<Record<number, boolean>>({});
+  const reducedMotionFromMotion = useReducedMotion();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const shouldReduceMotion = reducedMotionFromMotion || prefersReducedMotion;
+  const galleryGridRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollDepthDisabled = shouldReduceMotion ? "true" : "false";
+
+  const galleryGridDepth = useScrollDepthMotion({
+    target: galleryGridRef,
+    rangeByViewport: {
+      mobile: {
+        y: [8, 0, -8],
+        scale: [0.998, 1, 1.012],
+      },
+      desktop: {
+        y: [14, 0, -14],
+        scale: [0.994, 1, 1.018],
+      },
+    },
+  });
 
   // Navegação por teclado
   React.useEffect(() => {
@@ -130,10 +151,25 @@ export function Gallery({
       )}
 
       {/* Grid de Imagens */}
-      <div className={cn(
-        "grid gap-4",
-        gridCols[columns]
-      )}>
+      <motion.div
+        ref={galleryGridRef}
+        className={cn(
+          "grid gap-4",
+          gridCols[columns]
+        )}
+        style={
+          shouldReduceMotion
+            ? undefined
+            : {
+                y: galleryGridDepth.y,
+                scale: galleryGridDepth.scale,
+                willChange: "transform",
+              }
+        }
+        data-scroll-depth="gallery-grid"
+        data-scroll-depth-profile={galleryGridDepth.profile}
+        data-scroll-depth-disabled={scrollDepthDisabled}
+      >
         {images.map((image, index) => (
           <button
             key={`${image.src}-${index}`}
@@ -178,7 +214,7 @@ export function Gallery({
             )}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Lightbox Modal */}
       {selectedImage !== null && (

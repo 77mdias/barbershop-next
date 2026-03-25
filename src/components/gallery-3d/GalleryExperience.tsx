@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
@@ -7,6 +8,7 @@ import { ArrowRight, Camera, Scissors, ShieldCheck, Sparkles } from "lucide-reac
 import { Gallery } from "@/components/gallery";
 import { galleryCollections, galleryImages } from "@/components/gallery-images";
 import { GallerySceneBackdrop } from "@/components/gallery-3d/GallerySceneBackdrop";
+import { usePrefersReducedMotion, useScrollDepthMotion } from "@/hooks/useScrollDepthMotion";
 
 const valuePillars = [
   {
@@ -27,18 +29,95 @@ const valuePillars = [
 ];
 
 export function GalleryExperience() {
-  const shouldReduceMotion = useReducedMotion();
+  const reducedMotionFromMotion = useReducedMotion();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const shouldReduceMotion = reducedMotionFromMotion || prefersReducedMotion;
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const collectionsSectionRef = useRef<HTMLElement | null>(null);
+  const portfolioSectionRef = useRef<HTMLElement | null>(null);
+  const scrollDepthDisabled = shouldReduceMotion ? "true" : "false";
+
+  const heroIntroDepth = useScrollDepthMotion({
+    target: heroSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [10, 0, -10],
+        scale: [0.996, 1, 1.012],
+      },
+      desktop: {
+        y: [18, 0, -18],
+        scale: [0.992, 1, 1.02],
+      },
+    },
+  });
+
+  const pillarsDepth = useScrollDepthMotion({
+    target: heroSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [8, 0, -8],
+        scale: [0.998, 1, 1.012],
+      },
+      desktop: {
+        y: [14, 0, -14],
+        scale: [0.994, 1, 1.018],
+      },
+    },
+  });
+
+  const collectionsDepth = useScrollDepthMotion({
+    target: collectionsSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [10, 0, -10],
+        scale: [0.996, 1, 1.014],
+      },
+      desktop: {
+        y: [20, 0, -20],
+        scale: [0.992, 1, 1.024],
+      },
+    },
+  });
+
+  const portfolioDepth = useScrollDepthMotion({
+    target: portfolioSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [8, 0, -8],
+        scale: [0.998, 1, 1.012],
+      },
+      desktop: {
+        y: [16, 0, -16],
+        scale: [0.994, 1, 1.02],
+      },
+    },
+  });
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <GallerySceneBackdrop />
 
       <div className="relative z-10">
-        <section className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-2xl))] lg:pt-[calc(65px+var(--space-3d-3xl))]">
+        <section
+          ref={heroSectionRef}
+          className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-2xl))] lg:pt-[calc(65px+var(--space-3d-3xl))]"
+        >
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 26 }}
             animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: heroIntroDepth.y,
+                    scale: heroIntroDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="gallery-hero-intro"
+            data-scroll-depth-profile={heroIntroDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
             className="mx-auto max-w-4xl text-center"
           >
             <span className="type-3d-label inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.38)] bg-[hsl(var(--accent)/0.12)] px-4 py-1.5 text-accent">
@@ -71,7 +150,21 @@ export function GalleryExperience() {
             </div>
           </motion.div>
 
-          <div className="mt-3d-xl grid gap-3d-md lg:grid-cols-3">
+          <motion.div
+            className="mt-3d-xl grid gap-3d-md lg:grid-cols-3"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: pillarsDepth.y,
+                    scale: pillarsDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="gallery-value-pillars"
+            data-scroll-depth-profile={pillarsDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
+          >
             {valuePillars.map((pillar, index) => {
               const Icon = pillar.icon;
 
@@ -93,10 +186,10 @@ export function GalleryExperience() {
                 </motion.article>
               );
             })}
-          </div>
+          </motion.div>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section">
+        <section ref={collectionsSectionRef} className="layout-3d-shell rhythm-3d-section">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -123,7 +216,21 @@ export function GalleryExperience() {
             </Link>
           </motion.div>
 
-          <div className="grid gap-3d-md lg:grid-cols-3">
+          <motion.div
+            className="grid gap-3d-md lg:grid-cols-3"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: collectionsDepth.y,
+                    scale: collectionsDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="gallery-collections-grid"
+            data-scroll-depth-profile={collectionsDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
+          >
             {galleryCollections.map((collection, index) => (
               <motion.article
                 key={collection.id}
@@ -133,8 +240,8 @@ export function GalleryExperience() {
                 transition={{ duration: 0.55, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={shouldReduceMotion ? undefined : { y: -6 }}
                 className="surface-3d-1 overflow-hidden rounded-3xl"
-                >
-                  <div className="relative h-56 w-full">
+              >
+                <div className="relative h-56 w-full">
                   <Image
                     src={collection.heroImage}
                     alt={collection.title}
@@ -147,22 +254,34 @@ export function GalleryExperience() {
                   <span className="absolute left-4 top-4 rounded-full border border-white/30 bg-black/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
                     {collection.badge}
                   </span>
-                  </div>
+                </div>
                 <div className="rhythm-3d-stack-sm p-5">
                   <h3 className="type-3d-title-sm text-foreground">{collection.title}</h3>
                   <p className="type-3d-body text-fg-muted">{collection.description}</p>
                 </div>
               </motion.article>
             ))}
-          </div>
+          </motion.div>
         </section>
 
-        <section className="layout-3d-shell rhythm-3d-section">
+        <section ref={portfolioSectionRef} className="layout-3d-shell rhythm-3d-section">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: portfolioDepth.y,
+                    scale: portfolioDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="gallery-portfolio-shell"
+            data-scroll-depth-profile={portfolioDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
             className="surface-3d-1 rounded-[2rem] p-3 sm:p-6"
           >
             <div className="mb-6 flex flex-col gap-3d-sm sm:flex-row sm:items-end sm:justify-between">

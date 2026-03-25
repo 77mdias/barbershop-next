@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Footer } from "@/components/home/Footer";
 import { HomeSceneBackdrop } from "@/components/home-3d/HomeSceneBackdrop";
 import { RevealBlock, type RevealViewportTiming } from "@/components/home-3d/RevealBlock";
+import { usePrefersReducedMotion, useScrollDepthMotion } from "@/hooks/useScrollDepthMotion";
 
 type HomeExperienceProps = {
   data: HomePageData;
@@ -116,12 +118,95 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
 };
 
 export function HomeExperience({ data }: HomeExperienceProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const reducedMotionFromMotion = useReducedMotion();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const shouldReduceMotion = reducedMotionFromMotion || prefersReducedMotion;
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const servicesSectionRef = useRef<HTMLElement | null>(null);
+  const discoverySectionRef = useRef<HTMLElement | null>(null);
+  const socialProofSectionRef = useRef<HTMLElement | null>(null);
   const heroAct = homeStoryboard.hero;
   const servicesAct = homeStoryboard.services;
   const discoveryAct = homeStoryboard.discovery;
   const socialProofAct = homeStoryboard.socialProof;
   const ctaAct = homeStoryboard.cta;
+  const scrollDepthDisabled = shouldReduceMotion ? "true" : "false";
+
+  const heroAsideDepth = useScrollDepthMotion({
+    target: heroSectionRef,
+    rangeByViewport: {
+      mobile: {
+        x: [4, 0, -4],
+        y: [10, 0, -10],
+        scale: [0.996, 1, 1.012],
+      },
+      desktop: {
+        x: [12, 0, -12],
+        y: [20, 0, -20],
+        scale: [0.99, 1, 1.024],
+      },
+    },
+  });
+
+  const servicesGridDepth = useScrollDepthMotion({
+    target: servicesSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [8, 0, -8],
+        scale: [0.998, 1, 1.012],
+      },
+      desktop: {
+        y: [16, 0, -16],
+        scale: [0.994, 1, 1.02],
+      },
+    },
+  });
+
+  const discoveryOffersDepth = useScrollDepthMotion({
+    target: discoverySectionRef,
+    rangeByViewport: {
+      mobile: {
+        x: [-4, 0, 4],
+        y: [10, 0, -10],
+        scale: [0.996, 1, 1.014],
+      },
+      desktop: {
+        x: [-10, 0, 10],
+        y: [18, 0, -18],
+        scale: [0.992, 1, 1.022],
+      },
+    },
+  });
+
+  const discoverySalonsDepth = useScrollDepthMotion({
+    target: discoverySectionRef,
+    rangeByViewport: {
+      mobile: {
+        x: [4, 0, -4],
+        y: [12, 0, -12],
+        scale: [0.996, 1, 1.014],
+      },
+      desktop: {
+        x: [10, 0, -10],
+        y: [20, 0, -20],
+        scale: [0.992, 1, 1.022],
+      },
+    },
+  });
+
+  const socialGridDepth = useScrollDepthMotion({
+    target: socialProofSectionRef,
+    rangeByViewport: {
+      mobile: {
+        y: [8, 0, -8],
+        scale: [0.998, 1, 1.012],
+      },
+      desktop: {
+        y: [14, 0, -14],
+        scale: [0.995, 1, 1.018],
+      },
+    },
+  });
 
   return (
     <main className="relative min-h-screen w-full overflow-x-hidden bg-background text-foreground">
@@ -129,6 +214,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
 
       <div className="relative z-10 flex flex-col">
         <section
+          ref={heroSectionRef}
           className="layout-3d-shell rhythm-3d-section pt-[calc(65px+var(--space-3d-xl))] lg:pt-[calc(65px+var(--space-3d-2xl))]"
           aria-label={heroAct.label}
           data-storyboard-act={heroAct.id}
@@ -176,6 +262,19 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
+                style={
+                  shouldReduceMotion
+                    ? undefined
+                    : {
+                        x: heroAsideDepth.x,
+                        y: heroAsideDepth.y,
+                        scale: heroAsideDepth.scale,
+                        willChange: "transform",
+                      }
+                }
+                data-scroll-depth="home-hero-aside"
+                data-scroll-depth-profile={heroAsideDepth.profile}
+                data-scroll-depth-disabled={scrollDepthDisabled}
                 className="surface-3d-card rhythm-3d-stack-md rounded-2xl p-6"
               >
                 <h2 className="type-3d-label text-fg-subtle">
@@ -201,6 +300,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
         </section>
 
         <section
+          ref={servicesSectionRef}
           className="layout-3d-shell rhythm-3d-section"
           aria-label={servicesAct.label}
           data-storyboard-act={servicesAct.id}
@@ -224,7 +324,21 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             </div>
           </RevealBlock>
 
-          <div className="grid gap-3d-md md:grid-cols-2 xl:grid-cols-4">
+          <motion.div
+            className="grid gap-3d-md md:grid-cols-2 xl:grid-cols-4"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: servicesGridDepth.y,
+                    scale: servicesGridDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="home-services-grid"
+            data-scroll-depth-profile={servicesGridDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
+          >
             {data.services.items.map((service, index) => (
               <motion.article
                 key={service.id}
@@ -255,10 +369,11 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 </div>
               </motion.article>
             ))}
-          </div>
+          </motion.div>
         </section>
 
         <section
+          ref={discoverySectionRef}
           className="layout-3d-shell rhythm-3d-section"
           aria-label={discoveryAct.label}
           data-storyboard-act={discoveryAct.id}
@@ -269,114 +384,147 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-desktop={discoveryAct.timingByViewport.desktop}
         >
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
-            <RevealBlock
-              className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
-              narrativeLabel={`${discoveryAct.label} / ofertas`}
-              revealByViewport={discoveryAct.revealByViewport}
+            <motion.div
+              style={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      x: discoveryOffersDepth.x,
+                      y: discoveryOffersDepth.y,
+                      scale: discoveryOffersDepth.scale,
+                      willChange: "transform",
+                    }
+              }
+              data-scroll-depth="home-discovery-offers"
+              data-scroll-depth-profile={discoveryOffersDepth.profile}
+              data-scroll-depth-disabled={scrollDepthDisabled}
             >
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="type-3d-title text-foreground">
-                  {data.promotions.title}
-                </h2>
-                <Link
-                  href={data.promotions.ctaHref}
-                  className="type-3d-meta inline-flex items-center gap-2 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
-                >
-                  {data.promotions.ctaLabel}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              <div className="mt-7 space-y-4">
-                {data.promotions.items.map((promo) => (
-                  <motion.div
-                    key={promo.id}
-                    whileHover={shouldReduceMotion ? undefined : { x: 4 }}
-                    className="surface-3d-emphasis rounded-xl p-4"
+              <RevealBlock
+                className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
+                narrativeLabel={`${discoveryAct.label} / ofertas`}
+                revealByViewport={discoveryAct.revealByViewport}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <h2 className="type-3d-title text-foreground">
+                    {data.promotions.title}
+                  </h2>
+                  <Link
+                    href={data.promotions.ctaHref}
+                    className="type-3d-meta inline-flex items-center gap-2 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="type-3d-label inline-flex items-center gap-1 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.16)] px-2.5 py-1 text-[hsl(var(--accent))]">
-                        <Percent className="h-3 w-3" />
-                        {promo.badgeLabel}
-                      </span>
-                      {promo.expiresLabel ? (
-                        <span className="type-3d-meta text-fg-subtle">{promo.expiresLabel}</span>
-                      ) : null}
-                    </div>
-                    <h3 className="type-3d-title-sm mt-3 text-foreground">{promo.title}</h3>
-                    {promo.description ? <p className="type-3d-body mt-1 text-fg-muted">{promo.description}</p> : null}
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <code className="type-3d-label rounded-lg border border-dashed border-[hsl(var(--accent)/0.45)] bg-[hsl(var(--accent)/0.12)] px-3 py-1.5 text-[hsl(var(--accent))]">
-                        {promo.code}
-                      </code>
-                      <Link
-                        href={promo.href}
-                        className="type-3d-meta font-semibold text-foreground transition-colors hover:text-[hsl(var(--accent))]"
-                      >
-                        Aplicar oferta
-                      </Link>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </RevealBlock>
+                    {data.promotions.ctaLabel}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
 
-            <RevealBlock
-              className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
-              narrativeLabel={`${discoveryAct.label} / unidades`}
-              revealByViewport={{
-                mobile: { delay: 0.18, y: 14, duration: 0.52, viewportAmount: 0.18 },
-                desktop: { delay: 0.26, y: 22, duration: 0.62, viewportAmount: 0.18 },
-              }}
-            >
-              <h2 className="type-3d-title text-foreground">
-                {data.salons.title}
-              </h2>
-              <p className="type-3d-body mt-2 text-fg-muted">Navegue pelas unidades com melhor avaliação e proximidade.</p>
-              <div className="mt-6 space-y-4">
-                {data.salons.items.slice(0, 3).map((salon) => (
-                  <motion.article
-                    key={salon.id}
-                    whileHover={shouldReduceMotion ? undefined : { y: -3 }}
-                    className="surface-3d-emphasis overflow-hidden rounded-xl"
-                  >
-                    <div className="relative h-28 w-full">
-                      <Image src={salon.imageUrl} alt={salon.name} fill className="object-cover" />
-                    </div>
-                    <div className="space-y-2 p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="type-3d-body-lg font-semibold text-foreground">{salon.name}</h3>
-                        <span className="type-3d-meta inline-flex items-center gap-1 text-[hsl(var(--accent))]">
-                          <Star className="h-3.5 w-3.5 fill-current" />
-                          {salon.ratingLabel}
+                <div className="mt-7 space-y-4">
+                  {data.promotions.items.map((promo) => (
+                    <motion.div
+                      key={promo.id}
+                      whileHover={shouldReduceMotion ? undefined : { x: 4 }}
+                      className="surface-3d-emphasis rounded-xl p-4"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="type-3d-label inline-flex items-center gap-1 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.16)] px-2.5 py-1 text-[hsl(var(--accent))]">
+                          <Percent className="h-3 w-3" />
+                          {promo.badgeLabel}
                         </span>
+                        {promo.expiresLabel ? (
+                          <span className="type-3d-meta text-fg-subtle">{promo.expiresLabel}</span>
+                        ) : null}
                       </div>
-                      <p className="type-3d-meta inline-flex items-start gap-1.5 text-fg-muted">
-                        <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                        <span>{salon.address}</span>
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="type-3d-meta text-fg-subtle">{salon.distanceLabel}</span>
-                        <Link href={salon.href} className="type-3d-meta font-semibold text-foreground hover:text-[hsl(var(--accent))]">
-                          Ver unidade
+                      <h3 className="type-3d-title-sm mt-3 text-foreground">{promo.title}</h3>
+                      {promo.description ? <p className="type-3d-body mt-1 text-fg-muted">{promo.description}</p> : null}
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                        <code className="type-3d-label rounded-lg border border-dashed border-[hsl(var(--accent)/0.45)] bg-[hsl(var(--accent)/0.12)] px-3 py-1.5 text-[hsl(var(--accent))]">
+                          {promo.code}
+                        </code>
+                        <Link
+                          href={promo.href}
+                          className="type-3d-meta font-semibold text-foreground transition-colors hover:text-[hsl(var(--accent))]"
+                        >
+                          Aplicar oferta
                         </Link>
                       </div>
-                    </div>
-                  </motion.article>
-                ))}
-              </div>
-              <Link
-                href={data.salons.ctaHref}
-                className="type-3d-meta mt-5 inline-flex items-center gap-1 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
+                    </motion.div>
+                  ))}
+                </div>
+              </RevealBlock>
+            </motion.div>
+
+            <motion.div
+              style={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      x: discoverySalonsDepth.x,
+                      y: discoverySalonsDepth.y,
+                      scale: discoverySalonsDepth.scale,
+                      willChange: "transform",
+                    }
+              }
+              data-scroll-depth="home-discovery-salons"
+              data-scroll-depth-profile={discoverySalonsDepth.profile}
+              data-scroll-depth-disabled={scrollDepthDisabled}
+            >
+              <RevealBlock
+                className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
+                narrativeLabel={`${discoveryAct.label} / unidades`}
+                revealByViewport={{
+                  mobile: { delay: 0.18, y: 14, duration: 0.52, viewportAmount: 0.18 },
+                  desktop: { delay: 0.26, y: 22, duration: 0.62, viewportAmount: 0.18 },
+                }}
               >
-                {data.salons.ctaLabel}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </RevealBlock>
+                <h2 className="type-3d-title text-foreground">
+                  {data.salons.title}
+                </h2>
+                <p className="type-3d-body mt-2 text-fg-muted">Navegue pelas unidades com melhor avaliação e proximidade.</p>
+                <div className="mt-6 space-y-4">
+                  {data.salons.items.slice(0, 3).map((salon) => (
+                    <motion.article
+                      key={salon.id}
+                      whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                      className="surface-3d-emphasis overflow-hidden rounded-xl"
+                    >
+                      <div className="relative h-28 w-full">
+                        <Image src={salon.imageUrl} alt={salon.name} fill className="object-cover" />
+                      </div>
+                      <div className="space-y-2 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <h3 className="type-3d-body-lg font-semibold text-foreground">{salon.name}</h3>
+                          <span className="type-3d-meta inline-flex items-center gap-1 text-[hsl(var(--accent))]">
+                            <Star className="h-3.5 w-3.5 fill-current" />
+                            {salon.ratingLabel}
+                          </span>
+                        </div>
+                        <p className="type-3d-meta inline-flex items-start gap-1.5 text-fg-muted">
+                          <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                          <span>{salon.address}</span>
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="type-3d-meta text-fg-subtle">{salon.distanceLabel}</span>
+                          <Link href={salon.href} className="type-3d-meta font-semibold text-foreground hover:text-[hsl(var(--accent))]">
+                            Ver unidade
+                          </Link>
+                        </div>
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+                <Link
+                  href={data.salons.ctaHref}
+                  className="type-3d-meta mt-5 inline-flex items-center gap-1 font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent)/0.84)]"
+                >
+                  {data.salons.ctaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </RevealBlock>
+            </motion.div>
           </div>
         </section>
 
         <section
+          ref={socialProofSectionRef}
           className="layout-3d-shell rhythm-3d-section"
           aria-label={socialProofAct.label}
           data-storyboard-act={socialProofAct.id}
@@ -397,7 +545,21 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             </p>
           </RevealBlock>
 
-          <div className="grid gap-3d-md md:grid-cols-2 xl:grid-cols-4">
+          <motion.div
+            className="grid gap-3d-md md:grid-cols-2 xl:grid-cols-4"
+            style={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: socialGridDepth.y,
+                    scale: socialGridDepth.scale,
+                    willChange: "transform",
+                  }
+            }
+            data-scroll-depth="home-social-grid"
+            data-scroll-depth-profile={socialGridDepth.profile}
+            data-scroll-depth-disabled={scrollDepthDisabled}
+          >
             {data.reviews.items.map((review, reviewIndex) => (
               <RevealBlock
                 key={review.id}
@@ -428,7 +590,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 <p className="type-3d-body mt-3 text-fg-muted">&ldquo;{review.comment}&rdquo;</p>
               </RevealBlock>
             ))}
-          </div>
+          </motion.div>
         </section>
 
         <section

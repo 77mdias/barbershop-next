@@ -3,7 +3,7 @@
 **Status:** 🟢 ATIVA  
 **Última atualização:** 2026-03-25  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 25% (4/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 31% (5/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -18,11 +18,11 @@
 | Categoria | Total | Concluído | Em Andamento | Pendente | Bloqueado |
 | --- | --- | --- | --- | --- | --- |
 | Foundation Design System | 3 | 3 | 0 | 0 | 0 |
-| Layout + Scroll 3D | 4 | 1 | 0 | 3 | 0 |
+| Layout + Scroll 3D | 4 | 2 | 0 | 2 | 0 |
 | Motion + Interações | 4 | 0 | 0 | 4 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
 | Performance + QA | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **16** | **4** | **0** | **12** | **0** |
+| **TOTAL** | **16** | **5** | **0** | **11** | **0** |
 
 ### 🎯 Principais Indicadores
 - ✅ Escopo fechado para `Home` e `Gallery` como referência da fase.
@@ -178,7 +178,7 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
 
 #### L3D.2 - Scroll-driven Image Animation
 
-- [ ] **PH6-L3D-002** - Implementar animação de imagens orientada por scroll (parallax + depth)
+- [x] **PH6-L3D-002** - Implementar animação de imagens orientada por scroll (parallax + depth)
 
   **Descrição curta:**
   - Aplicar deslocamento por eixo e escala leve em imagens/cards conforme progresso do scroll.
@@ -192,13 +192,19 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`, `src/components/gallery.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Imagens respondem ao scroll sem jitter perceptível.
-  - [ ] Reduced motion desativa animações contínuas e mantém usabilidade.
+  - [x] Imagens respondem ao scroll sem jitter perceptível.
+  - [x] Reduced motion desativa animações contínuas e mantém usabilidade.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 8h  
   **Dependências:** PH6-L3D-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-L3D-002):**
+  - Hook compartilhado `useScrollDepthMotion` criado com `useScroll + useTransform` e ranges por breakpoint (`mobile`/`desktop`) para padronizar parallax/depth em camadas 2D sobre cena 3D.
+  - Home atualizada com camadas de depth observáveis em `hero`, `services`, `discovery` e `social proof` via contrato `data-scroll-depth*`.
+  - Gallery 3D atualizada com depth no intro, pilares de valor, grid de coleções e shell do portfólio; componente-base `Gallery` também ganhou camada de parallax no grid de thumbnails.
+  - Fallback de reduced motion preservado para animações contínuas através do gate de motion + media query, mantendo interação e leitura estáveis sem jitter perceptível.
 
 #### L3D.3 - Header + Overlay Layering
 

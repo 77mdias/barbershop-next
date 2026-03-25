@@ -3,6 +3,8 @@ import type { HomePageData } from "@/types/home";
 import { HomeExperience } from "@/components/home-3d/HomeExperience";
 import React from "react";
 
+let reducedMotionValue = false;
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: ({ fill: _fill, ...props }: Record<string, unknown>) => React.createElement("img", props),
@@ -36,7 +38,9 @@ jest.mock("motion/react", () => {
 
   return {
     motion,
-    useReducedMotion: () => false,
+    useReducedMotion: () => reducedMotionValue,
+    useScroll: () => ({ scrollYProgress: 0 }),
+    useTransform: (_value: unknown, _input: number[], output: number[]) => output[1] ?? output[0] ?? 0,
   };
 });
 
@@ -147,6 +151,10 @@ const sampleData: HomePageData = {
 };
 
 describe("HomeExperience", () => {
+  beforeEach(() => {
+    reducedMotionValue = false;
+  });
+
   test("renders the redesigned narrative sections and primary actions", () => {
     const { container } = render(<HomeExperience data={sampleData} />);
     const expectedStoryboardActs = [
@@ -199,6 +207,24 @@ describe("HomeExperience", () => {
     });
 
     expect(container.querySelectorAll("[data-reveal-label]").length).toBeGreaterThanOrEqual(5);
+    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
+    expect(depthLayers.length).toBeGreaterThanOrEqual(4);
+    depthLayers.forEach((layer) => {
+      expect(layer).toHaveAttribute("data-scroll-depth-profile");
+      expect(layer).toHaveAttribute("data-scroll-depth-disabled", "false");
+    });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
+  });
+
+  test("keeps layout usable with static scroll-depth layers when reduced motion is enabled", () => {
+    reducedMotionValue = true;
+
+    const { container } = render(<HomeExperience data={sampleData} />);
+    const depthLayers = container.querySelectorAll("[data-scroll-depth]");
+
+    expect(depthLayers.length).toBeGreaterThan(0);
+    depthLayers.forEach((layer) => {
+      expect(layer).toHaveAttribute("data-scroll-depth-disabled", "true");
+    });
   });
 });
