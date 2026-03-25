@@ -358,7 +358,7 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
 
 #### MSI.4 - Scroll Intent Validation
 
-- [ ] **PH6-MSI-004** - Validar direção de movimento por intenção de UX
+- [x] **PH6-MSI-004** - Validar direção de movimento por intenção de UX
 
   **Descrição curta:**
   - Garantir que movimento reforça leitura e conversão, não apenas “efeito”.
@@ -372,13 +372,19 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Cada animação possui propósito funcional claro (descoberta, foco, CTA).
-  - [ ] Não há animações “decorativas” que prejudiquem leitura.
+  - [x] Cada animação possui propósito funcional claro (descoberta, foco, CTA).
+  - [x] Não há animações “decorativas” que prejudiquem leitura.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 3h  
   **Dependências:** PH6-MSI-003  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-MSI-004):**
+  - Home e Gallery passaram a expor metadados de storyboard (`data-storyboard-*`) e intenção principal por seção (`data-ux-intent-primary`) para rastrear propósito funcional da animação.
+  - Camadas com scroll-depth agora incluem marcação explícita de intenção e propósito (`data-ux-intent`, `data-ux-purpose`) para separar descoberta, foco e conversão.
+  - A microinteração de hover dos cards de serviço na Home foi simplificada para deslocamento planar (sem rotação 3D decorativa), preservando legibilidade.
+  - Fallback para `prefers-reduced-motion` foi mantido com `data-scroll-depth-disabled="true"` nas camadas dinâmicas.
 
 ### 📦 Responsividade + A11y - Robustez de experiência multidevice
 

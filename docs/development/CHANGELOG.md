@@ -4,6 +4,12 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 
 ## [Unreleased]
 
+### 🎯 PH6-MSI-004 - Validação de intenção de movimento (UX)
+- `HomeExperience` e `GalleryExperience` agora expõem contrato explícito de intenção por seção com `data-storyboard-*` + `data-ux-intent-primary` (descoberta, foco, CTA).
+- Camadas principais de scroll-depth receberam metadados de propósito (`data-ux-intent`, `data-ux-purpose`) para garantir que movimento sustente leitura/conversão.
+- Microinteração dos cards de serviço na Home foi simplificada para deslocamento planar, removendo rotação decorativa e reduzindo ruído visual.
+- `Home3DExperience.test.tsx` e `GalleryExperience.test.tsx` foram ampliados para validar o contrato de intenção e propósito das animações.
+
 ### 🎛️ PH6-FDS-001 - Layout System 3D (Foundation Design System)
 - Adicionados tokens responsivos de layout em `src/app/globals.css` para padronizar `max-width`, `gutter`, colunas e `column-gap` (`--layout-3d-*`) em breakpoints de `390px+`, `768px+`, `1024px+` e `1440px+`.
 - Criado utilitário global `layout-3d-shell` com grid responsivo e aplicado em todas as seções das experiências `Home` e `Gallery`.

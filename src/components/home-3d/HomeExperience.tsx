@@ -71,6 +71,7 @@ type HomeStoryboardAct = {
     desktop: string;
   };
   revealByViewport: RevealViewportTiming;
+  uxIntent: "discovery" | "focus" | "cta";
 };
 
 const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
@@ -98,6 +99,7 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
         viewportAmount: motionIntensity.viewportAmount.hero,
       },
     },
+    uxIntent: "discovery",
   },
   services: {
     id: "act-2-services",
@@ -123,6 +125,7 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
         viewportAmount: motionIntensity.viewportAmount.standard,
       },
     },
+    uxIntent: "focus",
   },
   discovery: {
     id: "act-3-discovery",
@@ -148,6 +151,7 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
         viewportAmount: motionIntensity.viewportAmount.standard,
       },
     },
+    uxIntent: "focus",
   },
   socialProof: {
     id: "act-4-social-proof",
@@ -173,6 +177,7 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
         viewportAmount: motionIntensity.viewportAmount.soft,
       },
     },
+    uxIntent: "focus",
   },
   cta: {
     id: "act-5-cta",
@@ -198,6 +203,7 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
         viewportAmount: motionIntensity.viewportAmount.focused,
       },
     },
+    uxIntent: "cta",
   },
 };
 
@@ -307,6 +313,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-visual={heroAct.visualBehavior}
           data-storyboard-timing-mobile={heroAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={heroAct.timingByViewport.desktop}
+          data-ux-intent-primary={heroAct.uxIntent}
         >
           <RevealBlock narrativeLabel={heroAct.label} revealByViewport={heroAct.revealByViewport}>
             <span className="type-3d-label inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.12)] px-4 py-2 text-[hsl(var(--accent))]">
@@ -361,6 +368,8 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                       }
                 }
                 data-scroll-depth="home-hero-aside"
+                data-ux-intent="discovery"
+                data-ux-purpose="supporting-ritual-summary"
                 data-scroll-depth-profile={heroAsideDepth.profile}
                 data-scroll-depth-disabled={scrollDepthDisabled}
                 className="surface-3d-card rhythm-3d-stack-md rounded-2xl p-6"
@@ -397,6 +406,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-visual={servicesAct.visualBehavior}
           data-storyboard-timing-mobile={servicesAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={servicesAct.timingByViewport.desktop}
+          data-ux-intent-primary={servicesAct.uxIntent}
         >
           <RevealBlock narrativeLabel={servicesAct.label} revealByViewport={servicesAct.revealByViewport}>
             <div className="mb-3d-xl flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -424,6 +434,8 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   }
             }
             data-scroll-depth="home-services-grid"
+            data-ux-intent="focus"
+            data-ux-purpose="support-service-comparison"
             data-scroll-depth-profile={servicesGridDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
           >
@@ -432,8 +444,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 key={service.id}
                 whileHover={shouldReduceMotion ? undefined : {
                   y: motionIntensity.hover.liftStrong,
-                  rotateX: 3,
-                  rotateY: index % 2 === 0 ? -2 : 2,
+                  x: index % 2 === 0 ? -2 : 2,
                 }}
                 transition={{ duration: motionDuration.instant, ease: motionEasing.emphasized }}
                 className="surface-3d-card group rounded-2xl p-6"
@@ -474,6 +485,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-visual={discoveryAct.visualBehavior}
           data-storyboard-timing-mobile={discoveryAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={discoveryAct.timingByViewport.desktop}
+          data-ux-intent-primary={discoveryAct.uxIntent}
         >
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
             <motion.div
@@ -488,6 +500,8 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                     }
               }
               data-scroll-depth="home-discovery-offers"
+              data-ux-intent="focus"
+              data-ux-purpose="highlight-promotions-before-salon-choice"
               data-scroll-depth-profile={discoveryOffersDepth.profile}
               data-scroll-depth-disabled={scrollDepthDisabled}
             >
@@ -556,6 +570,8 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                     }
               }
               data-scroll-depth="home-discovery-salons"
+              data-ux-intent="focus"
+              data-ux-purpose="confirm-local-convenience"
               data-scroll-depth-profile={discoverySalonsDepth.profile}
               data-scroll-depth-disabled={scrollDepthDisabled}
             >
@@ -640,6 +656,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-visual={socialProofAct.visualBehavior}
           data-storyboard-timing-mobile={socialProofAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={socialProofAct.timingByViewport.desktop}
+          data-ux-intent-primary={socialProofAct.uxIntent}
         >
           <RevealBlock
             className="mb-8 flex items-center justify-between gap-4"
@@ -664,6 +681,8 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   }
             }
             data-scroll-depth="home-social-grid"
+            data-ux-intent="focus"
+            data-ux-purpose="reduce-friction-with-social-proof"
             data-scroll-depth-profile={socialGridDepth.profile}
             data-scroll-depth-disabled={scrollDepthDisabled}
           >
@@ -709,6 +728,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-visual={ctaAct.visualBehavior}
           data-storyboard-timing-mobile={ctaAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={ctaAct.timingByViewport.desktop}
+          data-ux-intent-primary={ctaAct.uxIntent}
         >
           <RevealBlock
             className="surface-3d-1 rounded-3xl p-8 text-center lg:p-12"
