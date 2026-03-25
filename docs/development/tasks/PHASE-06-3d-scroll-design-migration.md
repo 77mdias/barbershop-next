@@ -1,9 +1,9 @@
 # 🚀 Tasks - Fase 06: Migração de Design para 3D com Scroll
 
 **Status:** 🟢 ATIVA  
-**Última atualização:** 2026-03-24  
+**Última atualização:** 2026-03-25  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 12% (2/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 19% (3/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -17,12 +17,12 @@
 
 | Categoria | Total | Concluído | Em Andamento | Pendente | Bloqueado |
 | --- | --- | --- | --- | --- | --- |
-| Foundation Design System | 3 | 2 | 0 | 1 | 0 |
+| Foundation Design System | 3 | 3 | 0 | 0 | 0 |
 | Layout + Scroll 3D | 4 | 0 | 0 | 4 | 0 |
 | Motion + Interações | 4 | 0 | 0 | 4 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
 | Performance + QA | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **16** | **1** | **0** | **15** | **0** |
+| **TOTAL** | **16** | **3** | **0** | **13** | **0** |
 
 ### 🎯 Principais Indicadores
 - ✅ Escopo fechado para `Home` e `Gallery` como referência da fase.
@@ -112,7 +112,7 @@ Consolidar uma camada de fundação para evitar estilos ad-hoc durante a migraç
 
 #### FDS.3 - Surface + Color Semantics
 
-- [ ] **PH6-FDS-003** - Definir semântica visual de superfície para composição com fundo 3D
+- [x] **PH6-FDS-003** - Definir semântica visual de superfície para composição com fundo 3D
 
   **Descrição curta:**
   - Padronizar níveis de superfície (`surface-1`, `surface-card`, `surface-emphasis`) e transparências.
@@ -126,13 +126,20 @@ Consolidar uma camada de fundação para evitar estilos ad-hoc durante a migraç
   **Arquivos/áreas afetadas:** `src/app/globals.css`, `tailwind.config.js`, `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Contraste AA para texto principal em cards/superfícies.
-  - [ ] Light e dark com legibilidade equivalente em áreas com gradiente.
+  - [x] Contraste AA para texto principal em cards/superfícies.
+  - [x] Light e dark com legibilidade equivalente em áreas com gradiente.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 4h  
   **Dependências:** PH6-FDS-002  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-FDS-003):**
+  - Tokens semânticos de superfície 3D adicionados no `globals.css`: `--surface-1-3d`, `--surface-card-3d`, `--surface-emphasis-3d`, `--surface-border-3d`, `--surface-border-3d-strong`, `--surface-shadow-3d` e `--surface-blur-3d` em light/dark.
+  - Utilitários globais criados para padronização de composição sobre fundo dinâmico: `surface-3d-1`, `surface-3d-card`, `surface-3d-emphasis`.
+  - `tailwind.config.js` atualizado com as cores semânticas `surface-3d-*` e `surface-border-3d*`, além da sombra `surface-3d`.
+  - Aplicação uniforme dos níveis de superfície em `HomeExperience` e `GalleryExperience`, removendo opacidades ad-hoc repetidas.
+  - Cobertura de regressão atualizada em `Home3DExperience.test.tsx` e `GalleryExperience.test.tsx` para exigir uso explícito das classes de superfície semântica.
 
 ### 📦 Layout + Scroll 3D - Narrativa visual e composição por profundidade
 

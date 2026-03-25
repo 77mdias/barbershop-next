@@ -9,6 +9,13 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - Criado utilitário global `layout-3d-shell` com grid responsivo e aplicado em todas as seções das experiências `Home` e `Gallery`.
 - Atualizados `src/__tests__/Home3DExperience.test.tsx` e `src/__tests__/GalleryExperience.test.tsx` para validar o contrato de container/gutter compartilhado e prevenir regressão de layout.
 
+### 🎛️ PH6-FDS-003 - Surface + Color Semantics 3D (Foundation Design System)
+- Criados tokens semânticos de superfície para composição com fundos 3D em light/dark: `--surface-1-3d`, `--surface-card-3d`, `--surface-emphasis-3d`, `--surface-border-3d`, `--surface-border-3d-strong`, `--surface-shadow-3d` e `--surface-blur-3d`.
+- Adicionados utilitários globais `surface-3d-1`, `surface-3d-card` e `surface-3d-emphasis` para padronizar níveis de superfície, transparência, borda e blur.
+- `tailwind.config.js` estendido com cores semânticas `surface-3d-*` e `surface-border-3d*`, além da sombra `surface-3d`.
+- `HomeExperience` e `GalleryExperience` migrados para classes semânticas de superfície, removendo múltiplas variações ad-hoc de `bg-[hsl(...)]`.
+- Testes de regressão (`Home3DExperience` e `GalleryExperience`) atualizados para garantir adoção explícita da semântica de superfície 3D.
+
 ## [Realtime v1.9.0] - 2026-02-xx 🔔
 
 ### ⚡ Infra Real-time (#019)

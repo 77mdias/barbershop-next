@@ -17,6 +17,13 @@
     --surface-2: 30 5% 93%;
     --surface-card: 0 0% 100%;
     --surface-emphasis: 30 5% 91%;
+    --surface-1-3d: 0 0% 100% / 0.88;
+    --surface-card-3d: 0 0% 100% / 0.8;
+    --surface-emphasis-3d: 30 6% 96% / 0.72;
+    --surface-border-3d: 30 10% 36% / 0.24;
+    --surface-border-3d-strong: 30 10% 30% / 0.32;
+    --surface-shadow-3d: 0 24px 70px -34px rgba(15, 23, 42, 0.32);
+    --surface-blur-3d: 14px;
     --muted: 30 6% 95%;
     --muted-foreground: 24 5% 44%;
     --fg-muted: 24 5% 44%;
@@ -165,6 +172,13 @@
     --surface-2: 30 8% 9%;
     --surface-card: 30 8% 11%;
     --surface-emphasis: 30 8% 15%;
+    --surface-1-3d: 224 16% 13% / 0.8;
+    --surface-card-3d: 224 16% 13% / 0.76;
+    --surface-emphasis-3d: 224 14% 18% / 0.72;
+    --surface-border-3d: 214 24% 72% / 0.24;
+    --surface-border-3d-strong: 214 24% 80% / 0.32;
+    --surface-shadow-3d: 0 30px 85px -42px rgba(0, 0, 0, 0.72);
+    --surface-blur-3d: 16px;
     --muted-foreground: 30 8% 50%;
     --fg-muted: 40 10% 62%;
     --fg-subtle: 40 8% 46%;
@@ -300,6 +314,25 @@
 }
 
 @layer utilities {
+  .surface-3d-1 {
+    border: 1px solid hsl(var(--surface-border-3d-strong));
+    background: hsl(var(--surface-1-3d));
+    backdrop-filter: blur(var(--surface-blur-3d));
+    box-shadow: var(--surface-shadow-3d);
+  }
+
+  .surface-3d-card {
+    border: 1px solid hsl(var(--surface-border-3d));
+    background: hsl(var(--surface-card-3d));
+    backdrop-filter: blur(var(--surface-blur-3d));
+    box-shadow: var(--surface-shadow-3d);
+  }
+
+  .surface-3d-emphasis {
+    border: 1px solid hsl(var(--surface-border-3d));
+    background: hsl(var(--surface-emphasis-3d));
+  }
+
   .type-3d-display {
     font-family: var(--font-display), Georgia, serif;
     font-size: var(--type-3d-display-size);

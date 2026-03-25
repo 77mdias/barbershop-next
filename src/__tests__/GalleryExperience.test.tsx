@@ -60,6 +60,9 @@ describe("GalleryExperience", () => {
     expect(screen.getByRole("link", { name: /Agendar agora/i })).toHaveAttribute("href", "/scheduling");
     expect(screen.getByRole("link", { name: /Ver promoções/i })).toHaveAttribute("href", "/promotions");
     expect(screen.getByTestId("gallery-3d-backdrop")).toBeInTheDocument();
+    expect(container.querySelectorAll(".surface-3d-card").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".surface-3d-emphasis").length).toBeGreaterThan(0);
+    expect(container.querySelector(".surface-3d-1")).toBeInTheDocument();
 
     const sections = container.querySelectorAll("section");
     expect(sections.length).toBe(3);

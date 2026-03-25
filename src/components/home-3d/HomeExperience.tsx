@@ -54,7 +54,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                       defaultValue={data.hero.defaultQuery}
                       placeholder={data.hero.placeholder}
                       className={cn(
-                        "h-13 border-[hsl(var(--border)/0.55)] bg-[hsl(var(--surface-card)/0.74)] pl-11 text-foreground placeholder:text-fg-subtle",
+                        "h-13 border-surface-border-3d bg-surface-3d-card pl-11 text-foreground placeholder:text-fg-subtle",
                         "focus:border-[hsl(var(--accent)/0.9)] focus:ring-[hsl(var(--accent)/0.4)]",
                       )}
                     />
@@ -69,7 +69,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="rhythm-3d-stack-md rounded-2xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.72)] p-6 backdrop-blur-md"
+                className="surface-3d-card rhythm-3d-stack-md rounded-2xl p-6"
               >
                 <h2 className="type-3d-label text-fg-subtle">
                   {sectionTitles.ritual}
@@ -81,7 +81,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   {data.services.items.slice(0, 3).map((service) => (
                     <div
                       key={service.id}
-                      className="flex items-center justify-between rounded-xl border border-[hsl(var(--border)/0.4)] bg-[hsl(var(--surface-emphasis)/0.58)] px-3 py-2"
+                      className="surface-3d-emphasis flex items-center justify-between rounded-xl px-3 py-2"
                     >
                       <span className="truncate pr-3">{service.name}</span>
                       <span className="text-[hsl(var(--accent))]">{service.durationLabel}</span>
@@ -102,7 +102,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 </h2>
                 <p className="type-3d-body max-w-2xl text-fg-muted">{data.services.subtitle}</p>
               </div>
-              <p className="type-3d-label rounded-full border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-emphasis)/0.58)] px-4 py-2 text-fg-subtle">
+              <p className="surface-3d-emphasis type-3d-label rounded-full px-4 py-2 text-fg-subtle">
                 {sectionTitles.schedule}
               </p>
             </div>
@@ -114,7 +114,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                 key={service.id}
                 whileHover={shouldReduceMotion ? undefined : { y: -6, rotateX: 3, rotateY: index % 2 === 0 ? -2 : 2 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className="group rounded-2xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.72)] p-6 backdrop-blur-md"
+                className="surface-3d-card group rounded-2xl p-6"
               >
                 <div className="flex items-center justify-between">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.25)] text-[hsl(var(--accent))]">
@@ -144,7 +144,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
 
         <section className="layout-3d-shell rhythm-3d-section">
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
-            <RevealBlock className="rounded-3xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.76)] p-3d-lg backdrop-blur-md lg:p-3d-xl">
+            <RevealBlock className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="type-3d-title text-foreground">
                   {data.promotions.title}
@@ -163,7 +163,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   <motion.div
                     key={promo.id}
                     whileHover={shouldReduceMotion ? undefined : { x: 4 }}
-                    className="rounded-xl border border-[hsl(var(--border)/0.4)] bg-[hsl(var(--surface-emphasis)/0.6)] p-4"
+                    className="surface-3d-emphasis rounded-xl p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="type-3d-label inline-flex items-center gap-1 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.16)] px-2.5 py-1 text-[hsl(var(--accent))]">
@@ -193,7 +193,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             </RevealBlock>
 
             <RevealBlock
-              className="rounded-3xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.72)] p-3d-lg backdrop-blur-md lg:p-3d-xl"
+              className="surface-3d-1 rounded-3xl p-3d-lg lg:p-3d-xl"
               delay={0.1}
             >
               <h2 className="type-3d-title text-foreground">
@@ -205,7 +205,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                   <motion.article
                     key={salon.id}
                     whileHover={shouldReduceMotion ? undefined : { y: -3 }}
-                    className="overflow-hidden rounded-xl border border-[hsl(var(--border)/0.4)] bg-[hsl(var(--surface-emphasis)/0.6)]"
+                    className="surface-3d-emphasis overflow-hidden rounded-xl"
                   >
                     <div className="relative h-28 w-full">
                       <Image src={salon.imageUrl} alt={salon.name} fill className="object-cover" />
@@ -255,7 +255,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             {data.reviews.items.map((review, reviewIndex) => (
               <RevealBlock
                 key={review.id}
-                className="rounded-2xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.72)] p-5 backdrop-blur-md"
+                className="surface-3d-card rounded-2xl p-5"
                 delay={reviewIndex * 0.05}
               >
                 <div className="flex items-center gap-3">
@@ -286,7 +286,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
         </section>
 
         <section className="layout-3d-shell rhythm-3d-section rhythm-3d-section-tight">
-          <RevealBlock className="rounded-3xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.76)] p-8 text-center backdrop-blur-md lg:p-12">
+          <RevealBlock className="surface-3d-1 rounded-3xl p-8 text-center lg:p-12">
             <h2 className="type-3d-title text-foreground lg:text-5xl">
               {data.bookingCta.title}
             </h2>
@@ -299,7 +299,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               <Button
                 asChild
                 variant="outline"
-                className="h-12 border-[hsl(var(--border)/0.55)] bg-transparent px-8 text-foreground hover:bg-[hsl(var(--surface-emphasis)/0.58)] hover:text-foreground"
+                className="h-12 border-surface-border-3d bg-transparent px-8 text-foreground hover:bg-surface-3d-emphasis hover:text-foreground"
               >
                 <Link href={data.bookingCta.secondaryHref}>{data.bookingCta.secondaryLabel}</Link>
               </Button>

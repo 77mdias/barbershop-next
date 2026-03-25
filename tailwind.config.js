@@ -13,6 +13,11 @@ module.exports = {
 				'surface-2': 'hsl(var(--surface-2))',
 				'surface-card': 'hsl(var(--surface-card))',
 				'surface-emphasis': 'hsl(var(--surface-emphasis))',
+				'surface-3d-1': 'hsl(var(--surface-1-3d))',
+				'surface-3d-card': 'hsl(var(--surface-card-3d))',
+				'surface-3d-emphasis': 'hsl(var(--surface-emphasis-3d))',
+				'surface-border-3d': 'hsl(var(--surface-border-3d))',
+				'surface-border-3d-strong': 'hsl(var(--surface-border-3d-strong))',
 				primary: {
 					'50': '#f0fdfa',
 					'100': '#ccfbf1',
@@ -180,7 +185,8 @@ module.exports = {
 				]
 			},
 			boxShadow: {
-				soft: 'var(--shadow-soft)'
+				soft: 'var(--shadow-soft)',
+				'surface-3d': 'var(--surface-shadow-3d)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

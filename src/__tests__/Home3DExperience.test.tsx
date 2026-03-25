@@ -174,6 +174,9 @@ describe("HomeExperience", () => {
     );
 
     expect(screen.getByTestId("home-3d-backdrop")).toBeInTheDocument();
+    expect(container.querySelectorAll(".surface-3d-card").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".surface-3d-emphasis").length).toBeGreaterThan(0);
+    expect(container.querySelector(".surface-3d-1")).toBeInTheDocument();
 
     const sections = container.querySelectorAll("section");
     expect(sections.length).toBe(5);

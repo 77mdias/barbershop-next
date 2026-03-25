@@ -63,7 +63,7 @@ export function GalleryExperience() {
               </Link>
               <Link
                 href="/promotions"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-[hsl(var(--surface-card)/0.75)] px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent"
+                className="surface-3d-card inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent"
               >
                 Ver promoções
                 <ArrowRight className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function GalleryExperience() {
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={shouldReduceMotion ? undefined : { y: -5 }}
-                  className="rhythm-3d-stack-sm rounded-2xl border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--surface-card)/0.74)] p-5 backdrop-blur-md"
+                  className="surface-3d-card rhythm-3d-stack-sm rounded-2xl p-5"
                 >
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent)/0.16)] text-accent">
                     <Icon className="h-5 w-5" />
@@ -132,7 +132,7 @@ export function GalleryExperience() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.55, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={shouldReduceMotion ? undefined : { y: -6 }}
-                className="overflow-hidden rounded-3xl border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--surface-card)/0.82)] shadow-[0_24px_70px_-32px_rgba(0,0,0,0.28)]"
+                className="surface-3d-1 overflow-hidden rounded-3xl"
                 >
                   <div className="relative h-56 w-full">
                   <Image
@@ -163,7 +163,7 @@ export function GalleryExperience() {
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-[2rem] border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--surface-card)/0.82)] p-3 shadow-[0_28px_80px_-32px_rgba(0,0,0,0.25)] sm:p-6"
+            className="surface-3d-1 rounded-[2rem] p-3 sm:p-6"
           >
             <div className="mb-6 flex flex-col gap-3d-sm sm:flex-row sm:items-end sm:justify-between">
               <div className="rhythm-3d-stack-sm">
@@ -176,7 +176,7 @@ export function GalleryExperience() {
                   atendimento.
                 </p>
               </div>
-              <span className="type-3d-label inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.65)] bg-[hsl(var(--surface-emphasis)/0.52)] px-3 py-1.5 text-fg-subtle">
+              <span className="surface-3d-emphasis type-3d-label inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-fg-subtle">
                 <Sparkles className="h-3.5 w-3.5 text-accent" />
                 {galleryImages.length} estilos disponíveis
               </span>
