@@ -49,6 +49,7 @@ function getInteractionProfile(tier: SceneQualityTier) {
 
 export function HomeSceneBackdrop() {
   const shouldReduceMotion = useReducedMotion();
+  const prefersReducedMotion = shouldReduceMotion ?? true;
   const [tier, setTier] = useState<SceneQualityTier>("medium");
   const [theme, setTheme] = useState<SceneTheme>("light");
   const [pointerMode, setPointerMode] = useState<"enabled" | "limited" | "disabled">("enabled");
@@ -75,8 +76,8 @@ export function HomeSceneBackdrop() {
   }, []);
 
   const showCanvas = useMemo(
-    () => isMounted && !shouldReduceMotion && webglEnabled,
-    [isMounted, shouldReduceMotion, webglEnabled],
+    () => isMounted && !prefersReducedMotion && webglEnabled,
+    [isMounted, prefersReducedMotion, webglEnabled],
   );
 
   return (
@@ -88,7 +89,11 @@ export function HomeSceneBackdrop() {
       {showCanvas ? (
         <DynamicHomeSceneCanvas tier={tier} theme={theme} pointerMode={pointerMode} />
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(700px_400px_at_80%_20%,hsl(var(--home-3d-accent-glow)/0.18),transparent_58%),radial-gradient(500px_320px_at_20%_80%,hsl(var(--home-3d-secondary-glow)/0.16),transparent_55%)]" />
+        <div
+          className="h-full w-full bg-[radial-gradient(700px_400px_at_80%_20%,hsl(var(--home-3d-accent-glow)/0.18),transparent_58%),radial-gradient(500px_320px_at_20%_80%,hsl(var(--home-3d-secondary-glow)/0.16),transparent_55%)] dark:bg-[radial-gradient(700px_400px_at_80%_20%,hsl(var(--home-3d-accent-glow)/0.24),transparent_58%),radial-gradient(500px_320px_at_20%_80%,hsl(var(--home-3d-secondary-glow)/0.2),transparent_55%)]"
+          data-motion-mode={prefersReducedMotion ? "reduced" : "full"}
+          data-scene-theme={theme}
+        />
       )}
 
       <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,hsl(var(--background)/0.24)_30%,hsl(var(--background)/0.38)_100%)] opacity-30 dark:opacity-45" />

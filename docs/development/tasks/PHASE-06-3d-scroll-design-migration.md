@@ -454,7 +454,7 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
 
 #### RSP.3 - Reduced Motion + Theme Consistency
 
-- [ ] **PH6-RSP-003** - Garantir consistência de tema e reduced-motion em todos os fluxos
+- [x] **PH6-RSP-003** - Garantir consistência de tema e reduced-motion em todos os fluxos
 
   **Descrição curta:**
   - Validar dark/light e fallback visual em cenários com animação desativada.
@@ -468,13 +468,21 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
   **Arquivos/áreas afetadas:** `src/components/home-3d/*`, `src/components/gallery-3d/*`, `src/components/ThemeToggle.tsx`, `src/providers/ThemeProvider.tsx`
 
   **Critérios de aceitação:**
-  - [ ] `prefers-reduced-motion` remove animações críticas de deslocamento.
-  - [ ] Tema claro/escuro mantém contraste e legibilidade equivalentes.
+  - [x] `prefers-reduced-motion` remove animações críticas de deslocamento.
+  - [x] Tema claro/escuro mantém contraste e legibilidade equivalentes.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 4h  
   **Dependências:** PH6-MSI-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-RSP-003):**
+  - `ThemeProvider` agora sincroniza `prefers-reduced-motion` em tempo real e expõe o estado no `document.documentElement` via `data-reduced-motion`.
+  - O provider também define `color-scheme` com base no tema resolvido para manter consistência visual em controles nativos entre dark/light.
+  - `HomeSceneBackdrop` e `GallerySceneBackdrop` passaram a tratar `useReducedMotion()` indefinido como modo reduzido por padrão (`fail-safe`), evitando flash de animação em montagem.
+  - Fallbacks estáticos de Home/Gallery receberam ajustes dedicados em dark mode para preservar contraste equivalente sem canvas animado.
+  - `ThemeToggle` passou a usar `motion-reduce:transition-none` para evitar transições desnecessárias quando o usuário prefere movimento reduzido.
+  - Cobertura automatizada expandida com `ThemeProvider.test.tsx` e novos cenários de reduced-motion indefinido em `HomeSceneBackdrop.test.tsx` e `GallerySceneBackdrop.test.tsx`.
 
 ### 📦 Performance + QA - Estabilidade e validação final
 

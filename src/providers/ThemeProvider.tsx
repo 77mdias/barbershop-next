@@ -34,9 +34,20 @@ function getSystemTheme(): ResolvedTheme {
   }
 }
 
+function getInitialReducedMotionPreference(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {
+    return false;
+  }
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(getInitialReducedMotionPreference);
 
   // Resolução do tema efetivo
   const resolvedTheme: ResolvedTheme =
@@ -58,6 +69,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  useEffect(() => {
+    const motionMediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateReducedMotionPreference = (event?: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event ? event.matches : motionMediaQuery.matches);
+    };
+
+    updateReducedMotionPreference();
+    motionMediaQuery.addEventListener("change", updateReducedMotionPreference);
+
+    return () => motionMediaQuery.removeEventListener("change", updateReducedMotionPreference);
+  }, []);
+
   // Aplicação do tema ao DOM (sempre que o tema resolvido mudar)
   useEffect(() => {
     const root = document.documentElement;
@@ -67,7 +90,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("dark");
     }
+
+    root.style.colorScheme = resolvedTheme;
   }, [resolvedTheme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.reducedMotion = prefersReducedMotion ? "true" : "false";
+  }, [prefersReducedMotion]);
 
   // Persistência em localStorage
   useEffect(() => {
