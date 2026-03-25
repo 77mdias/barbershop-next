@@ -11,6 +11,7 @@ export type GallerySceneTheme = "light" | "dark";
 type GallerySceneCanvasProps = {
   tier: GallerySceneQualityTier;
   theme: GallerySceneTheme;
+  pointerMode: "enabled" | "limited" | "disabled";
 };
 
 type ScenePalette = {
@@ -45,9 +46,10 @@ function MovingFillLight({ color }: { color: string }) {
   return <pointLight ref={fillRef} intensity={1.1} position={[0, 0.8, 5]} color={color} />;
 }
 
-function CameraRig({ tier }: { tier: GallerySceneQualityTier }) {
+function CameraRig({ tier, pointerMode }: { tier: GallerySceneQualityTier; pointerMode: GallerySceneCanvasProps["pointerMode"] }) {
   const smoothFactor = tier === "high" ? 3.4 : tier === "medium" ? 2.9 : 2.2;
-  const targetMultiplier = tier === "high" ? 0.3 : tier === "medium" ? 0.22 : 0.14;
+  const targetMultiplier =
+    pointerMode === "disabled" ? 0 : pointerMode === "limited" ? (tier === "high" ? 0.14 : 0.1) : tier === "high" ? 0.24 : 0.18;
 
   useFrame(({ camera, pointer }, delta) => {
     camera.position.x = THREE.MathUtils.lerp(camera.position.x, pointer.x * targetMultiplier, delta * smoothFactor);
@@ -63,18 +65,22 @@ function BarberPole({
   rotation,
   scale,
   speed,
+  rotationIntensity,
+  floatIntensity,
   palette,
 }: {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;
   speed: number;
+  rotationIntensity: number;
+  floatIntensity: number;
   palette: ScenePalette;
 }) {
   const stripeAngles = useMemo(() => [0, 0.85, 1.7, 2.55], []);
 
   return (
-    <Float speed={speed} rotationIntensity={0.24} floatIntensity={0.58}>
+    <Float speed={speed} rotationIntensity={rotationIntensity} floatIntensity={floatIntensity}>
       <group position={position} rotation={rotation} scale={scale}>
         <mesh>
           <cylinderGeometry args={[0.2, 0.2, 2.2, 30]} />
@@ -107,16 +113,20 @@ function ShearMark({
   rotation,
   scale,
   speed,
+  rotationIntensity,
+  floatIntensity,
   palette,
 }: {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;
   speed: number;
+  rotationIntensity: number;
+  floatIntensity: number;
   palette: ScenePalette;
 }) {
   return (
-    <Float speed={speed} rotationIntensity={0.2} floatIntensity={0.62}>
+    <Float speed={speed} rotationIntensity={rotationIntensity} floatIntensity={floatIntensity}>
       <group position={position} rotation={rotation} scale={scale}>
         <mesh rotation={[0, 0, Math.PI / 5]}>
           <boxGeometry args={[1.9, 0.08, 0.08]} />
@@ -172,7 +182,9 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
               position={item.position}
               rotation={item.rotation}
               scale={item.scale}
-              speed={item.speed}
+              speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
+              rotationIntensity={tier === "low" ? 0.12 : tier === "medium" ? 0.18 : 0.24}
+              floatIntensity={tier === "low" ? 0.36 : tier === "medium" ? 0.48 : 0.58}
               palette={palette}
             />
           );
@@ -184,7 +196,9 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
-            speed={item.speed}
+            speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
+            rotationIntensity={tier === "low" ? 0.12 : tier === "medium" ? 0.16 : 0.2}
+            floatIntensity={tier === "low" ? 0.4 : tier === "medium" ? 0.5 : 0.62}
             palette={palette}
           />
         );
@@ -193,7 +207,7 @@ function SceneObjects({ tier, palette }: { tier: GallerySceneQualityTier; palett
   );
 }
 
-export function GallerySceneCanvas({ tier, theme }: GallerySceneCanvasProps) {
+export function GallerySceneCanvas({ tier, theme, pointerMode }: GallerySceneCanvasProps) {
   const dprLimit = tier === "high" ? 1.5 : tier === "medium" ? 1.25 : 1;
   const palette: ScenePalette =
     theme === "dark"
@@ -227,7 +241,7 @@ export function GallerySceneCanvas({ tier, theme }: GallerySceneCanvasProps) {
       <ambientLight intensity={theme === "dark" ? 0.48 : 0.44} />
       <directionalLight intensity={0.8} position={[2.2, 2.5, 2.8]} color={palette.keyLight} />
       <MovingFillLight color={palette.fillLight} />
-      <CameraRig tier={tier} />
+      <CameraRig tier={tier} pointerMode={pointerMode} />
       <SceneObjects tier={tier} palette={palette} />
     </Canvas>
   );

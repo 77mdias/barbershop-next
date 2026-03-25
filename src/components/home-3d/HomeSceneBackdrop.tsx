@@ -22,14 +22,44 @@ function getInitialTier(): SceneQualityTier {
   return "high";
 }
 
+function hasWebglSupport() {
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+function getInteractionProfile(tier: SceneQualityTier) {
+  if (typeof window === "undefined") {
+    return { tier, pointerMode: "enabled" as const };
+  }
+
+  const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+  const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+
+  const normalizedTier = isMobileViewport && tier === "high" ? "medium" : isMobileViewport ? "low" : tier;
+
+  const pointerMode: "enabled" | "limited" | "disabled" =
+    normalizedTier === "low" || hasCoarsePointer ? "disabled" : normalizedTier === "medium" ? "limited" : "enabled";
+
+  return { tier: normalizedTier, pointerMode };
+}
+
 export function HomeSceneBackdrop() {
   const shouldReduceMotion = useReducedMotion();
   const [tier, setTier] = useState<SceneQualityTier>("medium");
   const [theme, setTheme] = useState<SceneTheme>("light");
+  const [pointerMode, setPointerMode] = useState<"enabled" | "limited" | "disabled">("enabled");
+  const [webglEnabled, setWebglEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setTier(getInitialTier());
+    const profile = getInteractionProfile(getInitialTier());
+    setTier(profile.tier);
+    setPointerMode(profile.pointerMode);
+    setWebglEnabled(hasWebglSupport());
     setIsMounted(true);
 
     const root = document.documentElement;
@@ -45,8 +75,8 @@ export function HomeSceneBackdrop() {
   }, []);
 
   const showCanvas = useMemo(
-    () => isMounted && !shouldReduceMotion,
-    [isMounted, shouldReduceMotion],
+    () => isMounted && !shouldReduceMotion && webglEnabled,
+    [isMounted, shouldReduceMotion, webglEnabled],
   );
 
   return (
@@ -56,7 +86,7 @@ export function HomeSceneBackdrop() {
       aria-hidden
     >
       {showCanvas ? (
-        <DynamicHomeSceneCanvas tier={tier} theme={theme} />
+        <DynamicHomeSceneCanvas tier={tier} theme={theme} pointerMode={pointerMode} />
       ) : (
         <div className="h-full w-full bg-[radial-gradient(700px_400px_at_80%_20%,hsl(var(--home-3d-accent-glow)/0.18),transparent_58%),radial-gradient(500px_320px_at_20%_80%,hsl(var(--home-3d-secondary-glow)/0.16),transparent_55%)]" />
       )}

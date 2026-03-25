@@ -11,6 +11,7 @@ export type SceneTheme = "light" | "dark";
 type HomeSceneCanvasProps = {
   tier: SceneQualityTier;
   theme: SceneTheme;
+  pointerMode: "enabled" | "limited" | "disabled";
 };
 
 type ScenePalette = {
@@ -40,13 +41,23 @@ type PoleProps = {
   rotation: [number, number, number];
   scale: number;
   speed: number;
+  rotationIntensity: number;
+  floatIntensity: number;
 };
 
-function BarberPole({ position, rotation, scale, speed, palette }: PoleProps & { palette: ScenePalette }) {
+function BarberPole({
+  position,
+  rotation,
+  scale,
+  speed,
+  rotationIntensity,
+  floatIntensity,
+  palette,
+}: PoleProps & { palette: ScenePalette }) {
   const stripeAngles = useMemo(() => [0, 0.85, 1.7, 2.55], []);
 
   return (
-    <Float speed={speed} rotationIntensity={0.25} floatIntensity={0.65}>
+    <Float speed={speed} rotationIntensity={rotationIntensity} floatIntensity={floatIntensity}>
       <group position={position} rotation={rotation} scale={scale}>
         <mesh castShadow>
           <cylinderGeometry args={[0.24, 0.24, 2.5, 32]} />
@@ -72,6 +83,20 @@ function BarberPole({ position, rotation, scale, speed, palette }: PoleProps & {
       </group>
     </Float>
   );
+}
+
+function CameraRig({ tier, pointerMode }: { tier: SceneQualityTier; pointerMode: HomeSceneCanvasProps["pointerMode"] }) {
+  const smoothFactor = tier === "high" ? 3.2 : tier === "medium" ? 2.8 : 2.2;
+  const targetMultiplier =
+    pointerMode === "disabled" ? 0 : pointerMode === "limited" ? (tier === "high" ? 0.12 : 0.08) : tier === "high" ? 0.2 : 0.14;
+
+  useFrame(({ camera, pointer }, delta) => {
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, pointer.x * targetMultiplier, delta * smoothFactor);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, pointer.y * targetMultiplier, delta * smoothFactor);
+    camera.lookAt(0, 0, 0);
+  });
+
+  return null;
 }
 
 function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: ScenePalette }) {
@@ -102,7 +127,9 @@ function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: Scen
           position={item.position as [number, number, number]}
           rotation={item.rotation as [number, number, number]}
           scale={item.scale}
-          speed={item.speed}
+          speed={tier === "low" ? item.speed * 0.84 : tier === "medium" ? item.speed * 0.94 : item.speed}
+          rotationIntensity={tier === "low" ? 0.14 : tier === "medium" ? 0.2 : 0.25}
+          floatIntensity={tier === "low" ? 0.42 : tier === "medium" ? 0.54 : 0.65}
           palette={palette}
         />
       ))}
@@ -110,7 +137,7 @@ function SceneObjects({ tier, palette }: { tier: SceneQualityTier; palette: Scen
   );
 }
 
-export function HomeSceneCanvas({ tier, theme }: HomeSceneCanvasProps) {
+export function HomeSceneCanvas({ tier, theme, pointerMode }: HomeSceneCanvasProps) {
   const dprLimit = tier === "high" ? 1.6 : tier === "medium" ? 1.35 : 1.1;
   const palette: ScenePalette =
     theme === "dark"
@@ -146,6 +173,7 @@ export function HomeSceneCanvas({ tier, theme }: HomeSceneCanvasProps) {
       <directionalLight position={[2, 3, 2]} intensity={0.75} color={palette.keyLight} />
       <MovingLight color={palette.pointLight} />
 
+      <CameraRig tier={tier} pointerMode={pointerMode} />
       <SceneObjects tier={tier} palette={palette} />
     </Canvas>
   );

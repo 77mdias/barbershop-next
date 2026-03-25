@@ -327,7 +327,7 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
 
 #### MSI.3 - 3D Scene Behavior
 
-- [ ] **PH6-MSI-003** - Harmonizar comportamento da cena 3D (pointer, rotação, fallback)
+- [x] **PH6-MSI-003** - Harmonizar comportamento da cena 3D (pointer, rotação, fallback)
 
   **Descrição curta:**
   - Ajustar intensidade de movimentos da câmera/objetos.
@@ -341,13 +341,20 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeSceneBackdrop.tsx`, `src/components/home-3d/HomeSceneCanvas.tsx`, `src/components/gallery-3d/GallerySceneBackdrop.tsx`, `src/components/gallery-3d/GallerySceneCanvas.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Cena mantém estabilidade visual sem distração em mobile.
-  - [ ] Queda de qualidade é gradual (sem “quebras” visuais abruptas).
+  - [x] Cena mantém estabilidade visual sem distração em mobile.
+  - [x] Queda de qualidade é gradual (sem “quebras” visuais abruptas).
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 6h  
   **Dependências:** PH6-L3D-002  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-MSI-003):**
+  - Home e Gallery passaram a normalizar tier por viewport/pointer (`high|medium|low`) para evitar comportamento agressivo em mobile.
+  - `pointerMode` (`enabled|limited|disabled`) foi introduzido nas duas cenas para reduzir/parar deslocamento de câmera em dispositivos de ponteiro coarse e tier baixo.
+  - Intensidade de rotação/flutuação foi escalonada por tier para suavizar movimento em cenários degradados.
+  - Home ganhou detecção explícita de WebGL (paridade com Gallery), mantendo fallback estático quando indisponível.
+  - Testes de backdrop foram ampliados para validar fallback sem WebGL em Home e Gallery.
 
 #### MSI.4 - Scroll Intent Validation
 
