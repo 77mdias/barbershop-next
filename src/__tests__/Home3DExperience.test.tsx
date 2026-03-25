@@ -165,6 +165,10 @@ describe("HomeExperience", () => {
       "act-5-cta",
     ] as const;
 
+    const rootMain = container.querySelector("main");
+    expect(rootMain).toHaveAttribute("data-layout-contract", "ph6-rsp-001-home");
+    expect(rootMain).toHaveAttribute("data-layout-breakpoints", "390|768|1024|1440");
+
     const heroTitle = screen.getByRole("heading", { name: sampleData.hero.title });
     const servicesTitle = screen.getByRole("heading", { name: sampleData.services.title });
     const promotionsTitle = screen.getByRole("heading", { name: sampleData.promotions.title });
@@ -187,6 +191,7 @@ describe("HomeExperience", () => {
       "href",
       sampleData.bookingCta.secondaryHref,
     );
+    expect(screen.getByRole("link", { name: sampleData.bookingCta.primaryLabel })).toHaveClass("w-full");
 
     expect(screen.getByTestId("home-3d-backdrop")).toBeInTheDocument();
     expect(container.querySelectorAll(".surface-3d-card").length).toBeGreaterThan(0);
@@ -205,6 +210,7 @@ describe("HomeExperience", () => {
       expect(section).toHaveAttribute("data-storyboard-timing-mobile");
       expect(section).toHaveAttribute("data-storyboard-timing-desktop");
       expect(section).toHaveAttribute("data-ux-intent-primary");
+      expect(section).toHaveAttribute("data-layout-contract-step");
     });
 
     expect(container.querySelectorAll("[data-reveal-label]").length).toBeGreaterThanOrEqual(5);

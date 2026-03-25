@@ -207,6 +207,13 @@ const homeStoryboard: Record<HomeStoryboardActKey, HomeStoryboardAct> = {
   },
 };
 
+const HOME_BREAKPOINT_CONTRACT = {
+  id: "ph6-rsp-001-home",
+  targets: "390|768|1024|1440",
+  notes:
+    "390=stack+cta-full-width;768=duas-colunas-progressivas;1024=layout hero com aside fixo;1440=densidade expandida sem overlap",
+} as const;
+
 export function HomeExperience({ data }: HomeExperienceProps) {
   const reducedMotionFromMotion = useReducedMotion();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -299,7 +306,12 @@ export function HomeExperience({ data }: HomeExperienceProps) {
   });
 
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-background text-foreground">
+    <main
+      className="relative min-h-screen w-full overflow-x-hidden bg-background text-foreground"
+      data-layout-contract={HOME_BREAKPOINT_CONTRACT.id}
+      data-layout-breakpoints={HOME_BREAKPOINT_CONTRACT.targets}
+      data-layout-contract-notes={HOME_BREAKPOINT_CONTRACT.notes}
+    >
       <HomeSceneBackdrop />
 
       <div className="relative z-10 flex flex-col">
@@ -314,14 +326,23 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-mobile={heroAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={heroAct.timingByViewport.desktop}
           data-ux-intent-primary={heroAct.uxIntent}
+          data-layout-contract-step="hero-stack-safe"
         >
-          <RevealBlock narrativeLabel={heroAct.label} revealByViewport={heroAct.revealByViewport}>
+          <RevealBlock
+            narrativeLabel={heroAct.label}
+            revealByViewport={heroAct.revealByViewport}
+          >
             <span className="type-3d-label inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.12)] px-4 py-2 text-[hsl(var(--accent))]">
               <Sparkles className="h-3.5 w-3.5" />
               Nova Home 3D
             </span>
 
-            <div className="mt-3d-xl grid items-end gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14">
+            <div
+              className="mt-3d-xl grid items-end gap-8 min-[390px]:gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14"
+              data-layout-density-mobile="compact-readable"
+              data-layout-density-tablet="balanced"
+              data-layout-density-desktop="split-hero-with-aside"
+            >
               <div className="rhythm-3d-stack-md">
                 <h1 className="type-3d-display max-w-4xl text-foreground">
                   {data.hero.title}
@@ -343,7 +364,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
                       )}
                     />
                   </label>
-                  <Button className="h-13 min-w-48 bg-accent px-6 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]">
+                  <Button className="h-13 w-full min-w-48 bg-accent px-6 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98] sm:w-auto">
                     {data.hero.ctaLabel}
                   </Button>
                 </form>
@@ -407,6 +428,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-mobile={servicesAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={servicesAct.timingByViewport.desktop}
           data-ux-intent-primary={servicesAct.uxIntent}
+          data-layout-contract-step="services-grid-adaptive"
         >
           <RevealBlock narrativeLabel={servicesAct.label} revealByViewport={servicesAct.revealByViewport}>
             <div className="mb-3d-xl flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -486,6 +508,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-mobile={discoveryAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={discoveryAct.timingByViewport.desktop}
           data-ux-intent-primary={discoveryAct.uxIntent}
+          data-layout-contract-step="discovery-dual-surface"
         >
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
             <motion.div
@@ -657,6 +680,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-mobile={socialProofAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={socialProofAct.timingByViewport.desktop}
           data-ux-intent-primary={socialProofAct.uxIntent}
+          data-layout-contract-step="social-grid-stable"
         >
           <RevealBlock
             className="mb-8 flex items-center justify-between gap-4"
@@ -729,6 +753,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           data-storyboard-timing-mobile={ctaAct.timingByViewport.mobile}
           data-storyboard-timing-desktop={ctaAct.timingByViewport.desktop}
           data-ux-intent-primary={ctaAct.uxIntent}
+          data-layout-contract-step="cta-persistent-mobile"
         >
           <RevealBlock
             className="surface-3d-1 rounded-3xl p-8 text-center lg:p-12"
@@ -741,13 +766,13 @@ export function HomeExperience({ data }: HomeExperienceProps) {
             <p className="type-3d-body mx-auto mt-4 max-w-2xl text-fg-muted">{data.bookingCta.description}</p>
 
             <div className="mt-8 flex flex-col justify-center gap-3d-sm sm:flex-row">
-              <Button asChild className="h-12 bg-accent px-8 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]">
+              <Button asChild className="h-12 w-full bg-accent px-8 font-semibold text-on-accent hover:bg-accent/90 focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98] sm:w-auto">
                 <Link href={data.bookingCta.primaryHref}>{data.bookingCta.primaryLabel}</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className="h-12 border-surface-border-3d bg-transparent px-8 text-foreground hover:bg-surface-3d-emphasis hover:text-foreground focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98]"
+                className="h-12 w-full border-surface-border-3d bg-transparent px-8 text-foreground hover:bg-surface-3d-emphasis hover:text-foreground focus-visible:ring-[hsl(var(--accent)/0.45)] active:scale-[0.98] sm:w-auto"
               >
                 <Link href={data.bookingCta.secondaryHref}>{data.bookingCta.secondaryLabel}</Link>
               </Button>

@@ -78,7 +78,7 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
 - [ ] **#033** - Fase 06: Migração de Design para 3D com Scroll (Frontend)
   - **Descrição**: Definir e executar a fase de migração visual para narrativa 3D com animação de imagens por scroll, cobrindo layout, spacing, tipografia, motion system, responsividade e interações.
   - **Componentes**: HomeExperience, GalleryExperience, HeaderNavigation, camadas 3D (R3F), tokens globais de UI e testes de regressão frontend.
-  - **Status**: Em execução (PH6-FDS-001/002/003 e PH6-L3D-001 concluídas; 4/16 tarefas da fase).
+  - **Status**: Em execução (PH6-FDS-001/002/003, PH6-L3D-001/002/003/004, PH6-MSI-001/002/003/004 e PH6-RSP-001 concluídas; 12/16 tarefas da fase).
   - **Documento da fase**: `/docs/development/tasks/PHASE-06-3d-scroll-design-migration.md`
   - **Riscos iniciais mapeados**:
     - Runtime da Home quebrando por host externo em `next/image` sem configuração.

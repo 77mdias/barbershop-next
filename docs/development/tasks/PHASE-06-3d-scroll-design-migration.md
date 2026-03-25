@@ -393,7 +393,7 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
 
 #### RSP.1 - Breakpoint Contracts
 
-- [ ] **PH6-RSP-001** - Definir contratos de layout por breakpoint
+- [x] **PH6-RSP-001** - Definir contratos de layout por breakpoint
 
   **Descrição curta:**
   - Estabelecer regras objetivas para 390, 768, 1024 e 1440.
@@ -407,13 +407,19 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
   **Arquivos/áreas afetadas:** `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`, `src/components/HeaderNavigation.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Não há sobreposição de conteúdo em breakpoints alvo.
-  - [ ] CTA primário permanece visível e acionável em mobile.
+  - [x] Não há sobreposição de conteúdo em breakpoints alvo.
+  - [x] CTA primário permanece visível e acionável em mobile.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 5h  
   **Dependências:** PH6-FDS-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-RSP-001):**
+  - Home, Gallery e Header agora expõem contrato explícito de responsividade via `data-layout-contract`, `data-layout-breakpoints` e `data-layout-contract-notes`, fixando os alvos `390|768|1024|1440`.
+  - Cada seção principal de Home/Gallery recebeu `data-layout-contract-step` para descrever o comportamento esperado por bloco (hero, grids, shell de portfólio e CTA).
+  - CTAs primários de Home e Gallery foram ajustados para `w-full` em mobile (`sm:w-auto` no upscale), garantindo visibilidade e área de toque sem overlap.
+  - Suite de testes de Home/Gallery/Header foi ampliada para validar o novo contrato de layout e prevenir regressões nos breakpoints-alvo.
 
 #### RSP.2 - Accessible Navigation + Dialogs
 

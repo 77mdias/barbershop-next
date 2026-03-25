@@ -28,7 +28,10 @@ jest.mock("@/components/MenuNavigation", () => ({
 
 describe("HeaderNavigation layering", () => {
   test("opens mobile panel with backdrop and locks body scroll", () => {
-    render(<HeaderNavigation />);
+    const { container } = render(<HeaderNavigation />);
+    const header = container.querySelector("header");
+    expect(header).toHaveAttribute("data-layout-contract", "ph6-rsp-001-header");
+    expect(header).toHaveAttribute("data-layout-breakpoints", "390|768|1024|1440");
 
     const toggleButton = screen.getByRole("button", { name: /Toggle menu/i });
     fireEvent.click(toggleButton);

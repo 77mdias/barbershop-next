@@ -10,6 +10,12 @@ Histórico detalhado de todas as mudanças e implementações do projeto.
 - Microinteração dos cards de serviço na Home foi simplificada para deslocamento planar, removendo rotação decorativa e reduzindo ruído visual.
 - `Home3DExperience.test.tsx` e `GalleryExperience.test.tsx` foram ampliados para validar o contrato de intenção e propósito das animações.
 
+### 📦 PH6-RSP-001 - Contratos de layout por breakpoint
+- `HomeExperience`, `GalleryExperience` e `HeaderNavigation` agora publicam contrato de layout por breakpoint via `data-layout-contract`, `data-layout-breakpoints` e `data-layout-contract-notes` para os alvos `390|768|1024|1440`.
+- Seções narrativas da Home/Gallery receberam `data-layout-contract-step` para explicitar comportamento esperado e reduzir ajustes ad-hoc por componente.
+- CTAs primários na Home (hero e bloco final) e Gallery (hero) foram padronizados com `w-full` no mobile e `sm:w-auto` no upscale, mantendo ação principal visível e acionável.
+- `Home3DExperience.test.tsx`, `GalleryExperience.test.tsx` e `HeaderNavigationLayering.test.tsx` passaram a validar o contrato de responsividade.
+
 ### 🎛️ PH6-FDS-001 - Layout System 3D (Foundation Design System)
 - Adicionados tokens responsivos de layout em `src/app/globals.css` para padronizar `max-width`, `gutter`, colunas e `column-gap` (`--layout-3d-*`) em breakpoints de `390px+`, `768px+`, `1024px+` e `1440px+`.
 - Criado utilitário global `layout-3d-shell` com grid responsivo e aplicado em todas as seções das experiências `Home` e `Gallery`.
