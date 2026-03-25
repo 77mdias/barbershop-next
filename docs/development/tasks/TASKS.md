@@ -75,6 +75,21 @@ Lista organizada de tarefas, bugs e melhorias pendentes.
     - `/docs/development/CHANGELOG.md`
     - `/docs/development/ROADMAP.md`
   - **Testes**: `docker compose exec app npm test -- AdminReportsPageClient.test.tsx` ✅ (10 testes passando).
+- [ ] **#033** - Fase 06: Migração de Design para 3D com Scroll (Frontend)
+  - **Descrição**: Definir e executar a fase de migração visual para narrativa 3D com animação de imagens por scroll, cobrindo layout, spacing, tipografia, motion system, responsividade e interações.
+  - **Componentes**: HomeExperience, GalleryExperience, HeaderNavigation, camadas 3D (R3F), tokens globais de UI e testes de regressão frontend.
+  - **Status**: Em execução (PH6-FDS-001 concluída; 1/16 tarefas da fase).
+  - **Documento da fase**: `/docs/development/tasks/PHASE-06-3d-scroll-design-migration.md`
+  - **Riscos iniciais mapeados**:
+    - Runtime da Home quebrando por host externo em `next/image` sem configuração.
+    - Conflitos de camada entre header fixo, menu mobile e lightbox.
+    - Avisos de qualidade de imagem e risco de custo de render 3D em mobile.
+  - **Testes previstos**:
+    - `npm run lint:check` (foco em `src`)
+    - `npm run type-check`
+    - `npm test -- Home3DExperience`
+    - `npm test -- GalleryExperience`
+    - Auditoria visual com Playwright (desktop/mobile)
 
 ## 🔥 Alta Prioridade - Semana 5 (4-10 Nov 2025)
 

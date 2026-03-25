@@ -2,6 +2,13 @@
 
 Histórico detalhado de todas as mudanças e implementações do projeto.
 
+## [Unreleased]
+
+### 🎛️ PH6-FDS-001 - Layout System 3D (Foundation Design System)
+- Adicionados tokens responsivos de layout em `src/app/globals.css` para padronizar `max-width`, `gutter`, colunas e `column-gap` (`--layout-3d-*`) em breakpoints de `390px+`, `768px+`, `1024px+` e `1440px+`.
+- Criado utilitário global `layout-3d-shell` com grid responsivo e aplicado em todas as seções das experiências `Home` e `Gallery`.
+- Atualizados `src/__tests__/Home3DExperience.test.tsx` e `src/__tests__/GalleryExperience.test.tsx` para validar o contrato de container/gutter compartilhado e prevenir regressão de layout.
+
 ## [Realtime v1.9.0] - 2026-02-xx 🔔
 
 ### ⚡ Infra Real-time (#019)

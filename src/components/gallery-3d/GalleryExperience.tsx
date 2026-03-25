@@ -34,7 +34,7 @@ export function GalleryExperience() {
       <GallerySceneBackdrop />
 
       <div className="relative z-10">
-        <section className="container mx-auto px-4 pb-14 pt-[calc(65px+3.5rem)] lg:pb-20 lg:pt-[calc(65px+4.2rem)]">
+        <section className="layout-3d-shell pb-14 pt-[calc(65px+3.5rem)] lg:pb-20 lg:pt-[calc(65px+4.2rem)]">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 26 }}
             animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -96,7 +96,7 @@ export function GalleryExperience() {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 lg:py-16">
+        <section className="layout-3d-shell py-12 lg:py-16">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -157,7 +157,7 @@ export function GalleryExperience() {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 pb-14 lg:pb-20">
+        <section className="layout-3d-shell pb-14 lg:pb-20">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}

@@ -46,7 +46,7 @@ jest.mock("@/components/gallery-3d/GallerySceneBackdrop", () => ({
 
 describe("GalleryExperience", () => {
   test("renders redesigned gallery narrative and primary CTAs", () => {
-    render(<GalleryExperience />);
+    const { container } = render(<GalleryExperience />);
 
     expect(screen.getByRole("heading", { name: "Galeria de Estilos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Coleções em destaque" })).toBeInTheDocument();
@@ -55,5 +55,12 @@ describe("GalleryExperience", () => {
     expect(screen.getByRole("link", { name: /Agendar agora/i })).toHaveAttribute("href", "/scheduling");
     expect(screen.getByRole("link", { name: /Ver promoções/i })).toHaveAttribute("href", "/promotions");
     expect(screen.getByTestId("gallery-3d-backdrop")).toBeInTheDocument();
+
+    const sections = container.querySelectorAll("section");
+    expect(sections.length).toBe(3);
+    sections.forEach((section) => {
+      expect(section).toHaveClass("layout-3d-shell");
+    });
+    expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });
 });

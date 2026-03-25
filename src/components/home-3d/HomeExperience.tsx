@@ -30,7 +30,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
       <HomeSceneBackdrop />
 
       <div className="relative z-10 flex flex-col">
-        <section className="container mx-auto w-full px-4 pb-16 pt-16 sm:pt-24 lg:pb-20 lg:pt-28">
+        <section className="layout-3d-shell pb-16 pt-16 sm:pt-24 lg:pb-20 lg:pt-28">
           <RevealBlock>
             <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--accent)/0.12)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
               <Sparkles className="h-3.5 w-3.5" />
@@ -93,7 +93,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </RevealBlock>
         </section>
 
-        <section className="container mx-auto w-full px-4 py-16 lg:py-20">
+        <section className="layout-3d-shell py-16 lg:py-20">
           <RevealBlock>
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -142,7 +142,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="container mx-auto w-full px-4 py-16 lg:py-20">
+        <section className="layout-3d-shell py-16 lg:py-20">
           <div className="grid gap-8 lg:grid-cols-[1.3fr_minmax(0,1fr)]">
             <RevealBlock className="rounded-3xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.76)] p-7 backdrop-blur-md lg:p-9">
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -243,7 +243,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="container mx-auto w-full px-4 py-16 lg:py-20">
+        <section className="layout-3d-shell py-16 lg:py-20">
           <RevealBlock className="mb-8 flex items-center justify-between gap-4">
             <h2 className="font-display text-3xl font-bold italic text-foreground sm:text-4xl">{data.reviews.title}</h2>
             <p className="max-w-sm text-right text-xs uppercase tracking-[0.16em] text-fg-subtle">
@@ -285,7 +285,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
           </div>
         </section>
 
-        <section className="container mx-auto w-full px-4 pb-20 pt-12 lg:pb-24">
+        <section className="layout-3d-shell pb-20 pt-12 lg:pb-24">
           <RevealBlock className="rounded-3xl border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--surface-card)/0.76)] p-8 text-center backdrop-blur-md lg:p-12">
             <h2 className="font-display text-3xl font-bold italic text-foreground sm:text-4xl lg:text-5xl">
               {data.bookingCta.title}

@@ -148,7 +148,7 @@ const sampleData: HomePageData = {
 
 describe("HomeExperience", () => {
   test("renders the redesigned narrative sections and primary actions", () => {
-    render(<HomeExperience data={sampleData} />);
+    const { container } = render(<HomeExperience data={sampleData} />);
 
     expect(screen.getByRole("heading", { name: sampleData.hero.title })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: sampleData.services.title })).toBeInTheDocument();
@@ -167,5 +167,12 @@ describe("HomeExperience", () => {
     );
 
     expect(screen.getByTestId("home-3d-backdrop")).toBeInTheDocument();
+
+    const sections = container.querySelectorAll("section");
+    expect(sections.length).toBe(5);
+    sections.forEach((section) => {
+      expect(section).toHaveClass("layout-3d-shell");
+    });
+    expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });
 });
