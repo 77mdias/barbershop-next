@@ -208,7 +208,7 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
 
 #### L3D.3 - Header + Overlay Layering
 
-- [ ] **PH6-L3D-003** - Corrigir estratégia de camadas (header fixo, menu mobile, modais/lightbox)
+- [x] **PH6-L3D-003** - Corrigir estratégia de camadas (header fixo, menu mobile, modais/lightbox)
 
   **Descrição curta:**
   - Eliminar conflitos de z-index e sobreposição parcial.
@@ -222,13 +222,19 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
   **Arquivos/áreas afetadas:** `src/components/HeaderNavigation.tsx`, `src/components/MenuNavigation.tsx`, `src/components/gallery.tsx`, `src/app/layout.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Menu mobile cobre corretamente a interface e bloqueia clique no conteúdo.
-  - [ ] Lightbox fica acima de header e elementos fixos.
+  - [x] Menu mobile cobre corretamente a interface e bloqueia clique no conteúdo.
+  - [x] Lightbox fica acima de header e elementos fixos.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 5h  
   **Dependências:** PH6-L3D-002  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+
+  **Notas de implementação (PH6-L3D-003):**
+  - Tokens globais de camada (`--layer-*`) adicionados para estabilizar prioridade visual entre header, overlays e modais.
+  - Menu mobile convertido para padrão overlay + painel fixo com bloqueio de scroll do body, fechamento por ESC e contrato acessível (`aria-expanded`/`aria-controls`).
+  - Lightbox da galeria elevado para camada modal dedicada, acima de header fixo e demais elementos persistentes.
 
 #### L3D.4 - Runtime Safety na Home
 

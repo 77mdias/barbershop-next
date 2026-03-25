@@ -39,7 +39,9 @@ export default function RootLayout({
       >
         <Providers>
           <HeaderNavigation />
-          {children}
+          <main id="app-content" className="flex-1">
+            {children}
+          </main>
           <Toaster />
         </Providers>
       </body>

@@ -222,7 +222,7 @@ export function Gallery({
           role="dialog"
           aria-modal="true"
           aria-label={`Visualização ampliada de ${images[selectedImage].title || images[selectedImage].alt}`}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[var(--layer-modal)] flex items-center justify-center bg-black/90 p-4"
         >
           {/* Botão Fechar */}
           <Button
