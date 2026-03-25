@@ -150,11 +150,18 @@ describe("HomeExperience", () => {
   test("renders the redesigned narrative sections and primary actions", () => {
     const { container } = render(<HomeExperience data={sampleData} />);
 
-    expect(screen.getByRole("heading", { name: sampleData.hero.title })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: sampleData.services.title })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: sampleData.promotions.title })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: sampleData.salons.title })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: sampleData.reviews.title })).toBeInTheDocument();
+    const heroTitle = screen.getByRole("heading", { name: sampleData.hero.title });
+    const servicesTitle = screen.getByRole("heading", { name: sampleData.services.title });
+    const promotionsTitle = screen.getByRole("heading", { name: sampleData.promotions.title });
+    const salonsTitle = screen.getByRole("heading", { name: sampleData.salons.title });
+    const reviewsTitle = screen.getByRole("heading", { name: sampleData.reviews.title });
+
+    expect(heroTitle).toBeInTheDocument();
+    expect(heroTitle).toHaveClass("type-3d-display");
+    expect(servicesTitle).toHaveClass("type-3d-title");
+    expect(promotionsTitle).toHaveClass("type-3d-title");
+    expect(salonsTitle).toHaveClass("type-3d-title");
+    expect(reviewsTitle).toHaveClass("type-3d-title");
 
     expect(screen.getByRole("button", { name: sampleData.hero.ctaLabel })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: sampleData.bookingCta.primaryLabel })).toHaveAttribute(
@@ -172,6 +179,7 @@ describe("HomeExperience", () => {
     expect(sections.length).toBe(5);
     sections.forEach((section) => {
       expect(section).toHaveClass("layout-3d-shell");
+      expect(section).toHaveClass("rhythm-3d-section");
     });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });

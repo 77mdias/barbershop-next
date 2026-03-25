@@ -48,9 +48,14 @@ describe("GalleryExperience", () => {
   test("renders redesigned gallery narrative and primary CTAs", () => {
     const { container } = render(<GalleryExperience />);
 
-    expect(screen.getByRole("heading", { name: "Galeria de Estilos" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Coleções em destaque" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Portfólio completo" })).toBeInTheDocument();
+    const galleryTitle = screen.getByRole("heading", { name: "Galeria de Estilos" });
+    const collectionsTitle = screen.getByRole("heading", { name: "Coleções em destaque" });
+    const portfolioTitle = screen.getByRole("heading", { name: "Portfólio completo" });
+
+    expect(galleryTitle).toBeInTheDocument();
+    expect(galleryTitle).toHaveClass("type-3d-display");
+    expect(collectionsTitle).toHaveClass("type-3d-title");
+    expect(portfolioTitle).toHaveClass("type-3d-title");
 
     expect(screen.getByRole("link", { name: /Agendar agora/i })).toHaveAttribute("href", "/scheduling");
     expect(screen.getByRole("link", { name: /Ver promoções/i })).toHaveAttribute("href", "/promotions");
@@ -60,6 +65,7 @@ describe("GalleryExperience", () => {
     expect(sections.length).toBe(3);
     sections.forEach((section) => {
       expect(section).toHaveClass("layout-3d-shell");
+      expect(section).toHaveClass("rhythm-3d-section");
     });
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });

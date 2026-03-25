@@ -1,9 +1,9 @@
 # 🚀 Tasks - Fase 06: Migração de Design para 3D com Scroll
 
 **Status:** 🟢 ATIVA  
-**Última atualização:** 2026-03-25  
+**Última atualização:** 2026-03-24  
 **Sprint Atual:** Sprint Frontend UX 3D (Março/2026)  
-**Status Geral:** 🟡 6% (1/16 tarefas completas) - FASE ATIVA  
+**Status Geral:** 🟡 12% (2/16 tarefas completas) - FASE ATIVA  
 **ETA:** 2 a 3 semanas  
 **Pré-requisito:** baseline Home/Gallery 3D existente (parcialmente concluído)
 
@@ -17,7 +17,7 @@
 
 | Categoria | Total | Concluído | Em Andamento | Pendente | Bloqueado |
 | --- | --- | --- | --- | --- | --- |
-| Foundation Design System | 3 | 1 | 0 | 2 | 0 |
+| Foundation Design System | 3 | 2 | 0 | 1 | 0 |
 | Layout + Scroll 3D | 4 | 0 | 0 | 4 | 0 |
 | Motion + Interações | 4 | 0 | 0 | 4 | 0 |
 | Responsividade + A11y | 3 | 0 | 0 | 3 | 0 |
@@ -81,7 +81,7 @@ Consolidar uma camada de fundação para evitar estilos ad-hoc durante a migraç
 
 #### FDS.2 - Spacing + Typography System
 
-- [ ] **PH6-FDS-002** - Definir escala de spacing e tipografia de sistema para experiência 3D
+- [x] **PH6-FDS-002** - Definir escala de spacing e tipografia de sistema para experiência 3D
 
   **Descrição curta:**
   - Consolidar escala de espaçamento e tamanhos tipográficos por nível semântico.
@@ -95,13 +95,20 @@ Consolidar uma camada de fundação para evitar estilos ad-hoc durante a migraç
   **Arquivos/áreas afetadas:** `src/app/globals.css`, `tailwind.config.js`, `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery-3d/GalleryExperience.tsx`, `src/app/auth/signin/page.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Escala tipográfica documentada e aplicada nos principais componentes.
-  - [ ] Espaçamento vertical previsível entre blocos (sem “saltos” visuais).
+  - [x] Escala tipográfica documentada e aplicada nos principais componentes.
+  - [x] Espaçamento vertical previsível entre blocos (sem “saltos” visuais).
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 6h  
   **Dependências:** PH6-FDS-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-24)
+
+  **Notas de implementação (PH6-FDS-002):**
+  - Escala semântica criada no `globals.css` com tokens `--space-3d-*` e `--type-3d-*` por breakpoint.
+  - Utilitários globais adicionados: `type-3d-display|title|title-sm|body-lg|body|meta|label|price` e `rhythm-3d-section|section-tight|stack-*`.
+  - `tailwind.config.js` estendido com `spacing` e `fontSize` semânticos alinhados aos tokens de sistema.
+  - Adoção aplicada em `HomeExperience`, `GalleryExperience` e `signin/page.tsx` para padronizar hierarquia visual e ritmo vertical.
+  - Cobertura de regressão atualizada em `Home3DExperience.test.tsx`, `GalleryExperience.test.tsx` e novo `SignInPage.test.tsx`.
 
 #### FDS.3 - Surface + Color Semantics
 

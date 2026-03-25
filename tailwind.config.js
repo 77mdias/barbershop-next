@@ -113,6 +113,72 @@ module.exports = {
 					'5': 'hsl(var(--chart-5))'
 				}
 			},
+			spacing: {
+				'3d-2xs': 'var(--space-3d-2xs)',
+				'3d-xs': 'var(--space-3d-xs)',
+				'3d-sm': 'var(--space-3d-sm)',
+				'3d-md': 'var(--space-3d-md)',
+				'3d-lg': 'var(--space-3d-lg)',
+				'3d-xl': 'var(--space-3d-xl)',
+				'3d-2xl': 'var(--space-3d-2xl)',
+				'3d-3xl': 'var(--space-3d-3xl)',
+				'3d-4xl': 'var(--space-3d-4xl)',
+				'3d-section': 'var(--space-3d-section)',
+				'3d-section-tight': 'var(--space-3d-section-tight)'
+			},
+			fontSize: {
+				'3d-display': [
+					'var(--type-3d-display-size)',
+					{
+						lineHeight: 'var(--type-3d-display-line)',
+						letterSpacing: 'var(--type-3d-display-track)'
+					}
+				],
+				'3d-title': [
+					'var(--type-3d-title-size)',
+					{
+						lineHeight: 'var(--type-3d-title-line)',
+						letterSpacing: 'var(--type-3d-title-track)'
+					}
+				],
+				'3d-title-sm': [
+					'var(--type-3d-title-sm-size)',
+					{
+						lineHeight: 'var(--type-3d-title-sm-line)'
+					}
+				],
+				'3d-body-lg': [
+					'var(--type-3d-body-lg-size)',
+					{
+						lineHeight: 'var(--type-3d-body-lg-line)'
+					}
+				],
+				'3d-body': [
+					'var(--type-3d-body-size)',
+					{
+						lineHeight: 'var(--type-3d-body-line)'
+					}
+				],
+				'3d-meta': [
+					'var(--type-3d-meta-size)',
+					{
+						lineHeight: 'var(--type-3d-meta-line)'
+					}
+				],
+				'3d-label': [
+					'var(--type-3d-label-size)',
+					{
+						lineHeight: 'var(--type-3d-label-line)',
+						letterSpacing: 'var(--type-3d-label-track)'
+					}
+				],
+				'3d-price': [
+					'var(--type-3d-price-size)',
+					{
+						lineHeight: 'var(--type-3d-price-line)'
+					}
+				]
+			},
 			boxShadow: {
 				soft: 'var(--shadow-soft)'
 			},
