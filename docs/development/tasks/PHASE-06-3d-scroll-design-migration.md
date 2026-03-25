@@ -238,7 +238,7 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
 
 #### L3D.4 - Runtime Safety na Home
 
-- [ ] **PH6-L3D-004** - Garantir resiliência de imagens dinâmicas sem quebrar render
+- [x] **PH6-L3D-004** - Garantir resiliência de imagens dinâmicas sem quebrar render
 
   **Descrição curta:**
   - Evitar erro fatal da rota `/` quando imagens externas não estão configuradas.
@@ -252,13 +252,13 @@ Estruturar a experiência como narrativa de scroll, com seções pensadas para p
   **Arquivos/áreas afetadas:** `next.config.ts`, `src/components/home-3d/HomeExperience.tsx`, `src/__tests__/Home3DExperience.test.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Rota `/` não retorna 500 por host de imagem externo.
-  - [ ] Home renderiza com dados reais e fallback local quando necessário.
+  - [x] Rota `/` não retorna 500 por host de imagem externo.
+  - [x] Home renderiza com dados reais e fallback local quando necessário.
 
   **Prioridade:** 🔴 Crítica  
   **Estimativa:** 3h  
   **Dependências:** nenhuma  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
 
 ### 📦 Motion + Interações - Sistema de movimento e comportamento
 
