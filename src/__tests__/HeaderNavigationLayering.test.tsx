@@ -33,13 +33,15 @@ describe("HeaderNavigation layering", () => {
     expect(header).toHaveAttribute("data-layout-contract", "ph6-rsp-001-header");
     expect(header).toHaveAttribute("data-layout-breakpoints", "390|768|1024|1440");
 
-    const toggleButton = screen.getByRole("button", { name: /Toggle menu/i });
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
     fireEvent.click(toggleButton);
 
     expect(toggleButton).toHaveAttribute("aria-expanded", "true");
+    expect(toggleButton).toHaveAttribute("aria-haspopup", "dialog");
 
     const panel = document.getElementById("mobile-navigation-panel");
     expect(panel).toBeInTheDocument();
+    expect(panel).toHaveAttribute("role", "dialog");
     expect(document.body.style.overflow).toBe("hidden");
 
     const panelLink = panel?.querySelector("a[href='/']") as HTMLAnchorElement | null;
@@ -56,7 +58,7 @@ describe("HeaderNavigation layering", () => {
   test("closes mobile panel on Escape", () => {
     render(<HeaderNavigation />);
 
-    const toggleButton = screen.getByRole("button", { name: /Toggle menu/i });
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
     fireEvent.click(toggleButton);
     fireEvent.keyDown(window, { key: "Escape" });
 

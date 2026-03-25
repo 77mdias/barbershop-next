@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
 import { useAuthSafe } from "@/hooks/useAuthSafe";
 import { ClientOnlyAuth } from "./ClientOnlyAuth";
 import { Menu, X, Scissors, UserCircle, LogIn } from "lucide-react";
@@ -42,6 +42,8 @@ const HEADER_BREAKPOINT_CONTRACT = {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuthSafe();
+  const menuToggleButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuPanelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -71,6 +73,42 @@ const Header = () => {
       window.removeEventListener("keydown", handleEsc);
     };
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      const firstFocusable = mobileMenuPanelRef.current?.querySelector<HTMLElement>(
+        "a[href], button:not([disabled])",
+      );
+      firstFocusable?.focus();
+      return;
+    }
+
+    menuToggleButtonRef.current?.focus();
+  }, [isMenuOpen]);
+
+  const handleMobilePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") return;
+
+    const focusableElements = mobileMenuPanelRef.current?.querySelectorAll<HTMLElement>(
+      "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    );
+    if (!focusableElements || focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    const activeElement = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey && activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (!event.shiftKey && activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  };
 
   return (
     <header
@@ -162,11 +200,13 @@ const Header = () => {
             )}
           </ClientOnlyAuth>
           <button
+            ref={menuToggleButtonRef}
             className="rounded-md p-2 text-accent transition-all duration-200 hover:bg-[hsl(var(--accent)/0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-navigation-panel"
+            aria-haspopup="dialog"
           >
             {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -183,9 +223,14 @@ const Header = () => {
           />
           <div
             id="mobile-navigation-panel"
+            ref={mobileMenuPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu principal mobile"
             className="fixed inset-x-0 bottom-0 top-[65px] z-[var(--layer-mobile-menu)] overflow-y-auto border-t border-white/[0.07] bg-background/95 backdrop-blur-xl md:hidden"
+            onKeyDown={handleMobilePanelKeyDown}
           >
-            <nav className="flex flex-col px-4 py-3">
+            <nav className="flex flex-col px-4 py-3" aria-label="Navegação principal">
               {mobileNavLinks.map((link) => (
                 <Link
                   key={link.href}

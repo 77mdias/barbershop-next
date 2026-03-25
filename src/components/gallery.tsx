@@ -48,10 +48,14 @@ export function Gallery({
 }: GalleryProps) {
   const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
   const [isLoading, setIsLoading] = React.useState<Record<number, boolean>>({});
+  const [lastTriggerIndex, setLastTriggerIndex] = React.useState<number | null>(null);
   const reducedMotionFromMotion = useReducedMotion();
   const prefersReducedMotion = usePrefersReducedMotion();
   const shouldReduceMotion = reducedMotionFromMotion || prefersReducedMotion;
   const galleryGridRef = React.useRef<HTMLDivElement | null>(null);
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const thumbnailButtonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const scrollDepthDisabled = shouldReduceMotion ? "true" : "false";
 
   const galleryGridDepth = useScrollDepthMotion({
@@ -107,6 +111,17 @@ export function Gallery({
     };
   }, [selectedImage]);
 
+  React.useEffect(() => {
+    if (selectedImage !== null) {
+      closeButtonRef.current?.focus();
+      return;
+    }
+
+    if (lastTriggerIndex !== null) {
+      thumbnailButtonRefs.current[lastTriggerIndex]?.focus();
+    }
+  }, [lastTriggerIndex, selectedImage]);
+
   const handleImageLoad = (index: number) => {
     setIsLoading(prev => ({ ...prev, [index]: false }));
   };
@@ -122,6 +137,37 @@ export function Gallery({
       setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1);
     } else {
       setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0);
+    }
+  };
+
+  const closeLightbox = () => setSelectedImage(null);
+
+  const openLightbox = (index: number) => {
+    setLastTriggerIndex(index);
+    setSelectedImage(index);
+  };
+
+  const handleDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") return;
+
+    const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+      "button:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
+    );
+    if (!focusableElements || focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    const activeElement = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey && activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (!event.shiftKey && activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
     }
   };
 
@@ -173,10 +219,13 @@ export function Gallery({
         {images.map((image, index) => (
           <button
             key={`${image.src}-${index}`}
+            ref={(element) => {
+              thumbnailButtonRefs.current[index] = element;
+            }}
             type="button"
             aria-label={`Abrir imagem ${image.title || image.alt} em tela cheia`}
             className="group relative w-full overflow-hidden rounded-xl bg-gray-100 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] dark:bg-gray-800"
-            onClick={() => setSelectedImage(index)}
+            onClick={() => openLightbox(index)}
           >
             {/* Loading Skeleton */}
             {isLoading[index] && (
@@ -219,18 +268,23 @@ export function Gallery({
       {/* Lightbox Modal */}
       {selectedImage !== null && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={`Visualização ampliada de ${images[selectedImage].title || images[selectedImage].alt}`}
+          tabIndex={-1}
           className="fixed inset-0 z-[var(--layer-modal)] flex items-center justify-center bg-black/90 p-4"
+          onKeyDown={handleDialogKeyDown}
+          onClick={closeLightbox}
         >
           {/* Botão Fechar */}
           <Button
+            ref={closeButtonRef}
             variant="ghost"
             size="icon"
             aria-label="Fechar galeria"
             className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
-            onClick={() => setSelectedImage(null)}
+            onClick={closeLightbox}
           >
             <X className="w-6 h-6" />
           </Button>
@@ -262,7 +316,10 @@ export function Gallery({
           )}
 
           {/* Imagem Ampliada */}
-          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+          <div
+            className="relative flex h-full max-h-[90vh] w-full max-w-4xl items-center justify-center"
+            onClick={(event) => event.stopPropagation()}
+          >
             <Image
               src={images[selectedImage].src}
               alt={images[selectedImage].alt}

@@ -423,7 +423,7 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
 
 #### RSP.2 - Accessible Navigation + Dialogs
 
-- [ ] **PH6-RSP-002** - Corrigir semântica e comportamento de navegação/dialog em mobile
+- [x] **PH6-RSP-002** - Corrigir semântica e comportamento de navegação/dialog em mobile
 
   **Descrição curta:**
   - Garantir aria states consistentes para menu e overlays.
@@ -437,13 +437,20 @@ Garantir comportamento consistente em mobile/tablet/desktop com acessibilidade p
   **Arquivos/áreas afetadas:** `src/components/HeaderNavigation.tsx`, `src/components/gallery.tsx`, `src/components/MenuNavigation.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Menu mobile comunica estado aberto/fechado via ARIA.
-  - [ ] Lightbox fecha por ESC e retorna foco ao gatilho.
+  - [x] Menu mobile comunica estado aberto/fechado via ARIA.
+  - [x] Lightbox fecha por ESC e retorna foco ao gatilho.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 4h  
   **Dependências:** PH6-L3D-003  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-RSP-002):**
+  - `HeaderNavigation` recebeu melhorias de semântica para menu mobile com `aria-haspopup="dialog"`, `role="dialog"` no painel, label contextual aberto/fechado e foco inicial no primeiro item ao abrir.
+  - O painel mobile agora mantém navegação por teclado com ciclo de foco (Tab/Shift+Tab), fechamento por ESC e retorno de foco para o botão gatilho ao fechar.
+  - `Gallery` agora aplica gerenciamento de foco no lightbox (foco inicial no botão fechar, trap de foco no dialog), mantém fechamento por ESC e restauração de foco ao thumbnail acionador.
+  - `MenuNavigation` recebeu `aria-label` explícito nos gatilhos desktop/mobile para melhorar leitura assistiva.
+  - Testes de regressão foram atualizados em `HeaderNavigationLayering.test.tsx` e `GalleryAccessibility.test.tsx` para garantir contratos de ARIA e fechamento por teclado.
 
 #### RSP.3 - Reduced Motion + Theme Consistency
 
