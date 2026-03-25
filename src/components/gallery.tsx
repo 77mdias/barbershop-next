@@ -175,7 +175,7 @@ export function Gallery({
             key={`${image.src}-${index}`}
             type="button"
             aria-label={`Abrir imagem ${image.title || image.alt} em tela cheia`}
-            className="group relative w-full overflow-hidden rounded-xl bg-gray-100 text-left transition-all duration-300 hover:shadow-xl dark:bg-gray-800"
+            className="group relative w-full overflow-hidden rounded-xl bg-gray-100 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] dark:bg-gray-800"
             onClick={() => setSelectedImage(index)}
           >
             {/* Loading Skeleton */}
@@ -190,7 +190,7 @@ export function Gallery({
                 alt={image.alt}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                className="object-cover transition-transform duration-700 group-hover:scale-110 group-focus-visible:scale-105"
                 onLoad={() => handleImageLoad(index)}
                 onLoadStart={() => handleImageLoadStart(index)}
                 quality={85}
@@ -198,8 +198,8 @@ export function Gallery({
               
               {/* Overlay com zoom */}
               {showZoomOverlay && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                  <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform scale-75 group-hover:scale-100" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/30 group-focus-visible:bg-black/25">
+                  <ZoomIn className="h-8 w-8 scale-75 text-white opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100" />
                 </div>
               )}
             </div>
@@ -293,7 +293,7 @@ export function Gallery({
                   type="button"
                   aria-label={`Ir para imagem ${index + 1}`}
                   className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-200",
+                    "h-2 w-2 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black active:scale-90",
                     selectedImage === index 
                       ? "bg-white scale-125" 
                       : "bg-white/50 hover:bg-white/75"

@@ -28,6 +28,11 @@ const mobileNavLinks = [
   { href: "/support", label: "Suporte" },
 ];
 
+const navInteractiveClassName =
+  "rounded-md px-2 py-1 text-[14px] font-normal text-muted-foreground transition-all duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]";
+const mobileNavInteractiveClassName =
+  "rounded-md py-2.5 text-sm font-medium text-foreground transition-all duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]";
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuthSafe();
@@ -67,7 +72,10 @@ const Header = () => {
       <div className="container mx-auto hidden h-full grid-cols-3 items-center px-4 md:grid">
         {/* Logo */}
         <div className="flex items-center justify-start">
-          <Link href="/" className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-accent">
               <Scissors className="h-4 w-4" />
             </span>
@@ -83,7 +91,7 @@ const Header = () => {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[14px] font-normal text-muted-foreground transition-colors hover:text-foreground"
+              className={navInteractiveClassName}
             >
               {link.label}
             </Link>
@@ -92,7 +100,7 @@ const Header = () => {
             {user?.role === "ADMIN" && (
               <a
                 href="/dashboard"
-                className="text-[14px] font-normal text-muted-foreground transition-colors hover:text-foreground"
+                className={navInteractiveClassName}
               >
                 Dashboard
               </a>
@@ -118,7 +126,10 @@ const Header = () => {
       {/* Mobile Layout */}
       <div className="container mx-auto flex h-full items-center justify-between px-4 md:hidden">
         {/* Logo Mobile */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-accent">
             <Scissors className="h-3.5 w-3.5" />
           </span>
@@ -139,7 +150,7 @@ const Header = () => {
             )}
           </ClientOnlyAuth>
           <button
-            className="rounded-md p-2 text-accent transition-colors hover:bg-[hsl(var(--accent)/0.08)]"
+            className="rounded-md p-2 text-accent transition-all duration-200 hover:bg-[hsl(var(--accent)/0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
@@ -167,7 +178,7 @@ const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                  className={mobileNavInteractiveClassName}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
@@ -177,7 +188,7 @@ const Header = () => {
                 {user?.role === "ADMIN" && (
                   <Link
                     href="/dashboard"
-                    className="py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                    className={mobileNavInteractiveClassName}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
@@ -192,7 +203,7 @@ const Header = () => {
                 {isAuthenticated ? (
                   <Link
                     href="/profile"
-                    className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent"
+                    className="flex items-center gap-2.5 rounded-md py-2.5 text-sm font-medium text-foreground transition-all duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <UserCircle className="h-4 w-4 shrink-0 text-accent" />
@@ -201,7 +212,7 @@ const Header = () => {
                 ) : (
                   <Link
                     href="/auth/signin"
-                    className="flex items-center gap-2.5 py-2.5 text-sm font-medium text-accent transition-colors hover:text-accent/80"
+                    className="flex items-center gap-2.5 rounded-md py-2.5 text-sm font-medium text-accent transition-all duration-200 hover:text-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <LogIn className="h-4 w-4 shrink-0" />

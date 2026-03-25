@@ -297,7 +297,7 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
 
 #### MSI.2 - Interaction States
 
-- [ ] **PH6-MSI-002** - Definir estados de hover/focus/pressed para elementos clicáveis
+- [x] **PH6-MSI-002** - Definir estados de hover/focus/pressed para elementos clicáveis
 
   **Descrição curta:**
   - Garantir feedback visual consistente para botões, links, cards e itens de menu.
@@ -311,13 +311,19 @@ Definir uma linguagem de movimento consistente entre 2D/3D para reforçar percep
   **Arquivos/áreas afetadas:** `src/components/ui/button.tsx`, `src/components/HeaderNavigation.tsx`, `src/components/home-3d/HomeExperience.tsx`, `src/components/gallery.tsx`
 
   **Critérios de aceitação:**
-  - [ ] Todos os elementos interativos exibem estado de foco acessível.
-  - [ ] Hover/touch não alteram legibilidade do conteúdo.
+  - [x] Todos os elementos interativos exibem estado de foco acessível.
+  - [x] Hover/touch não alteram legibilidade do conteúdo.
 
   **Prioridade:** 🟡 Alta  
   **Estimativa:** 4h  
   **Dependências:** PH6-MSI-001  
-  **Status:** 🔴 Pendente
+  **Status:** 🟢 Concluída (2026-03-25)
+
+  **Notas de implementação (PH6-MSI-002):**
+  - `Button` base recebeu contrato consistente para foco visível e estado pressed (`active:scale`) em todas as variantes.
+  - `HeaderNavigation` foi padronizado com classes interativas para links desktop/mobile e botão do menu, incluindo foco visível de teclado.
+  - `HomeExperience` teve CTAs e links principais revisados para estados de hover/focus/pressed sem perda de legibilidade.
+  - `Gallery` passou a expor feedback consistente em cards clicáveis, overlay de zoom em `focus-visible` e indicadores do lightbox com foco acessível.
 
 #### MSI.3 - 3D Scene Behavior
 
