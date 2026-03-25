@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { GallerySceneBackdrop } from "@/components/gallery-3d/GallerySceneBackdrop";
 
-let reducedMotionValue = false;
+let reducedMotionValue: boolean | null = false;
 let getContextSpy: jest.SpiedFunction<HTMLCanvasElement["getContext"]>;
 
 jest.mock("motion/react", () => ({
@@ -44,6 +44,16 @@ describe("GallerySceneBackdrop", () => {
     render(<GallerySceneBackdrop />);
 
     expect(screen.getByTestId("gallery-3d-backdrop")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId("dynamic-gallery-scene")).not.toBeInTheDocument();
+    });
+  });
+
+  test("renders static fallback while reduced motion preference is unresolved", async () => {
+    reducedMotionValue = null;
+
+    render(<GallerySceneBackdrop />);
+
     await waitFor(() => {
       expect(screen.queryByTestId("dynamic-gallery-scene")).not.toBeInTheDocument();
     });

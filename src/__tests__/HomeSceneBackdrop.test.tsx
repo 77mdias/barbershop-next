@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { HomeSceneBackdrop } from "@/components/home-3d/HomeSceneBackdrop";
 
-let reducedMotionValue = false;
+let reducedMotionValue: boolean | null = false;
 let getContextSpy: jest.SpiedFunction<HTMLCanvasElement["getContext"]>;
 
 jest.mock("motion/react", () => ({
@@ -38,6 +38,16 @@ describe("HomeSceneBackdrop", () => {
     render(<HomeSceneBackdrop />);
 
     expect(screen.getByTestId("home-3d-backdrop")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId("dynamic-home-scene")).not.toBeInTheDocument();
+    });
+  });
+
+  test("renders static fallback while reduced motion preference is unresolved", async () => {
+    reducedMotionValue = null;
+
+    render(<HomeSceneBackdrop />);
+
     await waitFor(() => {
       expect(screen.queryByTestId("dynamic-home-scene")).not.toBeInTheDocument();
     });

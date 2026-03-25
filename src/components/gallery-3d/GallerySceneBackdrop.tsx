@@ -38,6 +38,7 @@ function getInteractionProfile(tier: GallerySceneQualityTier) {
 
 export function GallerySceneBackdrop() {
   const shouldReduceMotion = useReducedMotion();
+  const prefersReducedMotion = shouldReduceMotion ?? true;
   const [tier, setTier] = useState<GallerySceneQualityTier>("medium");
   const [theme, setTheme] = useState<GallerySceneTheme>("light");
   const [pointerMode, setPointerMode] = useState<"enabled" | "limited" | "disabled">("enabled");
@@ -71,8 +72,8 @@ export function GallerySceneBackdrop() {
   }, []);
 
   const showCanvas = useMemo(
-    () => isMounted && !shouldReduceMotion && webglEnabled,
-    [isMounted, shouldReduceMotion, webglEnabled],
+    () => isMounted && !prefersReducedMotion && webglEnabled,
+    [isMounted, prefersReducedMotion, webglEnabled],
   );
 
   return (
@@ -84,7 +85,11 @@ export function GallerySceneBackdrop() {
       {showCanvas ? (
         <DynamicGallerySceneCanvas tier={tier} theme={theme} pointerMode={pointerMode} />
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(720px_420px_at_80%_16%,hsl(var(--accent)/0.16),transparent_58%),radial-gradient(520px_320px_at_18%_78%,hsl(var(--primary)/0.14),transparent_56%)]" />
+        <div
+          className="h-full w-full bg-[radial-gradient(720px_420px_at_80%_16%,hsl(var(--accent)/0.16),transparent_58%),radial-gradient(520px_320px_at_18%_78%,hsl(var(--primary)/0.14),transparent_56%)] dark:bg-[radial-gradient(720px_420px_at_80%_16%,hsl(var(--accent)/0.2),transparent_58%),radial-gradient(520px_320px_at_18%_78%,hsl(var(--primary)/0.2),transparent_56%)]"
+          data-motion-mode={prefersReducedMotion ? "reduced" : "full"}
+          data-scene-theme={theme}
+        />
       )}
 
       <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--background)/0.08)_0%,hsl(var(--background)/0.42)_44%,hsl(var(--background)/0.8)_100%)]" />
