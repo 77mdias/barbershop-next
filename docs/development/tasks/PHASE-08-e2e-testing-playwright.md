@@ -3,7 +3,7 @@
 **Status:** 🟢 ATIVA
 **Última atualização:** 2026-03-26
 **Sprint Atual:** Sprint QA E2E (Março-Abril/2026)
-**Status Geral:** 🔴 0% (0/13 tarefas completas) - FASE INICIADA
+**Status Geral:** 🟡 8% (1/13 tarefas completas) - EM PROGRESSO
 **ETA:** 3 a 4 semanas
 **Pré-requisito:** Fase 06 concluída (Home/Gallery 3D estáveis), seed database funcional
 
@@ -17,15 +17,15 @@
 
 | Categoria | Total | Concluído | Em Andamento | Pendente | Bloqueado |
 | --- | --- | --- | --- | --- | --- |
-| E2E Foundation | 3 | 0 | 0 | 3 | 0 |
+| E2E Foundation | 3 | 1 | 0 | 2 | 0 |
 | Auth & Navigation | 3 | 0 | 0 | 3 | 0 |
 | Core Business Flows | 3 | 0 | 0 | 3 | 0 |
 | Social Features | 2 | 0 | 0 | 2 | 0 |
 | Admin & RBAC | 2 | 0 | 0 | 2 | 0 |
-| **TOTAL** | **13** | **0** | **0** | **13** | **0** |
+| **TOTAL** | **13** | **1** | **0** | **12** | **0** |
 
 ### 🎯 Principais Indicadores
-- ⚠️ Playwright não está instalado — a primeira task deve configurar tudo do zero.
+- ✅ Playwright instalado e configurado (PH8-FND-001 concluída 2026-03-26).
 - ✅ Seed database funcional com 9 users, 3 services, appointments, friendships, conversations.
 - ✅ CI existente no GitHub Actions com PostgreSQL — precisa de step adicional para E2E.
 - ⚠️ Auth usa JWT + NextAuth v4 — storageState precisa ser gerado por role (CLIENT, BARBER, ADMIN).
@@ -56,7 +56,7 @@ Configurar Playwright do zero com fixtures reutilizáveis de autenticação, hel
 
 #### FND.1 - Playwright Setup + Config
 
-- [ ] **PH8-FND-001** - Instalar Playwright e criar configuração base
+- [x] **PH8-FND-001** - Instalar Playwright e criar configuração base ✅ (2026-03-26)
 
   **Descrição curta:**
   - Instalar Playwright como devDependency com browsers Chromium.
@@ -73,14 +73,22 @@ Configurar Playwright do zero com fixtures reutilizáveis de autenticação, hel
   **Arquivos/áreas afetadas:** `package.json`, `playwright.config.ts`, `.gitignore`, `e2e/` (novo diretório)
 
   **Critérios de aceitação:**
-  - [ ] `npx playwright test --project=chromium` executa sem erro (mesmo sem testes).
-  - [ ] Projetos desktop e mobile configurados com viewports corretos.
-  - [ ] Dev server sobe automaticamente ao rodar testes.
+  - [x] `npx playwright test --project=chromium` executa sem erro (mesmo sem testes).
+  - [x] Projetos desktop e mobile configurados com viewports corretos.
+  - [x] Dev server sobe automaticamente ao rodar testes.
+
+  **Notas de implementação:**
+  - `@playwright/test` instalado como devDependency, Chromium browser baixado.
+  - Config: desktop (1280×720) + mobile Pixel 5 (390×844), `testDir: "e2e"`, webServer auto-start.
+  - Scripts adicionados: `test:e2e`, `test:e2e:ui`.
+  - `.gitignore`: `test-results/`, `playwright-report/`, `e2e/.auth/`.
+  - Estrutura: `e2e/fixtures/`, `e2e/helpers/`, `e2e/auth/`, smoke test em `e2e/smoke.spec.ts`.
+  - `npx playwright test --list` confirma 2 testes (desktop + mobile) detectados.
 
   **Prioridade:** 🔴 Crítica
   **Estimativa:** 3h
   **Dependências:** nenhuma
-  **Status:** 🔴 Pendente
+  **Status:** ✅ Concluído
 
 #### FND.2 - Auth Fixtures + StorageState
 
