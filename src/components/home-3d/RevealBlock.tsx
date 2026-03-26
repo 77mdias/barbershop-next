@@ -22,7 +22,6 @@ type RevealBlockProps = {
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  y?: number;
   revealByViewport?: RevealViewportTiming;
   narrativeLabel?: string;
 };
@@ -31,11 +30,11 @@ export function RevealBlock({
   children,
   className,
   delay = motionDelay.none,
-  y = motionIntensity.revealY.default,
   revealByViewport,
   narrativeLabel,
 }: RevealBlockProps) {
   const shouldReduceMotion = useReducedMotion();
+  const [canAnimate, setCanAnimate] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return false;
@@ -43,6 +42,13 @@ export function RevealBlock({
 
     return window.matchMedia("(min-width: 1024px)").matches;
   });
+
+  useEffect(() => {
+    const hasIntersectionObserver =
+      typeof window !== "undefined" && typeof window.IntersectionObserver === "function";
+
+    setCanAnimate(hasIntersectionObserver);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -67,13 +73,12 @@ export function RevealBlock({
 
   const viewportConfig = isDesktopViewport ? revealByViewport?.desktop : revealByViewport?.mobile;
   const resolvedDelay = viewportConfig?.delay ?? delay ?? motionDelay.none;
-  const resolvedY = viewportConfig?.y ?? y;
   const resolvedDuration = viewportConfig?.duration ?? motionDuration.narrative;
   const resolvedViewportAmount = viewportConfig?.viewportAmount ?? motionIntensity.viewportAmount.standard;
   const resolvedEase = viewportConfig?.ease ?? motionEasing.emphasized;
   const revealProfile = isDesktopViewport ? "desktop" : "mobile";
 
-  if (shouldReduceMotion) {
+  if (shouldReduceMotion || !canAnimate) {
     return (
       <div
         className={cn(className)}
@@ -90,7 +95,8 @@ export function RevealBlock({
       className={cn(className)}
       data-reveal-label={narrativeLabel}
       data-reveal-profile={revealProfile}
-      initial={{ opacity: 0, y: resolvedY }}
+      initial={false}
+      style={{ opacity: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: resolvedViewportAmount }}
       transition={{ duration: resolvedDuration, delay: resolvedDelay, ease: resolvedEase }}

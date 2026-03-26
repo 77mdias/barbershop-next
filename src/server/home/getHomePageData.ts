@@ -3,8 +3,6 @@ import "server-only";
 import { cache } from "react";
 import { differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { db } from "@/lib/prisma";
-import { ServiceService } from "@/server/services/serviceService";
 import { decimalToNumber } from "@/lib/serializers";
 import { logger } from "@/lib/logger";
 import {
@@ -24,6 +22,27 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 });
 
 const fallbackServiceIcons: PopularServiceIcon[] = ["scissors", "beard", "sparkles", "razor"];
+
+const HOME_QUERY_TIMEOUT_MS = 4500;
+
+async function withTimeout<T>(operation: Promise<T>, timeoutMs: number, operationName: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${operationName} timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([operation, timeoutPromise]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
 
 const fallbackServices: PopularServiceCard[] = [
   {
@@ -295,7 +314,8 @@ function resolveBadgeTone(expiresAt: Date | null | undefined): PromotionCard["ba
 
 async function loadPopularServices(): Promise<PopularServiceCard[]> {
   try {
-    const services = await ServiceService.findPopular(4);
+    const { ServiceService } = await import("@/server/services/serviceService");
+    const services = await withTimeout(ServiceService.findPopular(4), HOME_QUERY_TIMEOUT_MS, "loadPopularServices");
     if (!services.length) return [];
 
     return services.map((service, index) => ({
@@ -315,8 +335,10 @@ async function loadPopularServices(): Promise<PopularServiceCard[]> {
 
 async function loadPromotions(): Promise<PromotionCard[]> {
   try {
+    const { db } = await import("@/lib/prisma");
     const now = new Date();
-    const promotions = await db.promotion.findMany({
+    const promotions = await withTimeout(
+      db.promotion.findMany({
       where: {
         active: true,
         validFrom: { lte: now },
@@ -333,7 +355,10 @@ async function loadPromotions(): Promise<PromotionCard[]> {
       },
       orderBy: [{ validUntil: "asc" }, { createdAt: "desc" }],
       take: 3,
-    });
+      }),
+      HOME_QUERY_TIMEOUT_MS,
+      "loadPromotions",
+    );
 
     if (!promotions.length) return [];
 
@@ -359,7 +384,9 @@ async function loadPromotions(): Promise<PromotionCard[]> {
 
 async function loadSalons(): Promise<SalonCard[]> {
   try {
-    const appointments = await db.appointment.findMany({
+    const { db } = await import("@/lib/prisma");
+    const appointments = await withTimeout(
+      db.appointment.findMany({
       where: {
         status: "COMPLETED",
         serviceHistory: {
@@ -386,7 +413,10 @@ async function loadSalons(): Promise<SalonCard[]> {
       },
       orderBy: [{ updatedAt: "desc" }],
       take: 80,
-    });
+      }),
+      HOME_QUERY_TIMEOUT_MS,
+      "loadSalons",
+    );
 
     if (!appointments.length) return [];
 
@@ -438,7 +468,9 @@ async function loadSalons(): Promise<SalonCard[]> {
 
 async function loadReviews(): Promise<ReviewCard[]> {
   try {
-    const histories = await db.serviceHistory.findMany({
+    const { db } = await import("@/lib/prisma");
+    const histories = await withTimeout(
+      db.serviceHistory.findMany({
       where: {
         feedback: {
           not: null,
@@ -464,7 +496,10 @@ async function loadReviews(): Promise<ReviewCard[]> {
       },
       orderBy: [{ completedAt: "desc" }],
       take: 4,
-    });
+      }),
+      HOME_QUERY_TIMEOUT_MS,
+      "loadReviews",
+    );
 
     if (!histories.length) return [];
 

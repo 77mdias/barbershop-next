@@ -371,7 +371,7 @@ export function HomeExperience({ data }: HomeExperienceProps) {
               </div>
 
               <motion.aside
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                initial={false}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{
                   duration: motionDuration.hero,

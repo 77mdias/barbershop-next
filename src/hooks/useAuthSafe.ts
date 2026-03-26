@@ -1,8 +1,9 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { UserRole } from "@prisma/client";
 import { useEffect, useState } from "react";
+
+type UserRole = "ADMIN" | "BARBER" | "CLIENT";
 
 interface UserWithRole {
   id: string;
@@ -44,9 +45,9 @@ export function useAuthSafe() {
     user,
     isLoading: status === "loading",
     isAuthenticated: !!user,
-    isAdmin: user?.role === UserRole.ADMIN,
-    isBarber: user?.role === UserRole.BARBER,
-    isClient: user?.role === UserRole.CLIENT,
+    isAdmin: user?.role === "ADMIN",
+    isBarber: user?.role === "BARBER",
+    isClient: user?.role === "CLIENT",
     session,
     status,
     hasMounted: true,
