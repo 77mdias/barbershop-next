@@ -49,6 +49,14 @@ describe("RevealBlock", () => {
   beforeEach(() => {
     reducedMotion = false;
     lastMotionDivProps = null;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      value: class {
+        observe = jest.fn();
+        unobserve = jest.fn();
+        disconnect = jest.fn();
+      },
+    });
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: createMatchMediaMock(false),
@@ -122,5 +130,21 @@ describe("RevealBlock", () => {
       delay: 0,
       ease: motionEasing.emphasized,
     });
+  });
+
+  test("renders static fallback when IntersectionObserver is unavailable", () => {
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      value: undefined,
+    });
+
+    render(
+      <RevealBlock>
+        <span>Sem Observer</span>
+      </RevealBlock>,
+    );
+
+    expect(lastMotionDivProps).toBeNull();
+    expect(screen.getByText("Sem Observer")).toBeInTheDocument();
   });
 });
