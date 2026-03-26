@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import HeaderNavigation from "@/components/HeaderNavigation";
 
 jest.mock("@/hooks/useAuthSafe", () => ({
@@ -64,5 +64,84 @@ describe("HeaderNavigation layering", () => {
 
     expect(toggleButton).toHaveAttribute("aria-expanded", "false");
     expect(document.getElementById("mobile-navigation-panel")).not.toBeInTheDocument();
+  });
+
+  test("closes mobile panel when backdrop is clicked", () => {
+    const { container } = render(<HeaderNavigation />);
+
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
+    fireEvent.click(toggleButton);
+
+    const backdrop = container.querySelector("div.fixed[aria-hidden='true']");
+    expect(backdrop).toBeInTheDocument();
+    fireEvent.click(backdrop!);
+
+    expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("mobile-navigation-panel")).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  test("renders all mobile navigation links with correct hrefs", () => {
+    render(<HeaderNavigation />);
+
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
+    fireEvent.click(toggleButton);
+
+    const panel = document.getElementById("mobile-navigation-panel");
+    expect(panel).toBeInTheDocument();
+
+    const panelScope = within(panel!);
+    const mobileOnlyLinks = [
+      { label: "Preços", href: "/prices" },
+      { label: "Suporte", href: "/support" },
+    ];
+
+    mobileOnlyLinks.forEach(({ label, href }) => {
+      const link = panelScope.getByRole("link", { name: label });
+      expect(link).toHaveAttribute("href", href);
+    });
+
+    const sharedLinks = ["Início", "Galeria", "Comunidade", "Agendamento", "Avaliações"];
+    sharedLinks.forEach((label) => {
+      const links = screen.getAllByRole("link", { name: label });
+      const mobileLink = links.find((l) => panel!.contains(l));
+      expect(mobileLink).toBeDefined();
+    });
+  });
+
+  test("mobile panel has proper dialog role and aria-modal", () => {
+    render(<HeaderNavigation />);
+
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
+    fireEvent.click(toggleButton);
+
+    const panel = document.getElementById("mobile-navigation-panel");
+    expect(panel).toHaveAttribute("role", "dialog");
+    expect(panel).toHaveAttribute("aria-modal", "true");
+    expect(panel).toHaveAttribute("aria-label", "Menu principal mobile");
+  });
+
+  test("shows unauthenticated user the sign-in link in mobile menu", () => {
+    render(<HeaderNavigation />);
+
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
+    fireEvent.click(toggleButton);
+
+    const panel = document.getElementById("mobile-navigation-panel");
+    const panelScope = within(panel!);
+    const signinLink = panelScope.getByRole("link", { name: /Entrar/i });
+    expect(signinLink).toHaveAttribute("href", "/auth/signin");
+  });
+
+  test("toggle button label changes based on menu state", () => {
+    render(<HeaderNavigation />);
+
+    const toggleButton = screen.getByRole("button", { name: /Abrir menu de navegação/i });
+    expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+    expect(toggleButton).toHaveAttribute("aria-controls", "mobile-navigation-panel");
+
+    fireEvent.click(toggleButton);
+    expect(toggleButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: /Fechar menu de navegação/i })).toBeInTheDocument();
   });
 });

@@ -245,6 +245,99 @@ describe("HomeExperience", () => {
     });
   });
 
+  test("renders service cards with name, price, duration and navigation link", () => {
+    render(<HomeExperience data={sampleData} />);
+    const service = sampleData.services.items[0];
+
+    expect(screen.getByRole("heading", { name: service.name })).toBeInTheDocument();
+    expect(screen.getByText(service.priceLabel)).toBeInTheDocument();
+    expect(screen.getAllByText(service.durationLabel).length).toBeGreaterThanOrEqual(1);
+    const serviceLink = screen.getAllByRole("link", { name: /^Ver$/i }).find(
+      (link) => link.getAttribute("href") === service.href,
+    );
+    expect(serviceLink).toBeDefined();
+  });
+
+  test("renders promotion card with badge, code, expiry and action link", () => {
+    render(<HomeExperience data={sampleData} />);
+    const promo = sampleData.promotions.items[0];
+
+    expect(screen.getByText(promo.badgeLabel)).toBeInTheDocument();
+    expect(screen.getByText(promo.code)).toBeInTheDocument();
+    expect(screen.getByText(promo.expiresLabel!)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Aplicar oferta/i })).toHaveAttribute("href", promo.href);
+    expect(screen.getByRole("link", { name: sampleData.promotions.ctaLabel })).toHaveAttribute(
+      "href",
+      sampleData.promotions.ctaHref,
+    );
+  });
+
+  test("renders salon card with name, rating, address and navigation links", () => {
+    const { container } = render(<HomeExperience data={sampleData} />);
+    const salon = sampleData.salons.items[0];
+
+    expect(screen.getByRole("heading", { name: salon.name })).toBeInTheDocument();
+    expect(screen.getByText(salon.ratingLabel)).toBeInTheDocument();
+    expect(screen.getByText(salon.address)).toBeInTheDocument();
+    expect(screen.getByText(salon.distanceLabel)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ver unidade/i })).toHaveAttribute("href", salon.href);
+    expect(screen.getByRole("link", { name: sampleData.salons.ctaLabel })).toHaveAttribute(
+      "href",
+      sampleData.salons.ctaHref,
+    );
+
+    const salonImage = container.querySelector(`img[alt="${salon.name}"]`);
+    expect(salonImage).toHaveAttribute("src", salon.imageUrl);
+  });
+
+  test("renders review card with author, service name, rating stars and comment", () => {
+    const { container } = render(<HomeExperience data={sampleData} />);
+    const review = sampleData.reviews.items[0];
+
+    expect(screen.getByText(review.author)).toBeInTheDocument();
+    expect(screen.getByText(review.serviceName)).toBeInTheDocument();
+    expect(screen.getByText(`\u201c${review.comment}\u201d`)).toBeInTheDocument();
+
+    const reviewAvatar = container.querySelector(`img[alt="${review.author}"]`);
+    expect(reviewAvatar).toHaveAttribute("src", review.avatarUrl);
+  });
+
+  test("renders hero search form with correct action and default query", () => {
+    const { container } = render(<HomeExperience data={sampleData} />);
+    const form = container.querySelector(`form[action="${sampleData.hero.action}"]`);
+
+    expect(form).toBeInTheDocument();
+    expect(form).toHaveAttribute("method", "GET");
+
+    const input = form?.querySelector("input[name='query']");
+    expect(input).toHaveAttribute("value", sampleData.hero.defaultQuery);
+    expect(input).toHaveAttribute("placeholder", sampleData.hero.placeholder);
+  });
+
+  test("renders signin link in CTA section", () => {
+    render(<HomeExperience data={sampleData} />);
+
+    const signinLink = screen.getByRole("link", { name: /Entrar/i });
+    expect(signinLink).toHaveAttribute("href", sampleData.bookingCta.signinHref);
+  });
+
+  test("accepts allowed remote image hosts without falling back", () => {
+    const dataWithAllowedHost: HomePageData = {
+      ...sampleData,
+      salons: {
+        ...sampleData.salons,
+        items: sampleData.salons.items.map((salon) => ({
+          ...salon,
+          imageUrl: "https://res.cloudinary.com/demo/image/salon.jpg",
+        })),
+      },
+    };
+
+    const { container } = render(<HomeExperience data={dataWithAllowedHost} />);
+    const salonImage = container.querySelector(`img[alt="${dataWithAllowedHost.salons.items[0]?.name}"]`);
+    expect(salonImage).toHaveAttribute("src", "https://res.cloudinary.com/demo/image/salon.jpg");
+  });
+
   test("falls back to local assets when dynamic image URLs are invalid or not allowed", () => {
     const dataWithUnsafeImages: HomePageData = {
       ...sampleData,

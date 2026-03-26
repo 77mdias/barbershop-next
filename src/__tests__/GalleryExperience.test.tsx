@@ -113,6 +113,45 @@ describe("GalleryExperience", () => {
     expect(container.querySelector("section.container")).not.toBeInTheDocument();
   });
 
+  test("renders value pillar cards with title and description", () => {
+    render(<GalleryExperience />);
+
+    expect(screen.getByRole("heading", { name: "Curadoria editorial" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Portfólio real" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Padrão técnico" })).toBeInTheDocument();
+    expect(screen.getByText(/Seleção de cortes com direção visual premium/i)).toBeInTheDocument();
+  });
+
+  test("renders collection cards with title, description and hero image", () => {
+    const { container } = render(<GalleryExperience />);
+
+    expect(screen.getByRole("heading", { name: "Classic Tailoring" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Urban Texture" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Beard Fusion" })).toBeInTheDocument();
+
+    const collectionImages = container.querySelectorAll("article img");
+    expect(collectionImages.length).toBeGreaterThanOrEqual(3);
+
+    expect(screen.getByText("Assinatura da casa")).toBeInTheDocument();
+    expect(screen.getByText("Mais pedidos")).toBeInTheDocument();
+    expect(screen.getByText("Experiência premium")).toBeInTheDocument();
+  });
+
+  test("renders portfolio section with gallery component and item count", () => {
+    render(<GalleryExperience />);
+
+    expect(screen.getByRole("heading", { name: "Portfólio completo" })).toBeInTheDocument();
+    expect(screen.getByText(/estilos disponíveis/i)).toBeInTheDocument();
+    expect(screen.getByText(/Arquivo da barbearia/i)).toBeInTheDocument();
+  });
+
+  test("renders secondary navigation links (reviews, promotions)", () => {
+    render(<GalleryExperience />);
+
+    expect(screen.getByRole("link", { name: /Ver avaliações/i })).toHaveAttribute("href", "/reviews");
+    expect(screen.getByRole("link", { name: /Ver promoções/i })).toHaveAttribute("href", "/promotions");
+  });
+
   test("keeps static depth layers when reduced motion is enabled", () => {
     reducedMotionValue = true;
     const { container } = render(<GalleryExperience />);

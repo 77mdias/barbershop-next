@@ -121,4 +121,130 @@ describe("Gallery accessibility", () => {
     const gridLayer = container.querySelector("[data-scroll-depth='gallery-grid']");
     expect(gridLayer).toHaveAttribute("data-scroll-depth-disabled", "true");
   });
+
+  test("navigates lightbox images with ArrowLeft and ArrowRight keys", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+          { src: "/images/cortes/3.webp", alt: "Corte Contemporâneo", title: "Corte Contemporâneo" },
+          { src: "/images/cortes/images.jpg", alt: "Corte Estilizado", title: "Corte Estilizado" },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+    expect(screen.getByText("1 de 3")).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(screen.getByText("2 de 3")).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(screen.getByText("3 de 3")).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(screen.getByText("1 de 3")).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(screen.getByText("3 de 3")).toBeInTheDocument();
+  });
+
+  test("navigates via indicator dots in lightbox", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+          { src: "/images/cortes/3.webp", alt: "Corte Contemporâneo", title: "Corte Contemporâneo" },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+    expect(screen.getByText("1 de 2")).toBeInTheDocument();
+
+    const goToImage2 = screen.getByRole("button", { name: "Ir para imagem 2" });
+    fireEvent.click(goToImage2);
+    expect(screen.getByText("2 de 2")).toBeInTheDocument();
+  });
+
+  test("navigates via prev/next buttons in lightbox", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+          { src: "/images/cortes/3.webp", alt: "Corte Contemporâneo", title: "Corte Contemporâneo" },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+    expect(screen.getByText("1 de 2")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Próxima imagem/i }));
+    expect(screen.getByText("2 de 2")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Imagem anterior/i }));
+    expect(screen.getByText("1 de 2")).toBeInTheDocument();
+  });
+
+  test("lightbox locks body scroll and unlocks on close", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+        ]}
+      />,
+    );
+
+    expect(document.body.style.overflow).not.toBe("hidden");
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+    expect(document.body.style.overflow).toBe("hidden");
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(document.body.style.overflow).toBe("unset");
+  });
+
+  test("lightbox dialog has proper accessibility attributes", () => {
+    render(
+      <Gallery
+        images={[
+          { src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(dialog).toHaveAttribute("aria-label", "Visualização ampliada de Corte com Luzes");
+  });
+
+  test("renders gallery with title and subtitle when provided", () => {
+    render(
+      <Gallery
+        images={[{ src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" }]}
+        title="Nossos Cortes"
+        subtitle="Explore os melhores estilos"
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Nossos Cortes" })).toBeInTheDocument();
+    expect(screen.getByText("Explore os melhores estilos")).toBeInTheDocument();
+  });
+
+  test("does not show navigation buttons for single image lightbox", () => {
+    render(
+      <Gallery
+        images={[{ src: "/images/cortes/corteluz.jpg", alt: "Corte com Luzes", title: "Corte com Luzes" }]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Abrir imagem Corte com Luzes em tela cheia/i }));
+
+    expect(screen.queryByRole("button", { name: /Imagem anterior/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Próxima imagem/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Fechar galeria/i })).toBeInTheDocument();
+  });
 });

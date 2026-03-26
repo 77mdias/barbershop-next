@@ -296,7 +296,7 @@ export function Gallery({
               size="icon"
               aria-label="Imagem anterior"
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
-              onClick={() => navigateImage("prev")}
+              onClick={(e) => { e.stopPropagation(); navigateImage("prev"); }}
             >
               <ChevronLeft className="w-8 h-8" />
             </Button>
@@ -309,7 +309,7 @@ export function Gallery({
               size="icon"
               aria-label="Próxima imagem"
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
-              onClick={() => navigateImage("next")}
+              onClick={(e) => { e.stopPropagation(); navigateImage("next"); }}
             >
               <ChevronRight className="w-8 h-8" />
             </Button>
@@ -355,7 +355,7 @@ export function Gallery({
                       ? "bg-white scale-125" 
                       : "bg-white/50 hover:bg-white/75"
                   )}
-                  onClick={() => setSelectedImage(index)}
+                  onClick={(e) => { e.stopPropagation(); setSelectedImage(index); }}
                 />
               ))}
             </div>
