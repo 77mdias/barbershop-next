@@ -36,6 +36,8 @@ export function RevealBlock({
   narrativeLabel,
 }: RevealBlockProps) {
   const shouldReduceMotion = useReducedMotion();
+  const [hasMounted, setHasMounted] = useState(false);
+  const [supportsIntersectionObserver, setSupportsIntersectionObserver] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return false;
@@ -45,6 +47,8 @@ export function RevealBlock({
   });
 
   useEffect(() => {
+    setHasMounted(true);
+
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return;
     }
@@ -65,6 +69,14 @@ export function RevealBlock({
     return () => mediaQuery.removeListener(syncViewport);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setSupportsIntersectionObserver(typeof window.IntersectionObserver === "function");
+  }, []);
+
   const viewportConfig = isDesktopViewport ? revealByViewport?.desktop : revealByViewport?.mobile;
   const resolvedDelay = viewportConfig?.delay ?? delay ?? motionDelay.none;
   const resolvedY = viewportConfig?.y ?? y;
@@ -73,7 +85,9 @@ export function RevealBlock({
   const resolvedEase = viewportConfig?.ease ?? motionEasing.emphasized;
   const revealProfile = isDesktopViewport ? "desktop" : "mobile";
 
-  if (shouldReduceMotion) {
+  const shouldRenderStaticContent = shouldReduceMotion || !hasMounted || !supportsIntersectionObserver;
+
+  if (shouldRenderStaticContent) {
     return (
       <div
         className={cn(className)}
