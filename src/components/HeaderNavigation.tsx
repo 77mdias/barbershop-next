@@ -9,6 +9,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { ChatBell } from "@/components/ChatBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import MenuNavigation from "./MenuNavigation";
+import Image from "next/image";
 
 const desktopNavLinks = [
   { href: "/", label: "Início" },
@@ -35,8 +36,7 @@ const mobileNavInteractiveClassName =
 const HEADER_BREAKPOINT_CONTRACT = {
   id: "ph6-rsp-001-header",
   targets: "390|768|1024|1440",
-  notes:
-    "390=acoes-priorizadas-sem-overlap;768=transicao-para-nav-desktop;1024=grade-completa;1440=respiro-horizontal",
+  notes: "390=acoes-priorizadas-sem-overlap;768=transicao-para-nav-desktop;1024=grade-completa;1440=respiro-horizontal",
 } as const;
 
 const Header = () => {
@@ -76,9 +76,7 @@ const Header = () => {
 
   useEffect(() => {
     if (isMenuOpen) {
-      const firstFocusable = mobileMenuPanelRef.current?.querySelector<HTMLElement>(
-        "a[href], button:not([disabled])",
-      );
+      const firstFocusable = mobileMenuPanelRef.current?.querySelector<HTMLElement>("a[href], button:not([disabled])");
       firstFocusable?.focus();
       return;
     }
@@ -126,11 +124,9 @@ const Header = () => {
             href="/"
             className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-accent">
-              <Scissors className="h-4 w-4" />
-            </span>
+            <Image src="/Valorant-Academy.png" alt="Logo" className="h-8 w-8" width={4} height={4} />
             <span className="font-display text-xl font-bold italic text-foreground">
-              Barber<span className="text-accent">Kings</span>
+              Ne<span className="text-accent">XT</span>
             </span>
           </Link>
         </div>
@@ -138,20 +134,13 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="flex items-center justify-center gap-6">
           {desktopNavLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={navInteractiveClassName}
-            >
+            <Link key={link.href} href={link.href} className={navInteractiveClassName}>
               {link.label}
             </Link>
           ))}
           <ClientOnlyAuth>
             {user?.role === "ADMIN" && (
-              <a
-                href="/dashboard"
-                className={navInteractiveClassName}
-              >
+              <a href="/dashboard" className={navInteractiveClassName}>
                 Dashboard
               </a>
             )}
